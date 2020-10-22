@@ -27,16 +27,25 @@ pkg.keywords:
   - dw1000
 
 pkg.deps:
+    - "@mcuboot/boot/bootutil"
     - "@apache-mynewt-core/kernel/os"
     - "@apache-mynewt-core/hw/hal"
     - "@apache-mynewt-core/sys/console/full"
     - "@apache-mynewt-core/sys/shell"
     - "@apache-mynewt-core/sys/log/full"
     - "@apache-mynewt-core/sys/stats/full"
+    - "@apache-mynewt-core/mgmt/imgmgr"
+    - "@apache-mynewt-core/mgmt/newtmgr"
 
     - "@decawave-uwb-core/hw/drivers/uwb"
     - "@decawave-uwb-core/sys/uwbcfg"
+
     - "@decawave-uwb-core/lib/uwb_ccp"
+
+    - "@decawave-uwb-core/lib/tdma"
+
+    - "@decawave-uwb-core/lib/uwb_pan"
+    - "@decawave-uwb-core/lib/twr_ss_nrng"
 
 pkg.cflags:
     - "-std=gnu11"
