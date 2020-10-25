@@ -189,6 +189,9 @@ struct uwb_ccp_instance {
     uint16_t blink_frame_duration;                  //!< CCP blink duration in uus
     dpl_stack_t task_stack[MYNEWT_VAL(UWB_CCP_TASK_STACK_SZ)]
         __attribute__((aligned(DPL_STACK_ALIGNMENT))); //!< Task stack size
+    uint16_t rx_timeout_acc;                            //!< Slave rx timeout accumulator
+    struct dpl_event change_role_event;                 //!< Event used to change role
+    uint64_t my_master;                                 //!< Address of network master  
     uwb_ccp_frame_t * frames[];                          //!< Buffers to uwb_ccp frames
 };
 
@@ -202,6 +205,8 @@ void uwb_ccp_stop(struct uwb_ccp_instance *ccp);
 void ccp_encode(uint64_t epoch, uint64_t transmission_timestamp, uint64_t delta, uint8_t seq_num,  dpl_float64_t carrier_integrator);
 uint64_t uwb_ccp_skew_compensation_ui64(struct uwb_ccp_instance *ccp, uint64_t value);
 dpl_float64_t uwb_ccp_skew_compensation_f64(struct uwb_ccp_instance *ccp,  dpl_float64_t value);
+
+void rtls_ccp_start(struct uwb_ccp_instance *ccp);
 
 /**
  * @}

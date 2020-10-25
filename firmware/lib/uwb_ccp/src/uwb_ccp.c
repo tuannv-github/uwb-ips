@@ -44,7 +44,7 @@
 #include <uwb_ccp/ccp_json.h>
 #endif
 
-//#define DIAGMSG(s,u) printf(s,u)
+// #define DIAGMSG(s,u) printf(s,u)
 
 #ifndef DIAGMSG
 #define DIAGMSG(s,u)
@@ -129,13 +129,13 @@ ccp_timer_init(struct uwb_ccp_instance *ccp, uwb_ccp_role_t role)
     dpl_cputime_timer_init(&ccp->timer, ccp_timer_irq, (void *) ccp);
 
     /* Only reinitialise timer_event if not done */
-    if (dpl_event_get_arg(&ccp->timer_event) != (void *) ccp) {
+    // if (dpl_event_get_arg(&ccp->timer_event) != (void *) ccp) {
         if (role == CCP_ROLE_MASTER){
             dpl_event_init(&ccp->timer_event, ccp_master_timer_ev_cb, (void *) ccp);
         } else {
             dpl_event_init(&ccp->timer_event, ccp_slave_timer_ev_cb, (void *) ccp);
         }
-    }
+    // }
     dpl_cputime_timer_relative(&ccp->timer, 0);
 }
 
@@ -235,6 +235,11 @@ ccp_slave_timer_ev_cb(struct dpl_event *ev)
     if (ccp->status.rx_timeout_error) {
         uwb_set_rx_timeout(inst, MYNEWT_VAL(UWB_CCP_LONG_RX_TO));
         ccp_listen(ccp, 0, UWB_BLOCKING);
+        ccp->rx_timeout_acc++;
+        if(ccp->rx_timeout_acc > MYNEWT_VAL(UWB_RX_TIMEOUT_THRESH)){
+            ccp->config.role = CCP_ROLE_MASTER;
+            dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
+        }
         goto reset_timer;
     }
 
@@ -282,6 +287,7 @@ reset_timer:
         /* No ccp received, reschedule immediately */
         rc = dpl_cputime_timer_relative(&ccp->timer, 0);
     } else {
+        ccp->rx_timeout_acc = 0;
         /* ccp received ok, or close enough - reschedule for next ccp event */
         ccp->status.rx_timeout_error = 0;
         timer_expiry = ccp->os_epoch + dpl_cputime_usecs_to_ticks(
@@ -595,6 +601,14 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     struct uwb_ccp_instance * ccp = (struct uwb_ccp_instance *)cbs->inst_ptr;
 
     if (ccp->config.role == CCP_ROLE_MASTER) {
+        uwb_ccp_frame_t * frame = ccp->frames[(ccp->idx+1)%ccp->nframes];  // speculative frame advance
+        if (inst->frame_len >= sizeof(uwb_ccp_blink_frame_t) && inst->frame_len <= sizeof(frame->array)){
+            memcpy(frame->array, inst->rxbuf, sizeof(uwb_ccp_blink_frame_t));
+        }
+        if(frame->euid < inst->euid){
+            ccp->config.role = CCP_ROLE_SLAVE;
+            dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
+        }
         return true;
     }
 
@@ -627,6 +641,13 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
 
     if (inst->status.lde_error)
         return true;
+
+    if(ccp->my_master == 0){
+        ccp->my_master = frame->euid;
+    }
+    else if(ccp->my_master != frame->euid){
+        return true;
+    }
 
 #if MYNEWT_VAL(UWB_CCP_TEST_CASCADE_RPTS)
     if (frame->rpt_count < MYNEWT_VAL(UWB_CCP_TEST_CASCADE_RPTS)) {
@@ -1090,6 +1111,8 @@ uwb_ccp_start(struct uwb_ccp_instance *ccp, uwb_ccp_role_t role)
     uwb_ccp_frame_t * frame = ccp->frames[(ccp->idx)%ccp->nframes];
     ccp->config.role = role;
     ccp->status.enabled = 1;
+    ccp->rx_timeout_acc = 0;
+    ccp->my_master = 0;
 
     /* Setup CCP to send/listen for the first packet ASAP */
     ccp->os_epoch = dpl_cputime_get32() - epoch_to_rm;
@@ -1108,6 +1131,34 @@ uwb_ccp_start(struct uwb_ccp_instance *ccp, uwb_ccp_role_t role)
     ccp_timer_init(ccp, role);
 }
 EXPORT_SYMBOL(uwb_ccp_start);
+
+/**
+ * @fn ccp_change_role(struct dpl_event * ev)
+ * @brief API that serves as a place holder for role changing
+ *
+ * @param ev   pointer to dpl_events.
+ * @return void
+ */
+static void
+ccp_change_role(struct dpl_event * ev)
+{
+    assert(ev != NULL);
+    assert(dpl_event_get_arg(ev));
+    printf("change role\n");
+    
+    struct uwb_ccp_instance * ccp = (struct uwb_ccp_instance *) dpl_event_get_arg(ev);
+    uwb_ccp_stop(ccp);
+    printf("ccp->config.role: %d\n", ccp->config.role);
+    uwb_ccp_start(ccp, ccp->config.role);
+}
+
+void rtls_ccp_start(struct uwb_ccp_instance *ccp){
+    dpl_event_init(&ccp->change_role_event, ccp_change_role, (void *) ccp);
+    
+    ccp->config.role = CCP_ROLE_SLAVE;
+    dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
+}
+EXPORT_SYMBOL(rtls_ccp_start);
 
 /**
  * @fn ccp_stop(struct ccp_instance * inst)
