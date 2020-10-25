@@ -236,7 +236,9 @@ ccp_slave_timer_ev_cb(struct dpl_event *ev)
         uwb_set_rx_timeout(inst, MYNEWT_VAL(UWB_CCP_LONG_RX_TO));
         ccp_listen(ccp, 0, UWB_BLOCKING);
         ccp->rx_timeout_acc++;
+        printf("ccp->master_role_request: %d ccp->rx_timeout_acc: %d\n", ccp->master_role_request, ccp->rx_timeout_acc);
         if(ccp->rx_timeout_acc > MYNEWT_VAL(UWB_RX_TIMEOUT_THRESH)){
+            ccp->rx_timeout_acc = 0;
             ccp->config.role = CCP_ROLE_MASTER;
             dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
         }
@@ -601,13 +603,12 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     struct uwb_ccp_instance * ccp = (struct uwb_ccp_instance *)cbs->inst_ptr;
 
     if (ccp->config.role == CCP_ROLE_MASTER) {
-        uwb_ccp_frame_t * frame = ccp->frames[(ccp->idx+1)%ccp->nframes];  // speculative frame advance
+        uwb_ccp_frame_t * frame = (uwb_ccp_frame_t*)inst->rxbuf;
         if (inst->frame_len >= sizeof(uwb_ccp_blink_frame_t) && inst->frame_len <= sizeof(frame->array)){
-            memcpy(frame->array, inst->rxbuf, sizeof(uwb_ccp_blink_frame_t));
-        }
-        if(frame->euid < inst->euid){
-            ccp->config.role = CCP_ROLE_SLAVE;
-            dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
+            if(frame->euid < inst->euid){
+                ccp->config.role = CCP_ROLE_SLAVE;
+                dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
+            }
         }
         return true;
     }
@@ -646,6 +647,16 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
         ccp->my_master = frame->euid;
     }
     else if(ccp->my_master != frame->euid){
+        return true;
+    }
+
+    printf("ccp->master_role_request: %d\n", ccp->master_role_request);
+    printf("frame->euid/inst->euid: %lld/%lld \n", frame->euid, inst->euid);
+    if(ccp->master_role_request && frame->euid < inst->euid){
+        ccp->my_master = frame->euid;
+        printf("Be slave\n");
+        ccp->config.role = CCP_ROLE_SLAVE;
+        dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
         return true;
     }
 
@@ -1144,17 +1155,42 @@ ccp_change_role(struct dpl_event * ev)
 {
     assert(ev != NULL);
     assert(dpl_event_get_arg(ev));
-    printf("change role\n");
     
     struct uwb_ccp_instance * ccp = (struct uwb_ccp_instance *) dpl_event_get_arg(ev);
+    struct uwb_dev * inst = ccp->dev_inst;
     uwb_ccp_stop(ccp);
-    printf("ccp->config.role: %d\n", ccp->config.role);
-    uwb_ccp_start(ccp, ccp->config.role);
+
+    printf("change role %d\n", ccp->config.role);
+    if(ccp->config.role == CCP_ROLE_MASTER && !ccp->master_role_request){
+        printf("ccp->master_role_rqted\n");
+        uwb_ccp_frame_t frame;
+        frame.fctrl = FCNTL_IEEE_BLINK_CCP_64;
+        frame.rpt_count = 0;
+        frame.rpt_max = MYNEWT_VAL(UWB_CCP_MAX_CASCADE_RPTS);
+        frame.epoch_to_rm_us = uwb_phy_SHR_duration(inst);
+        frame.transmission_timestamp.timestamp = 0;
+        frame.seq_num = 0;
+        frame.euid = inst->euid;
+        frame.short_address = inst->my_short_address;
+        frame.transmission_interval = ((uint64_t)ccp->period << 16);
+        
+        uwb_write_tx(inst, frame.array, 0, sizeof(uwb_ccp_blink_frame_t));
+        uwb_write_tx_fctrl(inst, sizeof(uwb_ccp_blink_frame_t), 0);
+        uwb_start_tx(inst);
+
+        ccp->master_role_request = true;
+        uwb_ccp_start(ccp, CCP_ROLE_SLAVE);
+    }
+    else{
+        ccp->master_role_request = false;
+        uwb_ccp_start(ccp, ccp->config.role);
+    }
 }
 
 void rtls_ccp_start(struct uwb_ccp_instance *ccp){
     dpl_event_init(&ccp->change_role_event, ccp_change_role, (void *) ccp);
     
+    ccp->master_role_request = false;
     ccp->config.role = CCP_ROLE_SLAVE;
     dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
 }

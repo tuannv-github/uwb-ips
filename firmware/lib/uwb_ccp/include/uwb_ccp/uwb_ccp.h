@@ -191,7 +191,8 @@ struct uwb_ccp_instance {
         __attribute__((aligned(DPL_STACK_ALIGNMENT))); //!< Task stack size
     uint16_t rx_timeout_acc;                            //!< Slave rx timeout accumulator
     struct dpl_event change_role_event;                 //!< Event used to change role
-    uint64_t my_master;                                 //!< Address of network master  
+    uint64_t my_master;                                 //!< Address of network master
+    bool master_role_request;                            //!< Request for master role has been sent
     uwb_ccp_frame_t * frames[];                          //!< Buffers to uwb_ccp frames
 };
 
