@@ -2,7 +2,7 @@
 #include <config/config.h>
 
 #include <uwb/uwb.h>
-#include <rtls_ccp/rtls_ccp.h>
+#include <uwb_ccp/uwb_ccp.h>
 
 
 /**
@@ -35,7 +35,7 @@ int main(int argc, char **argv){
     struct uwb_ccp_instance *ccp = (struct uwb_ccp_instance*)uwb_mac_find_cb_inst_ptr(udev, UWBEXT_CCP);
     assert(ccp);
 
-    rtls_ccp_start(ccp);
+    uwb_ccp_start(ccp, CCP_ROLE_MASTER);
 
     udev->my_short_address = MYNEWT_VAL(NODE_ADDRESS);
     uwb_set_uid(udev, udev->my_short_address);

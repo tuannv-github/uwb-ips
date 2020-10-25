@@ -35,7 +35,7 @@ pkg.deps:
     - "@decawave-uwb-core/sys/uwbcfg"
     - "@decawave-uwb-core/hw/drivers/uwb"
 
-    - "@rtls/lib/rtls_ccp"
+    - "@rtls/lib/uwb_ccp"
 
 pkg.cflags:
     - "-std=gnu11"
