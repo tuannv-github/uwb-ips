@@ -10,10 +10,20 @@
 \usepackage{xcolor,colortbl}
 \usepackage{csquotes}
 \usepackage{dirtytalk}
-\usepackage[top=3cm,bottom=3cm,left=3cm,right=3cm,headsep=10pt,letterpaper]{geometry} 
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage[top=3cm,bottom=3cm,left=2cm,right=2cm,headsep=10pt,letterpaper]{geometry} 
 
 \graphicspath{{imgs/}}
 \bibliography{references.bib}
+
+\definecolor{Gray}{gray}{0.85}
+\definecolor{LightCyan}{rgb}{0.2,0.7,1}
+
+\newcolumntype{g}{>{\columncolor{Gray}}c}
+\newcolumntype{w}{>{\columncolor{white}}c}
+\newcolumntype{L}{>{\arraybackslash}X}
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1\textwidth}}
 
 \begin{document}
 

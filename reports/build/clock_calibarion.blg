@@ -1,9 +1,0 @@
-[0] Config.pm:302> INFO - This is Biber 2.9
-[0] Config.pm:305> INFO - Logfile is 'build/clock_calibarion.blg'
-[17] biber:313> INFO - === T6 Thg 10 23, 2020, 00:14:54
-[30] Biber.pm:371> INFO - Reading 'build/clock_calibarion.bcf'
-[69] Biber.pm:857> INFO - Found 0 citekeys in bib section 0
-[73] Utils.pm:169> WARN - The file 'build/clock_calibarion.bcf' does not contain any citations!
-[78] bbl.pm:617> INFO - Writing 'build/clock_calibarion.bbl' with encoding 'UTF-8'
-[78] bbl.pm:720> INFO - Output to build/clock_calibarion.bbl
-[78] Biber.pm:110> INFO - WARNINGS: 1
