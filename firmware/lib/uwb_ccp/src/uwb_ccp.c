@@ -237,7 +237,7 @@ ccp_slave_timer_ev_cb(struct dpl_event *ev)
         ccp_listen(ccp, 0, UWB_BLOCKING);
         ccp->rx_timeout_acc++;
         printf("ccp->master_role_request: %d ccp->rx_timeout_acc: %d\n", ccp->master_role_request, ccp->rx_timeout_acc);
-        if(ccp->rx_timeout_acc > MYNEWT_VAL(UWB_RX_TIMEOUT_THRESH)){
+        if(ccp->rx_timeout_acc > MYNEWT_VAL(UWB_RX_TIMEOUT_THRESH) + inst->euid%MYNEWT_VAL(UWB_RX_TIMEOUT_THRESH)){
             ccp->rx_timeout_acc = 0;
             ccp->config.role = CCP_ROLE_MASTER;
             dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
@@ -650,11 +650,11 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
         return true;
     }
 
-    printf("ccp->master_role_request: %d\n", ccp->master_role_request);
-    printf("frame->euid/inst->euid: %lld/%lld \n", frame->euid, inst->euid);
+    // printf("ccp->master_role_request: %d\n", ccp->master_role_request);
+    // printf("frame->euid/inst->euid: %lld/%lld \n", frame->euid, inst->euid);
     if(ccp->master_role_request && frame->euid < inst->euid){
         ccp->my_master = frame->euid;
-        printf("Be slave\n");
+        // printf("Be slave\n");
         ccp->config.role = CCP_ROLE_SLAVE;
         dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
         return true;

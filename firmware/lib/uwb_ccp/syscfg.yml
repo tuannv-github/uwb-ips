@@ -52,4 +52,4 @@ syscfg.defs:
         value: 128
     UWB_RX_TIMEOUT_THRESH:
         description: 'Number of rx timeout events in slave mode before turning into master mode'
-        value: 50
+        value: 20
