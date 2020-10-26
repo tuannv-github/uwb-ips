@@ -3,26 +3,7 @@
 
 #include <uwb/uwb.h>
 #include <uwb_ccp/uwb_ccp.h>
-
-
-/**
- * @fn superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
- * @brief
- *
- * @param inst  Pointer to struct uwb_dev.
- * @param cbs   Pointer to struct uwb_mac_interface.
- *
- * @return bool based on the totality of the handling which is false this implementation.
- */
-static bool
-superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
-{
-    // struct uwb_ccp_instance *ccp = (struct uwb_ccp_instance *)cbs->inst_ptr;
-    // printf("{\"role: %d, utime\": %"PRIu32",\"msg\": \"ccp:superframe_cb\", \"period\": %"PRIu32"}\n",
-    //         ccp->config.role, dpl_cputime_ticks_to_usecs(dpl_cputime_get32()), (uint32_t)uwb_dwt_usecs_to_usecs(ccp->period));
-    
-    return false;
-}
+#include <tdma/tdma.h>
 
 int main(int argc, char **argv){
     int rc;
@@ -32,18 +13,13 @@ int main(int argc, char **argv){
 
     struct uwb_dev *udev = uwb_dev_idx_lookup(0);
 
-    struct uwb_ccp_instance *ccp = (struct uwb_ccp_instance*)uwb_mac_find_cb_inst_ptr(udev, UWBEXT_CCP);
-    assert(ccp);
-
-    rtls_ccp_start(ccp);
-
-    udev->my_short_address = MYNEWT_VAL(NODE_ADDRESS);
-    uwb_set_uid(udev, udev->my_short_address);
+    tdma_instance_t *tdma = (tdma_instance_t*)uwb_mac_find_cb_inst_ptr(udev, UWBEXT_TDMA);
+    assert(tdma);
+    rtls_ccp_start(tdma->ccp);
 
     struct uwb_mac_interface cbs = (struct uwb_mac_interface){
         .id =  UWBEXT_APP0,
-        .inst_ptr = ccp,
-        .superframe_cb = superframe_cb
+        .inst_ptr = tdma,
     };
     uwb_mac_append_interface(udev, &cbs);
     
