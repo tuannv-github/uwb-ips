@@ -553,7 +553,7 @@ tdma_pkg_init(void)
     struct uwb_dev *udev;
 #if MYNEWT_VAL(UWB_PKG_INIT_LOG)
     printf("{\"utime\": %"PRIu32",\"msg\": \"tdma_pkg_init\"}\n",
-           (unsigned int)dpl_cputime_ticks_to_usecs(dpl_cputime_get32()));
+           (uint32_t)dpl_cputime_ticks_to_usecs(dpl_cputime_get32()));
 #endif
 
     for (i = 0; i < MYNEWT_VAL(UWB_DEVICE_MAX); i++) {
@@ -579,7 +579,7 @@ tdma_pkg_down(int reason)
     struct _tdma_instance_t * tdma;
 #if MYNEWT_VAL(UWB_PKG_INIT_LOG)
     printf("{\"utime\": %"PRIu32",\"msg\": \"tdma_pkg_down\"}\n",
-           (unsigned int)dpl_cputime_ticks_to_usecs(dpl_cputime_get32()));
+           (uint32_t)dpl_cputime_ticks_to_usecs(dpl_cputime_get32()));
 #endif
 
     for (i = 0; i < MYNEWT_VAL(UWB_DEVICE_MAX); i++) {
