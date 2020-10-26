@@ -236,7 +236,7 @@ ccp_slave_timer_ev_cb(struct dpl_event *ev)
         uwb_set_rx_timeout(inst, MYNEWT_VAL(UWB_CCP_LONG_RX_TO));
         ccp_listen(ccp, 0, UWB_BLOCKING);
         ccp->rx_timeout_acc++;
-        printf("ccp->master_role_request: %d ccp->rx_timeout_acc: %d\n", ccp->master_role_request, ccp->rx_timeout_acc);
+        // printf("ccp->master_role_request: %d ccp->rx_timeout_acc: %d\n", ccp->master_role_request, ccp->rx_timeout_acc);
         if(ccp->rx_timeout_acc > MYNEWT_VAL(UWB_RX_TIMEOUT_THRESH) + inst->euid%MYNEWT_VAL(UWB_RX_TIMEOUT_THRESH)){
             ccp->rx_timeout_acc = 0;
             ccp->config.role = CCP_ROLE_MASTER;
@@ -1135,6 +1135,10 @@ uwb_ccp_start(struct uwb_ccp_instance *ccp, uwb_ccp_role_t role)
     ccp->local_epoch -= epoch_to_rm;
     ccp->local_epoch &= UWB_DTU_40BMASK;
 
+#if MYNEWT_VAL(UWB_PKG_INIT_LOG)
+    printf("{\"utime\": %"PRIu32",\"msg\": \"uwb_ccp change role: %d\"}\n",
+           (uint32_t)dpl_cputime_ticks_to_usecs(dpl_cputime_get32()), role);
+#endif
     ccp_timer_init(ccp, role);
 }
 EXPORT_SYMBOL(uwb_ccp_start);
@@ -1156,9 +1160,9 @@ ccp_change_role(struct dpl_event * ev)
     struct uwb_dev * inst = ccp->dev_inst;
     uwb_ccp_stop(ccp);
 
-    printf("change role %d\n", ccp->config.role);
+    // printf("change role %d\n", ccp->config.role);
     if(ccp->config.role == CCP_ROLE_MASTER && !ccp->master_role_request){
-        printf("ccp->master_role_rqted\n");
+
         uwb_ccp_frame_t frame;
         frame.fctrl = FCNTL_IEEE_BLINK_CCP_64;
         frame.rpt_count = 0;
@@ -1175,7 +1179,7 @@ ccp_change_role(struct dpl_event * ev)
         uint16_t cnt = 0;
         while(cnt < 100 && ccp->master_role_request){
             cnt++;
-            printf("RX cnt: %d\n", cnt);
+            // printf("RX cnt: %d\n", cnt);
 
             uwb_set_rx_timeout(inst, MYNEWT_VAL(UWB_CCP_LONG_RX_TO) + inst->euid%MYNEWT_VAL(UWB_CCP_LONG_RX_TO));
             ccp_listen(ccp, 0, UWB_BLOCKING);
