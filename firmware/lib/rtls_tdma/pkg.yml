@@ -17,10 +17,10 @@
 # under the License.
 #
 
-pkg.name: lib/tdma
+pkg.name: lib/rtls_tdma
 pkg.description: Time-division multiple access
-pkg.author: "UWB Core <uwbcore@gmail.com>"
-pkg.homepage: "http://www.decawave.com/"
+pkg.author: "Tuan Ngo Van <tuanngo0898@gmail.com>"
+pkg.homepage: "https://github.com/tuanngo0898"
 pkg.keywords:
     - uwb
     - TDMA
@@ -29,11 +29,9 @@ pkg.cflags:
     - "-std=gnu99"
     - "-fms-extensions"
 
+pkg.deps:
+    - "@rtls/lib/uwb_ccp"
+    - "@decawave-uwb-core/lib/tdma"
+
 pkg.lflags:
     - "-lm"
-
-pkg.init:
-    tdma_pkg_init: 404
-
-pkg.down:
-    tdma_pkg_down: 404

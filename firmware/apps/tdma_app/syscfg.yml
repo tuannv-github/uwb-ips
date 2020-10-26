@@ -49,3 +49,4 @@ syscfg.vals:
     MSYS_1_BLOCK_COUNT: 24
     MSYS_1_BLOCK_SIZE: 512
     
+    TDMA_NSLOTS: 20

@@ -2,8 +2,9 @@
 #include <config/config.h>
 
 #include <uwb/uwb.h>
-#include <uwb_ccp/uwb_ccp.h>
-#include <tdma/tdma.h>
+#include <rtls_tdma/rtls_tdma.h>
+
+rtls_tdma_instance_t rtls_tdma_instance;
 
 int main(int argc, char **argv){
     int rc;
@@ -21,15 +22,7 @@ int main(int argc, char **argv){
     printf(",\"lot_id\"=\"%lX\"}\n",(uint32_t)(udev->euid>>32));
     printf("{\"utime\": %lu,\"msg\": \"SHR_duration = %d usec\"}\n",utime, uwb_phy_SHR_duration(udev));
 
-    tdma_instance_t *tdma = (tdma_instance_t*)uwb_mac_find_cb_inst_ptr(udev, UWBEXT_TDMA);
-    assert(tdma);
-    tdma_start(tdma);
-
-    struct uwb_mac_interface cbs = (struct uwb_mac_interface){
-        .id =  UWBEXT_APP0,
-        .inst_ptr = tdma,
-    };
-    uwb_mac_append_interface(udev, &cbs);
+    rtls_tdma_start(&rtls_tdma_instance, udev);
     
     while (1) {
         os_eventq_run(os_eventq_dflt_get());
