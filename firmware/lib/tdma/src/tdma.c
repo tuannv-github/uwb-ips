@@ -461,6 +461,21 @@ slot_timer_cb(void * arg)
 }
 
 /**
+ * @fn tdma_start(struct _tdma_instance_t * tdma)
+ * @brief API to start tdma operation. Releases each slot and stops all cputimer callbacks
+ *
+ * @param tdma      Pointer to _tdma_instance_t.
+ *
+ * @return void
+ */
+void
+tdma_start(struct _tdma_instance_t * tdma)
+{
+    tdma_stop(tdma);
+    rtls_ccp_start(tdma->ccp);
+}
+
+/**
  * @fn tdma_stop(struct _tdma_instance_t * tdma)
  * @brief API to stop tdma operation. Releases each slot and stops all cputimer callbacks
  *

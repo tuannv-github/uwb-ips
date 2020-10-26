@@ -103,6 +103,8 @@ struct _tdma_instance_t * tdma_init(struct uwb_dev * dev, uint16_t nslots);
 void tdma_free(struct _tdma_instance_t * inst);
 void tdma_assign_slot(struct _tdma_instance_t * inst, void (* call_back )(struct dpl_event *), uint16_t idx, void * arg);
 void tdma_release_slot(struct _tdma_instance_t * inst, uint16_t idx);
+
+void tdma_start(struct _tdma_instance_t * tdma);
 void tdma_stop(struct _tdma_instance_t * tdma);
 
 uint64_t tdma_tx_slot_start(struct _tdma_instance_t * tdma, dpl_float32_t idx);
