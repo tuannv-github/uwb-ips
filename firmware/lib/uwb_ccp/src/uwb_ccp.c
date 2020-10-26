@@ -602,13 +602,19 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
 {
     struct uwb_ccp_instance * ccp = (struct uwb_ccp_instance *)cbs->inst_ptr;
 
-    if (ccp->config.role == CCP_ROLE_MASTER) {
-        uwb_ccp_frame_t * frame = (uwb_ccp_frame_t*)inst->rxbuf;
+    if (ccp->config.role == CCP_ROLE_MASTER && inst->fctrl_array[0] == FCNTL_IEEE_BLINK_CCP_64) {
+        uwb_ccp_frame_t *frame = (uwb_ccp_frame_t*)inst->rxbuf;
         if (inst->frame_len >= sizeof(uwb_ccp_blink_frame_t) && inst->frame_len <= sizeof(frame->array)){
-            if(frame->euid < inst->euid){
-                ccp->config.role = CCP_ROLE_SLAVE;
-                dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
-            }
+            // if(frame->euid < inst->euid){
+                if(ccp->master_role_request) {
+                    ccp->master_role_request = false;
+                    printf("Be slave\n");
+                }
+                else{
+                    ccp->config.role = CCP_ROLE_SLAVE;
+                    dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
+                }
+            // }
         }
         return true;
     }
@@ -647,16 +653,6 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
         ccp->my_master = frame->euid;
     }
     else if(ccp->my_master != frame->euid){
-        return true;
-    }
-
-    // printf("ccp->master_role_request: %d\n", ccp->master_role_request);
-    // printf("frame->euid/inst->euid: %lld/%lld \n", frame->euid, inst->euid);
-    if(ccp->master_role_request && frame->euid < inst->euid){
-        ccp->my_master = frame->euid;
-        // printf("Be slave\n");
-        ccp->config.role = CCP_ROLE_SLAVE;
-        dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
         return true;
     }
 
@@ -1173,13 +1169,29 @@ ccp_change_role(struct dpl_event * ev)
         frame.euid = inst->euid;
         frame.short_address = inst->my_short_address;
         frame.transmission_interval = ((uint64_t)ccp->period << 16);
-        
-        uwb_write_tx(inst, frame.array, 0, sizeof(uwb_ccp_blink_frame_t));
-        uwb_write_tx_fctrl(inst, sizeof(uwb_ccp_blink_frame_t), 0);
-        uwb_start_tx(inst);
 
         ccp->master_role_request = true;
-        uwb_ccp_start(ccp, CCP_ROLE_SLAVE);
+
+        uint16_t cnt = 0;
+        while(cnt < 100 && ccp->master_role_request){
+            cnt++;
+            printf("RX cnt: %d\n", cnt);
+
+            uwb_set_rx_timeout(inst, MYNEWT_VAL(UWB_CCP_LONG_RX_TO) + inst->euid%MYNEWT_VAL(UWB_CCP_LONG_RX_TO));
+            ccp_listen(ccp, 0, UWB_BLOCKING);
+
+            uwb_write_tx(inst, frame.array, 0, sizeof(uwb_ccp_blink_frame_t));
+            uwb_write_tx_fctrl(inst, sizeof(uwb_ccp_blink_frame_t), 0);
+            uwb_start_tx(inst);
+        }
+
+        if(ccp->master_role_request){
+            uwb_ccp_start(ccp, CCP_ROLE_MASTER);
+        }
+        else
+        {
+            uwb_ccp_start(ccp, CCP_ROLE_SLAVE);
+        } 
     }
     else{
         ccp->master_role_request = false;
