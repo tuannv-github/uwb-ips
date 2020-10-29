@@ -1,10 +1,13 @@
 syscfg.defs:
   UWB_BCN_SLOT_MAX:
-    description: 'BCN slot is slot from 0 to UWB_BCN_SLOT_MAX'
-    value: 8
+    description: 'BCN slot is slot from 1 to UWB_BCN_SLOT_MAX, slot 0 is used for ccp'
+    value: 7
   UWB_SVC_SLOT:
     description: 'SVC slot index'
-    value: 9
+    value: 8
   RT_JOINT_LIST_THRESH:
     description: 'Number of listen times of each anchor before change to next state'
-    value: 5
+    value: 2
+  RT_MASTER_SLOT:
+    description: 'BCN slot for master'
+    value: 1
