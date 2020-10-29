@@ -2,30 +2,37 @@
 
 #include <rtls_tdma/rtls_tdma.h>
 
-typedef struct slot_cb_arg{
-    uint16_t idx;
-    rtls_tdma_instance_t *rtls_tdma_instance;
-}slot_cb_arg_t;
-
-static slot_cb_arg_t slot_cb_arg[MYNEWT_VAL(TDMA_NSLOTS)];
+static void rst_joint_list_cb(tdma_slot_t *tdma_slot);
+static void rst_joint_prep_cb(tdma_slot_t *tdma_slot);
+static void rst_joint_poll_cb(tdma_slot_t *tdma_slot);
+static void rst_joint_resp_cb(tdma_slot_t *tdma_slot);
+static void rst_joint_reqt_cb(tdma_slot_t *tdma_slot);
+static void rst_joint_jted_cb(tdma_slot_t *tdma_slot);
 
 static void
 slot_cb(struct dpl_event * ev)
 {
-    slot_cb_arg_t *slot_cb_arg = (slot_cb_arg_t*)dpl_event_get_arg(ev);
-    switch (slot_cb_arg->rtls_tdma_instance->cstate)
+    tdma_slot_t *tdma_slot = (tdma_slot_t *)dpl_event_get_arg(ev);
+
+    switch (((rtls_tdma_instance_t *)tdma_slot->arg)->cstate)
     {
     case RTS_JOINT_LIST:
+        rst_joint_list_cb(tdma_slot);
         break;
     case RTS_JOINT_PREP:
+        rst_joint_prep_cb(tdma_slot);
         break;
     case RTS_JOINT_POLL:
+        rst_joint_poll_cb(tdma_slot);
         break;
     case RTS_JOINT_RESP:
+        rst_joint_resp_cb(tdma_slot);
         break;
     case RTS_JOINT_REQT:
+        rst_joint_reqt_cb(tdma_slot);
         break;
     case RTS_JOINT_JTED:
+        rst_joint_jted_cb(tdma_slot);
         break;
     default:
         break;
@@ -62,8 +69,33 @@ void rtls_tdma_start(rtls_tdma_instance_t *rtls_tdma_instance, struct uwb_dev* u
     rtls_ccp_start(rtls_tdma_instance->tdma->ccp);
 
     for (uint16_t i = 0; i < MYNEWT_VAL(TDMA_NSLOTS); i++){
-        slot_cb_arg[i].rtls_tdma_instance = rtls_tdma_instance;
-        slot_cb_arg[i].idx = i;
-        tdma_assign_slot(rtls_tdma_instance->tdma, slot_cb,  i, &slot_cb_arg[i]);
+        tdma_assign_slot(rtls_tdma_instance->tdma, slot_cb,  i, rtls_tdma_instance);
+    }
+}
+
+void rst_joint_list_cb(tdma_slot_t *tdma_slot){
+
+}
+
+void rst_joint_prep_cb(tdma_slot_t *tdma_slot){
+
+}
+
+void rst_joint_poll_cb(tdma_slot_t *tdma_slot){
+
+}
+
+void rst_joint_resp_cb(tdma_slot_t *tdma_slot){
+
+}
+
+void rst_joint_reqt_cb(tdma_slot_t *tdma_slot){
+
+}
+
+void rst_joint_jted_cb(tdma_slot_t *tdma_slot){
+    rtls_tdma_instance_t *rtls_tdma_instance = (rtls_tdma_instance_t *)tdma_slot->arg;
+    if(rtls_tdma_instance->my_slot == tdma_slot->idx){
+        printf("this is my slot: %d\n", rtls_tdma_instance->my_slot);
     }
 }
