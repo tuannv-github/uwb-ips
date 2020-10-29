@@ -1160,7 +1160,9 @@ ccp_change_role(struct dpl_event * ev)
     struct uwb_dev * inst = ccp->dev_inst;
     uwb_ccp_stop(ccp);
 
-    // printf("change role %d\n", ccp->config.role);
+    /* sync lost event */
+    if(ccp->uwb_ccp_sync_cb != NULL) ccp->uwb_ccp_sync_cb(CCP_SYNC_LOST, ccp->uwb_ccp_sync_arg);
+
     if(ccp->config.role == CCP_ROLE_MASTER && !ccp->master_role_request){
 
         uwb_ccp_frame_t frame;
@@ -1179,7 +1181,6 @@ ccp_change_role(struct dpl_event * ev)
         uint16_t cnt = 0;
         while(cnt < 100 && ccp->master_role_request){
             cnt++;
-            // printf("RX cnt: %d\n", cnt);
 
             uwb_set_rx_timeout(inst, MYNEWT_VAL(UWB_CCP_LONG_RX_TO) + inst->euid%MYNEWT_VAL(UWB_CCP_LONG_RX_TO));
             ccp_listen(ccp, 0, UWB_BLOCKING);
@@ -1201,6 +1202,9 @@ ccp_change_role(struct dpl_event * ev)
         ccp->master_role_request = false;
         uwb_ccp_start(ccp, ccp->config.role);
     }
+
+    /* sync synced event */
+    if(ccp->uwb_ccp_sync_cb != NULL) ccp->uwb_ccp_sync_cb(CCP_SYNC_SYED, ccp->uwb_ccp_sync_arg);
 }
 
 void rtls_ccp_start(struct uwb_ccp_instance *ccp){
@@ -1211,6 +1215,12 @@ void rtls_ccp_start(struct uwb_ccp_instance *ccp){
     dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
 }
 EXPORT_SYMBOL(rtls_ccp_start);
+
+void rtls_ccp_set_sync_cb(struct uwb_ccp_instance *ccp, uwb_ccp_sync_cb_t uwb_ccp_sync_cb, void *arg){
+    ccp->uwb_ccp_sync_cb = uwb_ccp_sync_cb;
+    ccp->uwb_ccp_sync_arg = arg;
+}
+EXPORT_SYMBOL(rtls_ccp_set_sync_cb);
 
 /**
  * @fn ccp_stop(struct ccp_instance * inst)
