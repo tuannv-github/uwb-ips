@@ -1,0 +1,10 @@
+syscfg.defs:
+  UWB_BCN_SLOT_MAX:
+    description: 'BCN slot is slot from 0 to UWB_BCN_SLOT_MAX'
+    value: 8
+  UWB_SVC_SLOT:
+    description: 'SVC slot index'
+    value: 9
+  RT_JOINT_LIST_THRESH:
+    description: 'Number of listen times of each anchor before change to next state'
+    value: 5
