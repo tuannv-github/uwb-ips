@@ -11,3 +11,6 @@ syscfg.defs:
   RT_MASTER_SLOT:
     description: 'BCN slot for master'
     value: 1
+  RT_BCN_REQT_THRESH:
+    description: 'Timeout for slot reqt'
+    value: 2

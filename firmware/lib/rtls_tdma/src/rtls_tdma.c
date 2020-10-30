@@ -52,6 +52,10 @@ uwb_ccp_sync_cb(ccp_sync_t ccp_sync, void *arg){
             rti->anchors[MYNEWT_VAL(RT_MASTER_SLOT)].location_y = 5.6789;
             rti->anchors[MYNEWT_VAL(RT_MASTER_SLOT)].location_z = 9.87654321;
             rti->cstate = RTS_JOINT_JTED;
+            printf("state: RTS_JOINT_JTED\n");
+        }
+        else{
+            printf("state: RTS_JOINT_LIST\n");
         }
         break;
     default:
@@ -104,6 +108,31 @@ rx_timeout_cb(struct uwb_dev *inst, struct uwb_mac_interface *cbs)
 }
 
 /**
+ * @fn superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
+ * @brief
+ *
+ * @param inst  Pointer to struct uwb_dev.
+ * @param cbs   Pointer to struct uwb_mac_interface.
+ *
+ * @return bool based on the totality of the handling which is false this implementation.
+ */
+static bool
+superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
+{
+    rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)cbs->inst_ptr;
+    if(rti->cstate == RTS_JOINT_REQT && rti->joint_reqt_recved){
+        rti->joint_reqt_cnt++;
+        if(rti->joint_reqt_cnt > MYNEWT_VAL(RT_BCN_REQT_THRESH)){
+            rti->cstate = RTS_JOINT_LIST;
+            printf("joint_reqt_timeout\nrti->cstate:RTS_JOINT_LIST\n");
+        }
+        printf("rti->joint_reqt_cnt: %d\n", rti->joint_reqt_cnt);
+    }   
+    
+    return false;
+}
+
+/**
  * @fn rtls_tdma_listen(struct uwb_dev * inst, uwb_dev_modes_t mode)
  * @brief Listen for polls / requests
  *
@@ -146,6 +175,8 @@ void rtls_tdma_start(rtls_tdma_instance_t *rti, struct uwb_dev* udev){
     rti->umi.inst_ptr = rti,
     rti->umi.rx_complete_cb = rx_complete_cb,
     rti->umi.rx_timeout_cb = rx_timeout_cb,
+    rti->umi.superframe_cb = superframe_cb,
+
     uwb_mac_append_interface(rti->dev_inst, &rti->umi);
 
     rtls_ccp_set_sync_cb(rti->tdma->ccp, uwb_ccp_sync_cb, rti);
@@ -180,15 +211,16 @@ void rst_joint_list_cb(tdma_slot_t *tdma_slot){
         uint16_t frame_idx = sizeof(ieee_std_frame_hdr_t);
 
         while(frame_idx < rti->dev_inst->rxbuf_size){
+
+            if(ieee_std_frame_hdr->src_address != rti->anchors[tdma_slot->idx].addr){
+                rti->anchors[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
+                rti->anchors[tdma_slot->idx].listen_cnt = 0;
+            }
+
             switch(rti->dev_inst->rxbuf[frame_idx]){
                 case RT_LOCA_MSG:
                 {
                     rt_loca_t *rt_bcn_norm_payload = (rt_loca_t *)(&rti->dev_inst->rxbuf[frame_idx]);
-
-                    if(ieee_std_frame_hdr->src_address != rti->anchors[tdma_slot->idx].addr){
-                        rti->anchors[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
-                        rti->anchors[tdma_slot->idx].listen_cnt = 0;
-                    }
 
                     rti->anchors[tdma_slot->idx].location_x = rt_bcn_norm_payload->location_x;
                     rti->anchors[tdma_slot->idx].location_y = rt_bcn_norm_payload->location_y;
@@ -198,11 +230,10 @@ void rst_joint_list_cb(tdma_slot_t *tdma_slot){
                 case RT_SLOT_MSG:
                 {
                     rt_slot_t *rt_slot = (rt_slot_t *)(&rti->dev_inst->rxbuf[frame_idx]);
-                    if(ieee_std_frame_hdr->src_address != rti->anchors[tdma_slot->idx].addr){
-                        rti->anchors[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
-                    }
+
                     rti->anchors[tdma_slot->idx].slot = rt_slot->slot;
                     rti->anchors[tdma_slot->idx].listen_cnt++;
+                    printf("%d\n", tdma_slot->idx);
 
                     bool next_state = true;
                     for(int i=0; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
@@ -225,8 +256,8 @@ void rst_joint_list_cb(tdma_slot_t *tdma_slot){
                                 printf(":%d}\n", rti->anchors[i].slot);
                             }
                         }
-                        printf("Change to state: RTS_JOINT_REQT\n");
                         rti->cstate = RTS_JOINT_REQT;
+                        printf("state: RTS_JOINT_REQT\n");
                     }
                 }
                 break;
@@ -434,6 +465,7 @@ void rst_joint_jted_cb(tdma_slot_t *tdma_slot){
                 rti->anchors[rti->my_slot].slot |= 0x0001 << tdma_slot->idx;
 
                 if(rti->joint_reqt_recved && rti->joint_reqt_src == ieee_std_frame_hdr->src_address){
+                    rti->joint_reqt_cnt = 0;
                     rti->joint_reqt_recved = false;
                 }
                 while(frame_idx < rti->dev_inst->rxbuf_size){
@@ -493,6 +525,7 @@ void rst_joint_jted_cb(tdma_slot_t *tdma_slot){
                         rti->joint_reqt_recved = true;
                         rti->joint_reqt_src = ieee_std_frame_hdr->src_address;
                         rti->joint_reqt_slot = rt_slot->slot;
+                        rti->joint_reqt_cnt = 0;
                     }
                     break;
                 }

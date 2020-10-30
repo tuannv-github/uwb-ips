@@ -35,6 +35,7 @@ typedef struct _rtls_tdma_instance_t {
     bool        joint_reqt_recved;
     uint16_t    joint_reqt_src;
     uint16_t    joint_reqt_slot;
+    uint8_t     joint_reqt_cnt;
     
     rtls_tdma_anchor_t anchors[MYNEWT_VAL(UWB_BCN_SLOT_MAX)+1];
 }rtls_tdma_instance_t;
