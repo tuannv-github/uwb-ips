@@ -18,9 +18,9 @@ static bool
 superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
 {
     struct uwb_ccp_instance *ccp = (struct uwb_ccp_instance *)cbs->inst_ptr;
-    printf("{\"role: %d, utime\": %"PRIu32",\"msg\": \"ccp:superframe_cb\", \"period\": %"PRIu32"}\n",
+    printf("\33[2K\r{\"role: %d, utime\": %"PRIu32",\"msg\": \"ccp:superframe_cb\", \"period\": %"PRIu32"}",
             ccp->config.role, dpl_cputime_ticks_to_usecs(dpl_cputime_get32()), (uint32_t)uwb_dwt_usecs_to_usecs(ccp->period));
-    
+
     return false;
 }
 
@@ -30,6 +30,7 @@ int main(int argc, char **argv){
     sysinit();
     conf_load();
 
+    printf(" \n");
     struct uwb_dev *udev = uwb_dev_idx_lookup(0);
 
     struct uwb_ccp_instance *ccp = (struct uwb_ccp_instance*)uwb_mac_find_cb_inst_ptr(udev, UWBEXT_CCP);
