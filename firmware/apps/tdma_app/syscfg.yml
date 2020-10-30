@@ -50,3 +50,4 @@ syscfg.vals:
     MSYS_1_BLOCK_SIZE: 512
     
     TDMA_NSLOTS: 20
+    TDMA_TASK_STACK_SZ: 2048

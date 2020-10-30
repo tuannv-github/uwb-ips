@@ -14,3 +14,6 @@ syscfg.defs:
   RT_BCN_REQT_THRESH:
     description: 'Timeout for slot reqt'
     value: 2
+  RT_ANCHOR_TIMEOUT:
+    description: 'Number of supper frame anchor do not send BCN message before it is removed from the list'
+    value: 10

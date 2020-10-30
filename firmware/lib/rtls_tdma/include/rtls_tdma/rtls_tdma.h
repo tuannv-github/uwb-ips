@@ -20,6 +20,8 @@ typedef struct _rtls_tdma_anchor_t{
 
     uint8_t listen_cnt;
     bool accepted;
+
+    uint8_t timeout;
 }rtls_tdma_anchor_t;
 
 typedef struct _rtls_tdma_instance_t {
@@ -32,7 +34,7 @@ typedef struct _rtls_tdma_instance_t {
     struct dpl_sem sem;                      //!< Structure containing os semaphores
     uint8_t seqno;
 
-    bool        joint_reqt_recved;
+    bool        joint_reqt;
     uint16_t    joint_reqt_src;
     uint16_t    joint_reqt_slot;
     uint8_t     joint_reqt_cnt;
