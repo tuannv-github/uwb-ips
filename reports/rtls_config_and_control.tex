@@ -1,0 +1,18 @@
+\documentclass[./main.tex]{subfiles}
+
+\begin{document}
+
+\chapter{RTLS network configuration and control}
+
+\section{Network initialization}
+\subsection{Criteria for anchor sign-up}
+Before an anchor can join an existing network, the following criteria must be satisfied:
+\begin{itemize}
+    \item The cluster map and cluster neighbor map (sent as part of Beacon messages) must indicate there is a free seat to occupy. (i.e. the number of occupied BCN slots in the superframe is $<$ 16)
+    \item Clock level of the in-range anchors is lower than 127. The anchors which can hear initiator’s beacons are at clock level 1. The next ones are clock level 2, etc.
+    \item All in-range anchors have confirmed that the requested seat (requested by the anchor wishing to join) is free and no collisions with the other devices occurred during the sign-up process.
+    \item The firmware must be compatible (if FW update is enabled), i.e. the version must match the version in the initiator. The firmware version is sent in the Almanac messages.
+\end{itemize}
+\subsection{Sign-up process}
+
+\end{document}

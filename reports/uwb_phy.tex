@@ -1,0 +1,45 @@
+\documentclass[./main.tex]{subfiles}
+
+\begin{document}
+
+\chapter{UWB PHY RF requirements}
+
+\section{Operating frequency bands}
+
+The UWB operating frequency bands defined in IEEE Std 802.15.4-2011 is given in table \ref{tab:UWB PHY band allocation}. As the table shown, for the sub-gigahertz operation, channel 0 is defined as the mandatory channel; for the low-band operation, channel 3 is the mandatory channel; and for the high-band operation, channel 9 is the mandatory channel.
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{ |M{0.13}|M{0.18}|M{0.18}|M{0.12}|M{0.25}|} 
+        \hline
+        \textbf{Band group (decimal)} & \textbf{Channel number (decimal)} & \textbf{Center frequency, $f_c$
+        (MHz)} & \textbf{Band width (MHz)} & \textbf{Mandatory /Optional} \\ 
+        \hline
+        \multirow{1}{*}{0} & 0 & 499.2 & 499.2 & Mandatory below 1 GHz\\
+        \hline
+        \multirow{4}{*}{1}
+        & 1 & 3494.4 & 499.2 & Optional \\ \cline{2-5}
+        & 2 & 3993.6 & 499.2 & Optional \\ \cline{2-5}
+        & 3 & 4492.8 & 499.2 & Mandatory in low band \\ \cline{2-5}
+        & 4 & 3993.6 & 1331.2 & Optional \\
+        \hline
+        \multirow{11}{*}{2}
+        & 5 & 6489.6 & 499.2 & Optional \\ \cline{2-5}
+        & 6 & 6988.8 & 499.2 & Optional \\ \cline{2-5}
+        & 7 & 6489.6 & 1081.6 & Optional\\ \cline{2-5}
+        & 8 & 7488.0 & 499.2 & Optional \\ \cline{2-5}
+        & 9 & 7987.2 & 499.2 & Mandatory in high band\\ \cline{2-5}
+        & 10 & 8486.4 & 499.2 & Optional \\ \cline{2-5}
+        & 11 & 7987.2 & 1331.2 & Optional \\ \cline{2-5}
+        & 12 & 8985.6 & 499.2 & Optional \\ \cline{2-5}
+        & 13 & 9484.8 & 499.2 & Optional \\ \cline{2-5}
+        & 14 & 9984.0 & 499.2 & Optional \\ \cline{2-5}
+        & 15 & 9484.8 & 1354.97 & Optional \\ \cline{2-5}
+        \hline
+    \end{tabular}
+    \caption{UWB PHY band allocation \cite{IEEE_Std_802.15.4-2011}}
+    \label{tab:UWB PHY band allocation}
+\end{table}
+
+
+\end{document}
