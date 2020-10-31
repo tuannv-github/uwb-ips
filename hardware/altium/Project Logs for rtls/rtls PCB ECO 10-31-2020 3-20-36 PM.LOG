@@ -1,0 +1,6 @@
+Added Component: Designator=M2(AM2320)
+Added Pin To Net: NetName=3V3 Pin=M2-1
+Added Pin To Net: NetName=NetM2_2 Pin=M2-2
+Added Pin To Net: NetName=GND Pin=M2-3
+Added Pin To Net: NetName=NetM2_4 Pin=M2-4
+Added Member To Class: ClassName=io_sensor Member=Component M2 AM2320
