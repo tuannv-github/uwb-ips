@@ -91,7 +91,7 @@ static const struct bt_mesh_model_op g_loc_data_op[] = {
 };
 
 struct bt_mesh_model model_location[4] = {
-    BT_MESH_MODEL(BT_MESH_MODEL_ID_LOC_DATA_SRV, g_loc_data_op, &g_loc_data_pub, NULL),
+    BT_MESH_MODEL(BT_MESH_MODEL_ID_LOC_DATA_SRV, g_loc_data_op, &gen_onoff_pub, NULL),
     BT_MESH_MODEL(BT_MESH_MODEL_ID_LOC_CONF_SRV, gen_onoff_op, &gen_onoff_pub, NULL),
     BT_MESH_MODEL(BT_MESH_MODEL_ID_LOC_CONF_CLI, gen_onoff_op, &gen_onoff_pub, NULL),
     BT_MESH_MODEL(BT_MESH_MODEL_ID_LOC_DIST_SRV, gen_onoff_op, &gen_onoff_pub, NULL),

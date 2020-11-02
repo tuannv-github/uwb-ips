@@ -29,9 +29,18 @@ pkg.deps:
     - "@apache-mynewt-core/sys/log/modlog"
     - "@apache-mynewt-core/sys/stats/full"
     - "@apache-mynewt-core/sys/shell"
+
     - "@apache-mynewt-nimble/nimble/controller"
     - "@apache-mynewt-nimble/nimble/host"
     - "@apache-mynewt-nimble/nimble/host/services/gap"
     - "@apache-mynewt-nimble/nimble/host/services/gatt"
     - "@apache-mynewt-nimble/nimble/host/store/ram"
     - "@apache-mynewt-nimble/nimble/transport/ram"
+
+    - "@decawave-uwb-core/sys/uwbcfg"
+    - "@decawave-uwb-core/hw/drivers/uwb"
+    - "@rtls/lib/rtls_tdma"
+
+pkg.cflags:
+    - "-std=gnu11"
+    - "-fms-extensions"

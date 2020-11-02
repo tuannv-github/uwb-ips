@@ -100,5 +100,5 @@ void ble_mesh_init(){
     ble_hs_cfg.sync_cb = blemesh_on_sync;
     ble_hs_cfg.store_status_cb = ble_store_util_status_rr;
 
-    loc_pub_init();
+    // loc_pub_init();
 }

@@ -15,17 +15,7 @@
 
 #include <rtls_lb/model.h>
 
-static
-int loc_data_update(struct bt_mesh_model *mod){
-    console_printf("#mesh loc_data_update\n");
-    return 0;
-}
-static struct bt_mesh_model_pub gen_onoff_pub = {
-    .period = BT_MESH_PUB_PERIOD_SEC(1),
-    .update = loc_data_update,
-    .ttl = BT_MESH_TTL_DEFAULT,
-    .msg = (struct os_mbuf *)100,
-};
+static struct bt_mesh_model_pub gen_onoff_pub;
 
 static void gen_onoff_status(struct bt_mesh_model *model,
                              struct bt_mesh_msg_ctx *ctx)
