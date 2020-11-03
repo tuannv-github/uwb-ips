@@ -54,7 +54,7 @@ uwb_ccp_sync_cb(ccp_sync_t ccp_sync, void *arg){
             rti->anchors[MYNEWT_VAL(RT_MASTER_SLOT)].location_y = 5.6789;
             rti->anchors[MYNEWT_VAL(RT_MASTER_SLOT)].location_z = 9.87654321;
             rti->cstate = RTS_JOINT_JTED;
-            printf("state: RTS_JOINT_JTED, slot: %d, anchor.slot: %d\n", rti->my_slot, rti->anchors[MYNEWT_VAL(RT_MASTER_SLOT)].slot);
+            printf("state: RTS_JOINT_JTED, slot: %d, anchor.slot: 0x%x\n", rti->my_slot, rti->anchors[MYNEWT_VAL(RT_MASTER_SLOT)].slot);
         }
         else{
             printf("state: RTS_JOINT_LIST\n");
@@ -573,6 +573,11 @@ void rst_joint_jted_cb(tdma_slot_t *tdma_slot){
                 uint8_t msg_len = rti->dev_inst->rxbuf[frame_idx+1];
                 frame_idx += 2 + msg_len;
             }
+        }
+    }
+    else{
+        if(rti->rtls_tdma_cb != NULL){
+            rti->rtls_tdma_cb(rti, tdma_slot);
         }
     }
 }

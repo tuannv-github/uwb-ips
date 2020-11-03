@@ -4,6 +4,7 @@
 
 #include <uwb/uwb.h>
 #include <tdma/tdma.h>
+#include <uwb_rng/uwb_rng.h>
 
 typedef enum{
     RTS_JOINT_LIST,
@@ -24,11 +25,16 @@ typedef struct _rtls_tdma_anchor_t{
     uint8_t timeout;
 }rtls_tdma_anchor_t;
 
-typedef struct _rtls_tdma_instance_t {
-    tdma_instance_t *tdma;                   //!< Pointer to tdma instant
-    struct uwb_dev * dev_inst;               //!< UWB device instance
-    struct uwb_mac_interface umi;            //!< Mac interface
+typedef struct _rtls_tdma_instance_t rtls_tdma_instance_t;
 
+typedef void (*rtls_tdma_cb_t)(rtls_tdma_instance_t *rtls_tdma_instance, tdma_slot_t *tdma_slot);
+
+struct _rtls_tdma_instance_t {
+    tdma_instance_t *tdma;                      //!< Pointer to tdma instant
+    struct uwb_dev *dev_inst;                   //!< UWB device instance
+    struct uwb_mac_interface umi;               //!< Mac interface
+    struct uwb_rng_instance *uri;               //!= UWB ranging instance
+ 
     rts_t cstate;                            //!< Current rtls tdma state
     uint16_t my_slot;                        //!< Current rtls tdma slot
     struct dpl_sem sem;                      //!< Structure containing os semaphores
@@ -39,8 +45,10 @@ typedef struct _rtls_tdma_instance_t {
     uint16_t    joint_reqt_slot;
     uint8_t     joint_reqt_cnt;
     
+    rtls_tdma_cb_t rtls_tdma_cb;
+
     rtls_tdma_anchor_t anchors[MYNEWT_VAL(UWB_BCN_SLOT_MAX)+1];
-}rtls_tdma_instance_t;
+};
 
 #define RT_BROADCAST_ADDR   0xFFFF
 
