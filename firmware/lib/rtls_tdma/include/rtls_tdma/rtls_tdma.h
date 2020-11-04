@@ -18,19 +18,22 @@ typedef enum{
     RTR_TAG
 }rtr_t;
 
-typedef uint64_t slot_type_t;
+typedef uint64_t slot_map_t;
 
 typedef struct _rtls_tdma_node_t{   
 
-    uint16_t addr;          // Address of the node
-    slot_type_t slot;       // Slot map of the node
+    uint16_t addr;              // Address of the node
+    slot_map_t slot_map;        // Slot map of the node
 
     float location_x;       // Node location
     float location_y;       // Node location
     float location_z;       // Node location
 
     uint8_t bcn_cnt;        // Number of bcn message received from this node
-    uint8_t timeout;        // Keep track if jointed node leaved the network  
+    uint8_t timeout;        // Keep track if jointed node leaved the network
+
+    bool available;         // This anchor available in this supper frame
+    bool accepted;          // This anchor accept for my slot 
 }rtls_tdma_node_t;
 
 typedef struct _rtls_tdma_instance_t rtls_tdma_instance_t;
@@ -44,19 +47,17 @@ struct _rtls_tdma_instance_t {
     struct uwb_rng_instance *uri;               //!= UWB ranging instance
     
     rts_t cstate;                               //!< Current rtls tdma state
-    uint16_t my_slot;                           //!< Current rtls tdma slot
     struct dpl_sem sem;                         //!< Structure containing os semaphores
     rtr_t role;                                 //!< RTLS TDMA role
     uint8_t seqno;
+    uint16_t slot_idx;
 
-    bool        joint_reqt;
-    uint16_t    joint_reqt_src;
-    uint64_t    joint_reqt_slot;
-    uint8_t     joint_reqt_cnt;
+    slot_map_t  slot_req;
+    uint16_t    slot_req_addr;
     
     rtls_tdma_cb_t rtls_tdma_cb;
 
-    rtls_tdma_node_t nodes[MYNEWT_VAL(TDMA_NSLOTS)];
+    rtls_tdma_node_t nodes[MYNEWT_VAL(TDMA_NSLOTS)]; // nodes[0] save my node info
 };
 
 #define RT_BROADCAST_ADDR   0xFFFF
@@ -94,7 +95,7 @@ typedef struct _rt_slot_t{
     struct _msg_hdr_t;
     struct _rt_slot_data_t
     {
-        uint64_t slot;
+        slot_map_t slot_map;
     }__attribute__((__packed__,aligned(1)));
 }__attribute__((__packed__,aligned(1))) rt_slot_t;
 
