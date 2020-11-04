@@ -233,10 +233,8 @@ ccp_slave_timer_ev_cb(struct dpl_event *ev)
         uwb_set_rx_timeout(inst, MYNEWT_VAL(UWB_CCP_LONG_RX_TO));
         ccp_listen(ccp, 0, UWB_BLOCKING);
 
-        /* Timout time accumulated when rx timout error occurred */
-        if (ccp->status.rx_timeout_error) {
-            ccp->rx_timeout_acc++;
-        }
+        /* Timout accumulate */
+        ccp->rx_timeout_acc++;
 
         /* May change to master role if rx_timeout_acc reach thresh */
         if(ccp->rx_timeout_acc > MYNEWT_VAL(UWB_RX_TIMEOUT_THRESH) + inst->euid%MYNEWT_VAL(UWB_RX_TIMEOUT_THRESH)){
@@ -607,7 +605,6 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     if (ccp->config.role == CCP_ROLE_MASTER && inst->fctrl_array[0] == FCNTL_IEEE_BLINK_CCP_64) {
         if(ccp->master_role_request) {
             ccp->master_role_request = false;
-            printf("\nCan not change to master mode");
         }
         return true;
     }
