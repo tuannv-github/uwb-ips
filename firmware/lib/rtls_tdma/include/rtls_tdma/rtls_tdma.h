@@ -7,23 +7,31 @@
 #include <uwb_rng/uwb_rng.h>
 
 typedef enum{
+    RTS_JOINT_NONE,
     RTS_JOINT_LIST,
     RTS_JOINT_REQT,
     RTS_JOINT_JTED  
 }rts_t;
 
-typedef struct _rtls_tdma_anchor_t{
-    uint16_t addr;
-    uint16_t slot;
-    float location_x;
-    float location_y;
-    float location_z;
+typedef enum{
+    RTR_ANCHOR,
+    RTR_TAG
+}rtr_t;
 
-    uint8_t listen_cnt;
-    bool accepted;
+typedef uint64_t slot_type_t;
 
-    uint8_t timeout;
-}rtls_tdma_anchor_t;
+typedef struct _rtls_tdma_node_t{   
+
+    uint16_t addr;          // Address of the node
+    slot_type_t slot;       // Slot map of the node
+
+    float location_x;       // Node location
+    float location_y;       // Node location
+    float location_z;       // Node location
+
+    uint8_t bcn_cnt;        // Number of bcn message received from this node
+    uint8_t timeout;        // Keep track if jointed node leaved the network  
+}rtls_tdma_node_t;
 
 typedef struct _rtls_tdma_instance_t rtls_tdma_instance_t;
 
@@ -34,20 +42,21 @@ struct _rtls_tdma_instance_t {
     struct uwb_dev *dev_inst;                   //!< UWB device instance
     struct uwb_mac_interface umi;               //!< Mac interface
     struct uwb_rng_instance *uri;               //!= UWB ranging instance
- 
-    rts_t cstate;                            //!< Current rtls tdma state
-    uint16_t my_slot;                        //!< Current rtls tdma slot
-    struct dpl_sem sem;                      //!< Structure containing os semaphores
+    
+    rts_t cstate;                               //!< Current rtls tdma state
+    uint16_t my_slot;                           //!< Current rtls tdma slot
+    struct dpl_sem sem;                         //!< Structure containing os semaphores
+    rtr_t role;                                 //!< RTLS TDMA role
     uint8_t seqno;
 
     bool        joint_reqt;
     uint16_t    joint_reqt_src;
-    uint16_t    joint_reqt_slot;
+    uint64_t    joint_reqt_slot;
     uint8_t     joint_reqt_cnt;
     
     rtls_tdma_cb_t rtls_tdma_cb;
 
-    rtls_tdma_anchor_t anchors[MYNEWT_VAL(UWB_BCN_SLOT_MAX)+1];
+    rtls_tdma_node_t nodes[MYNEWT_VAL(TDMA_NSLOTS)];
 };
 
 #define RT_BROADCAST_ADDR   0xFFFF
@@ -85,7 +94,7 @@ typedef struct _rt_slot_t{
     struct _msg_hdr_t;
     struct _rt_slot_data_t
     {
-        uint16_t slot;
+        uint64_t slot;
     }__attribute__((__packed__,aligned(1)));
 }__attribute__((__packed__,aligned(1))) rt_slot_t;
 
