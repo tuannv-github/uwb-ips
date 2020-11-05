@@ -85,9 +85,11 @@ struct _msg_hdr_t{
 typedef struct _rt_bcn_loca_t{
     struct _msg_hdr_t;
     struct _rt_loca_data_t{
+        uint8_t slot;
         float location_x;
         float location_y;
         float location_z;
+ 
     }__attribute__((__packed__,aligned(1)));
 }__attribute__((__packed__,aligned(1))) rt_loca_t;
 
@@ -95,21 +97,26 @@ typedef struct _rt_slot_t{
     struct _msg_hdr_t;
     struct _rt_slot_data_t
     {
+        uint8_t slot;
         slot_map_t slot_map;
     }__attribute__((__packed__,aligned(1)));
 }__attribute__((__packed__,aligned(1))) rt_slot_t;
 
-#define UWB_TX(dev, msg, msg_size, dx_time)             \
-    uwb_write_tx(dev, msg, 0, msg_size);                \
-    uwb_write_tx_fctrl(dev, msg_size, 0);               \
-    uwb_set_wait4resp(dev, false);                      \
-    uwb_set_delay_start(dev, dx_time);                  \
-    if (uwb_start_tx(dev).start_tx_error)               \
-    {                                                   \
-        printf("TX error %s:%d\n", __FILE__, __LINE__); \
-    }                                                   
-
-
 void rtls_tdma_start(rtls_tdma_instance_t *rtls_tdma_instance, struct uwb_dev* udev);
+
+#define UWB_TX(rti, msg, msg_size, slot)                            \
+    uint64_t dx_time = tdma_tx_slot_start(rti->tdma, slot);         \
+    dx_time &= 0xFFFFFFFFFE00UL;                                    \
+    uwb_write_tx(rti->dev_inst, msg, 0, msg_size);                  \
+    uwb_write_tx_fctrl(rti->dev_inst, msg_size, 0);                 \
+    uwb_set_wait4resp(rti->dev_inst, false);                        \
+    uwb_set_delay_start(rti->dev_inst, dx_time);                    \
+    if (uwb_start_tx(rti->dev_inst).start_tx_error)                 \
+    {                                                               \
+        printf("TX error %s:%d\n", __FILE__, __LINE__);             \
+    }
+
+#define UWB_RX_ERROR(rti)       (rti->dev_inst->status.start_rx_error)
+#define UWB_RX_TIMEOUT(rti)     (rti->dev_inst->status.rx_timeout_error)
 
 #endif
