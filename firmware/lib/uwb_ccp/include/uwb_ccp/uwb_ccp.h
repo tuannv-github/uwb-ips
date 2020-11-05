@@ -219,6 +219,7 @@ dpl_float64_t uwb_ccp_skew_compensation_f64(struct uwb_ccp_instance *ccp,  dpl_f
 
 void rtls_ccp_start(struct uwb_ccp_instance *ccp);
 void rtls_ccp_set_sync_cb(struct uwb_ccp_instance *ccp, uwb_ccp_sync_cb_t uwb_ccp_sync_cb, void *arg);
+bool rtls_ccp_stable(struct uwb_ccp_instance *ccp);
 
 /**
  * @}
