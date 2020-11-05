@@ -50,7 +50,7 @@ struct _rtls_tdma_instance_t {
     struct dpl_sem sem;                         //!< Structure containing os semaphores
     rtr_t role;                                 //!< RTLS TDMA role
     uint8_t seqno;
-    uint16_t slot_idx;
+    uint16_t slot_idx;                          //!< slot_idx != 0 means I have slot already
 
     slot_map_t  slot_req;
     uint16_t    slot_req_addr;
@@ -98,6 +98,17 @@ typedef struct _rt_slot_t{
         slot_map_t slot_map;
     }__attribute__((__packed__,aligned(1)));
 }__attribute__((__packed__,aligned(1))) rt_slot_t;
+
+#define UWB_TX(dev, msg, msg_size, dx_time)             \
+    uwb_write_tx(dev, msg, 0, msg_size);                \
+    uwb_write_tx_fctrl(dev, msg_size, 0);               \
+    uwb_set_wait4resp(dev, false);                      \
+    uwb_set_delay_start(dev, dx_time);                  \
+    if (uwb_start_tx(dev).start_tx_error)               \
+    {                                                   \
+        printf("TX error %s:%d\n", __FILE__, __LINE__); \
+    }                                                   
+
 
 void rtls_tdma_start(rtls_tdma_instance_t *rtls_tdma_instance, struct uwb_dev* udev);
 

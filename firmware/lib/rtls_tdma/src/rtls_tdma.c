@@ -2,9 +2,6 @@
 
 #include <rtls_tdma/rtls_tdma.h>
 
-// static void rst_joint_list_cb(tdma_slot_t *tdma_slot);
-// static void rst_joint_reqt_cb(tdma_slot_t *tdma_slot);
-// static void rst_joint_jted_cb(tdma_slot_t *tdma_slot);
 static bool 
 rtls_tdma_slot_listen(rtls_tdma_instance_t *rti, uwb_dev_modes_t mode, uint16_t idx);
 
@@ -16,7 +13,7 @@ static void
 node_slot_map_printf(rtls_tdma_instance_t *rti){
     printf("- My slot: %d\n", rti->slot_idx);
     for(int i=1; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
-        if(rti->nodes[rti->slot_idx].slot_map & ((uint64_t)1 << i)){
+        if(rti->nodes[i].addr!=0){
             printf("--- Slot: %02d, addr: 0x%02x, accepted: %d, map:", i, rti->nodes[i].addr, rti->nodes[i].accepted);
             for(int j=0; j<MYNEWT_VAL(TDMA_NSLOTS); j++){
                 printf("%d", (uint8_t)((rti->nodes[i].slot_map >> j) & 0x01));
@@ -35,13 +32,13 @@ node_rmv_all(rtls_tdma_instance_t *rti){
     }
 }
 
-// static void 
-// node_rmv(rtls_tdma_instance_t *rti, uint16_t idx){
-//     rti->nodes[rti->my_slot].slot &= ~((uint64_t)1 << idx);
-//     memset(&rti->nodes[idx], 0, sizeof(rtls_tdma_node_t));
-//     /* the first slot is reserved for synchronization */
-//     rti->nodes[idx].slot = 0x01;
-// }
+static void 
+node_rmv(rtls_tdma_instance_t *rti, uint16_t idx){
+    rti->nodes[rti->slot_idx].slot_map &= ~((uint64_t)1 << idx);
+    memset(&rti->nodes[idx], 0, sizeof(rtls_tdma_node_t));
+    /* the first slot is reserved for synchronization */
+    rti->nodes[idx].slot_map = 0x01;
+}
 
 static void 
 node_add(rtls_tdma_instance_t *rti, uint16_t idx, uint16_t addr){
@@ -49,11 +46,12 @@ node_add(rtls_tdma_instance_t *rti, uint16_t idx, uint16_t addr){
     rti->nodes[idx].addr = addr;
 }
 
-static bool 
+static bool
 node_all_accepted(rtls_tdma_instance_t *rti){
     bool accepted = true;
-    for(int i=0; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
-        if(rti->nodes[i].addr != 0 && rti->nodes[i].accepted == false){
+    if(rti->tdma->ccp->config.role == CCP_ROLE_MASTER) return accepted;
+    for(int i=1; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
+        if(i != rti->slot_idx && rti->nodes[i].addr != 0 && rti->nodes[i].accepted == false){
             accepted = false;
             break;
         }
@@ -71,7 +69,7 @@ slot_cb(struct dpl_event * ev)
     rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)tdma_slot->arg;
 
     if(tdma_slot->idx <= MYNEWT_VAL(UWB_BCN_SLOT_MAX)){
-        /* this is my node */
+        /* This is my node */
         if(rti->slot_idx == tdma_slot->idx && node_all_accepted(rti)){
             bcn_slot_cb_mine(tdma_slot);
         }
@@ -207,6 +205,14 @@ superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)cbs->inst_ptr;
     for(int i=1; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
         rti->nodes[i].available = false;
+        if(rti->nodes[i].addr != 0 && i != rti->slot_idx){
+            rti->nodes[i].timeout++;
+            if(rti->nodes[i].timeout > MYNEWT_VAL(RT_ANCHOR_TIMEOUT)){
+                node_rmv(rti, i);
+                printf("Remove node: %d\n", i);
+                node_slot_map_printf(rti);
+            }
+        }
     }
 
     rti->nodes[rti->slot_idx].available = true;
@@ -258,29 +264,10 @@ bcn_slot_cb_mine(tdma_slot_t *tdma_slot){
         rt_slot_t *rt_slot = (rt_slot_t *)(rt_msg + sizeof(ieee_std_frame_hdr_t));
         rt_slot->msg_type = RT_ACPT_MSG;
         rt_slot->len = sizeof(struct _rt_slot_data_t);
-        rt_slot->slot_map = (~rti->nodes[rti->slot_idx].slot_map) & rti->slot_req;
-
-        /* Add this node */
-        rti->nodes[rti->slot_idx].slot_map |=  rt_slot->slot_map;   
-        for(int j=1; j<MYNEWT_VAL(TDMA_NSLOTS); j++){
-            if(rt_slot->slot_map & ((slot_map_t)1 << j)){
-                node_add(rti, j, rti->slot_req_addr);
-                rti->nodes[j].accepted = true;
-                printf("accepted slot %d\n", j);
-                break;
-            }
-        }
+        rt_slot->slot_map = rti->nodes[rti->slot_idx].slot_map & rti->slot_req;
 
         ieee_std_frame_hdr = (ieee_std_frame_hdr_t *)rt_msg;
         ieee_std_frame_hdr->dst_address = rti->slot_req_addr;
-
-        /* Remove request */
-        rti->slot_req  = 0;
-
-        rt_slot = (rt_slot_t *)(rt_msg + sizeof(ieee_std_frame_hdr_t) + sizeof(rt_slot_t));
-        rt_slot->msg_type = RT_SLOT_MSG;
-        rt_slot->len = sizeof(struct _rt_slot_data_t);
-        rt_slot->slot_map = rti->nodes[rti->slot_idx].slot_map;
     }
     /* else: just do my beacon job */
     else{
@@ -316,15 +303,8 @@ bcn_slot_cb_mine(tdma_slot_t *tdma_slot){
     ieee_std_frame_hdr->PANID = rti->tdma->dev_inst->pan_id;
     ieee_std_frame_hdr->src_address = rti->tdma->dev_inst->my_short_address;
 
-    uwb_write_tx(rti->dev_inst, rt_msg, 0, rt_msg_size);
-    uwb_write_tx_fctrl(rti->dev_inst, rt_msg_size, 0);
-    uwb_set_wait4resp(rti->dev_inst, false);
-
     uint64_t dx_time = tdma_tx_slot_start(rti->tdma, tdma_slot->idx) & 0xFFFFFFFFFE00UL;
-    uwb_set_delay_start(rti->dev_inst, dx_time);
-    if (uwb_start_tx(rti->dev_inst).start_tx_error) {
-        printf("BCN TX error\n");
-    }
+    UWB_TX(rti->dev_inst, rt_msg, rt_msg_size, dx_time);
 
     free(rt_msg);
 }
@@ -342,11 +322,15 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                 rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
                 rti->nodes[tdma_slot->idx].accepted = false;
             }else{
-                printf("Slot colission\n");
+                printf("Slot colission: %d\n", tdma_slot->idx);
+                if(rti->nodes[tdma_slot->idx].addr > ieee_std_frame_hdr->src_address){
+                    rti->nodes[tdma_slot->idx].addr = 0;
+                }
                 return;
             }
         }
         rti->nodes[tdma_slot->idx].available = true;
+        rti->nodes[tdma_slot->idx].timeout = 0;
 
         if(rti->dev_inst->rxbuf_size - sizeof(ieee_std_frame_hdr_t) < sizeof(msg_hdr_t)) return;
         
@@ -369,10 +353,10 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                 break;
                 case RT_LOCA_MSG:
                 {
-                    rt_loca_t *rt_bcn_norm_payload = (rt_loca_t *)(&rti->dev_inst->rxbuf[frame_idx]);
-                    rti->nodes[tdma_slot->idx].location_x = rt_bcn_norm_payload->location_x;
-                    rti->nodes[tdma_slot->idx].location_y = rt_bcn_norm_payload->location_y;
-                    rti->nodes[tdma_slot->idx].location_z = rt_bcn_norm_payload->location_z;
+                    rt_loca_t *rt_loca = (rt_loca_t *)(&rti->dev_inst->rxbuf[frame_idx]);
+                    rti->nodes[tdma_slot->idx].location_x = rt_loca->location_x;
+                    rti->nodes[tdma_slot->idx].location_y = rt_loca->location_y;
+                    rti->nodes[tdma_slot->idx].location_z = rt_loca->location_z;
 
                     rti->nodes[rti->slot_idx].slot_map |= (slot_map_t)1 << tdma_slot->idx;
                 }
@@ -383,6 +367,7 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                     rti->nodes[tdma_slot->idx].slot_map = rt_slot->slot_map;
 
                     rti->nodes[rti->slot_idx].slot_map |= (slot_map_t)1 << tdma_slot->idx;
+
                 }
                 default:
                 break;
@@ -434,7 +419,8 @@ svc_slot_cb(tdma_slot_t *tdma_slot){
         rt_slot->slot_map = (slot_map_t)-1;
         if(rti->role == RTR_ANCHOR){
             for(int i=1; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
-                if(!rti->nodes[i].available) continue;
+                /* Ignore if node is not available in this frame and my slot node*/
+                if(!rti->nodes[i].available) continue; 
                 rt_slot->slot_map &= ~rti->nodes[i].slot_map;
             }
             for(int i=1; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
@@ -448,7 +434,8 @@ svc_slot_cb(tdma_slot_t *tdma_slot){
         }
         else if(rti->role == RTR_TAG){
             for(int i=MYNEWT_VAL(UWB_BCN_SLOT_MAX) + 1; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
-                if(!rti->nodes[i].available) continue;
+                /* Ignore if node is not available in this frame and my slot node*/
+                if(!rti->nodes[i].available) continue; 
                 rt_slot->slot_map &= ~rti->nodes[i].slot_map;
             }
             for(int i=MYNEWT_VAL(UWB_BCN_SLOT_MAX) + 1; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
@@ -460,6 +447,9 @@ svc_slot_cb(tdma_slot_t *tdma_slot){
                 }
             }
         }
+        node_add(rti, rti->slot_idx, rti->dev_inst->my_short_address);
+        rti->nodes[rti->slot_idx].accepted = true;
+
         printf("RQT slot: %d\n", rti->slot_idx);
 
         for(int i=0; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
