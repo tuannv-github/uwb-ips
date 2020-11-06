@@ -220,6 +220,9 @@ superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
 
     rti->nodes[rti->slot_idx].available = true;
 
+    if(rti->slot_req){
+        rti->slot_req_cntr++;
+    }
     return false;
 }
 
@@ -247,6 +250,16 @@ void rtls_tdma_start(rtls_tdma_instance_t *rti, struct uwb_dev* udev){
     for (uint16_t i = 0; i < MYNEWT_VAL(TDMA_NSLOTS); i++){
         tdma_assign_slot(rti->tdma, slot_cb,  i, rti);
     }
+
+    rti->node_anchor_mask = 0;
+    for(int i = 1; i <= MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
+        rti->node_anchor_mask |= ((slot_map_t)1 << i);
+    }
+
+    rti->node_tag_mask = 0;
+    for(int i = MYNEWT_VAL(UWB_BCN_SLOT_MAX)+1; i < MYNEWT_VAL(TDMA_NSLOTS); i++){
+        rti->node_tag_mask |= ((slot_map_t)1 << i);
+    }
 }
 
 static void
@@ -257,6 +270,9 @@ bcn_slot_cb_mine(tdma_slot_t *tdma_slot){
     ieee_std_frame_hdr_t *ieee_std_frame_hdr;
     rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)tdma_slot->arg;
 
+    rt_slot_t *rt_slot = NULL;
+    rt_loca_t *rt_loca = NULL;
+
     rti->nodes[rti->slot_idx].slot_map |= (slot_map_t)1 << tdma_slot->idx;
 
     /* If I received a slot request, I will response for this request immediately */
@@ -266,7 +282,7 @@ bcn_slot_cb_mine(tdma_slot_t *tdma_slot){
         rt_msg = calloc(1, rt_msg_size);
         if(!rt_msg) return;
 
-        rt_slot_t *rt_slot = (rt_slot_t *)(rt_msg + sizeof(ieee_std_frame_hdr_t));
+        rt_slot = (rt_slot_t *)(rt_msg + sizeof(ieee_std_frame_hdr_t));
         rt_slot->msg_type = RT_ACPT_MSG;
         rt_slot->len = sizeof(struct _rt_slot_data_t);
         rt_slot->slot = tdma_slot->idx;
@@ -274,10 +290,6 @@ bcn_slot_cb_mine(tdma_slot_t *tdma_slot){
 
         if(rt_slot->slot_map == 0) {
             rti->slot_req = 0;
-            printf("Do not accept slot: 0x%02llx\n", rti->slot_req);
-        }
-        else{
-            printf("Accept slot: 0x%02llx/0x%02llx/0x%02llx\n", rti->nodes[rti->slot_idx].slot_map,  rti->slot_req, (~rti->nodes[rti->slot_idx].slot_map) & rti->slot_req);
         }
 
         ieee_std_frame_hdr = (ieee_std_frame_hdr_t *)rt_msg;
@@ -296,7 +308,7 @@ bcn_slot_cb_mine(tdma_slot_t *tdma_slot){
             rt_msg = calloc(1, rt_msg_size);
             if(!rt_msg) return;
 
-            rt_loca_t *rt_loca = (rt_loca_t *)(rt_msg + sizeof(ieee_std_frame_hdr_t));
+            rt_loca = (rt_loca_t *)(rt_msg + sizeof(ieee_std_frame_hdr_t));
             rt_loca->msg_type = RT_LOCA_MSG;
             rt_loca->len = sizeof(struct _rt_loca_data_t);
             rt_loca->slot = tdma_slot->idx;
@@ -309,7 +321,7 @@ bcn_slot_cb_mine(tdma_slot_t *tdma_slot){
             rt_msg = calloc(1, rt_msg_size);
             if(!rt_msg) return;
 
-            rt_slot_t *rt_slot = (rt_slot_t *)(rt_msg + sizeof(ieee_std_frame_hdr_t));
+            rt_slot = (rt_slot_t *)(rt_msg + sizeof(ieee_std_frame_hdr_t));
             rt_slot->msg_type = RT_SLOT_MSG;
             rt_slot->len = sizeof(struct _rt_slot_data_t);
             rt_slot->slot = tdma_slot->idx;
@@ -326,6 +338,10 @@ bcn_slot_cb_mine(tdma_slot_t *tdma_slot){
     ieee_std_frame_hdr->src_address = rti->tdma->dev_inst->my_short_address;
     
     UWB_TX(rti, rt_msg, rt_msg_size, tdma_slot->idx);
+
+    if(rt_slot && rti->slot_req != 0) {
+        printf("Accept slot: 0x%02llx/0x%02llx/0x%02llx\n", rti->nodes[rti->slot_idx].slot_map,  rti->slot_req, (~rti->nodes[rti->slot_idx].slot_map) & rti->slot_req);
+    }
 
     free(rt_msg);
 }
@@ -374,7 +390,7 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                         if(node_all_accepted(rti)){
                             node_add(rti, rti->slot_idx, rti->dev_inst->my_short_address);
                             rti->nodes[rti->slot_idx].accepted = true;
-                            printf("I has been accepted in slot: %d/%llx\n", rti->slot_idx, rt_slot->slot_map);
+                            printf("I has been accepted in slot: %d/0x%llx\n", rti->slot_idx, rt_slot->slot_map);
                         };
                     }
                 }
@@ -412,16 +428,22 @@ svc_slot_cb(tdma_slot_t *tdma_slot){
         if(rtls_tdma_slot_listen(rti, UWB_BLOCKING, tdma_slot->idx)){
             ieee_std_frame_hdr_t *ieee_std_frame_hdr = (ieee_std_frame_hdr_t *)rti->dev_inst->rxbuf;
             if(ieee_std_frame_hdr->PANID != rti->dev_inst->pan_id) return;
-            if(ieee_std_frame_hdr->dst_address != rti->dev_inst->my_short_address) return;
+            if(ieee_std_frame_hdr->dst_address != RT_BROADCAST_ADDR) return;
 
             if(rti->dev_inst->rxbuf_size - sizeof(ieee_std_frame_hdr_t) < sizeof(rt_slot_t)) return;
 
             rt_slot_t *rt_slot = (rt_slot_t *)(rti->dev_inst->rxbuf + sizeof(ieee_std_frame_hdr_t));
 
+            if(rti->slot_req && rti->slot_req_cntr > MYNEWT_VAL(RT_SLOT_REQT_TIMEOUT)){
+                printf("Node 0x%llx accept timout\n", rti->slot_req);
+                rti->slot_req = 0;
+                rti->slot_req_cntr = 0;
+            }
             /* Only receive first RT_REQT_MSG each svc slot */
             if(rti->slot_req == 0 && rt_slot->msg_type == RT_REQT_MSG){
                 printf("Recv slot reqt: 0x%llx\n", rti->slot_req);
                 rti->slot_req = rt_slot->slot_map;
+                rti->slot_req_cntr = 0;
                 rti->slot_req_addr = ieee_std_frame_hdr->src_address;
             }
         }
@@ -457,6 +479,7 @@ svc_slot_cb(tdma_slot_t *tdma_slot){
                     break;
                 }
             }
+            rt_slot->slot_map &= rti->node_anchor_mask;
         }
         else if(rti->role == RTR_TAG){
             for(int i=MYNEWT_VAL(UWB_BCN_SLOT_MAX) + 1; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
@@ -472,15 +495,15 @@ svc_slot_cb(tdma_slot_t *tdma_slot){
                     break;
                 }
             }
+            rt_slot->slot_map &= rti->node_tag_mask;
         }
-        printf("RQT slot: 0x%llx/%d\n", rt_slot->slot_map, rti->slot_idx);
 
-        for(int i=0; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
-            if(rti->nodes[i].addr != 0 && !rti->nodes[i].accepted && rti->nodes[i].available){
-                ieee_std_frame_hdr->dst_address = rti->nodes[i].addr;
-                UWB_TX(rti, rt_msg, rt_msg_size, tdma_slot->idx);
-            }
+        if(rt_slot->slot_map){
+            ieee_std_frame_hdr->dst_address = RT_BROADCAST_ADDR;
+            UWB_TX(rti, rt_msg, rt_msg_size, tdma_slot->idx);
         }
+
+        printf("RQT slot: 0x%llx/%d\n", rt_slot->slot_map, rti->slot_idx);
         free(rt_msg);
     }
 }

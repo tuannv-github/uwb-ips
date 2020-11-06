@@ -53,9 +53,13 @@ struct _rtls_tdma_instance_t {
     uint16_t slot_idx;                          //!< slot_idx != 0 means I have slot already
 
     slot_map_t  slot_req;
+    uint16_t    slot_req_cntr;
     uint16_t    slot_req_addr;
     
     rtls_tdma_cb_t rtls_tdma_cb;
+
+    slot_map_t node_anchor_mask;
+    slot_map_t node_tag_mask;
 
     rtls_tdma_node_t nodes[MYNEWT_VAL(TDMA_NSLOTS)]; // nodes[0] save my node info
 };
