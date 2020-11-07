@@ -171,7 +171,7 @@ ClassGenCCAutoRoomEnabled=1
 ClassGenNCAutoScope=None
 DItemRevisionGUID=
 GenerateClassCluster=0
-DocumentUniqueId=
+DocumentUniqueId=AIAYHBYS
 
 [Document9]
 DocumentPath=..\..\..\altium_lib\capacitor-smd.SchLib
@@ -409,7 +409,7 @@ ClassGenCCAutoRoomEnabled=1
 ClassGenNCAutoScope=None
 DItemRevisionGUID=
 GenerateClassCluster=0
-DocumentUniqueId=
+DocumentUniqueId=AOCDLXGJ
 
 [Document23]
 DocumentPath=..\..\..\altium_lib\header-connector.SchLib
@@ -954,6 +954,10 @@ ClassGenNCAutoScope=None
 DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=
+
+[GeneratedDocument1]
+DocumentPath=Project Outputs for rtls\Design Rule Check - rtls.html
+DItemRevisionGUID=
 
 [Configuration1]
 Name=Sources
