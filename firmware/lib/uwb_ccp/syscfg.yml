@@ -53,3 +53,6 @@ syscfg.defs:
     UWB_RX_TIMEOUT_THRESH:
         description: 'Number of rx timeout events in slave mode before turning into master mode'
         value: 20
+    CCP_MASTER_REQUEST:
+        description: 'Number master request blink before the node really change to master mode'
+        value: 100

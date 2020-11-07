@@ -157,6 +157,14 @@ struct uwb_ccp_config {
     uint16_t tx_holdoff_dly;          //!< Relay nodes holdoff
 };
 
+
+typedef enum{
+    CCP_SYNC_LOST,
+    CCP_SYNC_SYED
+}ccp_sync_t;
+
+typedef void (*uwb_ccp_sync_cb_t)(ccp_sync_t ccp_sync, void *arg);
+
 //! uwb_ccp instance parameters.
 struct uwb_ccp_instance {
     struct uwb_dev * dev_inst;                      //!< Pointer to struct uwb_dev
@@ -193,6 +201,8 @@ struct uwb_ccp_instance {
     struct dpl_event change_role_event;                 //!< Event used to change role
     uint64_t my_master;                                 //!< Address of network master
     bool master_role_request;                            //!< Request for master role has been sent
+    uwb_ccp_sync_cb_t uwb_ccp_sync_cb;                   //!< Ccp sync event callback
+    void *uwb_ccp_sync_arg;                              //!< Ccp sync event callback argument
     uwb_ccp_frame_t * frames[];                          //!< Buffers to uwb_ccp frames
 };
 
@@ -208,6 +218,7 @@ uint64_t uwb_ccp_skew_compensation_ui64(struct uwb_ccp_instance *ccp, uint64_t v
 dpl_float64_t uwb_ccp_skew_compensation_f64(struct uwb_ccp_instance *ccp,  dpl_float64_t value);
 
 void rtls_ccp_start(struct uwb_ccp_instance *ccp);
+void rtls_ccp_set_sync_cb(struct uwb_ccp_instance *ccp, uwb_ccp_sync_cb_t uwb_ccp_sync_cb, void *arg);
 
 /**
  * @}

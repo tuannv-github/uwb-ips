@@ -128,14 +128,11 @@ ccp_timer_init(struct uwb_ccp_instance *ccp, uwb_ccp_role_t role)
 
     dpl_cputime_timer_init(&ccp->timer, ccp_timer_irq, (void *) ccp);
 
-    /* Only reinitialise timer_event if not done */
-    // if (dpl_event_get_arg(&ccp->timer_event) != (void *) ccp) {
-        if (role == CCP_ROLE_MASTER){
-            dpl_event_init(&ccp->timer_event, ccp_master_timer_ev_cb, (void *) ccp);
-        } else {
-            dpl_event_init(&ccp->timer_event, ccp_slave_timer_ev_cb, (void *) ccp);
-        }
-    // }
+    if (role == CCP_ROLE_MASTER){
+        dpl_event_init(&ccp->timer_event, ccp_master_timer_ev_cb, (void *) ccp);
+    } else {
+        dpl_event_init(&ccp->timer_event, ccp_slave_timer_ev_cb, (void *) ccp);
+    }
     dpl_cputime_timer_relative(&ccp->timer, 0);
 }
 
@@ -235,12 +232,17 @@ ccp_slave_timer_ev_cb(struct dpl_event *ev)
     if (ccp->status.rx_timeout_error) {
         uwb_set_rx_timeout(inst, MYNEWT_VAL(UWB_CCP_LONG_RX_TO));
         ccp_listen(ccp, 0, UWB_BLOCKING);
-        ccp->rx_timeout_acc++;
-        printf("ccp->master_role_request: %d ccp->rx_timeout_acc: %d\n", ccp->master_role_request, ccp->rx_timeout_acc);
+
+        /* Timout time accumulated when rx timout error occurred */
+        if (ccp->status.rx_timeout_error) {
+            ccp->rx_timeout_acc++;
+        }
+
+        /* May change to master role if rx_timeout_acc reach thresh */
         if(ccp->rx_timeout_acc > MYNEWT_VAL(UWB_RX_TIMEOUT_THRESH) + inst->euid%MYNEWT_VAL(UWB_RX_TIMEOUT_THRESH)){
-            ccp->rx_timeout_acc = 0;
             ccp->config.role = CCP_ROLE_MASTER;
             dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
+            return;
         }
         goto reset_timer;
     }
@@ -289,6 +291,7 @@ reset_timer:
         /* No ccp received, reschedule immediately */
         rc = dpl_cputime_timer_relative(&ccp->timer, 0);
     } else {
+        /* Reset rx_timeout_acc each time received blink message */
         ccp->rx_timeout_acc = 0;
         /* ccp received ok, or close enough - reschedule for next ccp event */
         ccp->status.rx_timeout_error = 0;
@@ -308,7 +311,6 @@ reset_timer:
  * @param arg  Pointer to struct ccp_instance.
  * @return void
  */
-
 static void *
 ccp_task(void *arg)
 {
@@ -603,18 +605,9 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     struct uwb_ccp_instance * ccp = (struct uwb_ccp_instance *)cbs->inst_ptr;
 
     if (ccp->config.role == CCP_ROLE_MASTER && inst->fctrl_array[0] == FCNTL_IEEE_BLINK_CCP_64) {
-        uwb_ccp_frame_t *frame = (uwb_ccp_frame_t*)inst->rxbuf;
-        if (inst->frame_len >= sizeof(uwb_ccp_blink_frame_t) && inst->frame_len <= sizeof(frame->array)){
-            // if(frame->euid < inst->euid){
-                if(ccp->master_role_request) {
-                    ccp->master_role_request = false;
-                    printf("Be slave\n");
-                }
-                else{
-                    ccp->config.role = CCP_ROLE_SLAVE;
-                    dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
-                }
-            // }
+        if(ccp->master_role_request) {
+            ccp->master_role_request = false;
+            printf("\nCan not change to master mode");
         }
         return true;
     }
@@ -1115,11 +1108,19 @@ uwb_ccp_start(struct uwb_ccp_instance *ccp, uwb_ccp_role_t role)
     ccp->idx = 0x0;
     ccp->status.valid = false;
     ccp->master_euid = 0x0;
-    uwb_ccp_frame_t * frame = ccp->frames[(ccp->idx)%ccp->nframes];
-    ccp->config.role = role;
     ccp->status.enabled = 1;
-    ccp->rx_timeout_acc = 0;
-    ccp->my_master = 0;
+    ccp->config.role = role;
+    if(ccp->config.role == CCP_ROLE_SLAVE){
+        /* Reset rx_timeout_acc if change to ccp slave mode */
+        ccp->rx_timeout_acc = 0;
+        ccp->my_master = 0;
+        printf("CCP_ROLE_SLAVE\n");
+    }
+    else if(ccp->config.role == CCP_ROLE_MASTER){
+        printf("CCP_ROLE_MASTER\n");
+    }
+
+    uwb_ccp_frame_t * frame = ccp->frames[(ccp->idx)%ccp->nframes];
 
     /* Setup CCP to send/listen for the first packet ASAP */
     ccp->os_epoch = dpl_cputime_get32() - epoch_to_rm;
@@ -1156,9 +1157,11 @@ ccp_change_role(struct dpl_event * ev)
     struct uwb_dev * inst = ccp->dev_inst;
     uwb_ccp_stop(ccp);
 
-    printf("change role %d\n", ccp->config.role);
+    /* sync lost event */
+    if(ccp->uwb_ccp_sync_cb != NULL) ccp->uwb_ccp_sync_cb(CCP_SYNC_LOST, ccp->uwb_ccp_sync_arg);
+
     if(ccp->config.role == CCP_ROLE_MASTER && !ccp->master_role_request){
-        printf("ccp->master_role_rqted\n");
+
         uwb_ccp_frame_t frame;
         frame.fctrl = FCNTL_IEEE_BLINK_CCP_64;
         frame.rpt_count = 0;
@@ -1173,10 +1176,9 @@ ccp_change_role(struct dpl_event * ev)
         ccp->master_role_request = true;
 
         uint16_t cnt = 0;
-        while(cnt < 100 && ccp->master_role_request){
+        while(cnt < MYNEWT_VAL(CCP_MASTER_REQUEST) && ccp->master_role_request){
             cnt++;
-            printf("RX cnt: %d\n", cnt);
-
+            printf("\33[2K\rTry to be master time: %d", cnt);
             uwb_set_rx_timeout(inst, MYNEWT_VAL(UWB_CCP_LONG_RX_TO) + inst->euid%MYNEWT_VAL(UWB_CCP_LONG_RX_TO));
             ccp_listen(ccp, 0, UWB_BLOCKING);
 
@@ -1184,6 +1186,7 @@ ccp_change_role(struct dpl_event * ev)
             uwb_write_tx_fctrl(inst, sizeof(uwb_ccp_blink_frame_t), 0);
             uwb_start_tx(inst);
         }
+        printf(" \n");
 
         if(ccp->master_role_request){
             uwb_ccp_start(ccp, CCP_ROLE_MASTER);
@@ -1197,6 +1200,9 @@ ccp_change_role(struct dpl_event * ev)
         ccp->master_role_request = false;
         uwb_ccp_start(ccp, ccp->config.role);
     }
+
+    /* sync synced event */
+    if(ccp->uwb_ccp_sync_cb != NULL) ccp->uwb_ccp_sync_cb(CCP_SYNC_SYED, ccp->uwb_ccp_sync_arg);
 }
 
 void rtls_ccp_start(struct uwb_ccp_instance *ccp){
@@ -1207,6 +1213,12 @@ void rtls_ccp_start(struct uwb_ccp_instance *ccp){
     dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
 }
 EXPORT_SYMBOL(rtls_ccp_start);
+
+void rtls_ccp_set_sync_cb(struct uwb_ccp_instance *ccp, uwb_ccp_sync_cb_t uwb_ccp_sync_cb, void *arg){
+    ccp->uwb_ccp_sync_cb = uwb_ccp_sync_cb;
+    ccp->uwb_ccp_sync_arg = arg;
+}
+EXPORT_SYMBOL(rtls_ccp_set_sync_cb);
 
 /**
  * @fn ccp_stop(struct ccp_instance * inst)
@@ -1254,7 +1266,6 @@ dpl_float64_t uwb_ccp_skew_compensation_f64(struct uwb_ccp_instance *ccp,  dpl_f
 #endif
     return value;
 }
-
 
 /**
  * @fn uwb_ccp_pkg_init(void)
