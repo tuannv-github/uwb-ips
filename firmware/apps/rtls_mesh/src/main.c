@@ -26,13 +26,11 @@
 #include "bsp/bsp.h"
 #include "shell/shell.h"
 
-#include "rtls_sw/ble_mesh.h"
+#include "rtls_sw/ble_mesh/ble_mesh.h"
 
 int
 main(int argc, char **argv)
 {
-
-    /* Initialize OS */
     sysinit();
 
     ble_mesh_init();

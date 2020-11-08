@@ -13,10 +13,10 @@
 #include "services/gap/ble_svc_gap.h"
 #include "mesh/glue.h"
 
-#include "rtls_sw/ble_mesh.h"
-#include "rtls_sw/model.h"
+#include <rtls_sw/ble_mesh/ble_mesh.h>
+#include <rtls_sw/ble_mesh/model.h>
 
-static const uint8_t g_dev_uuid[16] = MYNEWT_VAL(BLE_MESH_DEV_UUID);
+// static const uint8_t g_dev_uuid[16] = MYNEWT_VAL(BLE_MESH_DEV_UUID);
 
 /* Element definition */
 static struct bt_mesh_elem g_elements[] = {
@@ -44,7 +44,7 @@ static void prov_complete(u16_t net_idx, u16_t addr)
 }
 
 static const struct bt_mesh_prov prov = {
-    .uuid = g_dev_uuid,
+    // .uuid = g_dev_uuid,
     .output_size = 4,
     .output_actions = BT_MESH_DISPLAY_NUMBER | BT_MESH_BEEP | BT_MESH_VIBRATE | BT_MESH_BLINK,
     .output_number = output_number,
@@ -54,7 +54,7 @@ static const struct bt_mesh_prov prov = {
 static void
 blemesh_on_reset(int reason)
 {
-    BLE_HS_LOG(ERROR, "Resetting state; reason=%d\n", reason);
+    printf("Resetting state; reason=%d\n", reason);
 }
 
 static void
@@ -95,5 +95,5 @@ void ble_mesh_init(){
     ble_hs_cfg.sync_cb = blemesh_on_sync;
     ble_hs_cfg.store_status_cb = ble_store_util_status_rr;
 
-    mode_sw_init();
+    model_sw_init();
 }

@@ -8,7 +8,11 @@
 		"files.associations": {
 			"type_traits": "cpp",
 			"cmath": "cpp",
-			"limits": "cpp"
+			"limits": "cpp",
+			"functional": "c",
+			"array": "cpp",
+			"string": "cpp",
+			"string_view": "cpp"
 		}
 	}
 }

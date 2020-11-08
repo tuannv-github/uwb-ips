@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-pkg.name: apps/rtls_se
+pkg.name: apps/rtls_mesh
 pkg.type: app
 pkg.description: Sample application for BLE Mesh node with on/off model
 pkg.author: "Łukasz Rymanowski <lukasz.rymanowski@codecoup.pl>"
@@ -35,3 +35,5 @@ pkg.deps:
     - "@apache-mynewt-nimble/nimble/host/services/gatt"
     - "@apache-mynewt-nimble/nimble/host/store/ram"
     - "@apache-mynewt-nimble/nimble/transport/ram"
+
+    - "@rtls/lib/button"

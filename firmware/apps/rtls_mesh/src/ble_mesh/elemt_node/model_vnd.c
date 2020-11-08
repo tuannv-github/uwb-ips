@@ -13,7 +13,8 @@
 #include "services/gap/ble_svc_gap.h"
 #include "mesh/glue.h"
 
-#include <rtls_sw/model.h>
+#include <rtls_sw/ble_mesh/model.h>
+#include <rtls_sw/ble_mesh/ble_mesh.h>
 
 static struct bt_mesh_model_pub vnd_model_pub;
 
@@ -46,3 +47,7 @@ static const struct bt_mesh_model_op vnd_model_op[] = {
 struct bt_mesh_model model_vnd[1] = {
     BT_MESH_MODEL_VND(CID_VENDOR, BT_MESH_MODEL_ID_GEN_ONOFF_SRV, vnd_model_op, &vnd_model_pub, NULL),
 };
+
+void model_vnd_init(){
+    
+}

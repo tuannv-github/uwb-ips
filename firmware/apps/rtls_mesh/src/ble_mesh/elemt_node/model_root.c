@@ -13,7 +13,7 @@
 #include "services/gap/ble_svc_gap.h"
 #include "mesh/glue.h"
 
-#include <rtls_sw/model.h>
+#include <rtls_sw/ble_mesh/model.h>
 
 static struct bt_mesh_cfg_srv cfg_srv = {
     .relay = BT_MESH_RELAY_DISABLED,
@@ -96,3 +96,7 @@ struct bt_mesh_model model_root[3] = {
     BT_MESH_MODEL(BT_MESH_MODEL_ID_GEN_BATTERY_SRV, gen_batty_op, &gen_batty_pub, NULL),
     BT_MESH_MODEL(BT_MESH_MODEL_ID_GEN_ONOFF_SRV, gen_level_op, &gen_level_pub, NULL),
 };
+
+void model_root_init(){
+    
+}
