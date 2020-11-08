@@ -8,11 +8,11 @@ typedef struct _button_arg_t
 {
     struct _button_t *button;
     int pin;
-    hal_gpio_irq_trig_t hal_gpio_irq_trig;
 
     struct hal_timer *timer;
     struct dpl_event *event;
     button_handler_t handler;
+    int state;
     void *arg;
 }button_arg_t;
 
@@ -27,6 +27,7 @@ static button_t g_button;
 
 void button_irq_handler(void *arg){
     button_arg_t *button_arg = (button_arg_t *)arg;
+    button_arg->state = hal_gpio_read(button_arg->pin);
     dpl_cputime_timer_relative(button_arg->timer, MYNEWT_VAL(BUTTON_DEBOUNCE_US));
 }
 
@@ -34,16 +35,8 @@ static void
 btn_timer_irq(void * arg){
     button_arg_t *button_arg = (button_arg_t *)arg;
     int val = hal_gpio_read(button_arg->pin);
-    switch (button_arg->hal_gpio_irq_trig)
-    {
-    case HAL_GPIO_TRIG_RISING:
-        if(val == 1) dpl_eventq_put(&button_arg->button->eventq, button_arg->event);
-        break;
-    case HAL_GPIO_TRIG_FALLING:
-        if(val == 0) dpl_eventq_put(&button_arg->button->eventq, button_arg->event);
-        break;
-    default:
-        break;
+    if(button_arg->state == val){
+        dpl_eventq_put(&button_arg->button->eventq, button_arg->event);
     }
 }
 
@@ -64,7 +57,6 @@ button_init(int pin, button_handler_t handler, void *arg,
     g_button.button_arg[pin].button = &g_button;
     g_button.button_arg[pin].pin = pin;
 
-    g_button.button_arg[pin].hal_gpio_irq_trig = trig;
     g_button.button_arg[pin].arg = arg;
     g_button.button_arg[pin].handler = handler;
 
