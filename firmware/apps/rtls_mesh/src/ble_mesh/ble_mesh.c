@@ -12,16 +12,18 @@
 #include "host/ble_hs.h"
 #include "services/gap/ble_svc_gap.h"
 #include "mesh/glue.h"
+#include <controller/ble_hw.h>
 
 #include <rtls_sw/ble_mesh/ble_mesh.h>
 #include <rtls_sw/ble_mesh/model.h>
 
-// static const uint8_t g_dev_uuid[16] = MYNEWT_VAL(BLE_MESH_DEV_UUID);
+static uint8_t g_dev_uuid[16] = MYNEWT_VAL(BLE_MESH_DEV_UUID);
 
 /* Element definition */
 static struct bt_mesh_elem g_elements[] = {
     BT_MESH_ELEM(0, model_root, model_vnd),
     BT_MESH_ELEM(0, model_sw, BT_MESH_MODEL_NONE),
+    BT_MESH_ELEM(0, model_lb, BT_MESH_MODEL_NONE),
 };
 
 /* Node definition */
@@ -44,7 +46,7 @@ static void prov_complete(u16_t net_idx, u16_t addr)
 }
 
 static const struct bt_mesh_prov prov = {
-    // .uuid = g_dev_uuid,
+    .uuid = g_dev_uuid,
     .output_size = 4,
     .output_actions = BT_MESH_DISPLAY_NUMBER | BT_MESH_BEEP | BT_MESH_VIBRATE | BT_MESH_BLINK,
     .output_number = output_number,
@@ -62,7 +64,6 @@ blemesh_on_sync(void)
 {
     int err;
     ble_addr_t addr;
-
     console_printf("Bluetooth initialized\n");
 
     /* Use NRPA */
@@ -71,6 +72,23 @@ blemesh_on_sync(void)
     err = ble_hs_id_set_rnd(addr.val);
     assert(err == 0);
 
+    ble_hw_get_public_addr(&addr);
+
+    printf("HW address: ");
+    for(int i=0; i<6; i++){
+        printf("0x%02x ", addr.val[i]);
+    }
+    printf(" \n");
+
+    uint8_t *uuid = (uint8_t *)prov.uuid;
+    memcpy(uuid, addr.val, 6);
+
+    printf("UUID: ");
+    for(int i=0; i<16; i++){
+        printf("0x%02x ", prov.uuid[i]);
+    }
+    printf(" \n");
+    
     err = bt_mesh_init(addr.type, &prov, &g_comp);
     if (err) {
         console_printf("Initializing mesh failed (err %d)\n", err);
@@ -96,4 +114,5 @@ void ble_mesh_init(){
     ble_hs_cfg.store_status_cb = ble_store_util_status_rr;
 
     model_sw_init();
+    model_lb_init();
 }

@@ -15,7 +15,8 @@
 extern struct bt_mesh_model model_root[3];
 extern struct bt_mesh_model model_vnd[1];
 
-struct bt_mesh_model model_sw[1];
+extern struct bt_mesh_model model_sw[1];
+extern struct bt_mesh_model model_lb[1];
 
 void model_sw_init();
 

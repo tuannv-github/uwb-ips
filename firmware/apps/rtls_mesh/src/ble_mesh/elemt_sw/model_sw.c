@@ -101,7 +101,7 @@ app_event_fn(struct dpl_event *ev){
 
 void model_sw_init(){
     button_init(BUTTON_2, button_handler, &app_sw, HAL_GPIO_TRIG_FALLING, HAL_GPIO_PULL_UP);
-    model_sw->pub->msg = NET_BUF_SIMPLE(3);
+    model_sw->pub->msg = NET_BUF_SIMPLE(2+1);
 
     app_sw.model = &model_sw[0];
 
