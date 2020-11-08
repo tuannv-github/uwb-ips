@@ -24,3 +24,35 @@ newt build rtls_sw
 newt create-image rtls_sw 0.0.0.0
 newt load rtls_sw
 ```
+
+```
+newt target create blemesh
+newt target set blemesh app=@apache-mynewt-nimble/apps/blemesh
+newt target set blemesh bsp=@apache-mynewt-core/hw/bsp/nordic_pca10040
+newt target set blemesh build_profile=optimized
+
+newt target set blemesh syscfg=BLE_MESH_PB_GATT=1:BLE_MESH_DEV_UUID='(uint8_t[16]){0x22, 0x20, 0}'
+newt target set blemesh syscfg=BLE_MESH_PB_GATT=1:BLE_MESH_DEV_UUID='(uint8_t[16]){0x22, 0x21, 0}'
+
+newt build blemesh
+newt create-image blemesh 0.0.0.0
+newt load blemesh
+```
+
+```
+newt target create blemesh
+newt target set blemesh app=@apache-mynewt-nimble/apps/blemesh
+newt target set blemesh bsp=hw/bsp/dwm1001_232
+newt target set blemesh build_profile=optimized
+
+newt target set blemesh syscfg=BLE_MESH_PB_GATT=1:BLE_MESH_DEV_UUID='(uint8_t[16]){0x22, 0x20, 0}'
+newt target set blemesh syscfg=BLE_MESH_PB_GATT=1:BLE_MESH_DEV_UUID='(uint8_t[16]){0x22, 0x21, 0}'
+
+newt build blemesh
+newt create-image blemesh 0.0.0.0
+newt load blemesh
+```
+
+```
+newt load blemesh --extrajtagcmd "-select USB=760085863" 
+```

@@ -94,6 +94,4 @@ void ble_mesh_init(){
     ble_hs_cfg.reset_cb = blemesh_on_reset;
     ble_hs_cfg.sync_cb = blemesh_on_sync;
     ble_hs_cfg.store_status_cb = ble_store_util_status_rr;
-
-    mode_sw_init();
 }

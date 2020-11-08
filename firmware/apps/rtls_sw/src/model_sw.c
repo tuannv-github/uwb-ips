@@ -45,12 +45,3 @@ struct bt_mesh_model model_sw[1] = {
     BT_MESH_MODEL(BT_MESH_MODEL_ID_GEN_ONOFF_CLI, gen_onoff_op, &gen_onoff_pub, NULL),
 };
 
-void handler(void *arg){
-    console_printf("BTN 1 click\n");
-}
-
-void mode_sw_init(){
-    hal_gpio_init_in(BUTTON_1, HAL_GPIO_PULL_NONE);
-    hal_gpio_irq_init(BUTTON_1, handler, NULL, HAL_GPIO_TRIG_FALLING, HAL_GPIO_PULL_NONE);
-    hal_gpio_irq_enable(BUTTON_1);
-}
