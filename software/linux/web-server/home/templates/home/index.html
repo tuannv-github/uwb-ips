@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="{% static '/home/chartjs/Chart.min.css' %}"/>
     <script src="{% static '/home/chartjs/Chart.min.js' %}"></script>
 
+	<!-- <script src="{% static '/home/paho.javascript-1.1.0/paho-mqtt-min.js' %}"></script> -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
+
     <style>
         canvas{
             -moz-user-select: none;
@@ -28,7 +31,7 @@
             flex-wrap: wrap;
             justify-content: center;
         }
-        </style>
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-light bg-light" style="background-color: #e3f2fd;">
@@ -49,68 +52,68 @@
         </div>
     </div>
 </body>
-    <script>
-		function createConfig(pointStyle) {
-			return {
-				type: 'line',
-				data: {
-					labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-					datasets: [{
-						label: 'My First dataset',
-						backgroundColor: window.chartColors.red,
-						borderColor: window.chartColors.red,
-						data: [10, 23, 5, 99, 67, 43, 0],
-						fill: false,
-						pointRadius: 10,
-						pointHoverRadius: 15,
-						showLine: false // no line shown
-					}]
+<script>
+	function createConfig(pointStyle) {
+		return {
+			type: 'line',
+			data: {
+				labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+				datasets: [{
+					label: 'My First dataset',
+					backgroundColor: window.chartColors.red,
+					borderColor: window.chartColors.red,
+					data: [10, 23, 5, 99, 67, 43, 0],
+					fill: false,
+					pointRadius: 10,
+					pointHoverRadius: 15,
+					showLine: false // no line shown
+				}]
+			},
+			options: {
+				responsive: true,
+				title: {
+					display: true,
+					text: 'Point Style: ' + pointStyle
 				},
-				options: {
-					responsive: true,
-					title: {
-						display: true,
-						text: 'Point Style: ' + pointStyle
-					},
-					legend: {
-						display: false
-					},
-					elements: {
-						point: {
-							pointStyle: pointStyle
-						}
+				legend: {
+					display: false
+				},
+				elements: {
+					point: {
+						pointStyle: pointStyle
 					}
 				}
-			};
-		}
-
-		window.onload = function() {
-			var container = document.querySelector('.chart');
-			[
-				'circle',
-				'triangle',
-				'rect',
-				'rectRounded',
-				'rectRot',
-				'cross',
-				'crossRot',
-				'star',
-				'line',
-				'dash'
-			].forEach(function(pointStyle) {
-				var div = document.createElement('div');
-				div.classList.add('chart-container');
-
-				var canvas = document.createElement('canvas');
-				div.appendChild(canvas);
-				container.appendChild(div);
-
-				var ctx = canvas.getContext('2d');
-				var config = createConfig(pointStyle);
-				new Chart(ctx, config);
-			});
+			}
 		};
-	</script>
+	}
+
+	window.onload = function() {
+		var container = document.querySelector('.chart');
+		[
+			'circle',
+			'triangle',
+			'rect',
+			'rectRounded',
+			'rectRot',
+			'cross',
+			'crossRot',
+			'star',
+			'line',
+			'dash'
+		].forEach(function(pointStyle) {
+			var div = document.createElement('div');
+			div.classList.add('chart-container');
+
+			var canvas = document.createElement('canvas');
+			div.appendChild(canvas);
+			container.appendChild(div);
+
+			var ctx = canvas.getContext('2d');
+			var config = createConfig(pointStyle);
+			new Chart(ctx, config);
+		});
+	};
+</script>
 <script>
     'use strict';
 
@@ -259,5 +262,32 @@ window.chartColors = {
 	/* eslint-enable */
 
 }(this));
+</script>
+<script>
+
+client = new Paho.MQTT.Client(location.hostname, Number(8080), "clientId");
+client.onConnectionLost = onConnectionLost;
+client.onMessageArrived = onMessageArrived;
+client.connect({onSuccess:onConnect});
+
+function onConnect() {
+  console.log("onConnect");
+  client.subscribe("location_evt");
+}
+
+function onFail(){
+	console.log("onFail");
+}
+
+function onConnectionLost(responseObject) {
+  if (responseObject.errorCode !== 0) {
+    console.log("onConnectionLost:"+responseObject.errorMessage);
+  }
+}
+
+function onMessageArrived(message) {
+  console.log("onMessageArrived:"+message.payloadString);
+}
+
 </script>
 </html>
