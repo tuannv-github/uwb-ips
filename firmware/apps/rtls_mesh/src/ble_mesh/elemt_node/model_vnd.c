@@ -13,8 +13,13 @@
 #include "services/gap/ble_svc_gap.h"
 #include "mesh/glue.h"
 
-#include <rtls_sw/ble_mesh/model.h>
-#include <rtls_sw/ble_mesh/ble_mesh.h>
+#include <rtls_mesh/ble_mesh/model.h>
+#include <rtls_mesh/ble_mesh/ble_mesh.h>
+
+
+#define STANDARD_TEST_ID    0x00
+#define TEST_ID             0x01
+#define FAULT_ARR_SIZE      2
 
 static struct bt_mesh_model_pub vnd_model_pub;
 

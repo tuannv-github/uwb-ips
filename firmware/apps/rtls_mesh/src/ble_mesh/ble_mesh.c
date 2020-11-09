@@ -14,8 +14,8 @@
 #include "mesh/glue.h"
 #include <controller/ble_hw.h>
 
-#include <rtls_sw/ble_mesh/ble_mesh.h>
-#include <rtls_sw/ble_mesh/model.h>
+#include <rtls_mesh/ble_mesh/ble_mesh.h>
+#include <rtls_mesh/ble_mesh/model.h>
 
 static uint8_t g_dev_uuid[16] = MYNEWT_VAL(BLE_MESH_DEV_UUID);
 
@@ -113,6 +113,7 @@ void ble_mesh_init(){
     ble_hs_cfg.sync_cb = blemesh_on_sync;
     ble_hs_cfg.store_status_cb = ble_store_util_status_rr;
 
+    model_root_init();
     model_sw_init();
     model_lb_init();
 }

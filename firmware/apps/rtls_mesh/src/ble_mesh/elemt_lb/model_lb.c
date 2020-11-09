@@ -13,8 +13,8 @@
 #include "services/gap/ble_svc_gap.h"
 #include "mesh/glue.h"
 
-#include <rtls_sw/ble_mesh/model.h>
-#include <rtls_sw/ble_mesh/ble_mesh.h>
+#include <rtls_mesh/ble_mesh/model.h>
+#include <rtls_mesh/ble_mesh/ble_mesh.h>
 
 /* Model Operation Codes */
 #define BT_MESH_MODEL_OP_GEN_ONOFF_GET			BT_MESH_MODEL_OP_2(0x82, 0x01)

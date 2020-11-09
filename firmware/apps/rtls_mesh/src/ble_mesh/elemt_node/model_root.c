@@ -1,19 +1,25 @@
 #include <assert.h>
-#include "os/mynewt.h"
-#include "mesh/mesh.h"
-#include "console/console.h"
-#include "hal/hal_system.h"
-#include "hal/hal_gpio.h"
-#include "bsp/bsp.h"
-#include "shell/shell.h"
+#include <dpl/dpl.h>
+#include <hal/hal_gpio.h>
+#include <bsp/bsp.h>
 
 /* BLE */
+#include "mesh/mesh.h"
 #include "nimble/ble.h"
 #include "host/ble_hs.h"
 #include "services/gap/ble_svc_gap.h"
 #include "mesh/glue.h"
 
-#include <rtls_sw/ble_mesh/model.h>
+#include <rtls_mesh/ble_mesh/model.h>
+#include <rtls_mesh/ble_mesh/mesh_msg.h>
+
+typedef struct _app_root_t{ 
+    struct dpl_sem sem;  
+    bool running;     
+    struct dpl_task task;            
+    dpl_stack_t task_stack[MYNEWT_VAL(APP_ROOT_TASK_STACK_SZ)];
+    struct bt_mesh_model *model;
+}app_root_t;
 
 static struct bt_mesh_cfg_srv cfg_srv = {
     .relay = BT_MESH_RELAY_DISABLED,
@@ -34,22 +40,22 @@ static struct bt_mesh_cfg_srv cfg_srv = {
     .net_transmit = BT_MESH_TRANSMIT(2, 20),
     .relay_retransmit = BT_MESH_TRANSMIT(2, 20),
 };
+static app_root_t g_app_root;
 
 static void gen_onoff_get(struct bt_mesh_model *model,
               struct bt_mesh_msg_ctx *ctx,
               struct os_mbuf *buf)
 {
-    console_printf("#mesh-onoff GET\n");
+    printf("#mesh-onoff GET\n");
+    struct os_mbuf *msg = NET_BUF_SIMPLE(2+1);
+    msg_onoff_t msg_onoff;
+    msg_onoff.value = g_app_root.running;
 
-    struct os_mbuf *msg = NET_BUF_SIMPLE(3);
-    uint8_t *status;
-
-    bt_mesh_model_msg_init(msg, BT_MESH_MODEL_OP_2(0x82, 0x04));
-    status = net_buf_simple_add(msg, 1);
-    *status = !hal_gpio_read(LED_2);
+    bt_mesh_model_msg_init(msg, BT_MESH_MODEL_OP_GEN_ONOFF_STATUS);
+    msg_prepr_onoff(msg, &msg_onoff);
 
     if (bt_mesh_model_send(model, ctx, msg, NULL, NULL)) {
-        console_printf("#mesh-onoff STATUS: send status failed\n");
+        printf("#mesh-onoff STATUS: send status failed\n");
     }
 
     os_mbuf_free_chain(msg);
@@ -59,44 +65,97 @@ static void gen_onoff_set_unack(struct bt_mesh_model *model,
                 struct bt_mesh_msg_ctx *ctx,
                 struct os_mbuf *buf)
 {
-    uint8_t value = net_buf_simple_pull_u8(buf);
-    console_printf("#mesh-onoff SET-UNACK %d\n", value);
+    msg_onoff_t msg_onoff;
+    msg_parse_onoff(buf, &msg_onoff);
 
-    hal_gpio_write(LED_2, !value);
+    if(msg_onoff.value){
+        dpl_sem_release(&g_app_root.sem);
+        g_app_root.running = true;
+    }
+    else{
+        g_app_root.running = false;
+    }
 }
 
 static void gen_onoff_set(struct bt_mesh_model *model,
               struct bt_mesh_msg_ctx *ctx,
               struct os_mbuf *buf)
 {
-    console_printf("#mesh-onoff SET\n");
+    printf("#mesh-onoff SET\n");
     gen_onoff_set_unack(model, ctx, buf);
 	gen_onoff_get(model, ctx, buf);
 }
 
-static const struct bt_mesh_model_op gen_level_op[] = {
+static const struct bt_mesh_model_op gen_onoff_op[] = {
     { BT_MESH_MODEL_OP_2(0x82, 0x01), 0, gen_onoff_get },
-    { BT_MESH_MODEL_OP_2(0x82, 0x02), 2, gen_onoff_set },
-    { BT_MESH_MODEL_OP_2(0x82, 0x03), 2, gen_onoff_set_unack },
+    { BT_MESH_MODEL_OP_2(0x82, 0x02), 0, gen_onoff_set },
+    { BT_MESH_MODEL_OP_2(0x82, 0x03), 0, gen_onoff_set_unack },
     BT_MESH_MODEL_OP_END,
 };
 
 static const struct bt_mesh_model_op gen_batty_op[] = {
-    { BT_MESH_MODEL_OP_2(0x82, 0x01), 0, gen_onoff_get },
-    { BT_MESH_MODEL_OP_2(0x82, 0x02), 2, gen_onoff_set },
-    { BT_MESH_MODEL_OP_2(0x82, 0x03), 2, gen_onoff_set_unack },
     BT_MESH_MODEL_OP_END,
 };
 
 static struct bt_mesh_model_pub gen_batty_pub;
-static struct bt_mesh_model_pub gen_level_pub;
+static struct bt_mesh_model_pub gen_onoff_pub;
 
 struct bt_mesh_model model_root[3] = {
     BT_MESH_MODEL_CFG_SRV(&cfg_srv),
     BT_MESH_MODEL(BT_MESH_MODEL_ID_GEN_BATTERY_SRV, gen_batty_op, &gen_batty_pub, NULL),
-    BT_MESH_MODEL(BT_MESH_MODEL_ID_GEN_ONOFF_SRV, gen_level_op, &gen_level_pub, NULL),
+    BT_MESH_MODEL(BT_MESH_MODEL_ID_GEN_ONOFF_SRV, gen_onoff_op, &gen_onoff_pub, NULL),
 };
 
+static void *
+task(void *arg)
+{
+    app_root_t *app_root = (app_root_t *)arg;
+    // bool value = 0;
+
+    while (1) {
+        dpl_sem_pend(&app_root->sem, DPL_TIMEOUT_NEVER);
+
+        // value = !value;
+        dpl_time_delay(dpl_time_ms_to_ticks32(200));
+        hal_gpio_write(LED_1, 0);
+        dpl_time_delay(dpl_time_ms_to_ticks32(200));
+        hal_gpio_write(LED_4, 0);
+        dpl_time_delay(dpl_time_ms_to_ticks32(200));
+        hal_gpio_write(LED_3, 0);
+        dpl_time_delay(dpl_time_ms_to_ticks32(200));
+        hal_gpio_write(LED_2, 0);
+        dpl_time_delay(dpl_time_ms_to_ticks32(200));
+
+        hal_gpio_write(LED_1, 1);
+        hal_gpio_write(LED_2, 1);
+        hal_gpio_write(LED_3, 1);
+        hal_gpio_write(LED_4, 1);
+
+        dpl_sem_release(&app_root->sem);
+        if(!app_root->running) {
+            dpl_sem_pend(&app_root->sem, DPL_TIMEOUT_NEVER);
+            hal_gpio_init_out(LED_1, 1);
+            hal_gpio_init_out(LED_2, 1);
+            hal_gpio_init_out(LED_3, 1);
+            hal_gpio_init_out(LED_4, 1);
+        }
+    }
+    return NULL;
+}
+
 void model_root_init(){
-    
+    hal_gpio_init_out(LED_1, 1);
+    hal_gpio_init_out(LED_2, 1);
+    hal_gpio_init_out(LED_3, 1);
+    hal_gpio_init_out(LED_4, 1);
+
+    dpl_sem_init(&g_app_root.sem, 0x00);
+
+    dpl_task_init(&g_app_root.task, "app_root",
+                    task,
+                    (void *)&g_app_root,
+                    MYNEWT_VAL(APP_ROOT_TASK_PRIORITY), 
+                    DPL_WAIT_FOREVER,
+                    g_app_root.task_stack,
+                    MYNEWT_VAL(APP_ROOT_TASK_STACK_SZ));
 }

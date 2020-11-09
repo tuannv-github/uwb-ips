@@ -13,15 +13,9 @@
 #include "services/gap/ble_svc_gap.h"
 #include "mesh/glue.h"
 
-#include <rtls_sw/ble_mesh/model.h>
-#include <rtls_sw/ble_mesh/ble_mesh.h>
+#include <rtls_mesh/ble_mesh/model.h>
+#include <rtls_mesh/ble_mesh/ble_mesh.h>
 #include <button/button.h>
-
-/* Model Operation Codes */
-#define BT_MESH_MODEL_OP_GEN_ONOFF_GET			BT_MESH_MODEL_OP_2(0x82, 0x01)
-#define BT_MESH_MODEL_OP_GEN_ONOFF_SET			BT_MESH_MODEL_OP_2(0x82, 0x02)
-#define BT_MESH_MODEL_OP_GEN_ONOFF_SET_UNACK	BT_MESH_MODEL_OP_2(0x82, 0x03)
-#define BT_MESH_MODEL_OP_GEN_ONOFF_STATUS		BT_MESH_MODEL_OP_2(0x82, 0x04)
 
 typedef struct _app_sw_t{
     struct dpl_eventq eventq;
@@ -91,7 +85,7 @@ app_event_fn(struct dpl_event *ev){
 	printf("publish to 0x%04x onoff %d\n", pub_cli->addr, app_sw->state);
 
 	bt_mesh_model_msg_init(pub_cli->msg, BT_MESH_MODEL_OP_GEN_ONOFF_SET);
-	net_buf_simple_add_u8(pub_cli->msg, app_sw->state);
+
 
 	int err = bt_mesh_model_publish(model_sw);
 	if (err) {
