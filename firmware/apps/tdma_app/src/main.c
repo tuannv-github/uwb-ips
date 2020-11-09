@@ -4,7 +4,9 @@
 #include <uwb/uwb.h>
 #include <rtls_tdma/rtls_tdma.h>
 
-rtls_tdma_instance_t rtls_tdma_instance;
+rtls_tdma_instance_t rtls_tdma_instance = {
+    .role = RTR_ANCHOR
+}
 
 int main(int argc, char **argv){
     int rc;

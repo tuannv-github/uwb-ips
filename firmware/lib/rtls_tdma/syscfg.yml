@@ -1,19 +1,19 @@
 syscfg.defs:
   UWB_BCN_SLOT_MAX:
     description: 'BCN slot is slot from 1 to UWB_BCN_SLOT_MAX, slot 0 is used for ccp'
-    value: 7
+    value: 5
   UWB_SVC_SLOT:
     description: 'SVC slot index'
-    value: 8
+    value: 6
   RT_JOINT_LIST_THRESH:
     description: 'Number of listen times of each anchor before change to next state'
     value: 2
   RT_MASTER_SLOT:
     description: 'BCN slot for master'
     value: 1
-  RT_BCN_REQT_THRESH:
+  RT_SLOT_REQT_TIMEOUT:
     description: 'Timeout for slot reqt'
-    value: 2
+    value: 5
   RT_ANCHOR_TIMEOUT:
     description: 'Number of supper frame anchor do not send BCN message before it is removed from the list'
     value: 10
