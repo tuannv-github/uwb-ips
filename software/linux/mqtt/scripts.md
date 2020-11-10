@@ -59,3 +59,7 @@ protocol websockets
 ```
 /usr/sbin/mosquitto -c /etc/mosquitto/mosquitto.conf
 ```
+
+```
+socat -d -d pty,raw,echo=0 pty,raw,echo=0
+```
