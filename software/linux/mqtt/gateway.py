@@ -10,7 +10,7 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(config.LOCATION_CMD_TOPIC)
 
 def on_message(client, userdata, msg):
-    print("NET->BLE: " + msg.payload.decode("utf-8"))
+    print("NET->BLE: " + config.LOCATION_EVT_TOPIC + ": " + msg.payload.decode("utf-8"))
     serial.write(msg.payload + b'\n')
 
 client.on_connect = on_connect
@@ -29,7 +29,7 @@ def loop_serial():
             line  = byteline[:-2].decode("utf-8")
         else:
             line  = byteline[:-1].decode("utf-8")
-        print("BLE->NET: " + line)
+        print("BLE->NET: " + config.LOCATION_EVT_TOPIC + ": "+ line)
         client.publish(config.LOCATION_EVT_TOPIC, line)
 
 thread_mqtt = threading.Thread(target=loop_mqtt)
