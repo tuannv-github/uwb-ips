@@ -237,6 +237,7 @@ class Node{
 		this.type = type;
 		this.location = location;
 		this.editing = false;
+		this.identifying = false;
 	}
 	valueOf(){
     	return this.address;
@@ -343,8 +344,11 @@ const nodeTemplate = ({ address, type, locationX, locationY, locationZ}) =>
                     <option>TAG</option>
                 </select>
             </div>
-            <div class="row col-sm-12 no-gutters pt-1">
-                <label class="col-sm-3 no-gutters col-form-label">Location</label>
+			<div class="row col-sm-12 no-gutters pt-1">
+				<div class="col-sm-3 no-gutters col-form-label">
+					<div><label>Location</label></div>
+					<div class="spinner-grow spinner-grow-sm text-info p-1" role="status" style="display: none;" id="node${address}Identifying"></div>
+				</div>
                 <div class="col-sm-9 no-gutters">
                     <div class="row col-sm-12 no-gutters pt-1 pb-1">
                         <label class="col-sm-2 col-form-label text-center">X</label>
@@ -361,7 +365,9 @@ const nodeTemplate = ({ address, type, locationX, locationY, locationZ}) =>
                 </div>
             </div>
 			<div class="row col-sm-12 no-gutters pt-1">
-				<div class="col-sm-4 p-2"><button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}Identify" onclick="onIdentifyBtnClick('${address}')">Identify</button></div>
+				<div class="col-sm-4 p-2">
+					<button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}BtnIdentify" onclick="onIdentifyBtnClick('${address}')">Identify</button>
+				</div>
                 <div class="col-sm-4 p-2"><button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}BtnEdit" onclick="onEditBtnClick('${address}')">Edit</button></div>
 				<div class="col-sm-4 p-2"><button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}Update" onclick="onUpdateBtnClick('${address}')">Update</button></div>
             </div>
@@ -399,20 +405,20 @@ function onEditBtnClick(address){
 
 	if(node.editing){
 		node.editing = false;
+		$('#node' + address + 'BtnEdit').text('Edit').button("refresh");
 		$('#node' + address + 'Select').children("option")[0].disabled = true;
 		$('#node' + address + 'Select').children("option")[1].disabled = true;
 		$('#node' + address + 'LocationX').attr('readonly', true);
 		$('#node' + address + 'LocationY').attr('readonly', true);
 		$('#node' + address + 'LocationZ').attr('readonly', true);
-		$('#node' + address + 'BtnEdit').text('Edit').button("refresh");
 	}else{
 		node.editing = true;
+		$('#node' + address + 'BtnEdit').text('Editing...').button("refresh");
 		$('#node' + address + 'Select').children("option")[0].disabled = false;
 		$('#node' + address + 'Select').children("option")[1].disabled = false;
 		$('#node' + address + 'LocationX').attr('readonly', false);
 		$('#node' + address + 'LocationY').attr('readonly', false);
 		$('#node' + address + 'LocationZ').attr('readonly', false);
-		$('#node' + address + 'BtnEdit').text('Editing...').button("refresh");
 	}
 }
 
@@ -422,6 +428,23 @@ function onUpdateBtnClick(address){
 
 function onIdentifyBtnClick(address){
 	console.log("onIdentifyBtnClick: " + address);
+
+	let idx = 0;
+	for(idx=0; idx<nodeList.length; idx++){
+		if(address == nodeList[idx].address) break;
+	}
+	let node = nodeList[idx];
+
+	if(node.identifying){
+		node.identifying = false;
+		$('#node' + address + 'BtnIdentify').text('Identify').button("refresh");
+		$('#node' + address + 'Identifying').hide();
+	}
+	else{
+		node.identifying = true;
+		$('#node' + address + 'BtnIdentify').text('Identifying').button("refresh");
+		$('#node' + address + 'Identifying').show();
+	}
 }
 
 </script>
