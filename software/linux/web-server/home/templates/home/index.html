@@ -20,7 +20,9 @@
 			<div class="chart">
 			</div>
 		</div>
-		<div class="col-sm-3 height-full overflow-auto" id="idNodeList" id="outer">
+		<div class="col-sm-3" >
+				<div class="overflow-auto" style="max-height: calc(100vh - 80px);" id="idNodeList">
+				</div>
 		</div>
 	</div>
 </body>
@@ -34,6 +36,7 @@
 	.node-title{
 		color: rgb(255, 255, 255);
 	}
+
 </style>
 <script>
 	function createConfig(pointStyle) {
@@ -324,9 +327,8 @@ const nodeTemplate = ({ address, type, locationX, locationY, locationZ}) =>
 `
 <div class="card m-1" style="display: none;" id="node${address}Card">
     <div class="card-heading p-1 node-title-${type}" role="button" data-toggle="collapse" href="#node${address}Toggle">
-        <h5 class="row card-title m-1">
-            <div class="col-sm-3 no-gutters text-center node-title">Node</div>
-            <div class="col-sm-9 no-gutters node-title">${address}</div>
+        <h5 class="row card-title m-1 node-title">
+            Node <span style='margin-left:0.25em'>${address}</span>
         </h5>
     </div>
     <div class="collapse" id="node${address}Toggle">
