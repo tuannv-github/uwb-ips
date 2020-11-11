@@ -1,0 +1,8 @@
+LOCATION_CMD_TOPIC = "location_cmd"
+LOCATION_EVT_TOPIC = "location_evt"
+
+SERIAL_PORT = "/dev/pts/7"
+SERIAL_BAUD = 115200
+
+SERIAL_PORT_SIM = "/dev/pts/8"
+SERIAL_BAUD_SIM = 115200

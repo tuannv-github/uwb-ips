@@ -1,0 +1,451 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>RTLS</title>
+	<link rel="stylesheet" href="{% static '/home/bootstrap-4.5.3-dist/css/bootstrap.min.css' %}"/>
+	<script src="{% static '/home/jquery/jquery-3.5.1.min.js' %}"></script>
+	<script src="{% static '/home/bootstrap-4.5.3-dist/js/bootstrap.min.js' %}"></script>
+
+	<link rel="stylesheet" href="{% static '/home/chartjs/Chart.min.css' %}"/>
+	<script src="{% static '/home/paho.javascript-1.1.0/paho-mqtt-min.js' %}"></script>
+	<script src="{% static '/home/chartjs/Chart.min.js' %}"></script>
+</head>
+<body>
+    <nav class="navbar navbar-light bg-light">
+        <span class="navbar-brand h1 m-1">RTLS</span>
+	</nav>
+	<div class="row m-1">
+		<div class="col-sm-9">
+			<div class="chart">
+			</div>
+		</div>
+		<div class="col-sm-3" >
+				<div class="overflow-auto" style="max-height: calc(100vh - 80px);" id="idNodeList">
+				</div>
+		</div>
+	</div>
+</body>
+<style>
+	.node-title-TAG{
+		background-color: rgb(83, 158, 255);
+	}
+	.node-title-ANCHOR{
+		background-color: rgb(253, 128, 128);
+	}
+	.node-title{
+		color: rgb(255, 255, 255);
+	}
+
+</style>
+<script>
+	function createConfig(pointStyle) {
+		return {
+			type: 'line',
+			data: {
+				labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+				datasets: [{
+					label: 'My First dataset',
+					backgroundColor: window.chartColors.red,
+					borderColor: window.chartColors.red,
+					data: [10, 23, 5, 99, 67, 43, 0],
+					fill: false,
+					pointRadius: 10,
+					pointHoverRadius: 15,
+					showLine: false // no line shown
+				}]
+			},
+			options: {
+				responsive: true,
+				title: {
+					display: true,
+					text: 'Point Style: ' + pointStyle
+				},
+				legend: {
+					display: false
+				},
+				elements: {
+					point: {
+						pointStyle: pointStyle
+					}
+				}
+			}
+		};
+	}
+
+	window.onload = function() {
+		var container = document.querySelector('.chart');
+		[
+			'circle',
+		].forEach(function(pointStyle) {
+			var div = document.createElement('div');
+			div.classList.add('chart-container');
+
+			var canvas = document.createElement('canvas');
+			div.appendChild(canvas);
+			container.appendChild(div);
+
+			var ctx = canvas.getContext('2d');
+			var config = createConfig(pointStyle);
+			new Chart(ctx, config);
+		});
+	};
+
+	window.chartColors = {
+		red: 'rgb(255, 99, 132)',
+		orange: 'rgb(255, 159, 64)',
+		yellow: 'rgb(255, 205, 86)',
+		green: 'rgb(75, 192, 192)',
+		blue: 'rgb(54, 162, 235)',
+		purple: 'rgb(153, 102, 255)',
+		grey: 'rgb(201, 203, 207)'
+	};
+
+	(function(global) {
+		var MONTHS = [
+			'January',
+			'February',
+			'March',
+			'April',
+			'May',
+			'June',
+			'July',
+			'August',
+			'September',
+			'October',
+			'November',
+			'December'
+		];
+
+		var COLORS = [
+			'#4dc9f6',
+			'#f67019',
+			'#f53794',
+			'#537bc4',
+			'#acc236',
+			'#166a8f',
+			'#00a950',
+			'#58595b',
+			'#8549ba'
+		];
+
+		var Samples = global.Samples || (global.Samples = {});
+		var Color = global.Color;
+
+		Samples.utils = {
+			// Adapted from http://indiegamr.com/generate-repeatable-random-numbers-in-js/
+			srand: function(seed) {
+				this._seed = seed;
+			},
+
+			rand: function(min, max) {
+				var seed = this._seed;
+				min = min === undefined ? 0 : min;
+				max = max === undefined ? 1 : max;
+				this._seed = (seed * 9301 + 49297) % 233280;
+				return min + (this._seed / 233280) * (max - min);
+			},
+
+			numbers: function(config) {
+				var cfg = config || {};
+				var min = cfg.min || 0;
+				var max = cfg.max || 1;
+				var from = cfg.from || [];
+				var count = cfg.count || 8;
+				var decimals = cfg.decimals || 8;
+				var continuity = cfg.continuity || 1;
+				var dfactor = Math.pow(10, decimals) || 0;
+				var data = [];
+				var i, value;
+
+				for (i = 0; i < count; ++i) {
+					value = (from[i] || 0) + this.rand(min, max);
+					if (this.rand() <= continuity) {
+						data.push(Math.round(dfactor * value) / dfactor);
+					} else {
+						data.push(null);
+					}
+				}
+
+				return data;
+			},
+
+			labels: function(config) {
+				var cfg = config || {};
+				var min = cfg.min || 0;
+				var max = cfg.max || 100;
+				var count = cfg.count || 8;
+				var step = (max - min) / count;
+				var decimals = cfg.decimals || 8;
+				var dfactor = Math.pow(10, decimals) || 0;
+				var prefix = cfg.prefix || '';
+				var values = [];
+				var i;
+
+				for (i = min; i < max; i += step) {
+					values.push(prefix + Math.round(dfactor * i) / dfactor);
+				}
+
+				return values;
+			},
+
+			months: function(config) {
+				var cfg = config || {};
+				var count = cfg.count || 12;
+				var section = cfg.section;
+				var values = [];
+				var i, value;
+
+				for (i = 0; i < count; ++i) {
+					value = MONTHS[Math.ceil(i) % 12];
+					values.push(value.substring(0, section));
+				}
+
+				return values;
+			},
+
+			color: function(index) {
+				return COLORS[index % COLORS.length];
+			},
+
+			transparentize: function(color, opacity) {
+				var alpha = opacity === undefined ? 0.5 : 1 - opacity;
+				return Color(color).alpha(alpha).rgbString();
+			}
+		};
+
+		// DEPRECATED
+		window.randomScalingFactor = function() {
+			return Math.round(Samples.utils.rand(-100, 100));
+		};
+
+		// INITIALIZATION
+
+		Samples.utils.srand(Date.now());
+	}(this));
+</script>
+<script>
+
+client = new Paho.Client('{{mqtt_server_addr}}', Number({{mqtt_server_port}}), "client_id_" + Date.now());
+client.onConnectionLost = onConnectionLost;
+client.onMessageArrived = onMessageArrived;
+client.connect({onSuccess:onConnect});
+
+class Node{
+	constructor(address, type, location) {
+		this.address = address;
+		this.type = type;
+		this.location = location;
+		this.editing = false;
+		this.identifying = false;
+	}
+	valueOf(){
+    	return this.address;
+	};
+	equal(node){
+		return this.address == node.address;
+	}
+	some(node){
+		return this.address == node.address;
+	}
+	toString(){
+		let address = "Node: " + this.address.toString() + " ";
+		let type = "type: " + this.type.toString() + " ";
+		let location = "location: " + this.location.toString();
+		return  address + type + location;
+	}
+}
+
+this.nodeList = new Array();
+
+function onConnect() {
+  console.log("Connected");
+  client.subscribe("{{location_evt_topic}}");
+}
+
+function onFail(){
+	console.log("onFail");
+}
+
+function onConnectionLost(responseObject) {
+  if (responseObject.errorCode !== 0) {
+    console.log("Connection lost: " + responseObject.errorMessage);
+	console.log("Reconnecting...");
+	client.connect({onSuccess:onConnect});
+  }
+}
+
+function onMessageArrived(message) {
+	try{
+		msg = JSON.parse(message.payloadString);
+		switch(msg.type){
+			case "STATUS":
+				node = new Node(msg.msg.address, msg.msg.type, msg.msg.location);
+				let added = false;
+				let i = 0;
+				for(i=0; i<nodeList.length; ){
+					if(node.equal(nodeList[i])) {
+						added = true;
+						break;
+					}
+					i++;
+				}
+				if(added){
+					// console.log("Update: "+ node.toString());
+					if(!nodeList[i].editing) nodeUpdate(i, node);
+				}
+				else{
+					console.log("Add: "+ node.toString());
+					nodeList.push(node);
+					$('#idNodeList').append([
+						{address: node.address, 
+							type: node.type, 
+							location_x: node.location[0].toString(), location_y: node.location[1].toString(), location_z: node.location[2].toString()},
+					].map(nodeTemplate).join(''));
+					$('#node'+ node.address +'Card').show(300);
+					switch(node.type){
+						case "ANCHOR":
+							$('#node' + node.address + 'Select').children("option")[0].selected = true;
+							$('#node' + node.address + 'Select').children("option")[0].disabled = true;
+							$('#node' + node.address + 'Select').children("option")[1].disabled = true;
+							break;
+						case "TAG":
+							$('#node' + node.address + 'Select').children("option")[1].selected = true;
+							$('#node' + node.address + 'Select').children("option")[0].disabled = true;
+							$('#node' + node.address + 'Select').children("option")[1].disabled = true;
+							break;
+					}
+				}
+				break;
+			default:
+				console.error("MSG TYPE ERROR: "+message.payloadString);
+				break;
+		}
+	}
+	catch(error){
+		console.error("MSG PROCESS ERROR: " + message.payloadString + " ERROR: " + error.toString());
+	}
+}
+
+const nodeTemplate = ({ address, type, locationX, locationY, locationZ}) => 
+`
+<div class="card m-1" style="display: none;" id="node${address}Card">
+    <div class="card-heading p-1 node-title-${type}" role="button" data-toggle="collapse" href="#node${address}Toggle">
+        <h5 class="row card-title m-1 node-title">
+            Node <span style='margin-left:0.25em'>${address}</span>
+        </h5>
+    </div>
+    <div class="collapse" id="node${address}Toggle">
+        <div class="card-body p-2">
+            <div class="row col-sm-12 no-gutters">
+                <label class="col-sm-3 col-form-label">Type</label>
+                <select class="col-sm-9 form-control" id="node${address}Select">
+                    <option>ANCHOR</option>
+                    <option>TAG</option>
+                </select>
+            </div>
+			<div class="row col-sm-12 no-gutters pt-1">
+				<div class="col-sm-3 no-gutters col-form-label">
+					<div><label>Location</label></div>
+					<div class="spinner-grow spinner-grow-sm text-info p-1" role="status" style="display: none;" id="node${address}Identifying"></div>
+				</div>
+                <div class="col-sm-9 no-gutters">
+                    <div class="row col-sm-12 no-gutters pt-1 pb-1">
+                        <label class="col-sm-2 col-form-label text-center">X</label>
+                        <input type="text" class="col-sm-10 form-control p-1" value="${locationX}" readonly id="node${address}LocationX">
+                    </div>
+                    <div class="row col-sm-12 no-gutters pt-1 pb-1">
+                        <label class="col-sm-2 col-form-label text-center">Y</label>
+                        <input type="text" class="col-sm-10 form-control p-1" value="${locationY}" readonly id="node${address}LocationY">
+                    </div>
+                    <div class="row col-sm-12 no-gutters pt-1 pb-1">
+                        <label class="col-sm-2 col-form-label text-center">Z</label>
+                        <input type="text" class="col-sm-10 form-control p-1" value="${locationZ}" readonly id="node${address}LocationZ">
+                    </div>
+                </div>
+            </div>
+			<div class="row col-sm-12 no-gutters pt-1">
+				<div class="col-sm-4 p-2">
+					<button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}BtnIdentify" onclick="onIdentifyBtnClick('${address}')">Identify</button>
+				</div>
+                <div class="col-sm-4 p-2"><button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}BtnEdit" onclick="onEditBtnClick('${address}')">Edit</button></div>
+				<div class="col-sm-4 p-2"><button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}Update" onclick="onUpdateBtnClick('${address}')">Update</button></div>
+            </div>
+        </div>
+    </div>
+</div>
+`;
+
+function nodeUpdate(idx, node){
+	nodeList[idx].type = node.type;
+	nodeList[idx].location = node.location;
+	
+	switch(node.type){
+		case "ANCHOR":
+			$('#node' + node.address + 'Select').children("option")[0].selected = true;
+			break;
+		case "TAG":
+			$('#node' + node.address + 'Select').children("option")[1].selected = true;
+			break;
+	}
+
+	$('#node' + node.address + "LocationX").val(node.location[0])
+	$('#node' + node.address + "LocationY").val(node.location[1])
+	$('#node' + node.address + "LocationZ").val(node.location[2])
+}
+
+function onEditBtnClick(address){
+	console.log("onEditBtnClick: " + address);
+
+	let idx = 0;
+	for(idx=0; idx<nodeList.length; idx++){
+		if(address == nodeList[idx].address) break;
+	}
+	let node = nodeList[idx];
+
+	if(node.editing){
+		node.editing = false;
+		$('#node' + address + 'BtnEdit').text('Edit').button("refresh");
+		$('#node' + address + 'Select').children("option")[0].disabled = true;
+		$('#node' + address + 'Select').children("option")[1].disabled = true;
+		$('#node' + address + 'LocationX').attr('readonly', true);
+		$('#node' + address + 'LocationY').attr('readonly', true);
+		$('#node' + address + 'LocationZ').attr('readonly', true);
+	}else{
+		node.editing = true;
+		$('#node' + address + 'BtnEdit').text('Editing...').button("refresh");
+		$('#node' + address + 'Select').children("option")[0].disabled = false;
+		$('#node' + address + 'Select').children("option")[1].disabled = false;
+		$('#node' + address + 'LocationX').attr('readonly', false);
+		$('#node' + address + 'LocationY').attr('readonly', false);
+		$('#node' + address + 'LocationZ').attr('readonly', false);
+	}
+}
+
+function onUpdateBtnClick(address){
+	console.log("onUpdateBtnClick: " + address);
+}
+
+function onIdentifyBtnClick(address){
+	console.log("onIdentifyBtnClick: " + address);
+
+	let idx = 0;
+	for(idx=0; idx<nodeList.length; idx++){
+		if(address == nodeList[idx].address) break;
+	}
+	let node = nodeList[idx];
+
+	if(node.identifying){
+		node.identifying = false;
+		$('#node' + address + 'BtnIdentify').text('Identify').button("refresh");
+		$('#node' + address + 'Identifying').hide();
+	}
+	else{
+		node.identifying = true;
+		$('#node' + address + 'BtnIdentify').text('Identifying').button("refresh");
+		$('#node' + address + 'Identifying').show();
+	}
+}
+
+</script>
+</html>
