@@ -360,9 +360,10 @@ const nodeTemplate = ({ address, type, locationX, locationY, locationZ}) =>
                     </div>
                 </div>
             </div>
-            <div class="row col-sm-12 no-gutters pt-1">
-                <div class="col-sm-6 p-2"><button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}BtnEdit" onclick="onEditBtnClick('${address}')">Edit</button></div>
-                <div class="col-sm-6 p-2"><button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}Update" onclick="onUpdateBtnClick('${address}')">Update</button></div>
+			<div class="row col-sm-12 no-gutters pt-1">
+				<div class="col-sm-4 p-2"><button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}Identify" onclick="onIdentifyBtnClick('${address}')">Identify</button></div>
+                <div class="col-sm-4 p-2"><button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}BtnEdit" onclick="onEditBtnClick('${address}')">Edit</button></div>
+				<div class="col-sm-4 p-2"><button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}Update" onclick="onUpdateBtnClick('${address}')">Update</button></div>
             </div>
         </div>
     </div>
@@ -419,6 +420,9 @@ function onUpdateBtnClick(address){
 	console.log("onUpdateBtnClick: " + address);
 }
 
+function onIdentifyBtnClick(address){
+	console.log("onIdentifyBtnClick: " + address);
+}
 
 </script>
 </html>
