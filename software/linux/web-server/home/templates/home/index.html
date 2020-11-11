@@ -20,53 +20,19 @@
 			<div class="chart">
 			</div>
 		</div>
-		<div class="col-sm-3">
-			<div class="card m-1">
-				<div class="card-heading p-1 node-title" role="button" data-toggle="collapse" href="#node">
-					<h5 class="row card-title m-1">
-						<div class="col-sm-3 no-gutters text-center">Node</div>
-						<div class="col-sm-9 no-gutters">0xAAAA</div>
-					</h5>
-				</div>
-				<div class="collapse" id="node">
-					<div class="card-body p-2">
-						<div class="row col-sm-12 no-gutters">
-							<label class="col-sm-3 col-form-label">Type</label>
-							<select class="col-sm-9 form-control">
-								<option>ANCHOR</option>
-								<option>TAG</option>
-							</select>
-						</div>
-						<div class="row col-sm-12 no-gutters pt-1">
-							<label class="col-sm-3 no-gutters col-form-label">Location</label>
-							<div class="col-sm-9 no-gutters">
-								<div class="row col-sm-12 no-gutters pt-1 pb-1">
-									<label class="col-sm-2 col-form-label text-center">X</label>
-									<input type="text" class="col-sm-10 form-control">
-								</div>
-								<div class="row col-sm-12 no-gutters pt-1 pb-1">
-									<label class="col-sm-2 col-form-label text-center">Y</label>
-									<input type="text" class="col-sm-10 form-control">
-								</div>
-								<div class="row col-sm-12 no-gutters pt-1 pb-1">
-									<label class="col-sm-2 col-form-label text-center">Z</label>
-									<input type="text" class="col-sm-10 form-control">
-								</div>
-							</div>
-						</div>
-						<div class="row col-sm-12 no-gutters pt-1">
-							<div class="col-sm-6 p-2"><button type="button" class="btn btn-outline-primary col-sm-12">Edit</button></div>
-							<div class="col-sm-6 p-2"><button type="button" class="btn btn-outline-primary col-sm-12">Update</button></div>
-						</div>
-					</div>
-				</div>
-			</div>
+		<div class="col-sm-3 height-full overflow-auto" id="idNodeList" id="outer">
 		</div>
 	</div>
 </body>
 <style>
+	.node-title-TAG{
+		background-color: rgb(83, 158, 255);
+	}
+	.node-title-ANCHOR{
+		background-color: rgb(253, 128, 128);
+	}
 	.node-title{
-		background-color: rgb(211, 228, 250);
+		color: rgb(255, 255, 255);
 	}
 </style>
 <script>
@@ -320,15 +286,28 @@ function onMessageArrived(message) {
 					i++;
 				}
 				if(added){
-					console.log("Update: "+ node.toString());
+					// console.log("Update: "+ node.toString());
 					nodeUpdate(i, node);
 				}
 				else{
 					console.log("Add: "+ node.toString());
 					nodeList.push(node);
 					$('#idNodeList').append([
-						{address: node.address, type: node.type, location_x: node.location[0].toString(), location_y: node.location[1].toString(), location_z: node.location[2].toString()},
+						{address: node.address, 
+							type: node.type, 
+							location_x: node.location[0].toString(), location_y: node.location[1].toString(), location_z: node.location[2].toString()},
 					].map(nodeTemplate).join(''));
+					$('#node'+ node.address +'Card').show(300);
+					switch(node.type){
+						case "ANCHOR":
+							$('#node' + node.address + 'Select').children("option")[0].selected = true;
+							$('#node' + node.address + 'Select').children("option")[1].disabled = true;
+							break;
+						case "TAG":
+							$('#node' + node.address + 'Select').children("option")[1].selected = true;
+							$('#node' + node.address + 'Select').children("option")[0].disabled = true;
+							break;
+					}
 				}
 				break;
 			default:
@@ -341,26 +320,66 @@ function onMessageArrived(message) {
 	}
 }
 
-const nodeTemplate = ({ address, type, location_x, location_y, location_z}) => 
+const nodeTemplate = ({ address, type, locationX, locationY, locationZ}) => 
 `
-	<ul id="node_${address}">
-		<li >Address: <div id="node_${address}_address">${address}</div></li>
-		<li >Type: <div id="node_${address}_type">${type}</div></li>
-		<ul>
-			<li >Location x: <div id="node_${address}_location_x">${location_x}</div></li>
-			<li >Location y: <div id="node_${address}_location_y">${location_y}</div></li>
-			<li >Location z: <div id="node_${address}_location_z">${location_z}</div></li>
-		</ul>
-	</ul>
+<div class="card m-1" style="display: none;" id="node${address}Card">
+    <div class="card-heading p-1 node-title-${type}" role="button" data-toggle="collapse" href="#node${address}Toggle">
+        <h5 class="row card-title m-1">
+            <div class="col-sm-3 no-gutters text-center node-title">Node</div>
+            <div class="col-sm-9 no-gutters node-title">${address}</div>
+        </h5>
+    </div>
+    <div class="collapse" id="node${address}Toggle">
+        <div class="card-body p-2">
+            <div class="row col-sm-12 no-gutters">
+                <label class="col-sm-3 col-form-label">Type</label>
+                <select class="col-sm-9 form-control" id="node${address}Select">
+                    <option>ANCHOR</option>
+                    <option>TAG</option>
+                </select>
+            </div>
+            <div class="row col-sm-12 no-gutters pt-1">
+                <label class="col-sm-3 no-gutters col-form-label">Location</label>
+                <div class="col-sm-9 no-gutters">
+                    <div class="row col-sm-12 no-gutters pt-1 pb-1">
+                        <label class="col-sm-2 col-form-label text-center">X</label>
+                        <input type="text" class="col-sm-10 form-control p-1" value="${locationX}" readonly id="node${address}LocationX">
+                    </div>
+                    <div class="row col-sm-12 no-gutters pt-1 pb-1">
+                        <label class="col-sm-2 col-form-label text-center">Y</label>
+                        <input type="text" class="col-sm-10 form-control p-1" value="${locationY}" readonly id="node${address}LocationY">
+                    </div>
+                    <div class="row col-sm-12 no-gutters pt-1 pb-1">
+                        <label class="col-sm-2 col-form-label text-center">Z</label>
+                        <input type="text" class="col-sm-10 form-control p-1" value="${locationZ}" readonly id="node${address}LocationZ">
+                    </div>
+                </div>
+            </div>
+            <div class="row col-sm-12 no-gutters pt-1">
+                <div class="col-sm-6 p-2"><button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}BtnEdit" onclick="onEditBtnClick('${address}')">Edit</button></div>
+                <div class="col-sm-6 p-2"><button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}Update" onclick="onUpdateBtnClick('${address}')">Update</button></div>
+            </div>
+        </div>
+    </div>
+</div>
 `;
 
 function nodeUpdate(idx, node){
 	nodeList[idx].type = node.type;
 	nodeList[idx].location = node.location;
-	$('#node_' + node.address + "_location_x").text(node.location[0])
-	$('#node_' + node.address + "_location_y").text(node.location[1])
-	$('#node_' + node.address + "_location_z").text(node.location[2])
+	$('#node' + node.address + "LocationX").val(node.location[0])
+	$('#node' + node.address + "LocationY").val(node.location[1])
+	$('#node' + node.address + "LocationZ").val(node.location[2])
 }
+
+function onEditBtnClick(address){
+	console.log("onEditBtnClick: " + address);
+}
+
+function onUpdateBtnClick(address){
+	console.log("onUpdateBtnClick: " + address);
+}
+
 
 </script>
 </html>
