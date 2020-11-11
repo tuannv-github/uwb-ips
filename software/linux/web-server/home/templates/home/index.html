@@ -236,6 +236,7 @@ class Node{
 		this.address = address;
 		this.type = type;
 		this.location = location;
+		this.editing = false;
 	}
 	valueOf(){
     	return this.address;
@@ -290,7 +291,7 @@ function onMessageArrived(message) {
 				}
 				if(added){
 					// console.log("Update: "+ node.toString());
-					nodeUpdate(i, node);
+					if(!nodeList[i].editing) nodeUpdate(i, node);
 				}
 				else{
 					console.log("Add: "+ node.toString());
@@ -304,11 +305,13 @@ function onMessageArrived(message) {
 					switch(node.type){
 						case "ANCHOR":
 							$('#node' + node.address + 'Select').children("option")[0].selected = true;
+							$('#node' + node.address + 'Select').children("option")[0].disabled = true;
 							$('#node' + node.address + 'Select').children("option")[1].disabled = true;
 							break;
 						case "TAG":
 							$('#node' + node.address + 'Select').children("option")[1].selected = true;
 							$('#node' + node.address + 'Select').children("option")[0].disabled = true;
+							$('#node' + node.address + 'Select').children("option")[1].disabled = true;
 							break;
 					}
 				}
@@ -369,6 +372,16 @@ const nodeTemplate = ({ address, type, locationX, locationY, locationZ}) =>
 function nodeUpdate(idx, node){
 	nodeList[idx].type = node.type;
 	nodeList[idx].location = node.location;
+	
+	switch(node.type){
+		case "ANCHOR":
+			$('#node' + node.address + 'Select').children("option")[0].selected = true;
+			break;
+		case "TAG":
+			$('#node' + node.address + 'Select').children("option")[1].selected = true;
+			break;
+	}
+
 	$('#node' + node.address + "LocationX").val(node.location[0])
 	$('#node' + node.address + "LocationY").val(node.location[1])
 	$('#node' + node.address + "LocationZ").val(node.location[2])
@@ -376,6 +389,30 @@ function nodeUpdate(idx, node){
 
 function onEditBtnClick(address){
 	console.log("onEditBtnClick: " + address);
+
+	let idx = 0;
+	for(idx=0; idx<nodeList.length; idx++){
+		if(address == nodeList[idx].address) break;
+	}
+	let node = nodeList[idx];
+
+	if(node.editing){
+		node.editing = false;
+		$('#node' + address + 'Select').children("option")[0].disabled = true;
+		$('#node' + address + 'Select').children("option")[1].disabled = true;
+		$('#node' + address + 'LocationX').attr('readonly', true);
+		$('#node' + address + 'LocationY').attr('readonly', true);
+		$('#node' + address + 'LocationZ').attr('readonly', true);
+		$('#node' + address + 'BtnEdit').text('Edit').button("refresh");
+	}else{
+		node.editing = true;
+		$('#node' + address + 'Select').children("option")[0].disabled = false;
+		$('#node' + address + 'Select').children("option")[1].disabled = false;
+		$('#node' + address + 'LocationX').attr('readonly', false);
+		$('#node' + address + 'LocationY').attr('readonly', false);
+		$('#node' + address + 'LocationZ').attr('readonly', false);
+		$('#node' + address + 'BtnEdit').text('Editing...').button("refresh");
+	}
 }
 
 function onUpdateBtnClick(address){

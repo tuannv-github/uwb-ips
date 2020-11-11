@@ -5,7 +5,7 @@ import time
 
 serial = Serial(config.SERIAL_PORT_SIM, config.SERIAL_BAUD_SIM)
 
-NODE_MAX = 30
+NODE_MAX = 2
 
 def loop_write():
     address = 0
