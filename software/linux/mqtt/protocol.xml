@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<mavlink>
+	<version>3</version>
+
+	<enums>
+		<enum name="msg_type_t">
+			<entry name="MSG_GET"></entry>
+			<entry name="MSG_SET"></entry>
+            <entry name="ACK"></entry>
+            <entry name="STATUS"></entry>
+		</enum>
+	</enums>
+
+	<messages>
+		<message id="0" name="LOCATION">
+			<description>Location message</description>
+			<field type="uint16_t" name="dstsrc"/>
+			<field type="uint8_t" name="msg_type" enum="msg_type_t"/>
+			<field type="float" name="location_x"/>
+			<field type="float" name="location_y"/>
+			<field type="float" name="location_z"/>
+		</message>
+		<message id="1" name="ONOFF">
+			<description>On off message</description>
+			<field type="uint16_t" name="dstsrc"/>
+			<field type="uint8_t" name="msg_type" enum="msg_type_t"/>
+			<field type="uint8_t" name="value"/>
+		</message>
+	</messages>
+</mavlink>
