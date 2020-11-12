@@ -8,7 +8,7 @@ from mavlink import *
 serial = Serial(config.SERIAL_PORT_SIM, config.SERIAL_BAUD_SIM)
 mav = MAVLink(serial)
 
-NODE_MAX = 10
+NODE_MAX = 16
 
 def loop_write():
     i = 0x00

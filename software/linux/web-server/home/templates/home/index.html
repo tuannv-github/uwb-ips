@@ -486,8 +486,12 @@ function onUpdateBtnClick(address){
 	locationY = parseFloat($('#node' + node.address + 'LocationY').val());
 	locationZ = parseFloat($('#node' + node.address + 'LocationZ').val());
 	address = parseInt(address);
-	if(isNaN(locationX) || isNaN(locationY) || isNaN(locationZ) || isNaN(address)){
+	if(isNaN(locationX) || isNaN(locationY) || isNaN(locationZ)){
 		toastError("Invalid location");
+		return;
+	}
+	if(isNaN(address)){
+		toastError("Invalid node address");
 		return;
 	}
 	
@@ -509,16 +513,25 @@ function onIdentifyBtnClick(address){
 	}
 	let node = nodeList[idx];
 
+	address = parseInt(address);
+	if(isNaN(address)){
+		toastError("Invalid node address");
+		return;
+	}
+
 	if(node.identifying){
 		node.identifying = false;
 		$('#node' + address + 'BtnIdentify').text('Identify').button("refresh");
-		$('#node' + address + 'Identifying').hide();
+		// $('#node' + address + 'Identifying').hide();
+		cmd = '{"mavpackettype": "ONOFF", "dstsrc": '+ address +', "type": "SET", "value": 0}'
 	}
 	else{
 		node.identifying = true;
 		$('#node' + address + 'BtnIdentify').text('Identifying').button("refresh");
-		$('#node' + address + 'Identifying').show();
+		// $('#node' + address + 'Identifying').show();
+		cmd = '{"mavpackettype": "ONOFF", "dstsrc": '+ address +', "type": "SET", "value": 1}'
 	}
+	publish("{{topic_publish}}", cmd)
 }
 
 </script>

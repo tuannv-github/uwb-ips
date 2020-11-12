@@ -39,7 +39,7 @@ def on_message(client, userdata, msg):
             msg["node"] = TAG
         mav.location_send(msg["dstsrc"], msg["type"], msg["node"], msg["location_x"], msg["location_y"], msg["location_z"])
     elif(msg["mavpackettype"] == "ONOFF"):
-        mav.location_send(msg["dstsrc"], msg["type"], msg["value"])
+        mav.onoff_send(msg["dstsrc"], msg["type"], msg["value"])
 
 client.on_connect = on_connect
 client.on_message = on_message
