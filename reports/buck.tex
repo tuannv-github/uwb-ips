@@ -1,0 +1,65 @@
+\documentclass[./main.tex]{subfiles}
+
+\begin{document}
+
+\chapter{Switching regulator implementation details}
+
+Design requirements:
+\begin{itemize}
+    \item Input voltage range: 3.4V-4.2V
+    \item Input voltage (mean): 3.7V
+    \item Output voltage: 3.4V
+    \item Output current (max): 0.5A
+    \item Ratio of ripple current: 0.3
+\end{itemize}
+
+\noindent Pre-choosen hardware specification
+\begin{itemize}
+    \item Switching frequency: 0.55Mhz (LM2734YMK)
+    \item Switch ON Resistance: $R_{DS} = 0.3 \si{\ohm}$ 
+    \item Catch Diode $V_F$: $V_{D1} = 0.3V$
+    \item Boost Diode $V_F$: $V_{D2} = 1V$
+\end{itemize}
+
+\section{Inductor selection}
+The Duty Cycle (D) can be approximated quickly using the ratio of output voltage (VO) to the input voltage (VIN):
+\begin{equation}
+    D = \frac{V_O}{V_{IN}}
+\end{equation}
+
+The catch diode (D1) forward voltage drop and the voltage drop across the internal NMOS must be included to calculate a more accurate duty cycle. Calculate D by using the following formula:
+\begin{equation}
+    D = \frac{V_O + V_{D}}{V_{IN} + V_{D} - V_{SW}}
+    % = \frac{3.4V + 0.3V}{3.7V + 0.3V - 1A \times 0.3Ohm}
+    = \frac{1.5V + 0.3V}{5V + 0.3V - 1A \times 0.3\si{\ohm}} = 36\%
+\end{equation}
+$V_{SW}$ can be approximated by:
+\begin{equation}
+    V_{SW} = I_O \times R_{DS}
+\end{equation}
+The diode forward drop (VD) can range from 0.3 V to 0.7 V depending on the quality of the diode. The lower $V_D$ is, the higher the operating efficiency of the converter.
+
+The inductor value determines the output ripple current. Lower inductor values decrease the size of the inductor, but increase the output ripple current. An increase in the inductor value will decrease the output ripple current. The ratio of ripple current ($\delta i_L$) to the output current ($I_O$) is optimized when it is set between 0.3 and 0.4 at 1 A. The ratio r is defined as:
+\begin{equation}
+    r = \frac{\delta i_L}{I_O}
+\end{equation}
+
+One must also ensure that the minimum current limit (1.2 A) is not exceeded, so the peak current in the inductor must be calculated. The peak current ($I_{LPK}$) in the inductor is calculated as shown in the following equation:
+\begin{equation}
+    I_{LPK} = I_O + \frac{\delta i_L}{2}
+\end{equation}
+
+If r = 0.5 at an output of 1 A, the peak current in the inductor will be 1.25 A.
+Now that the ripple current or ripple ratio is determined, the inductance is calculated as shown in 
+\begin{equation}
+    L = \frac{V_O + V_D}{I_O \times r \times f_s} \times (1-D)
+    = \frac{3.4V + 0.3V}{0.5A * 0.3 * 1.6MHz} * (1-0.95) = 0.77uH
+\end{equation}
+where:
+\begin{itemize}
+    \item $f_s$ is the switching frequency
+    \item $I_O$ is the output current
+\end{itemize}
+When selecting an physical inductor, make sure that it is capable of supporting the peak output current without saturating.
+
+\end{document}
