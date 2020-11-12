@@ -25,6 +25,28 @@
 				</div>
 		</div>
 	</div>
+
+	<div class="toast" style="position: absolute; top: 10px; right: 10px;"  id="nodeToast">
+		<div class="toast-header">
+		  <!-- <img src="..." class="rounded mr-2" alt="..."> -->
+		  <strong class="mr-auto" id="nodeToastTitle"></strong>
+		  <small>1s ago</small>
+		  <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		  </button>
+		</div>
+		<div class="toast-body" id="nodeToastBody"></div>
+	</div>
+
+	<script>
+		function toastError(errorString){
+			$("#nodeToastTitle").text("Error");
+			$("#nodeToastBody").text(errorString);
+			$('#nodeToast').toast({delay: 3000});
+			$('#nodeToast').toast('show');
+		}
+	</script>
+
 </body>
 <style>
 	.node-title-TAG{
@@ -232,10 +254,12 @@ client.onMessageArrived = onMessageArrived;
 client.connect({onSuccess:onConnect});
 
 class Node{
-	constructor(address, type, location) {
+	constructor(address, type, locationX, locationY, locationZ) {
 		this.address = address;
 		this.type = type;
-		this.location = location;
+		this.locationX = locationX;
+		this.locationY = locationY;
+		this.locationZ = locationZ;
 		this.editing = false;
 		this.identifying = false;
 	}
@@ -251,7 +275,7 @@ class Node{
 	toString(){
 		let address = "Node: " + this.address.toString() + " ";
 		let type = "type: " + this.type.toString() + " ";
-		let location = "location: " + this.location.toString();
+		let location = "location: " + this.locationX.toString() + ", " +  this.locationY.toString() + ", " +  this.locationZ.toString();
 		return  address + type + location;
 	}
 }
@@ -260,7 +284,7 @@ this.nodeList = new Array();
 
 function onConnect() {
   console.log("Connected");
-  client.subscribe("{{location_evt_topic}}");
+  client.subscribe("{{topic_subscribe}}");
 }
 
 function onFail(){
@@ -269,56 +293,70 @@ function onFail(){
 
 function onConnectionLost(responseObject) {
   if (responseObject.errorCode !== 0) {
+	toastError("MQTT conection lost")
     console.log("Connection lost: " + responseObject.errorMessage);
 	console.log("Reconnecting...");
 	client.connect({onSuccess:onConnect});
   }
 }
 
+function dec2hexString(dec) {
+   return '0x' + (dec+0x10000).toString(16).substr(-4).toUpperCase();
+}
+
+function handler_location(msg_location){
+	node = new Node(msg.dstsrc, msg.node, msg.location_x, msg.location_y, msg.location_z);
+	let added = false;
+	let i = 0;
+	for(i=0; i<nodeList.length; i++){
+		if(node.equal(nodeList[i])) {
+			added = true;
+			break;
+		}
+	}
+	if(added){
+		if(!nodeList[i].editing) nodeUpdate(i, node);
+	}
+	else{
+		console.log("Add: "+ node.toString());
+		nodeList.push(node);
+		$('#idNodeList').append(
+			[
+				{address: node.address, addressHex: dec2hexString(parseInt(node.address)), type: node.type, 
+					locationX: node.locationX.toString(), locationY: node.locationY.toString(), locationZ: node.locationZ.toString()},
+			].map(nodeTemplate).join(''));
+		$('#node'+ node.address +'Card').show(300);
+		switch(node.type){
+			case "ANCHOR":
+				$('#node' + node.address + 'Select').children("option")[0].selected = true;
+				$('#node' + node.address + 'Select').children("option")[0].disabled = true;
+				$('#node' + node.address + 'Select').children("option")[1].disabled = true;
+				break;
+			case "TAG":
+				$('#node' + node.address + 'Select').children("option")[1].selected = true;
+				$('#node' + node.address + 'Select').children("option")[0].disabled = true;
+				$('#node' + node.address + 'Select').children("option")[1].disabled = true;
+				break;
+		}
+	}
+}
+
+function handler_onoff(msg_onoff){
+	console.log("handler_onoff: " + JSON.stringify(msg_onoff));
+}
+
 function onMessageArrived(message) {
 	try{
 		msg = JSON.parse(message.payloadString);
-		switch(msg.type){
-			case "STATUS":
-				node = new Node(msg.msg.address, msg.msg.type, msg.msg.location);
-				let added = false;
-				let i = 0;
-				for(i=0; i<nodeList.length; ){
-					if(node.equal(nodeList[i])) {
-						added = true;
-						break;
-					}
-					i++;
-				}
-				if(added){
-					// console.log("Update: "+ node.toString());
-					if(!nodeList[i].editing) nodeUpdate(i, node);
-				}
-				else{
-					console.log("Add: "+ node.toString());
-					nodeList.push(node);
-					$('#idNodeList').append([
-						{address: node.address, 
-							type: node.type, 
-							location_x: node.location[0].toString(), location_y: node.location[1].toString(), location_z: node.location[2].toString()},
-					].map(nodeTemplate).join(''));
-					$('#node'+ node.address +'Card').show(300);
-					switch(node.type){
-						case "ANCHOR":
-							$('#node' + node.address + 'Select').children("option")[0].selected = true;
-							$('#node' + node.address + 'Select').children("option")[0].disabled = true;
-							$('#node' + node.address + 'Select').children("option")[1].disabled = true;
-							break;
-						case "TAG":
-							$('#node' + node.address + 'Select').children("option")[1].selected = true;
-							$('#node' + node.address + 'Select').children("option")[0].disabled = true;
-							$('#node' + node.address + 'Select').children("option")[1].disabled = true;
-							break;
-					}
-				}
+		switch(msg.mavpackettype){
+			case "LOCATION":
+				handler_location(msg)
+				break;
+			case "ONOFF":
+				handler_onoff(msg)
 				break;
 			default:
-				console.error("MSG TYPE ERROR: "+message.payloadString);
+				console.error("UNKNOWN MSG: "+message.payloadString);
 				break;
 		}
 	}
@@ -327,12 +365,12 @@ function onMessageArrived(message) {
 	}
 }
 
-const nodeTemplate = ({ address, type, locationX, locationY, locationZ}) => 
+const nodeTemplate = ({ address, addressHex, type, locationX, locationY, locationZ}) => 
 `
 <div class="card m-1" style="display: none;" id="node${address}Card">
     <div class="card-heading p-1 node-title-${type}" role="button" data-toggle="collapse" href="#node${address}Toggle">
         <h5 class="row card-title m-1 node-title">
-            Node <span style='margin-left:0.25em'>${address}</span>
+            Node <span style='margin-left:0.25em'>${addressHex}</span>
         </h5>
     </div>
     <div class="collapse" id="node${address}Toggle">
@@ -378,7 +416,9 @@ const nodeTemplate = ({ address, type, locationX, locationY, locationZ}) =>
 
 function nodeUpdate(idx, node){
 	nodeList[idx].type = node.type;
-	nodeList[idx].location = node.location;
+	nodeList[idx].locationX = node.locationX;
+	nodeList[idx].locationY = node.locationY;
+	nodeList[idx].locationZ = node.locationZ;
 	
 	switch(node.type){
 		case "ANCHOR":
@@ -389,9 +429,9 @@ function nodeUpdate(idx, node){
 			break;
 	}
 
-	$('#node' + node.address + "LocationX").val(node.location[0])
-	$('#node' + node.address + "LocationY").val(node.location[1])
-	$('#node' + node.address + "LocationZ").val(node.location[2])
+	$('#node' + node.address + "LocationX").val(node.locationX)
+	$('#node' + node.address + "LocationY").val(node.locationY)
+	$('#node' + node.address + "LocationZ").val(node.locationZ)
 }
 
 function onEditBtnClick(address){
@@ -422,8 +462,42 @@ function onEditBtnClick(address){
 	}
 }
 
+function publish(topic, msg){
+	message = new Paho.Message(msg);
+	message.destinationName = topic;
+	console.log("Publish to topic '" + topic + "': " + msg);
+	client.send(message);
+}
+
 function onUpdateBtnClick(address){
 	console.log("onUpdateBtnClick: " + address);
+	let idx = 0;
+	for(idx=0; idx<nodeList.length; idx++){
+		if(address == nodeList[idx].address) break;
+	}
+	let node = nodeList[idx];
+
+	if(!node.editing){
+		toastError("Enter editing mode first");
+		return;
+	}
+
+	locationX = parseFloat($('#node' + node.address + 'LocationX').val());
+	locationY = parseFloat($('#node' + node.address + 'LocationY').val());
+	locationZ = parseFloat($('#node' + node.address + 'LocationZ').val());
+	address = parseInt(address);
+	if(isNaN(locationX) || isNaN(locationY) || isNaN(locationZ) || isNaN(address)){
+		toastError("Invalid location");
+		return;
+	}
+	
+	if($('#node' + node.address + 'Select').children("option")[0].selected)
+		node = "ANCHOR"
+	else
+		node = "TAG"
+	cmd = '{"mavpackettype": "LOCATION", "dstsrc": ' + address + ', "node": "' + node + '", "type": "SET", "location_x": ' + locationX +', "location_y": ' + locationY + ', "location_z": ' + locationZ + '}'
+
+	publish("{{topic_publish}}", cmd)
 }
 
 function onIdentifyBtnClick(address){

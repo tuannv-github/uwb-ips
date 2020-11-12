@@ -62,4 +62,13 @@ protocol websockets
 
 ```
 socat -d -d pty,raw,echo=0 pty,raw,echo=0
+sudo socat -u -u pty,raw,echo=0,link=/dev/ttyS20 pty,raw,echo=0,link=/dev/ttyS21
+sudo chown tuannv:tuannv /dev/ttyS20 /dev/ttyS21
+```
+
+Protocol generator
+```
+cd mavlink-1.0.13
+python -m pymavlink.tools.mavgen --lang=Python --wire-protocol=1.0 --output=../mavlink.py ../protocol.xml
+python -m pymavlink.tools.mavgen --lang=C --wire-protocol=1.0 --output=../mavlink/ ../protocol.xml
 ```
