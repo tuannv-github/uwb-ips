@@ -6,7 +6,7 @@
 
 typedef struct __mavlink_onoff_t {
  uint16_t dstsrc; /*<  */
- uint8_t msg_type; /*<  */
+ uint8_t type; /*<  */
  uint8_t value; /*<  */
 } mavlink_onoff_t;
 
@@ -15,8 +15,8 @@ typedef struct __mavlink_onoff_t {
 #define MAVLINK_MSG_ID_1_LEN 4
 #define MAVLINK_MSG_ID_1_MIN_LEN 4
 
-#define MAVLINK_MSG_ID_ONOFF_CRC 251
-#define MAVLINK_MSG_ID_1_CRC 251
+#define MAVLINK_MSG_ID_ONOFF_CRC 53
+#define MAVLINK_MSG_ID_1_CRC 53
 
 
 
@@ -26,7 +26,7 @@ typedef struct __mavlink_onoff_t {
     "ONOFF", \
     3, \
     {  { "dstsrc", NULL, MAVLINK_TYPE_UINT16_T, 0, 0, offsetof(mavlink_onoff_t, dstsrc) }, \
-         { "msg_type", NULL, MAVLINK_TYPE_UINT8_T, 0, 2, offsetof(mavlink_onoff_t, msg_type) }, \
+         { "type", NULL, MAVLINK_TYPE_UINT8_T, 0, 2, offsetof(mavlink_onoff_t, type) }, \
          { "value", NULL, MAVLINK_TYPE_UINT8_T, 0, 3, offsetof(mavlink_onoff_t, value) }, \
          } \
 }
@@ -35,7 +35,7 @@ typedef struct __mavlink_onoff_t {
     "ONOFF", \
     3, \
     {  { "dstsrc", NULL, MAVLINK_TYPE_UINT16_T, 0, 0, offsetof(mavlink_onoff_t, dstsrc) }, \
-         { "msg_type", NULL, MAVLINK_TYPE_UINT8_T, 0, 2, offsetof(mavlink_onoff_t, msg_type) }, \
+         { "type", NULL, MAVLINK_TYPE_UINT8_T, 0, 2, offsetof(mavlink_onoff_t, type) }, \
          { "value", NULL, MAVLINK_TYPE_UINT8_T, 0, 3, offsetof(mavlink_onoff_t, value) }, \
          } \
 }
@@ -48,24 +48,24 @@ typedef struct __mavlink_onoff_t {
  * @param msg The MAVLink message to compress the data into
  *
  * @param dstsrc  
- * @param msg_type  
+ * @param type  
  * @param value  
  * @return length of the message in bytes (excluding serial stream start sign)
  */
 static inline uint16_t mavlink_msg_onoff_pack(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg,
-                               uint16_t dstsrc, uint8_t msg_type, uint8_t value)
+                               uint16_t dstsrc, uint8_t type, uint8_t value)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char buf[MAVLINK_MSG_ID_ONOFF_LEN];
     _mav_put_uint16_t(buf, 0, dstsrc);
-    _mav_put_uint8_t(buf, 2, msg_type);
+    _mav_put_uint8_t(buf, 2, type);
     _mav_put_uint8_t(buf, 3, value);
 
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), buf, MAVLINK_MSG_ID_ONOFF_LEN);
 #else
     mavlink_onoff_t packet;
     packet.dstsrc = dstsrc;
-    packet.msg_type = msg_type;
+    packet.type = type;
     packet.value = value;
 
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), &packet, MAVLINK_MSG_ID_ONOFF_LEN);
@@ -82,25 +82,25 @@ static inline uint16_t mavlink_msg_onoff_pack(uint8_t system_id, uint8_t compone
  * @param chan The MAVLink channel this message will be sent over
  * @param msg The MAVLink message to compress the data into
  * @param dstsrc  
- * @param msg_type  
+ * @param type  
  * @param value  
  * @return length of the message in bytes (excluding serial stream start sign)
  */
 static inline uint16_t mavlink_msg_onoff_pack_chan(uint8_t system_id, uint8_t component_id, uint8_t chan,
                                mavlink_message_t* msg,
-                                   uint16_t dstsrc,uint8_t msg_type,uint8_t value)
+                                   uint16_t dstsrc,uint8_t type,uint8_t value)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char buf[MAVLINK_MSG_ID_ONOFF_LEN];
     _mav_put_uint16_t(buf, 0, dstsrc);
-    _mav_put_uint8_t(buf, 2, msg_type);
+    _mav_put_uint8_t(buf, 2, type);
     _mav_put_uint8_t(buf, 3, value);
 
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), buf, MAVLINK_MSG_ID_ONOFF_LEN);
 #else
     mavlink_onoff_t packet;
     packet.dstsrc = dstsrc;
-    packet.msg_type = msg_type;
+    packet.type = type;
     packet.value = value;
 
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), &packet, MAVLINK_MSG_ID_ONOFF_LEN);
@@ -120,7 +120,7 @@ static inline uint16_t mavlink_msg_onoff_pack_chan(uint8_t system_id, uint8_t co
  */
 static inline uint16_t mavlink_msg_onoff_encode(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, const mavlink_onoff_t* onoff)
 {
-    return mavlink_msg_onoff_pack(system_id, component_id, msg, onoff->dstsrc, onoff->msg_type, onoff->value);
+    return mavlink_msg_onoff_pack(system_id, component_id, msg, onoff->dstsrc, onoff->type, onoff->value);
 }
 
 /**
@@ -134,7 +134,7 @@ static inline uint16_t mavlink_msg_onoff_encode(uint8_t system_id, uint8_t compo
  */
 static inline uint16_t mavlink_msg_onoff_encode_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, const mavlink_onoff_t* onoff)
 {
-    return mavlink_msg_onoff_pack_chan(system_id, component_id, chan, msg, onoff->dstsrc, onoff->msg_type, onoff->value);
+    return mavlink_msg_onoff_pack_chan(system_id, component_id, chan, msg, onoff->dstsrc, onoff->type, onoff->value);
 }
 
 /**
@@ -142,24 +142,24 @@ static inline uint16_t mavlink_msg_onoff_encode_chan(uint8_t system_id, uint8_t 
  * @param chan MAVLink channel to send the message
  *
  * @param dstsrc  
- * @param msg_type  
+ * @param type  
  * @param value  
  */
 #ifdef MAVLINK_USE_CONVENIENCE_FUNCTIONS
 
-static inline void mavlink_msg_onoff_send(mavlink_channel_t chan, uint16_t dstsrc, uint8_t msg_type, uint8_t value)
+static inline void mavlink_msg_onoff_send(mavlink_channel_t chan, uint16_t dstsrc, uint8_t type, uint8_t value)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char buf[MAVLINK_MSG_ID_ONOFF_LEN];
     _mav_put_uint16_t(buf, 0, dstsrc);
-    _mav_put_uint8_t(buf, 2, msg_type);
+    _mav_put_uint8_t(buf, 2, type);
     _mav_put_uint8_t(buf, 3, value);
 
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_ONOFF, buf, MAVLINK_MSG_ID_ONOFF_MIN_LEN, MAVLINK_MSG_ID_ONOFF_LEN, MAVLINK_MSG_ID_ONOFF_CRC);
 #else
     mavlink_onoff_t packet;
     packet.dstsrc = dstsrc;
-    packet.msg_type = msg_type;
+    packet.type = type;
     packet.value = value;
 
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_ONOFF, (const char *)&packet, MAVLINK_MSG_ID_ONOFF_MIN_LEN, MAVLINK_MSG_ID_ONOFF_LEN, MAVLINK_MSG_ID_ONOFF_CRC);
@@ -174,7 +174,7 @@ static inline void mavlink_msg_onoff_send(mavlink_channel_t chan, uint16_t dstsr
 static inline void mavlink_msg_onoff_send_struct(mavlink_channel_t chan, const mavlink_onoff_t* onoff)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
-    mavlink_msg_onoff_send(chan, onoff->dstsrc, onoff->msg_type, onoff->value);
+    mavlink_msg_onoff_send(chan, onoff->dstsrc, onoff->type, onoff->value);
 #else
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_ONOFF, (const char *)onoff, MAVLINK_MSG_ID_ONOFF_MIN_LEN, MAVLINK_MSG_ID_ONOFF_LEN, MAVLINK_MSG_ID_ONOFF_CRC);
 #endif
@@ -188,19 +188,19 @@ static inline void mavlink_msg_onoff_send_struct(mavlink_channel_t chan, const m
   is usually the receive buffer for the channel, and allows a reply to an
   incoming message with minimum stack space usage.
  */
-static inline void mavlink_msg_onoff_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  uint16_t dstsrc, uint8_t msg_type, uint8_t value)
+static inline void mavlink_msg_onoff_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  uint16_t dstsrc, uint8_t type, uint8_t value)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char *buf = (char *)msgbuf;
     _mav_put_uint16_t(buf, 0, dstsrc);
-    _mav_put_uint8_t(buf, 2, msg_type);
+    _mav_put_uint8_t(buf, 2, type);
     _mav_put_uint8_t(buf, 3, value);
 
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_ONOFF, buf, MAVLINK_MSG_ID_ONOFF_MIN_LEN, MAVLINK_MSG_ID_ONOFF_LEN, MAVLINK_MSG_ID_ONOFF_CRC);
 #else
     mavlink_onoff_t *packet = (mavlink_onoff_t *)msgbuf;
     packet->dstsrc = dstsrc;
-    packet->msg_type = msg_type;
+    packet->type = type;
     packet->value = value;
 
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_ONOFF, (const char *)packet, MAVLINK_MSG_ID_ONOFF_MIN_LEN, MAVLINK_MSG_ID_ONOFF_LEN, MAVLINK_MSG_ID_ONOFF_CRC);
@@ -224,11 +224,11 @@ static inline uint16_t mavlink_msg_onoff_get_dstsrc(const mavlink_message_t* msg
 }
 
 /**
- * @brief Get field msg_type from onoff message
+ * @brief Get field type from onoff message
  *
  * @return  
  */
-static inline uint8_t mavlink_msg_onoff_get_msg_type(const mavlink_message_t* msg)
+static inline uint8_t mavlink_msg_onoff_get_type(const mavlink_message_t* msg)
 {
     return _MAV_RETURN_uint8_t(msg,  2);
 }
@@ -253,7 +253,7 @@ static inline void mavlink_msg_onoff_decode(const mavlink_message_t* msg, mavlin
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     onoff->dstsrc = mavlink_msg_onoff_get_dstsrc(msg);
-    onoff->msg_type = mavlink_msg_onoff_get_msg_type(msg);
+    onoff->type = mavlink_msg_onoff_get_type(msg);
     onoff->value = mavlink_msg_onoff_get_value(msg);
 #else
         uint8_t len = msg->len < MAVLINK_MSG_ID_ONOFF_LEN? msg->len : MAVLINK_MSG_ID_ONOFF_LEN;

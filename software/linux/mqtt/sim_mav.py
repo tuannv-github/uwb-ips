@@ -8,10 +8,26 @@ from mavlink import *
 serial = Serial(config.SERIAL_PORT_SIM, config.SERIAL_BAUD_SIM)
 mav = MAVLink(serial)
 
+NODE_MAX = 10
+
 def loop_write():
+    i = 0x00
+    location_x = 123.456
+    location_y = 99.2222
+    location_z = 789.123
     while True:
-        mav.location_send(0xFAAB, MSG_GET, 0.123, 987.123, 999.456)
-        time.sleep(1)
+        if(i > NODE_MAX/2):
+            mav.location_send(i, STATUS, ANCHOR, location_x, location_y, location_z)
+        else:
+            mav.location_send(i, STATUS, TAG, location_x, location_y, location_z)
+        mav.onoff_send(i, STATUS, 1)
+        time.sleep(0.1)
+
+        i+=1
+        i %= NODE_MAX
+        location_x += 1
+        location_y += 2
+        location_z += 10
 
 def loop_read():
     while True:

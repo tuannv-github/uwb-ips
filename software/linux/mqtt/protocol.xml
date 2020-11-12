@@ -3,11 +3,15 @@
 	<version>3</version>
 
 	<enums>
-		<enum name="msg_type_t">
-			<entry name="MSG_GET"></entry>
-			<entry name="MSG_SET"></entry>
-            <entry name="ACK"></entry>
+		<enum name="type_t">
+			<entry name="GET"></entry>
+			<entry name="SET"></entry>
+            <entry name="SET_UNACK"></entry>
             <entry name="STATUS"></entry>
+		</enum>
+		<enum name="node_t">
+			<entry name="ANCHOR"></entry>
+			<entry name="TAG"></entry>
 		</enum>
 	</enums>
 
@@ -15,7 +19,8 @@
 		<message id="0" name="LOCATION">
 			<description>Location message</description>
 			<field type="uint16_t" name="dstsrc"/>
-			<field type="uint8_t" name="msg_type" enum="msg_type_t"/>
+			<field type="uint8_t" name="type" enum="type_t"/>
+			<field type="uint8_t" name="node" enum="node_t"/>
 			<field type="float" name="location_x"/>
 			<field type="float" name="location_y"/>
 			<field type="float" name="location_z"/>
@@ -23,7 +28,7 @@
 		<message id="1" name="ONOFF">
 			<description>On off message</description>
 			<field type="uint16_t" name="dstsrc"/>
-			<field type="uint8_t" name="msg_type" enum="msg_type_t"/>
+			<field type="uint8_t" name="type" enum="type_t"/>
 			<field type="uint8_t" name="value"/>
 		</message>
 	</messages>

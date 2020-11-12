@@ -62,6 +62,8 @@ protocol websockets
 
 ```
 socat -d -d pty,raw,echo=0 pty,raw,echo=0
+sudo socat -u -u pty,raw,echo=0,link=/dev/ttyS20 pty,raw,echo=0,link=/dev/ttyS21
+sudo chown tuannv:tuannv /dev/ttyS20 /dev/ttyS21
 ```
 
 Protocol generator
