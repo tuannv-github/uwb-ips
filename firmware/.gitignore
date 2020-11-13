@@ -32,3 +32,5 @@ tags
 repos
 targets
 .vscode
+
+**/env

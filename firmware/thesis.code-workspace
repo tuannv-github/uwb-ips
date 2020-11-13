@@ -2,6 +2,12 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "../software/linux/gateway"
+		},
+		{
+			"path": "scripts"
 		}
 	],
 	"settings": {
@@ -13,6 +19,9 @@
 			"array": "cpp",
 			"string": "cpp",
 			"string_view": "cpp"
-		}
+		},
+		"cSpell.words": [
+			"swoport"
+		]
 	}
 }
