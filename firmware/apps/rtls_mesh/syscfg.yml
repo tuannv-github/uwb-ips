@@ -1,27 +1,56 @@
 
 syscfg.defs:
     APP_SW_TASK_STACK_SZ:
-        description: 'Size of interrupt task stack'
+        description: 'Size of task stack'
         value: 512
     APP_SW_TASK_PRIORITY:
-        description: 'Priority of button task'
-        value: 111
+        description: 'Priority of task'
+        value: 110
+
     APP_ROOT_TASK_STACK_SZ:
-        description: 'Size of interrupt task stack'
+        description: 'Size of task stack'
         value: 128
     APP_ROOT_TASK_PRIORITY:
-        description: 'Priority of button task'
-        value: 110
+        description: 'Priority of task'
+        value: 111
+
+    APP_GATEWAY_DOWNLINK_TASK_STACK_SZ:
+        description: 'Size of task stack'
+        value: 128
+    APP_GATEWAY_DOWNLINK_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 112
+
+    APP_GATEWAY_UPLINK_TASK_STACK_SZ:
+        description: 'Size of task stack'
+        value: 512
+    APP_GATEWAY_UPLINK_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 113
+
+    APP_RTLS_TASK_STACK_SIZE:
+        description: 'Size of task stack'
+        value: 128
+    APP_RTLS_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 114
+    APP_LOCA_TASK_STACK_SIZE:
+        description: 'Size of task stack'
+        value: 512
+    APP_LOCA_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 115
 
 syscfg.vals:
     # Enable the shell task.
     SHELL_TASK: 1
 
     # Set log level to info (disable debug logging).
-    LOG_LEVEL: 1
+    LOG_LEVEL: 5
 
     # Default task settings
     OS_MAIN_STACK_SIZE: 768
+    OS_CRASH_STACKTRACE: 1
 
     # Newtmgr is not supported in this app, so disable newtmgr-over-shell.
     SHELL_NEWTMGR: 0
@@ -32,28 +61,25 @@ syscfg.vals:
     BLE_MESH_ADV_BUF_COUNT: 20
     BLE_MESH_TX_SEG_MAX: 6
 
-    BLE_MESH_DEBUG: 1
-    BLE_MESH_DEBUG_NET: 1
-    BLE_MESH_DEBUG_TRANS: 1
-    BLE_MESH_DEBUG_BEACON: 1
-    BLE_MESH_DEBUG_CRYPTO: 1
-    BLE_MESH_DEBUG_PROV: 1
-    BLE_MESH_DEBUG_ACCESS: 1
-    BLE_MESH_DEBUG_MODEL: 1
-    BLE_MESH_DEBUG_ADV: 1
-    BLE_MESH_DEBUG_LOW_POWER: 1
-    BLE_MESH_DEBUG_FRIEND: 1
-    BLE_MESH_DEBUG_PROXY: 1
+    # BLE_MESH_DEBUG: 1
+    # BLE_MESH_DEBUG_NET: 1
+    # BLE_MESH_DEBUG_TRANS: 1
+    # BLE_MESH_DEBUG_BEACON: 1
+    # BLE_MESH_DEBUG_CRYPTO: 1
+    # BLE_MESH_DEBUG_PROV: 1
+    # BLE_MESH_DEBUG_ACCESS: 1
+    # BLE_MESH_DEBUG_MODEL: 1
+    # BLE_MESH_DEBUG_ADV: 1
+    # BLE_MESH_DEBUG_LOW_POWER: 1
+    # BLE_MESH_DEBUG_FRIEND: 1
+    # BLE_MESH_DEBUG_PROXY: 1
 
-    BLE_MESH_SETTINGS: 0
-    CONFIG_NFFS: 1
+    BLE_MESH_SETTINGS: 1
+    CONFIG_NFFS: 0
 
-    # Route console to UART
-    CONSOLE_RTT: 0
-    CONSOLE_UART: 1
-    CONSOLE_UART_BAUD: 115200
-    CONSOLE_UART_TX_BUF_SIZE: 1024
-    CONSOLE_UART_RX_BUF_SIZE: 256
+    CONSOLE_UART: false
+    CONSOLE_RTT: true
     CONSOLE_HISTORY_SIZE: 8
     RTT_TERMINAL_BUFFER_SIZE_UP: 1024
     RTT_TERMINAL_BUFFER_SIZE_DOWN: 256
+    CONSOLE_ECHO: false

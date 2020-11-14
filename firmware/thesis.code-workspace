@@ -18,9 +18,23 @@
 			"functional": "c",
 			"array": "cpp",
 			"string": "cpp",
-			"string_view": "cpp"
+			"string_view": "cpp",
+			"*.tcc": "c",
+			"memory": "c",
+			"istream": "c",
+			"tuple": "c",
+			"utility": "c",
+			"initializer_list": "c"
 		},
 		"cSpell.words": [
+			"aroot",
+			"artls",
+			"m",
+			"m aroot",
+			"m artls",
+			"ma",
+			"ma swch",
+			"swch",
 			"swoport"
 		]
 	}

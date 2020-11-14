@@ -26,7 +26,8 @@
 #include "bsp/bsp.h"
 #include "shell/shell.h"
 
-#include "rtls_mesh/ble_mesh/ble_mesh.h"
+#include "rtls_mesh/ble_mesh/mesh_if.h"
+#include "rtls_mesh/gateway/gateway.h"
 
 int
 main(int argc, char **argv)
@@ -34,6 +35,7 @@ main(int argc, char **argv)
     sysinit();
 
     ble_mesh_init();
+    gateway_init();
 
     while (1) {
         os_eventq_run(os_eventq_dflt_get());

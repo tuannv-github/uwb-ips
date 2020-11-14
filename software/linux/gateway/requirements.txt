@@ -91,6 +91,7 @@ launchpadlib==1.10.6
 lazr.restfulclient==0.13.5
 lazr.uri==1.0.3
 livereload==2.6.2
+lxml==4.6.1
 lz4==0.10.1
 MarkupSafe==1.1.1
 matplotlib==2.2.5
@@ -108,7 +109,7 @@ numpy==1.16.6
 oauth==1.0.1
 olefile==0.45.1
 packaging==20.4
-paho-mqtt==1.5.0
+paho-mqtt==1.5.1
 PAM==0.4.2
 pandas==0.24.2
 pandocfilters==1.4.2
@@ -134,6 +135,7 @@ pycryptodomex==3.4.7
 pydot==1.2.3
 Pygments==2.5.2
 pygobject==3.26.1
+pymavlink==2.4.12
 PyNaCl==1.1.2
 PyOpenGL==3.1.0
 pyOpenSSL==17.5.0

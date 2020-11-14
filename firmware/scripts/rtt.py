@@ -2,13 +2,12 @@ import pylink
 import threading
 from subprocess import PIPE, run
 
+BASE_PORT = 20000
 jlink = pylink.JLink()
 
 def os_cmd(command):
     result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
     return result.stdout
-
-BASE_PORT=8000
 
 cmd_template = '''JLinkGDBServer -device NRF52 -if swd \
 -endian little -port %d -swoport %d -telnetport %d -RTTTelnetport %d \

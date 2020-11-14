@@ -40,7 +40,7 @@ serial_rx_char(void *arg, uint8_t byte)
 {
     serial_t *serial = (serial_t *)arg;
     if(rbuf_put(&serial->rbuf_rx, byte)){
-        printf("RX buffer full");
+        printf("RX buffer full\n");
     }
     dpl_sem_release(&serial->sem_rx);
     return 0;
@@ -57,7 +57,7 @@ void serial_write(char *chr, size_t len){
     size_t idx;
     for(idx=0; idx<len; idx++){
         if(rbuf_put(&g_serial.rbuf_tx, chr[idx])){
-            printf("TX buffer full");
+            printf("TX buffer full\n");
         }
     }
     uart_start_tx(g_serial.uart_dev);

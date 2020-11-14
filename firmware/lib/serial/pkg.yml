@@ -26,6 +26,8 @@ pkg.deps:
     - "@apache-mynewt-core/kernel/os"
     - "@decawave-uwb-core/porting/dpl/mynewt"
 
+    - "@rtls/lib/rbuf"
+
 pkg.cflags:
     - "-std=gnu99"
     - "-fms-extensions"

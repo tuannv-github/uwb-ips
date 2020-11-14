@@ -13,14 +13,9 @@
 #include "services/gap/ble_svc_gap.h"
 #include "mesh/glue.h"
 
-#include <rtls_mesh/ble_mesh/model.h>
+#include <rtls_mesh/ble_mesh/elemt_03_lb.h>
 #include <rtls_mesh/ble_mesh/ble_mesh.h>
-
-/* Model Operation Codes */
-#define BT_MESH_MODEL_OP_GEN_ONOFF_GET			BT_MESH_MODEL_OP_2(0x82, 0x01)
-#define BT_MESH_MODEL_OP_GEN_ONOFF_SET			BT_MESH_MODEL_OP_2(0x82, 0x02)
-#define BT_MESH_MODEL_OP_GEN_ONOFF_SET_UNACK	BT_MESH_MODEL_OP_2(0x82, 0x03)
-#define BT_MESH_MODEL_OP_GEN_ONOFF_STATUS		BT_MESH_MODEL_OP_2(0x82, 0x04)
+#include <rtls_mesh/ble_mesh/mesh_define.h>
 
 static void gen_onoff_set(struct bt_mesh_model *model,
               struct bt_mesh_msg_ctx *ctx,

@@ -10,12 +10,13 @@
 #include "services/gap/ble_svc_gap.h"
 #include "mesh/glue.h"
 
-#include <rtls_mesh/ble_mesh/model.h>
+#include <rtls_mesh/ble_mesh/elemt_00_node.h>
 #include <rtls_mesh/ble_mesh/mesh_msg.h>
+#include <rtls_mesh/ble_mesh/mesh_define.h>
 
 typedef struct _app_root_t{ 
     struct dpl_sem sem;  
-    bool running;     
+    bool running;
     struct dpl_task task;            
     dpl_stack_t task_stack[MYNEWT_VAL(APP_ROOT_TASK_STACK_SZ)];
     struct bt_mesh_model *model;
@@ -151,7 +152,7 @@ void model_root_init(){
 
     dpl_sem_init(&g_app_root.sem, 0x00);
 
-    dpl_task_init(&g_app_root.task, "app_root",
+    dpl_task_init(&g_app_root.task, "ma_root",
                     task,
                     (void *)&g_app_root,
                     MYNEWT_VAL(APP_ROOT_TASK_PRIORITY), 

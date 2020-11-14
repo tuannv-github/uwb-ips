@@ -13,8 +13,10 @@
 #include "services/gap/ble_svc_gap.h"
 #include "mesh/glue.h"
 
-#include <rtls_mesh/ble_mesh/model.h>
+#include <rtls_mesh/ble_mesh/elemt_02_sw.h>
 #include <rtls_mesh/ble_mesh/ble_mesh.h>
+#include <rtls_mesh/ble_mesh/mesh_define.h>
+
 #include <button/button.h>
 
 typedef struct _app_sw_t{
@@ -103,7 +105,7 @@ void model_sw_init(){
     {
         dpl_event_init(&app_sw.event, app_event_fn, &app_sw);
         dpl_eventq_init(&app_sw.eventq);
-        dpl_task_init(&app_sw.task, "app_sw",
+        dpl_task_init(&app_sw.task, "ma_swch",
                       task,
                       (void *)&app_sw,
                       MYNEWT_VAL(APP_SW_TASK_PRIORITY), 

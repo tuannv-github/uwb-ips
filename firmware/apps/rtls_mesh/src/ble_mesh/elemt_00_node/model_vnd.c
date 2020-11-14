@@ -13,9 +13,9 @@
 #include "services/gap/ble_svc_gap.h"
 #include "mesh/glue.h"
 
-#include <rtls_mesh/ble_mesh/model.h>
+#include <rtls_mesh/ble_mesh/elemt_00_node.h>
 #include <rtls_mesh/ble_mesh/ble_mesh.h>
-
+#include <rtls_mesh/ble_mesh/mesh_define.h>
 
 #define STANDARD_TEST_ID    0x00
 #define TEST_ID             0x01
