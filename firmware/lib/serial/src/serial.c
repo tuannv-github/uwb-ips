@@ -10,11 +10,7 @@ typedef struct _serial_t{
     rbuf_t rbuf_rx;
     uint8_t buffer_rx[MYNEWT_VAL(SERIAL_RX_RBUF_SIZE)];
 
-    struct dpl_eventq eventq;                         
-    struct dpl_task task;           
-    dpl_stack_t task_stack[MYNEWT_VAL(SERIAL_TASK_STACK_SIZE)];
     struct dpl_sem sem_rx;
-
 }serial_t;
 
 static serial_t g_serial;
@@ -43,7 +39,9 @@ static int
 serial_rx_char(void *arg, uint8_t byte)
 {
     serial_t *serial = (serial_t *)arg;
-    rbuf_put(&serial->rbuf_rx, byte);
+    if(rbuf_put(&serial->rbuf_rx, byte)){
+        printf("RX buffer full");
+    }
     dpl_sem_release(&serial->sem_rx);
     return 0;
 }
@@ -58,19 +56,11 @@ char serial_read(){
 void serial_write(char *chr, size_t len){
     size_t idx;
     for(idx=0; idx<len; idx++){
-        rbuf_put(&g_serial.rbuf_tx, chr[idx]);
+        if(rbuf_put(&g_serial.rbuf_tx, chr[idx])){
+            printf("TX buffer full");
+        }
     }
     uart_start_tx(g_serial.uart_dev);
-}
-
-static void *
-task(void *arg)
-{
-    serial_t *inst = arg;
-    while (1) {
-        dpl_eventq_run(&inst->eventq);
-    }
-    return NULL;
 }
 
 void
@@ -104,27 +94,10 @@ serial_pkg_init(void)
     }
 
     dpl_sem_init(&g_serial.sem_rx, 0x00);
-
-    if (!dpl_eventq_inited(&g_serial.eventq))
-    {
-        dpl_eventq_init(&g_serial.eventq);
-        dpl_task_init(&g_serial.task, "serial",
-                      task,
-                      (void *) &g_serial,
-                      MYNEWT_VAL(SERIAL_TASK_PRIORITY), 
-                      DPL_WAIT_FOREVER,
-                      g_serial.task_stack,
-                      MYNEWT_VAL(SERIAL_TASK_STACK_SIZE));
-    }
 }
 
 int
 serial_pkg_down(int reason)
 {
-    if (dpl_eventq_inited(&g_serial.eventq))
-    {
-        dpl_eventq_deinit(&g_serial.eventq);
-        dpl_task_remove(&g_serial.task);
-    }
     return 0;
 }

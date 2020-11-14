@@ -10,12 +10,10 @@ os_stack_t task_stack[STACK_SIZE];
 static void
 task_func(void *arg)
 {
-    char chr[2];
-    chr[1] = 0;
+    char chr;
     while(1){
-        chr[0] = serial_read();
-        printf("%s", chr);
-        serial_write(chr, 1);
+        chr = serial_read();
+        serial_write(&chr, 1);
     }
 }
 

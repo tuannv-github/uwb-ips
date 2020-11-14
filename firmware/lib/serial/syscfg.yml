@@ -1,10 +1,4 @@
 syscfg.defs:
-    SERIAL_TASK_STACK_SIZE:
-        description: 'Size of interrupt task stack'
-        value: 128
-    SERIAL_TASK_PRIORITY:
-        description: 'Priority of button task'
-        value: 100
     SERIAL_RX_RBUF_SIZE:
         description: ''
         value: 32
