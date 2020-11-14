@@ -1,13 +1,7 @@
 syscfg.defs:
-    BUTTON_TASK_STACK_SZ:
+    SERIAL_TASK_STACK_SZ:
         description: 'Size of interrupt task stack'
         value: 128
-    BUTTON_TASK_PRIORITY:
+    SERIAL_TASK_PRIORITY:
         description: 'Priority of button task'
         value: 100
-    BUTTON_NUM:
-        description: 'Number of supported button'
-        value: 32
-    BUTTON_DEBOUNCE_US:
-        description: 'Time in us for button debounce'
-        value: 5000

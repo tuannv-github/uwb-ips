@@ -1,0 +1,19 @@
+syscfg.defs:
+    SERIAL_TASK_STACK_SIZE:
+        description: 'Size of interrupt task stack'
+        value: 128
+    SERIAL_TASK_PRIORITY:
+        description: 'Priority of button task'
+        value: 100
+    SERIAL_RX_RBUF_SIZE:
+        description: ''
+        value: 32
+    SERIAL_TX_RBUF_SIZE:
+        description: ''
+        value: 32
+    SERIAL_UART_DEV:
+        description: 'Serial UART dev'
+        value: '"uart0"'
+    SERIAL_UART_BAUD:
+        description: 'Serial UART baud'
+        value: 115200
