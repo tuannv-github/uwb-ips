@@ -39,7 +39,7 @@ main(int argc, char **argv)
     
     ble_mesh_init();
     gateway_init();
-    rtls_init();
+    // rtls_init();
 
     while (1) {
         os_eventq_run(os_eventq_dflt_get());
