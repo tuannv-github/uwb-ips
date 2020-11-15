@@ -343,7 +343,7 @@ bcn_slot_cb_mine(tdma_slot_t *tdma_slot){
         printf("Accept slot: 0x%02llx/0x%02llx/0x%02llx\n", rti->nodes[rti->slot_idx].slot_map,  rti->slot_req, (~rti->nodes[rti->slot_idx].slot_map) & rti->slot_req);
     }
 
-    free(rt_msg);
+    if(rt_msg) free(rt_msg);
 }
 
 static void
@@ -451,6 +451,7 @@ svc_slot_cb(tdma_slot_t *tdma_slot){
     else{
         uint16_t rt_msg_size = sizeof(ieee_std_frame_hdr_t) + sizeof(rt_slot_t);
         uint8_t *rt_msg = calloc(1, rt_msg_size);
+        if(!rt_msg) return;
 
         ieee_std_frame_hdr_t *ieee_std_frame_hdr = (ieee_std_frame_hdr_t *)rt_msg;
         rt_slot_t *rt_slot = (rt_slot_t *)(rt_msg + sizeof(ieee_std_frame_hdr_t));

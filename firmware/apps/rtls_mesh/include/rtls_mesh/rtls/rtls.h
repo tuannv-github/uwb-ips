@@ -10,4 +10,6 @@ void rtls_get_address(uint16_t *address);
 
 void rtls_get_ntype(uint8_t *ntype);
 
+void rtls_init();
+
 #endif
