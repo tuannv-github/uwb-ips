@@ -1,0 +1,124 @@
+
+syscfg.defs:
+    APP_SW_TASK_STACK_SZ:
+        description: 'Size of task stack'
+        value: 512
+    APP_SW_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 210
+
+    APP_ROOT_TASK_STACK_SZ:
+        description: 'Size of task stack'
+        value: 128
+    APP_ROOT_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 211
+
+    APP_GATEWAY_DOWNLINK_TASK_STACK_SZ:
+        description: 'Size of task stack'
+        value: 128
+    APP_GATEWAY_DOWNLINK_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 212
+
+    APP_GATEWAY_UPLINK_TASK_STACK_SZ:
+        description: 'Size of task stack'
+        value: 512
+    APP_GATEWAY_UPLINK_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 213
+    APP_GATEWAY_UPLINK_MAV_BUFFER_SIZE:
+        description: 'Buffer size'
+        value: 32
+
+    APP_RTLS_TASK_STACK_SIZE:
+        description: 'Size of task stack'
+        value: 512
+    APP_RTLS_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 214
+
+syscfg.vals:
+    # Enable the shell task.
+    SHELL_TASK: 1
+
+    LOG_LEVEL: 2
+
+    # Default task settings
+    OS_MAIN_STACK_SIZE: 1024
+    OS_CRASH_STACKTRACE: 1
+
+    # Newtmgr is not supported in this app, so disable newtmgr-over-shell.
+    SHELL_NEWTMGR: 0
+
+    BLE_MESH: 1
+
+    BLE_MESH_ADV_BUF_COUNT: 10
+    # BLE_MESH_TX_SEG_MAX: 10
+    # BLE_MESH_TX_SEG_MSG_COUNT: 10
+
+    # BLE_MESH_DEBUG: 1
+    # BLE_MESH_DEBUG_NET: 1
+    # BLE_MESH_DEBUG_TRANS: 1
+    # BLE_MESH_DEBUG_BEACON: 1
+    # BLE_MESH_DEBUG_CRYPTO: 1
+    # BLE_MESH_DEBUG_PROV: 1
+    # BLE_MESH_DEBUG_ACCESS: 1
+    # BLE_MESH_DEBUG_MODEL: 1
+    # BLE_MESH_DEBUG_ADV: 1
+    # BLE_MESH_DEBUG_LOW_POWER: 1
+    # BLE_MESH_DEBUG_FRIEND: 1
+    # BLE_MESH_DEBUG_PROXY: 1
+
+    BLE_MESH_SETTINGS: 1
+    CONFIG_NFFS: 1
+
+    CONSOLE_UART: false
+    CONSOLE_RTT: true
+    CONSOLE_HISTORY_SIZE: 8
+    RTT_TERMINAL_BUFFER_SIZE_UP: 1024
+    RTT_TERMINAL_BUFFER_SIZE_DOWN: 256
+    CONSOLE_ECHO: false
+
+    UWB_PKG_INIT_LOG: 0
+
+   # Shell
+    SHELL_TASK: 1
+    SHELL_PROMPT_MODULE: 1
+    SHELL_NEWTMGR: 1
+    CONFIG_CLI: 1
+    CONFIG_CLI_DEBUG: 1
+    DW1000_CLI: 1
+    STATS_NAMES: 1
+    STATS_CLI: 1
+
+    # Enable DW1000
+    UWB_DEVICE_0: 1
+    UWBCFG_APPLY_AT_INIT: 1
+    CIR_ENABLED: 0
+    CIR_VERBOSE: 0
+    CIR_OFFSET:  4
+    CIR_SIZE:    8
+    UWB_CLI:  0
+    UWB_CLI_BACKTRACE: 0
+
+    UWB_CCP_ENABLED: 1
+    UWB_CCP_PERIOD: ((uint32_t)1000000)
+    UWB_CCP_MAX_CASCADE_RPTS: 2
+    
+    ## Where to store config
+    # CONFIG_FCB: 1
+    # CONFIG_NEWTMGR: 1
+    # CONFIG_FCB_FLASH_AREA: FLASH_AREA_NFFS
+
+    MSYS_1_BLOCK_COUNT: 16
+    MSYS_1_BLOCK_SIZE: 128
+    
+    MSYS_2_BLOCK_COUNT: 8
+    MSYS_2_BLOCK_SIZE: 512
+
+    TDMA_NSLOTS: 20
+    TDMA_TASK_STACK_SZ: 1024
+
+    BLE_MESH_TX_SEG_MAX: 6
+    # RNG_VERBOSE: 2
