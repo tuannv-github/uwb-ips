@@ -57,8 +57,8 @@ rtls_model_status(struct bt_mesh_model *model,
 }
 
 static const struct bt_mesh_model_op rtls_op[] = {
-    { BT_MESH_MODEL_OP_SET, 0, rtls_model_status},
-    { BT_MESH_MODEL_OP_STATUS, 0, rtls_model_set},
+    { BT_MESH_MODEL_OP_SET, 0, rtls_model_set},
+    { BT_MESH_MODEL_OP_STATUS, 0, rtls_model_status},
     BT_MESH_MODEL_OP_END,
 };
 
@@ -115,7 +115,7 @@ process_net_to_ble_queue(struct os_event *ev)
                 default:
                     continue;
             }
-            bt_mesh_model_msg_init(model->pub->msg, BT_MESH_MODEL_OP_STATUS);
+            bt_mesh_model_msg_init(model->pub->msg, BT_MESH_MODEL_OP_SET);
             msg_prepr_rtls(model->pub->msg, &msg_rtls);
             rc = bt_mesh_model_publish(model);
             if(rc){

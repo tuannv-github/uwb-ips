@@ -38,7 +38,6 @@ pkg.deps:
     - "@rtls/lib/serial"
 
 pkg.cflags:
-    - "-Waddress-of-packed-member"
     - "-std=gnu11"
     - "-fms-extensions"
     - "-g"
