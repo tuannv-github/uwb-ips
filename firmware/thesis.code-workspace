@@ -24,7 +24,13 @@
 			"istream": "c",
 			"tuple": "c",
 			"utility": "c",
-			"initializer_list": "c"
+			"initializer_list": "c",
+			"mesh_msg.h": "c",
+			"mavlink.h": "c",
+			"optional": "c",
+			"ostream": "c",
+			"ratio": "c",
+			"system_error": "c"
 		},
 		"cSpell.words": [
 			"aroot",
