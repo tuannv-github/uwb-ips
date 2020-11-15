@@ -32,14 +32,14 @@ rtls_model_set(struct bt_mesh_model *model,
               struct bt_mesh_msg_ctx *ctx,
               struct os_mbuf *buf)
 {  
-
+    printf("rtls_model_set()\n");
 }
 
 static void
 rtls_model_status(struct bt_mesh_model *model,
               struct bt_mesh_msg_ctx *ctx,
               struct os_mbuf *buf)
-{  
+{
     int rc;
     struct os_mbuf *om;
     struct os_mqueue *mqueue;
@@ -99,18 +99,32 @@ process_net_to_ble_queue(struct os_event *ev)
     struct os_mbuf *om;
     struct os_mqueue *mqueue = (struct os_mqueue *)ev->ev_arg;
     struct bt_mesh_model *model = &model_root[1];
+    msg_rtls_t msg_rtls;
     int rc;
 
     while ((om = os_mqueue_get(mqueue)) != NULL) {
         if(model->pub->addr != BT_MESH_ADDR_UNASSIGNED) {
-            model->pub->msg = om;
-            rc = bt_mesh_model_publish(model);  
+            msg_parse_rtls(om, &msg_rtls);
+            switch(msg_rtls.msg_type){
+                case MAVLINK_MSG_ID_LOCATION:
+                    model->pub->msg = NET_BUF_SIMPLE(1+sizeof(struct _msg_rtls_header_t) + sizeof(struct _msg_rtls_location_t));
+                    break;
+                case MAVLINK_MSG_ID_ONOFF:
+                    model->pub->msg = NET_BUF_SIMPLE(1+sizeof(struct _msg_rtls_header_t) + sizeof(struct _msg_rtls_onoff_t));
+                    break;
+                default:
+                    continue;
+            }
+            bt_mesh_model_msg_init(model->pub->msg, BT_MESH_MODEL_OP_STATUS);
+            msg_prepr_rtls(model->pub->msg, &msg_rtls);
+            rc = bt_mesh_model_publish(model);
             if(rc){
                 printf("Unable to publish message from net to ble\n");
             }
             else{
                 printf("NET->BLE\n");
             }
+            os_mbuf_free_chain(model->pub->msg);
         }
         os_mbuf_free_chain(om);
     }

@@ -52,7 +52,7 @@ task_downlink_func(void *arg)
         chr = serial_read();
         uint8_t msg_received = mavlink_parse_char(MAVLINK_COMM_0, chr, &g_mavlink_msg, &g_mavlink_status);
 		if(msg_received){
-
+            printf("Receive msg from net\n");
             om = os_mbuf_get_pkthdr(&g_mbuf_pool, 0);
             if(!om) {
                 printf("Full mqueue. Message drop!\n");
