@@ -15,13 +15,14 @@
 #include <controller/ble_hw.h>
 
 #include <rtls_mesh/ble_mesh/ble_mesh.h>
-#include <rtls_mesh/ble_mesh/model.h>
+#include <rtls_mesh/ble_mesh/mesh_define.h>
 
 static uint8_t g_dev_uuid[16] = MYNEWT_VAL(BLE_MESH_DEV_UUID);
 
 /* Element definition */
 static struct bt_mesh_elem g_elements[] = {
     BT_MESH_ELEM(0, model_root, model_vnd),
+    BT_MESH_ELEM(0, model_rtls, BT_MESH_MODEL_NONE),
     BT_MESH_ELEM(0, model_sw, BT_MESH_MODEL_NONE),
     BT_MESH_ELEM(0, model_lb, BT_MESH_MODEL_NONE),
 };
@@ -114,6 +115,10 @@ void ble_mesh_init(){
     ble_hs_cfg.store_status_cb = ble_store_util_status_rr;
 
     model_root_init();
+    model_vnd_init();
+
+    model_rtls_init();
+
     model_sw_init();
     model_lb_init();
 }

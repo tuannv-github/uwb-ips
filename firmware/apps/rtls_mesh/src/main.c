@@ -25,15 +25,21 @@
 #include "hal/hal_gpio.h"
 #include "bsp/bsp.h"
 #include "shell/shell.h"
+#include <config/config.h>
 
-#include "rtls_mesh/ble_mesh/ble_mesh.h"
+#include <rtls_mesh/ble_mesh/mesh_if.h>
+#include <rtls_mesh/gateway/gateway.h>
+#include <rtls_mesh/rtls/rtls.h>
 
 int
 main(int argc, char **argv)
 {
     sysinit();
-
+    conf_load();
+    
     ble_mesh_init();
+    gateway_init();
+    // rtls_init();
 
     while (1) {
         os_eventq_run(os_eventq_dflt_get());

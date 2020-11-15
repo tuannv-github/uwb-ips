@@ -17,18 +17,17 @@
 #
 pkg.name: apps/rtls_mesh
 pkg.type: app
-pkg.description: Sample application for BLE Mesh node with on/off model
-pkg.author: "Łukasz Rymanowski <lukasz.rymanowski@codecoup.pl>"
-pkg.homepage: "http://mynewt.apache.org/"
-pkg.keywords:
+pkg.description: Real localization system 
+pkg.author: "Tuan Ngo Van <tuanngo0898@gmail.com>"
+pkg.homepage: "https://github.com/tuanngo0898"
 
 pkg.deps:
     - "@apache-mynewt-core/kernel/os"
     - "@apache-mynewt-core/sys/console/full"
     - "@apache-mynewt-core/sys/log/full"
-    - "@apache-mynewt-core/sys/log/modlog"
     - "@apache-mynewt-core/sys/stats/full"
     - "@apache-mynewt-core/sys/shell"
+
     - "@apache-mynewt-nimble/nimble/controller"
     - "@apache-mynewt-nimble/nimble/host"
     - "@apache-mynewt-nimble/nimble/host/services/gap"
@@ -37,3 +36,22 @@ pkg.deps:
     - "@apache-mynewt-nimble/nimble/transport/ram"
 
     - "@rtls/lib/button"
+    - "@rtls/lib/serial"
+
+    - "@apache-mynewt-core/kernel/os"
+    - "@apache-mynewt-core/sys/console/full"
+    - "@apache-mynewt-core/sys/shell"
+    - "@apache-mynewt-core/sys/log/full"
+    - "@apache-mynewt-core/sys/stats/full"
+    - "@mynewt-timescale-lib/lib/timescale"
+
+    - "@decawave-uwb-core/sys/uwbcfg"
+    - "@decawave-uwb-core/hw/drivers/uwb"
+
+    - "@rtls/lib/rtls_tdma"
+
+pkg.cflags:
+    - "-Waddress-of-packed-member"
+    - "-std=gnu11"
+    - "-fms-extensions"
+    - "-g"

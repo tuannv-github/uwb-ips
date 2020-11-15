@@ -1,0 +1,68 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "gnu-debugger",
+            "request": "launch",
+            "name": "rtls_mesh",
+            "program": "/home/tuannv/thesis/firmware/bin/targets/rtls_mesh/app/apps/rtls_mesh/rtls_mesh.elf",
+            "toolchain": "/usr/local/bin/",
+            "client": "arm-none-eabi-gdb",
+            "server": "JLinkGDBServer",
+            "windows": {
+              "server": "JLinkGDBServerCL",
+            },
+            "serverArgs": [
+              "-device", "nrf52",
+              "-if", "SWD",
+              "-speed", "4000"
+            ],
+            "serverPort": 2331,
+            "serverHost": "localhost",
+            "customVariables": [
+              "port0",
+              "port1",
+              "port2",
+            ],
+            "autoRun": false,
+            "debugOutput": false,
+          },
+          {
+            "type": "gnu-debugger",
+            "request": "launch",
+            "name": "gateway",
+            "program": "/home/tuannv/thesis/firmware/bin/targets/gateway/app/apps/gateway/gateway.elf",
+            "toolchain": "/usr/local/bin/",
+            "client": "arm-none-eabi-gdb",
+            "server": "JLinkGDBServer",
+            "windows": {
+              "server": "JLinkGDBServerCL",
+            },
+            "serverArgs": [
+              "-device", "nrf52",
+              "-if", "SWD",
+              "-speed", "4000"
+            ],
+            "serverPort": 2331,
+            "serverHost": "localhost",
+            "customVariables": [
+              "port0",
+              "port1",
+              "port2",
+            ],
+            "autoRun": false,
+            "debugOutput": false,
+          }
+    ]
+}

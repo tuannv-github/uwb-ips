@@ -41,7 +41,7 @@ syscfg.defs:
         value: 1
     UWB_CCP_TASK_STACK_SZ:
         description: 'Size of interrupt task stack'
-        value: 128
+        value: 2048
     UWB_CCP_TOLERATE_MISSED_FRAMES:
         description: >
           The number of missed ccp frames we can tolerate before

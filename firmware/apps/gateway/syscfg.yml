@@ -1,0 +1,54 @@
+
+syscfg.defs:
+    APP_GATEWAY_DOWNLINK_TASK_STACK_SZ:
+        description: 'Size of task stack'
+        value: 128
+    APP_GATEWAY_DOWNLINK_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 212
+
+    APP_GATEWAY_UPLINK_TASK_STACK_SZ:
+        description: 'Size of task stack'
+        value: 512
+    APP_GATEWAY_UPLINK_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 213
+    APP_GATEWAY_UPLINK_MAV_BUFFER_SIZE:
+        description: 'Buffer size'
+        value: 32
+
+    APP_GATEWAY_TASK_STACK_SIZE:
+        description: 'Size of task stack'
+        value: 128
+    APP_GATEWAY_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 214
+
+syscfg.vals:
+
+    MSYS_1_BLOCK_COUNT: 32
+    MSYS_1_BLOCK_SIZE: 128
+    
+    MSYS_2_BLOCK_COUNT: 24
+    MSYS_2_BLOCK_SIZE: 512
+
+    SHELL_TASK: 1
+    SHELL_NEWTMGR: 0
+    
+    CONSOLE_UART: false
+    CONSOLE_RTT: true
+    CONSOLE_HISTORY_SIZE: 8
+    RTT_TERMINAL_BUFFER_SIZE_UP: 1024
+    RTT_TERMINAL_BUFFER_SIZE_DOWN: 256
+    CONSOLE_ECHO: false
+
+    LOG_LEVEL: 5
+    OS_MAIN_STACK_SIZE: 1024
+    OS_CRASH_STACKTRACE: 1
+
+    BLE_MESH: 1
+    BLE_MESH_ADV_BUF_COUNT: 15
+    BLE_MESH_TX_SEG_MAX: 10
+
+    BLE_MESH_SETTINGS: 1
+    CONFIG_NFFS: 1

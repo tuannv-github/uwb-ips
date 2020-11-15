@@ -33,33 +33,43 @@ newt load rtls_mesh
 ```
 
 ```
-newt target create blemesh
-newt target set blemesh app=@apache-mynewt-nimble/apps/blemesh
-newt target set blemesh bsp=@apache-mynewt-core/hw/bsp/nordic_pca10040
-newt target set blemesh build_profile=optimized
+newt target create rtls_mesh
+newt target set rtls_mesh app=@apache-mynewt-nimble/apps/rtls_mesh
+newt target set rtls_mesh bsp=@apache-mynewt-core/hw/bsp/nordic_pca10040
+newt target set rtls_mesh build_profile=optimized
 
-newt target set blemesh syscfg=BLE_MESH_PB_GATT=1:BLE_MESH_DEV_UUID='(uint8_t[16]){0x22, 0x20, 0}'
-newt target set blemesh syscfg=BLE_MESH_PB_GATT=1:BLE_MESH_DEV_UUID='(uint8_t[16]){0x22, 0x21, 0}'
+newt target set rtls_mesh syscfg=BLE_MESH_PB_GATT=1:BLE_MESH_DEV_UUID='(uint8_t[16]){0x22, 0x20, 0}'
+newt target set rtls_mesh syscfg=BLE_MESH_PB_GATT=1:BLE_MESH_DEV_UUID='(uint8_t[16]){0x22, 0x21, 0}'
 
-newt build blemesh
-newt create-image blemesh 0.0.0.0
-newt load blemesh
+newt build rtls_mesh
+newt create-image rtls_mesh 0.0.0.0
+newt load rtls_mesh
 ```
 
 ```
-newt target create blemesh
-newt target set blemesh app=@apache-mynewt-nimble/apps/blemesh
-newt target set blemesh bsp=hw/bsp/dwm1001_232
-newt target set blemesh build_profile=optimized
+newt target create rtls_mesh
+newt target set rtls_mesh app=@apache-mynewt-nimble/apps/rtls_mesh
+newt target set rtls_mesh bsp=hw/bsp/dwm1001_232
+newt target set rtls_mesh build_profile=optimized
 
-newt target set blemesh syscfg=BLE_MESH_PB_GATT=1:BLE_MESH_DEV_UUID='(uint8_t[16]){0x22, 0x20, 0}'
-newt target set blemesh syscfg=BLE_MESH_PB_GATT=1:BLE_MESH_DEV_UUID='(uint8_t[16]){0x22, 0x21, 0}'
+newt target set rtls_mesh syscfg=BLE_MESH_PB_GATT=1:BLE_MESH_DEV_UUID='(uint8_t[16]){0x22, 0x20, 0}'
+newt target set rtls_mesh syscfg=BLE_MESH_PB_GATT=1:BLE_MESH_DEV_UUID='(uint8_t[16]){0x22, 0x21, 0}'
 
-newt build blemesh
-newt create-image blemesh 0.0.0.0
-newt load blemesh
+newt build rtls_mesh
+newt create-image rtls_mesh 0.0.0.0
+newt load rtls_mesh
 ```
 
 ```
-newt load blemesh --extrajtagcmd "-select USB=760085863" 
+newt load rtls_mesh --extrajtagcmd "-select USB=760085863" 
+```
+
+```
+newt target create rtls_mesh
+newt target set rtls_mesh app=apps/rtls_mesh
+newt target set rtls_mesh bsp=hw/bsp/dwm1001_464
+newt target set rtls_mesh build_profile=optimized
+newt build rtls_mesh
+newt create-image rtls_mesh 0.0.0.0
+newt load rtls_mesh
 ```
