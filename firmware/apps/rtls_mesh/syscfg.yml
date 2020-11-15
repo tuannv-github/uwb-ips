@@ -27,6 +27,9 @@ syscfg.defs:
     APP_GATEWAY_UPLINK_TASK_PRIORITY:
         description: 'Priority of task'
         value: 113
+    APP_GATEWAY_UPLINK_MAV_BUFFER_SIZE:
+        description: 'Buffer size'
+        value: 32
 
     APP_RTLS_TASK_STACK_SIZE:
         description: 'Size of task stack'
@@ -45,7 +48,6 @@ syscfg.vals:
     # Enable the shell task.
     SHELL_TASK: 1
 
-    # Set log level to info (disable debug logging).
     LOG_LEVEL: 5
 
     # Default task settings
@@ -59,7 +61,8 @@ syscfg.vals:
     MSYS_1_BLOCK_COUNT: 48
 
     BLE_MESH_ADV_BUF_COUNT: 20
-    BLE_MESH_TX_SEG_MAX: 6
+    BLE_MESH_TX_SEG_MAX: 10
+    BLE_MESH_TX_SEG_MSG_COUNT: 10
 
     # BLE_MESH_DEBUG: 1
     # BLE_MESH_DEBUG_NET: 1
@@ -75,7 +78,7 @@ syscfg.vals:
     # BLE_MESH_DEBUG_PROXY: 1
 
     BLE_MESH_SETTINGS: 1
-    CONFIG_NFFS: 0
+    CONFIG_NFFS: 1
 
     CONSOLE_UART: false
     CONSOLE_RTT: true

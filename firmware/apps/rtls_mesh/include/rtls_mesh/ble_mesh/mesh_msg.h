@@ -24,7 +24,8 @@ void msg_parse_onoff(struct os_mbuf *os_mbuf, msg_onoff_t *msg);
 
 typedef struct _msg_rtls_t
 {
-    uint8_t type;
+    uint8_t msg_type;
+    uint8_t node_type;
     uint16_t dstsrc;
     union{
         struct

@@ -88,7 +88,6 @@ app_event_fn(struct dpl_event *ev){
 
 	bt_mesh_model_msg_init(pub_cli->msg, BT_MESH_MODEL_OP_GEN_ONOFF_SET);
 
-
 	int err = bt_mesh_model_publish(model_sw);
 	if (err) {
 		printk("bt_mesh_model_publish err %d\n", err);

@@ -9,9 +9,10 @@ void msg_parse_onoff(struct os_mbuf *os_mbuf, msg_onoff_t *msg){
 }
 
 void msg_prepr_rtls(struct os_mbuf *mbuf, msg_rtls_t *msg){
-    net_buf_simple_add_u8(mbuf, msg->type);
+    net_buf_simple_add_u8(mbuf, msg->msg_type);
+    net_buf_simple_add_u8(mbuf, msg->node_type);
     net_buf_simple_add_be16(mbuf, msg->dstsrc);
-    switch (msg->type)
+    switch (msg->msg_type)
     {
     case MAVLINK_MSG_ID_LOCATION:
         net_buf_simple_add_be32(mbuf, *((uint32_t *)(&msg->location_x)));
@@ -26,10 +27,10 @@ void msg_prepr_rtls(struct os_mbuf *mbuf, msg_rtls_t *msg){
 }
 
 void msg_parse_rtls(struct os_mbuf *mbuf, msg_rtls_t *msg){
-    msg->type = net_buf_simple_pull_u8(mbuf);
+    msg->msg_type = net_buf_simple_pull_u8(mbuf);
+    msg->node_type = net_buf_simple_pull_u8(mbuf);
     msg->dstsrc = net_buf_simple_pull_be16(mbuf);
-
-    switch (msg->type)
+    switch (msg->msg_type)
     {
     case MAVLINK_MSG_ID_LOCATION:
         *((uint32_t *)(&msg->location_x)) = net_buf_simple_pull_be32(mbuf);
