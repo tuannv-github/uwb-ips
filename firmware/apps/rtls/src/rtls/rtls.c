@@ -14,6 +14,7 @@ float g_location[3] = {0.2, 123.456, 567};
 uint16_t g_address = 0x1234;
 uint16_t g_ntype = ANCHOR;
 
+struct uwb_dev *udev;
 void rtls_get_location(float *x, float *y, float *z){
     *x = g_location[0];
     *y = g_location[1];
@@ -27,7 +28,7 @@ void rtls_set_location(float x, float y, float z){
 }
 
 void rtls_get_address(uint16_t *address){
-    *address = g_address;
+    *address = udev->my_short_address;
 }
 
 void rtls_get_ntype(uint8_t *ntype){
@@ -69,7 +70,7 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
 }
 
 void rtls_init(){
-    struct uwb_dev *udev = uwb_dev_idx_lookup(0);
+    udev = uwb_dev_idx_lookup(0);
     uwb_set_dblrxbuff(udev, false);
 
     g_rtls_tdma_instance.uri  = (struct uwb_rng_instance *)uwb_mac_find_cb_inst_ptr(udev, UWBEXT_RNG);

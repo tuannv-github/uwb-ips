@@ -402,7 +402,7 @@ uwb_ccp_init(struct uwb_dev* dev, uint16_t nframes)
 
         ccp->dev_inst = dev;
         /* TODO: fixme below */
-        ccp->task_prio = 150;
+        ccp->task_prio = dev->task_prio - 0x4;
     }else{
         assert(ccp->nframes == nframes);
     }
