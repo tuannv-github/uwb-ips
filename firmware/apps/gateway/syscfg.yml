@@ -2,7 +2,7 @@
 syscfg.defs:
     APP_GATEWAY_DOWNLINK_TASK_STACK_SZ:
         description: 'Size of task stack'
-        value: 128
+        value: 512
     APP_GATEWAY_DOWNLINK_TASK_PRIORITY:
         description: 'Priority of task'
         value: 212
@@ -15,18 +15,18 @@ syscfg.defs:
         value: 213
     APP_GATEWAY_UPLINK_MAV_BUFFER_SIZE:
         description: 'Buffer size'
-        value: 32
+        value: 128
 
     APP_GATEWAY_TASK_STACK_SIZE:
         description: 'Size of task stack'
-        value: 128
+        value: 512
     APP_GATEWAY_TASK_PRIORITY:
         description: 'Priority of task'
         value: 214
 
 syscfg.vals:
 
-    MSYS_1_BLOCK_COUNT: 32
+    MSYS_1_BLOCK_COUNT: 48
     MSYS_1_BLOCK_SIZE: 128
     
     MSYS_2_BLOCK_COUNT: 24

@@ -10,11 +10,12 @@
 #include <message/mavlink/protocol/mavlink.h>
 #include <message/mesh_msg.h>
 #include <gateway/ble_mesh/mesh_if.h>
+#include <gateway/ble_mesh/mesh_define.h>
 
 #define MBUF_PKTHDR_OVERHEAD    (sizeof(struct os_mbuf_pkthdr) + 0)
 #define MBUF_MEMBLOCK_OVERHEAD  (sizeof(struct os_mbuf) + MBUF_PKTHDR_OVERHEAD)
 
-#define MBUF_NUM_MBUFS      (10)
+#define MBUF_NUM_MBUFS      (20)
 #define MBUF_PAYLOAD_SIZE   (sizeof(msg_rtls_t))
 #define MBUF_BUF_SIZE       OS_ALIGN(MBUF_PAYLOAD_SIZE, 4)
 #define MBUF_MEMBLOCK_SIZE  (MBUF_BUF_SIZE + MBUF_MEMBLOCK_OVERHEAD)
@@ -52,7 +53,7 @@ task_downlink_func(void *arg)
         chr = serial_read();
         uint8_t msg_received = mavlink_parse_char(MAVLINK_COMM_0, chr, &g_mavlink_msg, &g_mavlink_status);
 		if(msg_received){
-            printf("Receive msg from net\n");
+            printf("Msg from net\n");
             om = os_mbuf_get_pkthdr(&g_mbuf_pool, 0);
             if(!om) {
                 printf("Full mqueue. Message drop!\n");
@@ -62,46 +63,72 @@ task_downlink_func(void *arg)
 			switch (g_mavlink_msg.msgid)
             {
             case MAVLINK_MSG_ID_LOCATION:
-            {
-                printf("MAVLINK_MSG_ID_LOCATION\n");
-                mavlink_location_t mavlink_location;
-                mavlink_msg_location_decode(&g_mavlink_msg, &mavlink_location);
-                msg_rtls = (msg_rtls_t){
-                    .msg_type = MAVLINK_MSG_ID_LOCATION,
-                    .node_type = mavlink_location.node,
-                    .dstsrc = mavlink_location.dstsrc,
-                    .location_x = mavlink_location.location_x,
-                    .location_y = mavlink_location.location_y,
-                    .location_z = mavlink_location.location_z,
-                };
-                rc = os_mbuf_copyinto(om, 0, &msg_rtls, sizeof(struct _msg_rtls_header_t) + sizeof(struct _msg_rtls_location_t));
-                if (rc) {
-                    printf("error: os_mbuf_copyinto()");
-                    continue;
+                {
+                    printf("MAVLINK_MSG_ID_LOCATION\n");
+                    mavlink_location_t mavlink_location;
+                    mavlink_msg_location_decode(&g_mavlink_msg, &mavlink_location);
+                    msg_rtls = (msg_rtls_t){
+                        .type = MAVLINK_MSG_ID_LOCATION,
+                        .dstsrc = mavlink_location.dstsrc,
+                        .node_type = mavlink_location.node,
+                        .location_x = mavlink_location.location_x,
+                        .location_y = mavlink_location.location_y,
+                        .location_z = mavlink_location.location_z,
+                    };
+                    switch (mavlink_location.type)
+                    {
+                    case GET:
+                        msg_rtls.opcode = BT_MESH_MODEL_OP_GET;
+                        break;
+                    case SET:
+                        msg_rtls.opcode = BT_MESH_MODEL_OP_SET;
+                        break;
+                    case SET_UNACK:
+                        msg_rtls.opcode = BT_MESH_MODEL_OP_SET_UNACK;
+                        break;
+                    case STATUS:
+                        msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
+                        break;
+                    default:
+                        continue;
+                    }
                 }
-            }
                 break;
             case MAVLINK_MSG_ID_ONOFF:
-            {
-                printf("MAVLINK_MSG_ID_ONOFF\n");
-                mavlink_onoff_t mavlink_onoff;
-                mavlink_msg_onoff_decode(&g_mavlink_msg, &mavlink_onoff);
-                msg_rtls = (msg_rtls_t){
-                    .msg_type = MAVLINK_MSG_ID_ONOFF,
-                    .dstsrc = mavlink_onoff.dstsrc,
-                    .value = mavlink_onoff.value
-                };
-                rc = os_mbuf_copyinto(om, 0, &msg_rtls, sizeof(struct _msg_rtls_header_t) + sizeof(struct _msg_rtls_onoff_t));
-                if (rc) {
-                    printf("error: os_mbuf_copyinto()");
-                    continue;
+                {
+                    printf("MAVLINK_MSG_ID_ONOFF\n");
+                    mavlink_onoff_t mavlink_onoff;
+                    mavlink_msg_onoff_decode(&g_mavlink_msg, &mavlink_onoff);
+                    msg_rtls = (msg_rtls_t){
+                        .type = MAVLINK_MSG_ID_ONOFF,
+                        .dstsrc = mavlink_onoff.dstsrc,
+                        .opcode = BT_MESH_MODEL_OP_SET,
+                        .value = mavlink_onoff.value
+                    };
+                    switch (mavlink_onoff.type)
+                    {
+                    case GET:
+                        msg_rtls.opcode = BT_MESH_MODEL_OP_GET;
+                        break;
+                    case SET:
+                        msg_rtls.opcode = BT_MESH_MODEL_OP_SET;
+                        break;
+                    case SET_UNACK:
+                        msg_rtls.opcode = BT_MESH_MODEL_OP_SET_UNACK;
+                        break;
+                    case STATUS:
+                        msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
+                        break;
+                    default:
+                        continue;
+                    }
                 }
-            }
                 break;
             default:
-                break;
+                continue;
             }
-
+            
+            msg_prepr_rtls_pipe(om, &msg_rtls);
             rc = os_mqueue_put(mqueue, eventq, om);
             if (rc) {
                 printf("error: os_mqueue_put()");
@@ -124,13 +151,15 @@ process_ble_to_net_queue(struct os_event *ev)
     struct os_mbuf *om;
     struct os_mqueue *mqueue = (struct os_mqueue *)ev->ev_arg;
     while ((om = os_mqueue_get(mqueue)) != NULL) {
-        msg_parse_rtls(om, &msg_rtls);
-        switch(msg_rtls.msg_type){
+        msg_parse_rtls_pipe(om, &msg_rtls);
+        printf("BLE->NET: ");
+        msg_print_rtls(&msg_rtls);
+        switch(msg_rtls.type){
             case MAVLINK_MSG_ID_LOCATION:
-                mavlink_msg_location_pack(0, 0, &mavlink_msg, msg_rtls.dstsrc, STATUS, msg_rtls.node_type, msg_rtls.location_x, msg_rtls.location_y, msg_rtls.location_z);
+                mavlink_msg_location_pack(0, 0, &mavlink_msg, msg_rtls.dstsrc, msg_rtls.opcode, msg_rtls.node_type, msg_rtls.location_x, msg_rtls.location_y, msg_rtls.location_z);
                 break;
             case MAVLINK_MSG_ID_ONOFF:
-                mavlink_msg_onoff_pack(0, 0, &mavlink_msg, msg_rtls.dstsrc, STATUS, msg_rtls.value);
+                mavlink_msg_onoff_pack(0, 0, &mavlink_msg, msg_rtls.dstsrc, msg_rtls.opcode, msg_rtls.value);
                 break;
             default:
                 continue;
@@ -139,7 +168,6 @@ process_ble_to_net_queue(struct os_event *ev)
         len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
         serial_write(mav_send_buf, len);
         os_mbuf_free_chain(om);
-        printf("BLE->NET\n");
     }
 }
 
@@ -162,7 +190,7 @@ void gateway_init(){
     os_mqueue_init(&mqueue_ble_to_net, process_ble_to_net_queue, &mqueue_ble_to_net);
     os_eventq_init(&eventq_ble_to_net);
 
-    os_task_init(&g_task_downlink, "gw_dl",
+    os_task_init(&g_task_downlink, "agw_dl",
                 task_downlink_func,
                 NULL,
                 MYNEWT_VAL(APP_GATEWAY_DOWNLINK_TASK_PRIORITY), 
@@ -170,7 +198,7 @@ void gateway_init(){
                 task_downlink_stack,
                 MYNEWT_VAL(APP_GATEWAY_DOWNLINK_TASK_STACK_SZ));
 
-    os_task_init(&g_task_uplink, "gw_ul",
+    os_task_init(&g_task_uplink, "agw_ul",
                 task_uplink_func,
                 NULL,
                 MYNEWT_VAL(APP_GATEWAY_UPLINK_TASK_PRIORITY), 
