@@ -7,8 +7,8 @@
 #include <gateway/gateway/gateway.h>
 
 #include <serial/serial.h>
-#include <gateway/gateway/mavlink/protocol/mavlink.h>
-#include <gateway/ble_mesh/mesh_msg.h>
+#include <message/mavlink/protocol/mavlink.h>
+#include <message/mesh_msg.h>
 #include <gateway/ble_mesh/mesh_if.h>
 
 #define MBUF_PKTHDR_OVERHEAD    (sizeof(struct os_mbuf_pkthdr) + 0)

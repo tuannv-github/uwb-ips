@@ -10,7 +10,7 @@
 #include "services/gap/ble_svc_gap.h"
 #include "mesh/glue.h"
 
-#include <gateway/ble_mesh/mesh_msg.h>
+#include <message/mesh_msg.h>
 #include <gateway/ble_mesh/mesh_define.h>
 #include <gateway/gateway/gateway.h>
 
@@ -47,7 +47,7 @@ rtls_model_status(struct bt_mesh_model *model,
 
     om = os_mbuf_get_pkthdr(&g_mbuf_pool, 0);
     if (om) {
-        os_mbuf_appendfrom(om, buf, 0, sizeof(msg_rtls_t));
+        os_mbuf_appendfrom(om, buf, 0, buf->om_len);
         get_ble_to_net_mqueue_eventq(&mqueue, &event);
         rc = os_mqueue_put(mqueue, event, om);
         if (rc != 0) {
