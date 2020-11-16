@@ -15,8 +15,8 @@
         {
             "type": "gnu-debugger",
             "request": "launch",
-            "name": "rtloco",
-            "program": "/home/tuannv/thesis/firmware/bin/targets/rtloco/app/apps/rtloco/rtloco.elf",
+            "name": "Debug",
+            "program": "/home/tuannv/thesis/firmware/bin/targets/rtls/app/apps/rtls/rtls.elf",
             "toolchain": "/usr/local/bin/",
             "client": "arm-none-eabi-gdb",
             "server": "JLinkGDBServer",

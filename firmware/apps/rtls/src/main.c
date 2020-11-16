@@ -36,8 +36,8 @@ main(int argc, char **argv)
     sysinit();
     conf_load();
     
-    ble_mesh_init();
     rtls_init();
+    ble_mesh_init();
 
     while (1) {
         os_eventq_run(os_eventq_dflt_get());
