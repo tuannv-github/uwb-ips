@@ -239,7 +239,7 @@ ccp_slave_timer_ev_cb(struct dpl_event *ev)
         /* May change to master role if rx_timeout_acc reach thresh */
         if(ccp->rx_timeout_acc > MYNEWT_VAL(UWB_RX_TIMEOUT_THRESH) + inst->euid%MYNEWT_VAL(UWB_RX_TIMEOUT_THRESH)){
             ccp->config.role = CCP_ROLE_MASTER;
-            dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
+            dpl_eventq_put(&ccp->eventq, &ccp->change_role_event);
             return;
         }
         goto reset_timer;
@@ -770,7 +770,7 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     }
 
     if (ccp->config.postprocess && ccp->status.valid) {
-        dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->postprocess_event);
+        dpl_eventq_put(&ccp->eventq, &ccp->postprocess_event);
     }
 
     dpl_sem_release(&ccp->sem);
@@ -839,7 +839,7 @@ tx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     }
 
     if (ccp->config.postprocess && ccp->status.valid)
-        dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->postprocess_event);
+        dpl_eventq_put(&ccp->eventq, &ccp->postprocess_event);
 
     if(dpl_sem_get_count(&ccp->sem) == 0){
         dpl_error_t err = dpl_sem_release(&ccp->sem);
@@ -1207,7 +1207,7 @@ void rtls_ccp_start(struct uwb_ccp_instance *ccp){
     
     ccp->master_role_request = false;
     ccp->config.role = CCP_ROLE_SLAVE;
-    dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
+    dpl_eventq_put(&ccp->eventq, &ccp->change_role_event);
 }
 EXPORT_SYMBOL(rtls_ccp_start);
 

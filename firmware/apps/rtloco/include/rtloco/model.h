@@ -3,6 +3,6 @@
 
 extern struct bt_mesh_model model_root[2];
 
-void model_gateway_init();
+void model_rtls_init();
 
 #endif

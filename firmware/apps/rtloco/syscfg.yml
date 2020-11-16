@@ -2,7 +2,12 @@ syscfg.defs:
     NODE_ADDRESS:
         description: 'Address of anchor'
         value: 0x1000
-
+    APP_RTLS_TASK_STACK_SIZE:
+        description: 'Size of task stack'
+        value: 512
+    APP_RTLS_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 214
 syscfg.vals:
     LOG_LEVEL: 5
 
@@ -48,4 +53,5 @@ syscfg.vals:
     UWB_PKG_INIT_LOG: 0
 
     BLE_MESH: 1
+    OS_MAIN_STACK_SIZE: 512
     

@@ -11,8 +11,8 @@
 #include "mesh/glue.h"
 
 #include <message/mesh_msg.h>
-#include <rtloco/ble_mesh/mesh_define.h>
-// #include <rtloco/rtls/rtls.h>
+#include <rtloco/mesh_define.h>
+#include <rtloco/rtls.h>
 
 static void
 rtls_model_set(struct bt_mesh_model *model,
@@ -53,42 +53,42 @@ struct bt_mesh_model model_root[] = {
     BT_MESH_MODEL(BT_MESH_MODEL_ID_RTLS, rtls_op, &model_pub_rtls, NULL),
 };
 
-// static void
-// task_rtls_func(void *arg){
-//     struct bt_mesh_model *model = &model_root[1];
-//     struct bt_mesh_model_pub *pub =  model->pub;
-//     msg_rtls_t msg_rtls;
+static void
+task_rtls_func(void *arg){
+    struct bt_mesh_model *model = &model_root[1];
+    struct bt_mesh_model_pub *pub =  model->pub;
+    msg_rtls_t msg_rtls;
 
-//     while (1) {
-//         dpl_time_delay(dpl_time_ms_to_ticks32(1000));
-//         if (pub->addr == BT_MESH_ADDR_UNASSIGNED) continue;
+    while (1) {
+        dpl_time_delay(dpl_time_ms_to_ticks32(1000));
+        if (pub->addr == BT_MESH_ADDR_UNASSIGNED) continue;
 
-//         pub->msg = NET_BUF_SIMPLE(1+sizeof(msg_rtls_t));
-//         bt_mesh_model_msg_init(pub->msg, BT_MESH_MODEL_OP_STATUS);
+        pub->msg = NET_BUF_SIMPLE(1+sizeof(msg_rtls_t));
+        bt_mesh_model_msg_init(pub->msg, BT_MESH_MODEL_OP_STATUS);
 
-//         msg_rtls.msg_type = MAVLINK_MSG_ID_LOCATION,
-//         rtls_get_ntype(&msg_rtls.node_type);
-//         rtls_get_address(&msg_rtls.dstsrc);
-//         rtls_get_location(&msg_rtls.location_x, &msg_rtls.location_y, &msg_rtls.location_z);
+        msg_rtls.msg_type = MAVLINK_MSG_ID_LOCATION,
+        rtls_get_ntype(&msg_rtls.node_type);
+        rtls_get_address(&msg_rtls.dstsrc);
+        rtls_get_location(&msg_rtls.location_x, &msg_rtls.location_y, &msg_rtls.location_z);
 
-//         msg_prepr_rtls(pub->msg, &msg_rtls);
+        msg_prepr_rtls(pub->msg, &msg_rtls);
 
-//         int err = bt_mesh_model_publish(model);
-//         if (err) {
-//             printf("bt_mesh_model_publish err %d\n", err);
-//         }
-//         os_mbuf_free(pub->msg);
-//     }
-// }
+        int err = bt_mesh_model_publish(model);
+        if (err) {
+            printf("bt_mesh_model_publish err %d\n", err);
+        }
+        os_mbuf_free(pub->msg);
+    }
+}
 
-// static struct os_task g_rtls_task;
-// static os_stack_t g_task_rtls_stack[MYNEWT_VAL(APP_RTLS_TASK_STACK_SIZE)];
-void model_gateway_init(){
-    // os_task_init(&g_rtls_task, "m_rtls",
-    //             task_rtls_func,
-    //             NULL,
-    //             MYNEWT_VAL(APP_RTLS_TASK_PRIORITY), 
-    //             OS_WAIT_FOREVER,
-    //             g_task_rtls_stack,
-    //             MYNEWT_VAL(APP_RTLS_TASK_STACK_SIZE));
+static struct os_task g_rtls_task;
+static os_stack_t g_task_rtls_stack[MYNEWT_VAL(APP_RTLS_TASK_STACK_SIZE)];
+void model_rtls_init(){
+    os_task_init(&g_rtls_task, "m_rtls",
+                task_rtls_func,
+                NULL,
+                MYNEWT_VAL(APP_RTLS_TASK_PRIORITY), 
+                OS_WAIT_FOREVER,
+                g_task_rtls_stack,
+                MYNEWT_VAL(APP_RTLS_TASK_STACK_SIZE));
 }
