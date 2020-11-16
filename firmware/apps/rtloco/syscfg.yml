@@ -1,7 +1,4 @@
 syscfg.defs:
-    NODE_ADDRESS:
-        description: 'Address of anchor'
-        value: 0x1000
     APP_RTLS_TASK_STACK_SIZE:
         description: 'Size of task stack'
         value: 512

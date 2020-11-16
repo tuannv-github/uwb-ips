@@ -11,6 +11,7 @@
 float g_location[3] = {0.2, 123.456, 567};
 uint16_t g_address = 0x1234;
 uint16_t g_ntype = ANCHOR;
+struct uwb_dev *udev;
 
 void rtls_get_location(float *x, float *y, float *z){
     *x = g_location[0];
@@ -25,7 +26,7 @@ void rtls_set_location(float x, float y, float z){
 }
 
 void rtls_get_address(uint16_t *address){
-    *address = g_address;
+    *address = udev->my_short_address;
 }
 
 void rtls_get_ntype(uint8_t *ntype){
@@ -44,11 +45,10 @@ superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
 
 static struct uwb_mac_interface cbs;
 void rtls_init(){
-    struct uwb_dev *udev = uwb_dev_idx_lookup(0);
+    udev = uwb_dev_idx_lookup(0);
     struct uwb_ccp_instance *ccp = (struct uwb_ccp_instance*)uwb_mac_find_cb_inst_ptr(udev, UWBEXT_CCP);
     rtls_ccp_start(ccp);
 
-    udev->my_short_address = MYNEWT_VAL(NODE_ADDRESS);
     uwb_set_uid(udev, udev->my_short_address);
 
     cbs = (struct uwb_mac_interface){
