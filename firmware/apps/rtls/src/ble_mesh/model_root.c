@@ -17,13 +17,17 @@
 #include <stats/stats.h>
 
 STATS_SECT_START(model_root_stat_t)
-    STATS_SECT_ENTRY(publish_error)
+    STATS_SECT_ENTRY(send_failed)
+    STATS_SECT_ENTRY(recv_recved)
+    STATS_SECT_ENTRY(recv_succed)
 STATS_SECT_END
 
 STATS_SECT_DECL(model_root_stat_t) g_model_root_stat;
 
 STATS_NAME_START(model_root_stat_t)
-    STATS_NAME(model_root_stat_t, publish_error)
+    STATS_NAME(model_root_stat_t, send_failed)
+    STATS_NAME(model_root_stat_t, recv_recved)
+    STATS_NAME(model_root_stat_t, recv_succed)
 STATS_NAME_END(model_root_stat_t)
 
 static void
@@ -31,22 +35,26 @@ rtls_model_set(struct bt_mesh_model *model,
               struct bt_mesh_msg_ctx *ctx,
               struct os_mbuf *buf)
 {  
-    // msg_rtls_t msg_rtls;
-    // uint16_t dstsrc;
-    // msg_parse_rtls(buf, &msg_rtls);
-    // rtls_get_address(&dstsrc);
-    // if(msg_rtls.dstsrc != dstsrc) return;
+    STATS_INC(g_model_root_stat, recv_recved);
+    msg_rtls_t msg_rtls;
+    uint16_t dstsrc;
+    msg_parse_rtls(buf, &msg_rtls);
+    rtls_get_address(&dstsrc);
+    if(msg_rtls.dstsrc != dstsrc) return;
 
-    // switch (msg_rtls.type)
-    // {
-    // case MAVLINK_MSG_ID_LOCATION:
-    //     break;
-    // case MAVLINK_MSG_ID_ONOFF:
-    //     hal_gpio_init_out(LED_1, msg_rtls.value);
-    //     break;
-    // default:
-    //     break;
-    // }
+    switch (msg_rtls.type)
+    {
+    case MAVLINK_MSG_ID_LOCATION:
+        STATS_INC(g_model_root_stat, recv_succed);
+        msg_print_rtls(&msg_rtls);
+        break;
+    case MAVLINK_MSG_ID_ONOFF:
+        hal_gpio_init_out(LED_1, msg_rtls.value);
+        STATS_INC(g_model_root_stat, recv_succed);
+        break;
+    default:
+        break;
+    }
 }
 
 static const struct bt_mesh_model_op rtls_op[] = {
@@ -100,7 +108,7 @@ task_rtls_func(void *arg){
 
         int err = bt_mesh_model_publish(model);
         if (err) {
-            STATS_INC(g_model_root_stat, publish_error);
+            STATS_INC(g_model_root_stat, send_failed);
         }
         os_mbuf_free(pub->msg);
     }

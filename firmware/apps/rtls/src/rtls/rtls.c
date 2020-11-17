@@ -37,21 +37,21 @@ void rtls_get_ntype(uint8_t *ntype){
 
 void rtls_tdma_cb(rtls_tdma_instance_t *rtls_tdma_instance, tdma_slot_t *slot){
     
-    // static uint16_t timeout = 0;
-    // struct uwb_rng_instance *rng = rtls_tdma_instance->uri;
-    // struct uwb_dev *inst = rtls_tdma_instance->dev_inst;
-    // uint16_t idx = slot->idx;
+    static uint16_t timeout = 0;
+    struct uwb_rng_instance *rng = rtls_tdma_instance->uri;
+    struct uwb_dev *inst = rtls_tdma_instance->dev_inst;
+    uint16_t idx = slot->idx;
 
-    // if (!timeout) {
-    //     timeout = uwb_usecs_to_dwt_usecs(uwb_phy_frame_duration(inst, sizeof(ieee_rng_request_frame_t)))
-    //         + rng->config.rx_timeout_delay;
-    //     printf("# timeout set to: %d %d = %d\n",
-    //            uwb_phy_frame_duration(inst, sizeof(ieee_rng_request_frame_t)),
-    //            rng->config.rx_timeout_delay, timeout);
-    // }
-    // tdma_instance_t *tdma = slot->parent;
+    if (!timeout) {
+        timeout = uwb_usecs_to_dwt_usecs(uwb_phy_frame_duration(inst, sizeof(ieee_rng_request_frame_t)))
+            + rng->config.rx_timeout_delay;
+        printf("# timeout set to: %d %d = %d\n",
+               uwb_phy_frame_duration(inst, sizeof(ieee_rng_request_frame_t)),
+               rng->config.rx_timeout_delay, timeout);
+    }
+    tdma_instance_t *tdma = slot->parent;
 
-    // uwb_rng_listen_delay_start(rng, tdma_rx_slot_start(tdma, idx), timeout, UWB_BLOCKING);
+    uwb_rng_listen_delay_start(rng, tdma_rx_slot_start(tdma, idx), timeout, UWB_BLOCKING);
 }
 
 rtls_tdma_instance_t g_rtls_tdma_instance = {
