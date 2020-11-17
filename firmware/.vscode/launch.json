@@ -16,7 +16,7 @@
             "type": "gnu-debugger",
             "request": "launch",
             "name": "Debug",
-            "program": "/home/tuannv/thesis/firmware/bin/targets/gateway/app/apps/gateway/gateway.elf",
+            "program": "/home/tuannv/thesis/firmware/bin/targets/rtls/app/apps/rtls/rtls.elf",
             "toolchain": "/usr/local/bin/",
             "client": "arm-none-eabi-gdb",
             "server": "JLinkGDBServer",

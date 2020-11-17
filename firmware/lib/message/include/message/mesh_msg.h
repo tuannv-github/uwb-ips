@@ -45,7 +45,7 @@ typedef struct _msg_rtls_t
     };
 }__attribute__((__packed__, aligned(1))) msg_rtls_t;
 
-void msg_prepr_rtls(struct os_mbuf *mbuf, msg_rtls_t *msg);
+void msg_prepr_rtls(struct os_mbuf **mbuf, msg_rtls_t *msg);
 void msg_parse_rtls(struct os_mbuf *mbuf, msg_rtls_t *msg);
 
 void msg_prepr_rtls_pipe(struct os_mbuf *mbuf, msg_rtls_t *msg);

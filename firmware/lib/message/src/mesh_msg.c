@@ -9,7 +9,7 @@ void msg_parse_onoff(struct os_mbuf *os_mbuf, msg_onoff_t *msg){
     msg->value = net_buf_simple_pull_u8(os_mbuf);
 }
 
-void msg_prepr_rtls(struct os_mbuf *mbuf, msg_rtls_t *msg){
+void msg_prepr_rtls(struct os_mbuf **mbuf, msg_rtls_t *msg){
     uint8_t header;
     if (msg->opcode < 0x100) header = 1;
 	else if (msg->opcode < 0x10000) header = 2;
@@ -18,20 +18,20 @@ void msg_prepr_rtls(struct os_mbuf *mbuf, msg_rtls_t *msg){
     switch (msg->type)
     {
     case MAVLINK_MSG_ID_LOCATION:
-        mbuf = NET_BUF_SIMPLE(header + 15);
-        bt_mesh_model_msg_init(mbuf, msg->opcode);
-        net_buf_simple_add_u8(mbuf, (msg->type & 0x0F) | (msg->node_type << 4));
-        net_buf_simple_add_be16(mbuf, msg->dstsrc);
-        net_buf_simple_add_be32(mbuf, *((uint32_t *)(&msg->location_x)));
-        net_buf_simple_add_be32(mbuf, *((uint32_t *)(&msg->location_y)));
-        net_buf_simple_add_be32(mbuf, *((uint32_t *)(&msg->location_z)));
+        *mbuf = NET_BUF_SIMPLE(header + 15);
+        bt_mesh_model_msg_init(*mbuf, msg->opcode);
+        net_buf_simple_add_u8(*mbuf, (msg->type & 0x0F) | (msg->node_type << 4));
+        net_buf_simple_add_be16(*mbuf, msg->dstsrc);
+        net_buf_simple_add_be32(*mbuf, *((uint32_t *)(&msg->location_x)));
+        net_buf_simple_add_be32(*mbuf, *((uint32_t *)(&msg->location_y)));
+        net_buf_simple_add_be32(*mbuf, *((uint32_t *)(&msg->location_z)));
         break;
     case MAVLINK_MSG_ID_ONOFF:
-        mbuf = NET_BUF_SIMPLE(header + 4);
-        bt_mesh_model_msg_init(mbuf, msg->opcode);
-        net_buf_simple_add_u8(mbuf, msg->type);
-        net_buf_simple_add_be16(mbuf, msg->dstsrc);
-        net_buf_simple_add_u8(mbuf, msg->value);
+        *mbuf = NET_BUF_SIMPLE(header + 4);
+        bt_mesh_model_msg_init(*mbuf, msg->opcode);
+        net_buf_simple_add_u8(*mbuf, msg->type);
+        net_buf_simple_add_be16(*mbuf, msg->dstsrc);
+        net_buf_simple_add_u8(*mbuf, msg->value);
         break;
     default:
         break;
