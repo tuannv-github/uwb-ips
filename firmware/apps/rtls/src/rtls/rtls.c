@@ -1,4 +1,5 @@
 #include <rtls/rtls/rtls.h>
+#include <config/config.h>
 
 #include <rtls_tdma/rtls_tdma.h>
 
@@ -10,21 +11,114 @@
 #include <uwb/uwb.h>
 #include <uwb_rng/uwb_rng.h>
 
-float g_location[3] = {0.2, 123.456, 567};
-uint16_t g_address = 0x1234;
-uint16_t g_ntype = ANCHOR;
+static struct {
+    uint8_t node_type;
+    float location_x;
+    float location_y;
+    float location_z;
+} rtls_conf = {
+    ANCHOR,
+    0,0,0
+};
+
+static struct{
+    char node_type[8];
+    char location_x[8];
+    char location_y[8];
+    char location_z[8];
+} rtls_conf_str = {
+    "ANCHOR",
+    "0.0", "0.0", "0.0"
+};
+
+static char *
+rtls_get(int argc, char **argv, char *val, int val_len_max)
+{
+    if (argc == 1) {
+        if (!strcmp(argv[0], "node_type"))  return rtls_conf_str.node_type;
+        else if (!strcmp(argv[0], "location_x"))  return rtls_conf_str.location_x;
+        else if (!strcmp(argv[0], "location_y"))  return rtls_conf_str.location_y;
+        else if (!strcmp(argv[0], "location_z"))  return rtls_conf_str.location_z;
+    }
+    return NULL;
+}
+
+static int
+rtls_set(int argc, char **argv, char *val)
+{
+    int rc = -1;
+    if (argc == 1) {
+        if (!strcmp(argv[0], "node_type")) {
+            if(!strcmp(val, "TAG") || !strcmp(val, "ANCHOR")){
+                rc = CONF_VALUE_SET(val, CONF_STRING, rtls_conf_str.node_type);
+                if(rc) goto done;
+                if(!strcmp(rtls_conf_str.node_type, "TAG")){
+                    rtls_conf.node_type = TAG;
+                    printf("Node type: TAG\n");
+                }
+                else if(!strcmp(rtls_conf_str.node_type, "ANCHOR")){
+                    rtls_conf.node_type = ANCHOR;
+                    printf("Node type: ANCHOR\n");
+                }else{
+                    printf("Invalid node type: %s\n", rtls_conf_str.node_type);
+                    return -1;
+                }
+            }
+            else{
+                printf("Invalid node type!\n");
+            }
+        }
+        else if (!strcmp(argv[0], "location_x")) {
+            rc = CONF_VALUE_SET(val, CONF_STRING, rtls_conf_str.location_x);
+            if(rc) goto done;
+            rtls_conf.location_x = strtod(rtls_conf_str.location_x, NULL);
+        }
+        else if (!strcmp(argv[0], "location_y")) {
+            rc = CONF_VALUE_SET(val, CONF_STRING, rtls_conf_str.location_y);
+            if(rc) goto done;
+            rtls_conf.location_y = strtod(rtls_conf_str.location_y, NULL);
+        }
+        else if (!strcmp(argv[0], "location_z")) {
+            rc = CONF_VALUE_SET(val, CONF_STRING, rtls_conf_str.location_z);
+            if(rc) goto done;
+            rtls_conf.location_z = strtod(rtls_conf_str.location_z, NULL);
+        }
+    }
+
+done:
+    return rc;
+}
+
+static int
+rtls_export(void (*export_func)(char *name, char *val),
+             enum conf_export_tgt tgt)
+{
+    export_func("rtls/node_type", rtls_conf_str.node_type);
+    export_func("rtls/location_x", rtls_conf_str.location_x);
+    export_func("rtls/location_y", rtls_conf_str.location_y);
+    export_func("rtls/location_z", rtls_conf_str.location_z);
+    return 0;
+}
+
+static struct conf_handler rtls_handler = {
+    .ch_name = "rtls",
+    .ch_get = rtls_get,
+    .ch_set = rtls_set,
+    .ch_commit = NULL,
+    .ch_export = rtls_export,
+};
 
 struct uwb_dev *udev;
 void rtls_get_location(float *x, float *y, float *z){
-    *x = g_location[0];
-    *y = g_location[1];
-    *z = g_location[2];
+    *x = rtls_conf.location_x;
+    *y = rtls_conf.location_y;
+    *z = rtls_conf.location_z;
 }
 
 void rtls_set_location(float x, float y, float z){
-    g_location[0] = x;
-    g_location[1] = y;
-    g_location[2] = z;
+    rtls_conf.location_x = x;
+    rtls_conf.location_y = y;
+    rtls_conf.location_z = z;
 }
 
 void rtls_get_address(uint16_t *address){
@@ -32,7 +126,7 @@ void rtls_get_address(uint16_t *address){
 }
 
 void rtls_get_ntype(uint8_t *ntype){
-    *ntype = g_ntype;
+    *ntype = rtls_conf.node_type;
 }
 
 void rtls_tdma_cb(rtls_tdma_instance_t *rtls_tdma_instance, tdma_slot_t *slot){
@@ -70,6 +164,8 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
 }
 
 void rtls_init(){
+    int rc;
+
     udev = uwb_dev_idx_lookup(0);
     uwb_set_dblrxbuff(udev, false);
 
@@ -83,4 +179,13 @@ void rtls_init(){
     uwb_mac_append_interface(udev, &g_cbs);
 
     rtls_tdma_start(&g_rtls_tdma_instance, udev);
+
+    rc = conf_register(&rtls_handler);
+    if(rc){
+        printf("Config register failed: %d\n", rc);
+    }
+    else{
+        conf_load();
+        printf("RTLS config loaded\n");
+    }
 }
