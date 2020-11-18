@@ -67,7 +67,7 @@ node_slot_map_printf(rtls_tdma_instance_t *rti){
     printf("- My slot: %d\n", rti->slot_idx);
     for(int i=1; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
         if(rti->nodes[i].addr!=0){
-            printf("--- Slot: %02d, addr: 0x%02x, accepted: %d, map:", i, rti->nodes[i].addr, rti->nodes[i].accepted);
+            printf("--- Slot: %02d, addr: 0x%04x, accepted: %d, map:", i, rti->nodes[i].addr, rti->nodes[i].accepted);
             for(int j=0; j<MYNEWT_VAL(TDMA_NSLOTS); j++){
                 printf("%d", (uint8_t)((rti->nodes[i].slot_map >> j) & 0x01));
             }
@@ -186,7 +186,8 @@ static bool
 superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
 {
     rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)cbs->inst_ptr;
-    for(int i=1; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
+    /* Check timeout and availability of ANCHOR only */
+    for(int i=1; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
         rti->nodes[i].available = false;
         if(rti->nodes[i].addr != 0){
             rti->nodes[i].timeout++;
@@ -275,7 +276,7 @@ bcn_slot_cb_mine(tdma_slot_t *tdma_slot){
         rt_slot_acpt->slot = tdma_slot->idx;
         rt_slot_acpt->slot_reqt = ((~rti->nodes[rti->slot_idx].slot_map) & ((slot_map_t)0x01 << rti->slot_reqt)) ? rti->slot_reqt : 0;
 
-        /* I can now receive newt request if I do not accept this request */
+        /* I can now receive new request if I do not accept this request */
         if(rt_slot_acpt->slot_reqt == 0) {
             rti->slot_reqt = 0;
         }
@@ -329,6 +330,13 @@ bcn_slot_cb_mine(tdma_slot_t *tdma_slot){
 
     if(rti->slot_reqt) {
         printf("I accept 0x%04X for slot %d\n", rti->slot_reqt_addr, rti->slot_reqt);
+        if(rti->slot_reqt > MYNEWT_VAL(UWB_SVC_SLOT)){
+            /* Release request context if it is not BCN slot */
+            rti->nodes[rti->slot_idx].slot_map |= (slot_map_t)0x01 << rti->slot_reqt;
+            rti->nodes[rti->slot_reqt].addr = rti->slot_reqt_addr;
+            rti->slot_reqt = 0;
+            node_slot_map_printf(rti);
+        }
     }
 
     if(rt_msg) free(rt_msg);
@@ -346,27 +354,30 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
         if(ieee_std_frame_hdr->src_address != rti->nodes[tdma_slot->idx].addr){
             /* I do not have see any node in this slot before, it is a new node for this slot */
             if(rti->nodes[tdma_slot->idx].addr == 0){
-                /* I see a slot request from this node before. It is up now */
-                if(rti->slot_reqt != 0 && rti->slot_reqt_addr == ieee_std_frame_hdr->src_address){
-                    rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
-                    printf("Node up: 0x04%X\n", ieee_std_frame_hdr->src_address);
-                    /* This have request thi slot before, it must acctept my slot before joining */
-                    rti->nodes[tdma_slot->idx].accepted = true;
-                    /* Release request context */
-                    rti->slot_reqt = 0;
+                /* I am a network member */
+                if(rti->slot_idx != 0){
+                    /* I see a slot request from this node before. It is up now */
+                    if(rti->slot_reqt != 0 && rti->slot_reqt_addr == ieee_std_frame_hdr->src_address){
+                        rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
+                        printf("Node up: 0x04%X\n", ieee_std_frame_hdr->src_address);
+                        /* This have request thi slot before, it must acctept my slot before joining */
+                        rti->nodes[tdma_slot->idx].accepted = true;
+                        /* Release request context */
+                        rti->slot_reqt = 0;
+                    }
+                    else{
+                        /* I has joint the network and I do not see any request from this node before */
+                        /* This node take this slot without permission */
+                        printf("Unknown node: 0x%04X at slot %d\n", ieee_std_frame_hdr->src_address, tdma_slot->idx);
+                        return;
+                    }
                 }
-                /* I has joint the network and I do not see any request from this node before */
-                /* This node take this slot without permission */
-                else if(rti->slot_idx != 0){
-                    printf("Unknown node: 0x%04X at slot %d\n", ieee_std_frame_hdr->src_address, tdma_slot->idx);
-                    return;
-                }
-                /* I do not a network member, just update this slot in table */
+                /* I am not a network member, just update this slot in table */
                 else{
                     rti->nodes[tdma_slot->idx].slot_map |= (slot_map_t)0x01 << tdma_slot->idx;
                     rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
+                    node_slot_map_printf(rti);
                 }
-            /* I did */
             }else{
                 printf("Slot colission: 0x%04X at slot %d\n", ieee_std_frame_hdr->src_address, tdma_slot->idx);
                 return;
@@ -393,6 +404,8 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                             node_add_me(rti, rti->slot_reqt);
                             printf("All node has accepted in slot: %d\n", rti->slot_reqt);
                             node_slot_map_printf(rti);
+                            /* Reset slot_reqt to change it purpose */
+                            rti->slot_reqt = 0;
                         };
                     }
                 }
@@ -429,7 +442,7 @@ svc_slot_cb(tdma_slot_t *tdma_slot){
     if(node_all_accepted(rti)){
         /* I have been waiting for requested node to up too long. It must request again */
         if(rti->slot_reqt && rti->slot_reqt_cntr > MYNEWT_VAL(RT_SLOT_REQT_TIMEOUT)){
-            printf("Node 0x%04X request slot %d accept timout\n", rti->slot_reqt_addr, rti->slot_reqt);
+            printf("Node 0x%04X request slot %d accept timeout\n", rti->slot_reqt_addr, rti->slot_reqt);
             /* Release request context */
             rti->slot_reqt = 0;
         }
@@ -490,12 +503,12 @@ svc_slot_cb(tdma_slot_t *tdma_slot){
         }
         /* Find TAG slot */
         else if(rti->role == RTR_TAG){
-            for(int i=MYNEWT_VAL(UWB_BCN_SLOT_MAX) + 1; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
+            for(int i=MYNEWT_VAL(UWB_SVC_SLOT) + 1; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
                 /* Ignore if node is not available in this frame and my slot node*/
                 if(rti->nodes[i].addr == 0 || !rti->nodes[i].available) continue; 
                 slot_map &= ~rti->nodes[i].slot_map;
             }
-            for(int i=MYNEWT_VAL(UWB_BCN_SLOT_MAX) + 1; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
+            for(int i=MYNEWT_VAL(UWB_SVC_SLOT) + 1; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
                 if(slot_map & ((slot_map_t)1 << i)){
                     rt_slot_reqt->slot_reqt = rti->slot_reqt = i;
                     break;

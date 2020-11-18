@@ -2,12 +2,12 @@ import pylink
 import os
 import sys
 
-conf_template   = "newt target set %s syscfg=RTR_ROLE=ANCHOR"
+device_serial_numbers = {760085863, 760085559, 760085865}
+
+conf_template   = "newt target set %s syscfg=RTR_ROLE=RTR_ANCHOR"
 build_template  = "newt build %s"
 image_template  = "newt create-image %s 0.0.0.0"
 load_template   = 'newt load %s --extrajtagcmd "-select USB=%d"'
-
-device_serial_numbers = {760085863, 760085559}
 
 def run_cmd(serial_number, app):
     global load_template
