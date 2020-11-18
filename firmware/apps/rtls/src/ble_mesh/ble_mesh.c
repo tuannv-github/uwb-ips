@@ -1,13 +1,15 @@
 #include <assert.h>
 #include "os/mynewt.h"
-#include "mesh/mesh.h"
 #include "console/console.h"
 #include "hal/hal_system.h"
 #include "hal/hal_gpio.h"
 #include "bsp/bsp.h"
 #include "shell/shell.h"
 
+#if MYNEWT_VAL(BLE_MESH)
+
 /* BLE */
+#include "mesh/mesh.h"
 #include "nimble/ble.h"
 #include "host/ble_hs.h"
 #include "services/gap/ble_svc_gap.h"
@@ -113,3 +115,5 @@ void ble_mesh_init(){
 
     model_gateway_init();
 }
+
+#endif

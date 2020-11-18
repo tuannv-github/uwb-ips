@@ -73,3 +73,7 @@ newt build rtls
 newt create-image rtls 0.0.0.0
 newt load rtls
 ```
+
+```
+newt target set rtls syscfg=BLE_MESH=0
+```

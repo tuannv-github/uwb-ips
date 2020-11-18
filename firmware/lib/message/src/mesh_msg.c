@@ -1,4 +1,6 @@
 #include <message/mesh_msg.h>
+
+#if MYNEWT_VAL(BLE_MESH)
 #include <mesh/access.h>
 
 void msg_prepr_onoff(struct os_mbuf *os_mbuf, msg_onoff_t *msg){
@@ -117,3 +119,4 @@ void msg_prepr_rtls_pipe(struct os_mbuf *mbuf, msg_rtls_t *msg){
     }
 }
 
+#endif

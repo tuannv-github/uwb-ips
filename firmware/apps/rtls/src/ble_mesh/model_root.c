@@ -3,6 +3,8 @@
 #include <hal/hal_gpio.h>
 #include <bsp/bsp.h>
 
+#if MYNEWT_VAL(BLE_MESH)
+
 /* BLE */
 #include "mesh/mesh.h"
 #include "nimble/ble.h"
@@ -143,3 +145,5 @@ void model_gateway_init(){
     rc = stats_register("m_rtls", STATS_HDR(g_model_root_stat));
     assert(rc == 0);
 }
+
+#endif

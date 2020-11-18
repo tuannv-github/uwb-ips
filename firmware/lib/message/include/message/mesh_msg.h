@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <dpl/dpl.h>
 
+#if MYNEWT_VAL(BLE_MESH)
+
 /* BLE */
 #include "nimble/ble.h"
 #include "host/ble_hs.h"
@@ -53,6 +55,6 @@ void msg_parse_rtls_pipe(struct os_mbuf *mbuf, msg_rtls_t *msg);
 
 void msg_print_rtls(msg_rtls_t *msg);
 
-
+#endif
 
 #endif
