@@ -58,9 +58,6 @@ struct _rtls_tdma_instance_t {
     
     rtls_tdma_cb_t rtls_tdma_cb;
 
-    slot_map_t node_anchor_mask;
-    slot_map_t node_tag_mask;
-
     rtls_tdma_node_t nodes[MYNEWT_VAL(TDMA_NSLOTS)]; // nodes[0] save my node info
 };
 

@@ -225,7 +225,16 @@ void rtls_tdma_start(rtls_tdma_instance_t *rti, struct uwb_dev* udev){
 
     rti->slot_idx = 0; /*rti->slot_idx = 0 mean no sync yet */
     rtls_ccp_set_sync_cb(rti->tdma->ccp, uwb_ccp_sync_cb, rti);
-    rtls_ccp_start(rti->tdma->ccp);
+
+    if(rti->role == RTR_TAG){
+        rtls_ccp_start_role(rti->tdma->ccp, CCP_ROLE_SLAVE);
+    }
+    else if(rti->role == RTR_ANCHOR){
+        rtls_ccp_start_role(rti->tdma->ccp, CCP_ROLE_MASTER | CCP_ROLE_SLAVE);
+    }
+    else{
+        printf("Undefined RTR role\n");
+    }
 
     for (uint16_t i = 0; i < MYNEWT_VAL(TDMA_NSLOTS); i++){
         tdma_assign_slot(rti->tdma, slot_cb,  i, rti);

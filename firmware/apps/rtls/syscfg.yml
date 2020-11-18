@@ -38,6 +38,10 @@ syscfg.defs:
         description: 'Priority of task'
         value: 214
 
+    RTR_ROLE:
+        description: 'Priority of task'
+        value: RTR_ANCHOR
+
 syscfg.vals:
     LOG_LEVEL: 5
 

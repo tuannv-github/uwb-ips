@@ -142,9 +142,9 @@ struct uwb_ccp_status {
 
 //! Extension ids for services.
 typedef enum _uwb_ccp_role_t{
-    CCP_ROLE_MASTER,                        //!< Clock calibration packet master mode
-    CCP_ROLE_SLAVE,                         //!< Clock calibration packet slave mode
-    CCP_ROLE_RELAY                          //!< Clock calibration packet master replay mode
+    CCP_ROLE_MASTER = 0x01,                        //!< Clock calibration packet master mode
+    CCP_ROLE_SLAVE  = 0x02,                         //!< Clock calibration packet slave mode
+    CCP_ROLE_RELAY  = 0x04                         //!< Clock calibration packet master replay mode
 }uwb_ccp_role_t;
 
 //! Callback for fetching clock source tof compensation
@@ -203,6 +203,7 @@ struct uwb_ccp_instance {
     bool master_role_request;                            //!< Request for master role has been sent
     uwb_ccp_sync_cb_t uwb_ccp_sync_cb;                   //!< Ccp sync event callback
     void *uwb_ccp_sync_arg;                              //!< Ccp sync event callback argument
+    uwb_ccp_role_t uwb_ccp_role;
     uwb_ccp_frame_t * frames[];                          //!< Buffers to uwb_ccp frames
 };
 
@@ -218,6 +219,7 @@ uint64_t uwb_ccp_skew_compensation_ui64(struct uwb_ccp_instance *ccp, uint64_t v
 dpl_float64_t uwb_ccp_skew_compensation_f64(struct uwb_ccp_instance *ccp,  dpl_float64_t value);
 
 void rtls_ccp_start(struct uwb_ccp_instance *ccp);
+void rtls_ccp_start_role(struct uwb_ccp_instance *ccp, uwb_ccp_role_t uwb_ccp_role);
 void rtls_ccp_set_sync_cb(struct uwb_ccp_instance *ccp, uwb_ccp_sync_cb_t uwb_ccp_sync_cb, void *arg);
 bool rtls_ccp_stable(struct uwb_ccp_instance *ccp);
 

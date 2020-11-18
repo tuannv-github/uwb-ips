@@ -203,6 +203,7 @@ void rtls_init(){
     };
     uwb_mac_append_interface(udev, &g_cbs);
     
+    g_rtls_tdma_instance.role = MYNEWT_VAL(RTR_ROLE);
     rtls_tdma_start(&g_rtls_tdma_instance, udev);
 
     rc = conf_register(&rtls_handler);
