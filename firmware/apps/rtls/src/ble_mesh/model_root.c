@@ -46,6 +46,12 @@ rtls_model_set(struct bt_mesh_model *model,
     {
     case MAVLINK_MSG_ID_LOCATION:
         STATS_INC(g_model_root_stat, recv_succed);
+        uint8_t ntype;
+        rtls_get_ntype(&ntype);
+        if(ntype != msg_rtls.node_type){
+            rtls_set_ntype(msg_rtls.node_type);
+        }
+        rtls_set_location(msg_rtls.location_x, msg_rtls.location_y, msg_rtls.location_z);
         msg_print_rtls(&msg_rtls);
         break;
     case MAVLINK_MSG_ID_ONOFF:

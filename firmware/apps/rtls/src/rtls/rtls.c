@@ -1,5 +1,6 @@
 #include <rtls/rtls/rtls.h>
 #include <config/config.h>
+#include <hal/hal_system.h>
 
 #include <rtls_tdma/rtls_tdma.h>
 
@@ -117,8 +118,14 @@ void rtls_get_location(float *x, float *y, float *z){
 
 void rtls_set_location(float x, float y, float z){
     rtls_conf.location_x = x;
+    sprintf(rtls_conf_str.location_x, "%d.%d", (int)rtls_conf.location_x, (int)(1000*(rtls_conf.location_x - (int)rtls_conf.location_x)));
+    conf_save_one("rtls/location_x", rtls_conf_str.location_x);
     rtls_conf.location_y = y;
+    sprintf(rtls_conf_str.location_y, "%d.%d", (int)rtls_conf.location_y, (int)(1000*(rtls_conf.location_y - (int)rtls_conf.location_y)));
+    conf_save_one("rtls/location_y", rtls_conf_str.location_y);
     rtls_conf.location_z = z;
+    sprintf(rtls_conf_str.location_z, "%d.%d", (int)rtls_conf.location_z, (int)(1000*(rtls_conf.location_z - (int)rtls_conf.location_z)));
+    conf_save_one("rtls/location_z", rtls_conf_str.location_z);
 }
 
 void rtls_get_address(uint16_t *address){
@@ -127,6 +134,24 @@ void rtls_get_address(uint16_t *address){
 
 void rtls_get_ntype(uint8_t *ntype){
     *ntype = rtls_conf.node_type;
+}
+
+void rtls_set_ntype(uint8_t ntype){
+    switch (ntype)
+    {
+    case ANCHOR:
+        sprintf(rtls_conf_str.node_type, "%s", "ANCHOR");
+        break;
+    case TAG:
+        sprintf(rtls_conf_str.node_type, "%s", "TAG");
+        break;
+    default:
+        printf("Invalid node type!");
+        return;
+    }
+    conf_save_one("rtls/node_type", rtls_conf_str.node_type);
+    printf("Role change: %s\nSystem reset\n", rtls_conf_str.node_type);
+    hal_system_reset();
 }
 
 void rtls_tdma_cb(rtls_tdma_instance_t *rtls_tdma_instance, tdma_slot_t *slot){
