@@ -202,7 +202,7 @@ void rtls_init(){
         .complete_cb = complete_cb,
     };
     uwb_mac_append_interface(udev, &g_cbs);
-
+    
     rtls_tdma_start(&g_rtls_tdma_instance, udev);
 
     rc = conf_register(&rtls_handler);

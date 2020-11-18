@@ -52,9 +52,9 @@ struct _rtls_tdma_instance_t {
     uint8_t seqno;
     uint16_t slot_idx;                          //!< slot_idx != 0 means I have slot already
 
-    slot_map_t  slot_req;
-    uint16_t    slot_req_cntr;
-    uint16_t    slot_req_addr;
+    uint16_t slot_reqt;
+    uint16_t slot_reqt_cntr;
+    uint16_t slot_reqt_addr;
     
     rtls_tdma_cb_t rtls_tdma_cb;
 
@@ -97,14 +97,32 @@ typedef struct _rt_bcn_loca_t{
     }__attribute__((__packed__,aligned(1)));
 }__attribute__((__packed__,aligned(1))) rt_loca_t;
 
-typedef struct _rt_slot_t{
+ struct _rt_slot_reqt_t{
     struct _msg_hdr_t;
-    struct _rt_slot_data_t
+    struct _rt_slot_reqt_data_t
+    {
+        uint8_t slot;
+        uint8_t slot_reqt;
+    }__attribute__((__packed__,aligned(1)));
+}__attribute__((__packed__,aligned(1)));
+
+typedef struct _rt_slot_reqt_t rt_slot_reqt_t;
+typedef struct _rt_slot_reqt_data_t rt_slot_reqt_data_t;
+
+typedef struct _rt_slot_reqt_t rt_slot_acpt_t;
+typedef struct _rt_slot_reqt_data_t rt_slot_acpt_data_t;
+
+struct _rt_slot_map_t{
+    struct _msg_hdr_t;
+    struct _rt_slot_map_data_t
     {
         uint8_t slot;
         slot_map_t slot_map;
     }__attribute__((__packed__,aligned(1)));
-}__attribute__((__packed__,aligned(1))) rt_slot_t;
+}__attribute__((__packed__,aligned(1)));
+
+typedef struct _rt_slot_map_t rt_slot_map_t;
+typedef struct _rt_slot_map_data_t rt_slot_map_data_t;
 
 void rtls_tdma_start(rtls_tdma_instance_t *rtls_tdma_instance, struct uwb_dev* udev);
 
