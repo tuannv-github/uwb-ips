@@ -18,6 +18,9 @@ typedef enum{
     RTR_TAG
 }rtr_t;
 
+#define RTR_ANCHOR  0
+#define RTR_TAG     1
+
 typedef uint64_t slot_map_t;
 
 typedef struct _rtls_tdma_node_t{   

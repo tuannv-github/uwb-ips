@@ -120,9 +120,10 @@ slot_cb(struct dpl_event * ev)
 {
     tdma_slot_t *tdma_slot = (tdma_slot_t *)dpl_event_get_arg(ev);
     rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)tdma_slot->arg;
-
     /* Slot 0 is used for synchronization */
-    if(tdma_slot->idx > 0 && tdma_slot->idx <= MYNEWT_VAL(UWB_BCN_SLOT_MAX)){
+    if(tdma_slot->idx == 0) return;
+
+    if(tdma_slot->idx <= MYNEWT_VAL(UWB_BCN_SLOT_MAX)){
         /* This is my node */
         if(rti->slot_idx == tdma_slot->idx && node_all_accepted(rti)){
             /* my slot */

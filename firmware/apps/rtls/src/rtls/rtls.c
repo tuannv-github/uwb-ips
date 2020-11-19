@@ -154,23 +154,45 @@ void rtls_set_ntype(uint8_t ntype){
     hal_system_reset();
 }
 
-void rtls_tdma_cb(rtls_tdma_instance_t *rtls_tdma_instance, tdma_slot_t *slot){
+void rtls_tdma_cb(rtls_tdma_instance_t *rti, tdma_slot_t *slot){
     
+#if MYNEWT_VAL(RTR_ROLE) == RTR_ANCHOR
     static uint16_t timeout = 0;
-    struct uwb_rng_instance *rng = rtls_tdma_instance->uri;
-    struct uwb_dev *inst = rtls_tdma_instance->dev_inst;
+    struct uwb_rng_instance *rng = rti->uri;
+    struct uwb_dev *inst = rti->dev_inst;
     uint16_t idx = slot->idx;
 
     if (!timeout) {
         timeout = uwb_usecs_to_dwt_usecs(uwb_phy_frame_duration(inst, sizeof(ieee_rng_request_frame_t)))
             + rng->config.rx_timeout_delay;
-        printf("# timeout set to: %d %d = %d\n",
+        printf("Range request set timeout to: %d %d = %d\n",
                uwb_phy_frame_duration(inst, sizeof(ieee_rng_request_frame_t)),
                rng->config.rx_timeout_delay, timeout);
     }
     tdma_instance_t *tdma = slot->parent;
+    struct uwb_dev_status status = uwb_rng_listen_delay_start(rng, tdma_rx_slot_start(tdma, idx), timeout, UWB_BLOCKING);
+    if(!status.rx_timeout_error){
+        printf("Slot %d\n", idx);
+    }
 
-    uwb_rng_listen_delay_start(rng, tdma_rx_slot_start(tdma, idx), timeout, UWB_BLOCKING);
+#elif MYNEWT_VAL(RTR_ROLE) == RTR_TAG
+
+    /* Only start range requests if I this is my slot*/
+    if(rti->slot_idx == slot->idx){
+        tdma_instance_t * tdma = slot->parent;
+        uint16_t idx = slot->idx;
+        struct uwb_rng_instance *rng = rti->uri;
+
+        uint64_t dx_time = tdma_tx_slot_start(tdma, idx) & 0xFFFFFFFFFE00UL;
+
+        /* Range with the clock master by default */
+        uint16_t node_address = rti->nodes[1].addr;
+
+        uwb_rng_request_delay_start(rng, node_address, dx_time, UWB_DATA_CODE_SS_TWR);
+        printf("slot %d\n", slot->idx);
+    }
+
+#endif
 }
 
 rtls_tdma_instance_t g_rtls_tdma_instance = {

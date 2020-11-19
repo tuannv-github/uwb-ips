@@ -105,3 +105,4 @@ syscfg.vals:
     TDMA_NSLOTS: 20
     TDMA_TASK_STACK_SZ: 1024
 
+    RNG_VERBOSE: 2
