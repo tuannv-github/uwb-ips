@@ -36,16 +36,28 @@
 		"cSpell.words": [
 			"aroot",
 			"artls",
+			"calc",
+			"dw",
+			"dw calc fppl",
+			"dw phy read wakeupvbat",
+			"dwt",
+			"dwt txconfig t",
+			"fppl",
 			"m",
 			"m aroot",
 			"m artls",
 			"ma",
 			"ma swch",
+			"phy",
+			"read",
 			"recv",
 			"recv succed",
 			"succed",
 			"swch",
-			"swoport"
+			"swoport",
+			"t",
+			"txconfig",
+			"wakeupvbat"
 		]
 	}
 }

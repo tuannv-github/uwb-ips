@@ -4,7 +4,7 @@ import sys
 
 device_serial_numbers = {760085863, 760085559, 760085865}
 
-conf_template   = "newt target set %s syscfg=RTR_ROLE=RTR_ANCHOR"
+conf_template   = "newt target set %s syscfg=RTR_ROLE=RTR_ANCHOR:BLE_MESH=0"
 build_template  = "newt build %s"
 image_template  = "newt create-image %s 0.0.0.0"
 load_template   = 'newt load %s --extrajtagcmd "-select USB=%d"'
