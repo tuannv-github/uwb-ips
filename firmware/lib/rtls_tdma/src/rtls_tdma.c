@@ -278,6 +278,7 @@ bcn_slot_cb_mine(tdma_slot_t *tdma_slot){
 
         /* I can now receive new request if I do not accept this request */
         if(rt_slot_acpt->slot_reqt == 0) {
+            printf("I do not accept 0x%04X for slot %d\n", rti->slot_reqt_addr, rti->slot_reqt);
             rti->slot_reqt = 0;
         }
 
@@ -330,10 +331,11 @@ bcn_slot_cb_mine(tdma_slot_t *tdma_slot){
 
     if(rti->slot_reqt) {
         printf("I accept 0x%04X for slot %d\n", rti->slot_reqt_addr, rti->slot_reqt);
+        /* If I accept for a RANGE slot, I do not wait for see its BCN message */
         if(rti->slot_reqt > MYNEWT_VAL(UWB_SVC_SLOT)){
-            /* Release request context if it is not BCN slot */
             rti->nodes[rti->slot_idx].slot_map |= (slot_map_t)0x01 << rti->slot_reqt;
             rti->nodes[rti->slot_reqt].addr = rti->slot_reqt_addr;
+            /* Release request context if it is not BCN slot */
             rti->slot_reqt = 0;
             node_slot_map_printf(rti);
         }
@@ -352,19 +354,24 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
         
         /* Strange node detected */
         if(ieee_std_frame_hdr->src_address != rti->nodes[tdma_slot->idx].addr){
-            /* I do not have see any node in this slot before, it is a new node for this slot */
+            /* I do not have see any node in this bcn slot before, it is a new node for this slot */
             if(rti->nodes[tdma_slot->idx].addr == 0){
                 /* I am a network member */
                 if(rti->slot_idx != 0){
                     /* I see a slot request from this node before. It is up now */
                     if(rti->slot_reqt != 0 && rti->slot_reqt_addr == ieee_std_frame_hdr->src_address){
                         rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
-                        printf("Node up: 0x04%X\n", ieee_std_frame_hdr->src_address);
+                        printf("Node up: 0x%04X\n", ieee_std_frame_hdr->src_address);
                         /* This have request thi slot before, it must acctept my slot before joining */
                         rti->nodes[tdma_slot->idx].accepted = true;
                         /* Release request context */
                         rti->slot_reqt = 0;
                     }
+                    /* I am a tag, and I see a new anchor */
+                    else if(rti->role == RTR_TAG){
+                        printf("I am a tag and I see new anchor!\n");
+                    }
+                    /* I am a anchor */
                     else{
                         /* I has joint the network and I do not see any request from this node before */
                         /* This node take this slot without permission */
@@ -374,6 +381,7 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                 }
                 /* I am not a network member, just update this slot in table */
                 else{
+                    if(rti->role )
                     rti->nodes[tdma_slot->idx].slot_map |= (slot_map_t)0x01 << tdma_slot->idx;
                     rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
                     node_slot_map_printf(rti);
@@ -407,6 +415,9 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                             /* Reset slot_reqt to change it purpose */
                             rti->slot_reqt = 0;
                         };
+                    }
+                    else{
+                        printf("0x%04X do not accept for slot %d\n", ieee_std_frame_hdr->src_address, rti->slot_reqt);
                     }
                 }
                 break;
@@ -457,7 +468,7 @@ svc_slot_cb(tdma_slot_t *tdma_slot){
 
             rt_slot_reqt_t *rt_slot_reqt = (rt_slot_reqt_t *)(rti->dev_inst->rxbuf + sizeof(ieee_std_frame_hdr_t));
 
-            /* Only receive one RT_REQT_MSG each svc slot */
+            /* Only receive one RT_REQT_MSG for a session */
             if(rti->slot_reqt == 0 && rt_slot_reqt->msg_type == RT_REQT_MSG){
                 /* Lock request context */
                 rti->slot_reqt = rt_slot_reqt->slot_reqt;
@@ -503,7 +514,7 @@ svc_slot_cb(tdma_slot_t *tdma_slot){
         }
         /* Find TAG slot */
         else if(rti->role == RTR_TAG){
-            for(int i=MYNEWT_VAL(UWB_SVC_SLOT) + 1; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
+            for(int i=1; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
                 /* Ignore if node is not available in this frame and my slot node*/
                 if(rti->nodes[i].addr == 0 || !rti->nodes[i].available) continue; 
                 slot_map &= ~rti->nodes[i].slot_map;
