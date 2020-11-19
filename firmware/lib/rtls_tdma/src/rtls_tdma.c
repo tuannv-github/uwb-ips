@@ -381,8 +381,6 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                 }
                 /* I am not a network member, just update this slot in table */
                 else{
-                    if(rti->role )
-                    rti->nodes[tdma_slot->idx].slot_map |= (slot_map_t)0x01 << tdma_slot->idx;
                     rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
                     node_slot_map_printf(rti);
                 }
@@ -395,7 +393,8 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
         /* If I received message from tabled node. Mark it available in this supperframe and reset timer */
         rti->nodes[tdma_slot->idx].available = true;
         rti->nodes[tdma_slot->idx].timeout = 0;
-        
+        rti->nodes[rti->slot_idx].slot_map |= (slot_map_t)1 << tdma_slot->idx;
+
         if(rti->dev_inst->rxbuf_size - sizeof(ieee_std_frame_hdr_t) < sizeof(msg_hdr_t)) return;
         uint16_t frame_idx = sizeof(ieee_std_frame_hdr_t);
         while(frame_idx < rti->dev_inst->rxbuf_size){
@@ -427,14 +426,12 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                     rti->nodes[tdma_slot->idx].location_x = rt_loca->location_x;
                     rti->nodes[tdma_slot->idx].location_y = rt_loca->location_y;
                     rti->nodes[tdma_slot->idx].location_z = rt_loca->location_z;
-                    rti->nodes[rti->slot_idx].slot_map |= (slot_map_t)1 << tdma_slot->idx;
                 }
                 break;
                 case RT_SLOT_MSG:
                 {
                     rt_slot_map_t *rt_slot = (rt_slot_map_t *)(&rti->dev_inst->rxbuf[frame_idx]);
                     rti->nodes[tdma_slot->idx].slot_map = rt_slot->slot_map;
-                    rti->nodes[rti->slot_idx].slot_map |= (slot_map_t)1 << tdma_slot->idx;
                 }
                 default:
                 break;
