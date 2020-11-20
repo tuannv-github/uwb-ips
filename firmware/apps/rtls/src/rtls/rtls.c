@@ -170,10 +170,11 @@ void rtls_tdma_cb(rtls_tdma_instance_t *rti, tdma_slot_t *slot){
                rng->config.rx_timeout_delay, timeout);
     }
     tdma_instance_t *tdma = slot->parent;
-    struct uwb_dev_status status = uwb_rng_listen_delay_start(rng, tdma_rx_slot_start(tdma, idx), timeout, UWB_BLOCKING);
-    if(!status.rx_timeout_error){
-        printf("Slot %d\n", idx);
-    }
+    uwb_rng_listen_delay_start(rng, tdma_rx_slot_start(tdma, idx), timeout, UWB_BLOCKING);
+    // struct uwb_dev_status status = uwb_rng_listen_delay_start(rng, tdma_rx_slot_start(tdma, idx), timeout, UWB_BLOCKING);
+    // if(!status.rx_timeout_error){
+    //     printf("Rx timeout Slot %d\n", idx);
+    // }
 
 #elif MYNEWT_VAL(RTR_ROLE) == RTR_TAG
 
@@ -189,7 +190,6 @@ void rtls_tdma_cb(rtls_tdma_instance_t *rti, tdma_slot_t *slot){
         uint16_t node_address = rti->nodes[1].addr;
 
         uwb_rng_request_delay_start(rng, node_address, dx_time, UWB_DATA_CODE_SS_TWR);
-        printf("slot %d\n", slot->idx);
     }
 
 #endif
@@ -207,6 +207,11 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
         inst->fctrl != (FCNTL_IEEE_RANGE_16|UWB_FCTRL_ACK_REQUESTED)) {
         return false;
     }
+    struct uwb_rng_instance *rng = (struct uwb_rng_instance *)cbs->inst_ptr;
+
+    dpl_float64_t time_of_flight = uwb_rng_twr_to_tof(rng, rng->idx_current);
+    double r = uwb_rng_tof_to_meters(time_of_flight);
+    printf("d: %d.%d\n", (int)r, (int)(1000*(r - (int)r)));
     return true;
 }
 
