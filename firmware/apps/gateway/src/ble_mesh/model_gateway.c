@@ -10,14 +10,14 @@
 #include "services/gap/ble_svc_gap.h"
 #include "mesh/glue.h"
 
-#include <gateway/ble_mesh/mesh_msg.h>
+#include <message/mesh_msg.h>
 #include <gateway/ble_mesh/mesh_define.h>
 #include <gateway/gateway/gateway.h>
 
 #define MBUF_PKTHDR_OVERHEAD    (sizeof(struct os_mbuf_pkthdr) + 0)
 #define MBUF_MEMBLOCK_OVERHEAD  (sizeof(struct os_mbuf) + MBUF_PKTHDR_OVERHEAD)
 
-#define MBUF_NUM_MBUFS      (10)
+#define MBUF_NUM_MBUFS      (20)
 #define MBUF_PAYLOAD_SIZE   (sizeof(msg_rtls_t))
 #define MBUF_BUF_SIZE       OS_ALIGN(MBUF_PAYLOAD_SIZE, 4)
 #define MBUF_MEMBLOCK_SIZE  (MBUF_BUF_SIZE + MBUF_MEMBLOCK_OVERHEAD)
@@ -44,10 +44,13 @@ rtls_model_status(struct bt_mesh_model *model,
     struct os_mbuf *om;
     struct os_mqueue *mqueue;
     struct os_eventq *event;
+    msg_rtls_t msg_rtls;
 
     om = os_mbuf_get_pkthdr(&g_mbuf_pool, 0);
     if (om) {
-        os_mbuf_appendfrom(om, buf, 0, sizeof(msg_rtls_t));
+        msg_parse_rtls(buf, &msg_rtls);
+        msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
+        msg_prepr_rtls_pipe(om, &msg_rtls);
         get_ble_to_net_mqueue_eventq(&mqueue, &event);
         rc = os_mqueue_put(mqueue, event, om);
         if (rc != 0) {
@@ -104,18 +107,8 @@ process_net_to_ble_queue(struct os_event *ev)
 
     while ((om = os_mqueue_get(mqueue)) != NULL) {
         if(model->pub->addr != BT_MESH_ADDR_UNASSIGNED) {
-            msg_parse_rtls(om, &msg_rtls);
-            switch(msg_rtls.msg_type){
-                case MAVLINK_MSG_ID_LOCATION:
-                    model->pub->msg = NET_BUF_SIMPLE(1+sizeof(struct _msg_rtls_header_t) + sizeof(struct _msg_rtls_location_t));
-                    break;
-                case MAVLINK_MSG_ID_ONOFF:
-                    model->pub->msg = NET_BUF_SIMPLE(1+sizeof(struct _msg_rtls_header_t) + sizeof(struct _msg_rtls_onoff_t));
-                    break;
-                default:
-                    continue;
-            }
-            bt_mesh_model_msg_init(model->pub->msg, BT_MESH_MODEL_OP_SET);
+            msg_parse_rtls_pipe(om, &msg_rtls);
+            msg_print_rtls(&msg_rtls);
             msg_prepr_rtls(model->pub->msg, &msg_rtls);
             rc = bt_mesh_model_publish(model);
             if(rc){
@@ -149,7 +142,7 @@ void model_gateway_init(){
     os_mqueue_init(&mqueue_net_to_ble, process_net_to_ble_queue, &mqueue_net_to_ble);
     os_eventq_init(&eventq_net_to_ble);
 
-    os_task_init(&g_gateway_task, "app_gateway",
+    os_task_init(&g_gateway_task, "mgw",
                 task_rtls_func,
                 NULL,
                 MYNEWT_VAL(APP_GATEWAY_TASK_PRIORITY), 

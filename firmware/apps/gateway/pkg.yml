@@ -36,6 +36,7 @@ pkg.deps:
     - "@apache-mynewt-nimble/nimble/transport/ram"
 
     - "@rtls/lib/serial"
+    - "@rtls/lib/message"
 
 pkg.cflags:
     - "-std=gnu11"

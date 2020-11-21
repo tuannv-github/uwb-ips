@@ -15,8 +15,8 @@
         {
             "type": "gnu-debugger",
             "request": "launch",
-            "name": "rtls_mesh",
-            "program": "/home/tuannv/thesis/firmware/bin/targets/rtls_mesh/app/apps/rtls_mesh/rtls_mesh.elf",
+            "name": "Debug",
+            "program": "/home/tuannv/thesis/firmware/bin/targets/rtls/app/apps/rtls/rtls.elf",
             "toolchain": "/usr/local/bin/",
             "client": "arm-none-eabi-gdb",
             "server": "JLinkGDBServer",
@@ -38,31 +38,5 @@
             "autoRun": false,
             "debugOutput": false,
           },
-          {
-            "type": "gnu-debugger",
-            "request": "launch",
-            "name": "gateway",
-            "program": "/home/tuannv/thesis/firmware/bin/targets/gateway/app/apps/gateway/gateway.elf",
-            "toolchain": "/usr/local/bin/",
-            "client": "arm-none-eabi-gdb",
-            "server": "JLinkGDBServer",
-            "windows": {
-              "server": "JLinkGDBServerCL",
-            },
-            "serverArgs": [
-              "-device", "nrf52",
-              "-if", "SWD",
-              "-speed", "4000"
-            ],
-            "serverPort": 2331,
-            "serverHost": "localhost",
-            "customVariables": [
-              "port0",
-              "port1",
-              "port2",
-            ],
-            "autoRun": false,
-            "debugOutput": false,
-          }
     ]
 }

@@ -28,12 +28,12 @@ pkg.deps:
     - "@apache-mynewt-core/sys/stats/full"
     - "@apache-mynewt-core/sys/shell"
 
-    - "@apache-mynewt-nimble/nimble/controller"
-    - "@apache-mynewt-nimble/nimble/host"
-    - "@apache-mynewt-nimble/nimble/host/services/gap"
-    - "@apache-mynewt-nimble/nimble/host/services/gatt"
-    - "@apache-mynewt-nimble/nimble/host/store/ram"
-    - "@apache-mynewt-nimble/nimble/transport/ram"
+    # - "@apache-mynewt-nimble/nimble/controller"
+    # - "@apache-mynewt-nimble/nimble/host"
+    # - "@apache-mynewt-nimble/nimble/host/services/gap"
+    # - "@apache-mynewt-nimble/nimble/host/services/gatt"
+    # - "@apache-mynewt-nimble/nimble/host/store/ram"
+    # - "@apache-mynewt-nimble/nimble/transport/ram"
 
     - "@apache-mynewt-core/kernel/os"
     - "@apache-mynewt-core/sys/console/full"
@@ -42,11 +42,13 @@ pkg.deps:
     - "@apache-mynewt-core/sys/stats/full"
     - "@mynewt-timescale-lib/lib/timescale"
 
+    - "@rtls/lib/message"
+
     - "@decawave-uwb-core/sys/uwbcfg"
     - "@decawave-uwb-core/hw/drivers/uwb"
 
     - "@rtls/lib/rtls_tdma"
-    - "@rtls/lib/message"
+    - "@rtls/lib/uwb_nrng_ss"
 
 pkg.cflags:
     - "-Waddress-of-packed-member"

@@ -13,3 +13,12 @@ newt build ccp_master
 newt create-image ccp_master 0.0.0.0
 newt load ccp_master
 ```
+
+```
+newt target create ccp_master
+newt target set ccp_master app=apps/ccp_master
+newt target set ccp_master bsp=hw/bsp/dwm1001_464
+newt build ccp_master
+newt create-image ccp_master 0.0.0.0
+newt load ccp_master
+```

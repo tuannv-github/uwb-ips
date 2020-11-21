@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <dpl/dpl.h>
 
+#if MYNEWT_VAL(BLE_MESH)
+
 /* BLE */
 #include "nimble/ble.h"
 #include "host/ble_hs.h"
@@ -26,8 +28,9 @@ typedef struct _msg_rtls_t
 {
     struct _msg_rtls_header_t
     {
-        uint8_t msg_type;
+        uint8_t type;
         uint16_t dstsrc;
+        uint32_t opcode;
     };
     union{
         struct _msg_rtls_location_t
@@ -43,11 +46,15 @@ typedef struct _msg_rtls_t
         };
     };
 }__attribute__((__packed__, aligned(1))) msg_rtls_t;
-void msg_prepr_rtls(struct os_mbuf *mbuf, msg_rtls_t *msg);
+
+void msg_prepr_rtls(struct os_mbuf **mbuf, msg_rtls_t *msg);
 void msg_parse_rtls(struct os_mbuf *mbuf, msg_rtls_t *msg);
 
-typedef struct _msg_rtls_mqueue_header_t{
-    uint8_t cmd;
-}__attribute__((__packed__, aligned(1))) msg_rtls_mqueue_header_t;
+void msg_prepr_rtls_pipe(struct os_mbuf *mbuf, msg_rtls_t *msg);
+void msg_parse_rtls_pipe(struct os_mbuf *mbuf, msg_rtls_t *msg);
+
+void msg_print_rtls(msg_rtls_t *msg);
+
+#endif
 
 #endif

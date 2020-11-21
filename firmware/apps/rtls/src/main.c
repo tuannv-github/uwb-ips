@@ -19,7 +19,6 @@
 
 #include <assert.h>
 #include "os/mynewt.h"
-#include "mesh/mesh.h"
 #include "console/console.h"
 #include "hal/hal_system.h"
 #include "hal/hal_gpio.h"
@@ -27,7 +26,11 @@
 #include "shell/shell.h"
 #include <config/config.h>
 
+#if MYNEWT_VAL(BLE_MESH)
+#include <mesh/mesh.h>
 #include <rtls/ble_mesh/mesh_if.h>
+#endif
+
 #include <rtls/rtls/rtls.h>
 
 int
@@ -36,9 +39,12 @@ main(int argc, char **argv)
     sysinit();
     conf_load();
     
-    ble_mesh_init();
     rtls_init();
 
+    #if MYNEWT_VAL(BLE_MESH)
+    ble_mesh_init();
+    #endif
+    
     while (1) {
         os_eventq_run(os_eventq_dflt_get());
     }

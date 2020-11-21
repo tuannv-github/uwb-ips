@@ -1,13 +1,15 @@
 #include <assert.h>
 #include "os/mynewt.h"
-#include "mesh/mesh.h"
 #include "console/console.h"
 #include "hal/hal_system.h"
 #include "hal/hal_gpio.h"
 #include "bsp/bsp.h"
 #include "shell/shell.h"
 
+#if MYNEWT_VAL(BLE_MESH)
+
 /* BLE */
+#include "mesh/mesh.h"
 #include "nimble/ble.h"
 #include "host/ble_hs.h"
 #include "services/gap/ble_svc_gap.h"
@@ -62,7 +64,7 @@ blemesh_on_sync(void)
 {
     int err;
     ble_addr_t addr;
-    console_printf("Bluetooth initialized\n");
+    console_printf("BLE initialized\n");
 
     /* Use NRPA */
     err = ble_hs_id_gen_rnd(1, &addr);
@@ -72,24 +74,24 @@ blemesh_on_sync(void)
 
     ble_hw_get_public_addr(&addr);
 
-    printf("HW address: ");
-    for(int i=0; i<6; i++){
-        printf("0x%02x ", addr.val[i]);
-    }
-    printf(" \n");
+    // printf("HW address: ");
+    // for(int i=0; i<6; i++){
+    //     printf("0x%02x ", addr.val[i]);
+    // }
+    // printf(" \n");
 
     uint8_t *uuid = (uint8_t *)prov.uuid;
     memcpy(uuid, addr.val, 6);
 
-    printf("UUID: ");
-    for(int i=0; i<16; i++){
-        printf("0x%02x ", prov.uuid[i]);
-    }
-    printf(" \n");
+    // printf("UUID: ");
+    // for(int i=0; i<16; i++){
+    //     printf("0x%02x ", prov.uuid[i]);
+    // }
+    // printf(" \n");
     
     err = bt_mesh_init(addr.type, &prov, &g_comp);
     if (err) {
-        console_printf("Initializing mesh failed (err %d)\n", err);
+        console_printf("Mesh init failed (err %d)\n", err);
         return;
     }
 
@@ -113,3 +115,5 @@ void ble_mesh_init(){
 
     model_gateway_init();
 }
+
+#endif
