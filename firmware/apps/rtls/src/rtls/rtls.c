@@ -175,7 +175,7 @@ void rtls_tdma_cb(rtls_tdma_instance_t *rti, tdma_slot_t *slot){
     }
     else if(rtls_conf.node_type == RTR_TAG){
         /* Only start range requests if I this is my slot*/
-        // if(rti->slot_idx == slot->idx){
+        if(rti->slot_idx == slot->idx){
             tdma_instance_t * tdma = slot->parent;
             uint16_t idx = slot->idx;
 
@@ -185,7 +185,7 @@ void rtls_tdma_cb(rtls_tdma_instance_t *rti, tdma_slot_t *slot){
             uint16_t node_address = rti->nodes[1].addr;
 
             uwb_rng_request_delay_start(uri, node_address, dx_time, UWB_DATA_CODE_SS_TWR);
-        // }
+        }
     }
 }
 
