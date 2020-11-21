@@ -10,7 +10,8 @@
 #include <message/mavlink/protocol/mavlink.h>
 
 #include <uwb/uwb.h>
-#include <uwb_rng/uwb_rng.h>
+#include <nrng/nrng.h>
+#include <uwb/uwb_mac.h>
 
 static struct {
     uint8_t node_type;
@@ -154,45 +155,45 @@ void rtls_set_ntype(uint8_t ntype){
     hal_system_reset();
 }
 
-struct uwb_rng_instance *uri;
+void rtls_tdma_cb(rtls_tdma_instance_t *rti, tdma_slot_t *slot);
+
+static rtls_tdma_instance_t g_rtls_tdma_instance = {
+    .rtls_tdma_cb = rtls_tdma_cb
+};
+static struct uwb_mac_interface g_cbs;
+static struct nrng_instance* g_nrng;
 
 void rtls_tdma_cb(rtls_tdma_instance_t *rti, tdma_slot_t *slot){
-    
-    if(rtls_conf.node_type == RTR_ANCHOR){
-        static uint16_t timeout = 0;
-        struct uwb_dev *inst = rti->dev_inst;
-        uint16_t idx = slot->idx;
+    rti->dev_inst->slot_id = g_rtls_tdma_instance.slot_idx;
 
-        if (!timeout) {
-            timeout = uwb_usecs_to_dwt_usecs(uwb_phy_frame_duration(inst, sizeof(ieee_rng_request_frame_t)))
-                + uri->config.rx_timeout_delay;
-            printf("Range request set timeout to: %d %d = %d\n",
-                uwb_phy_frame_duration(inst, sizeof(ieee_rng_request_frame_t)),
-                uri->config.rx_timeout_delay, timeout);
-        }
-        tdma_instance_t *tdma = slot->parent;
-        uwb_rng_listen_delay_start(uri, tdma_rx_slot_start(tdma, idx), timeout, UWB_BLOCKING);
+    if(rtls_conf.node_type == RTR_ANCHOR){
+        /* Listen for a ranging tag */
+        uwb_set_delay_start(udev, tdma_rx_slot_start(slot->parent, slot->idx));
+        uint16_t timeout = uwb_phy_frame_duration(udev, sizeof(nrng_request_frame_t))
+            + g_nrng->config.rx_timeout_delay;
+
+        /* Padded timeout to allow us to receive any nmgr packets too */
+        uwb_set_rx_timeout(udev, timeout + 0x1000);
+        nrng_listen(g_nrng, UWB_BLOCKING);
     }
     else if(rtls_conf.node_type == RTR_TAG){
-        /* Only start range requests if I this is my slot*/
-        if(rti->slot_idx == slot->idx){
-            tdma_instance_t * tdma = slot->parent;
-            uint16_t idx = slot->idx;
+        /* Range with the anchors */
+        uint64_t dx_time = tdma_tx_slot_start(slot->parent, slot->idx) & 0xFFFFFFFFFE00UL;
+        uint32_t slot_mask = 0;
+        for (uint16_t i = MYNEWT_VAL(NODE_START_SLOT_ID);
+             i <= MYNEWT_VAL(NODE_END_SLOT_ID); i++) {
+            slot_mask |= 1UL << i;
+        }
 
-            uint64_t dx_time = tdma_tx_slot_start(tdma, idx) & 0xFFFFFFFFFE00UL;
-
-            /* Range with the clock master by default */
-            uint16_t node_address = rti->nodes[1].addr;
-
-            uwb_rng_request_delay_start(uri, node_address, dx_time, UWB_DATA_CODE_SS_TWR);
+        if(nrng_request_delay_start(
+               g_nrng, UWB_BROADCAST_ADDRESS, dx_time,
+               UWB_DATA_CODE_SS_TWR_NRNG, slot_mask, 0).start_tx_error) {
+            uint32_t utime = os_cputime_ticks_to_usecs(os_cputime_get32());
+            printf("{\"utime\": %lu,\"msg\": \"slot_timer_cb_%d:start_tx_error\"}\n",
+                   utime, slot->idx);
         }
     }
 }
-
-rtls_tdma_instance_t g_rtls_tdma_instance = {
-    .rtls_tdma_cb = rtls_tdma_cb
-};
-struct uwb_mac_interface g_cbs;
 
 static bool
 complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
@@ -201,12 +202,12 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
         inst->fctrl != (FCNTL_IEEE_RANGE_16|UWB_FCTRL_ACK_REQUESTED)) {
         return false;
     }
-    struct uwb_rng_instance *rng = (struct uwb_rng_instance *)cbs->inst_ptr;
+    // struct nrng_instance *nrng = (struct nrng_instance *)cbs->inst_ptr;
 
-    uint16_t idx = (rng->idx)%rng->nframes;
-    dpl_float64_t time_of_flight = uwb_rng_twr_to_tof(rng, idx);
-    double r = uwb_rng_tof_to_meters(time_of_flight);
-    printf("idx: %d, d: %d.%d\n", idx, (int)r, (int)(1000*(r - (int)r)));
+    // uint16_t idx = (nrng->idx)%nrng->nframes;
+    // dpl_float64_t time_of_flight = uwb_rng_twr_to_tof(nrng, idx);
+    // double r = uwb_rng_tof_to_meters(time_of_flight);
+    // printf("idx: %d, d: %d.%d\n", idx, (int)r, (int)(1000*(r - (int)r)));
     return true;
 }
 
@@ -225,11 +226,12 @@ void rtls_init(){
     udev = uwb_dev_idx_lookup(0);
     uwb_set_dblrxbuff(udev, false);
 
-    uri  = (struct uwb_rng_instance *)uwb_mac_find_cb_inst_ptr(udev, UWBEXT_RNG);
+    g_nrng = (struct nrng_instance*)uwb_mac_find_cb_inst_ptr(udev, UWBEXT_NRNG);
+    assert(g_nrng);
 
     g_cbs = (struct uwb_mac_interface){
         .id =  UWBEXT_APP0,
-        .inst_ptr = uri,
+        .inst_ptr = g_nrng,
         .complete_cb = complete_cb,
     };
     uwb_mac_append_interface(udev, &g_cbs);
@@ -237,6 +239,4 @@ void rtls_init(){
     g_rtls_tdma_instance.role = rtls_conf.node_type;
     printf("Role: %d\n", rtls_conf.node_type);
     rtls_tdma_start(&g_rtls_tdma_instance, udev);
-
-
 }

@@ -48,7 +48,7 @@ pkg.deps:
     - "@decawave-uwb-core/hw/drivers/uwb"
 
     - "@rtls/lib/rtls_tdma"
-    - "@rtls/lib/uwb_twr_ss"
+    - "@rtls/lib/uwb_nrng_ss"
 
 pkg.cflags:
     - "-Waddress-of-packed-member"

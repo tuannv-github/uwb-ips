@@ -17,7 +17,7 @@
 # under the License.
 #
 
-pkg.name: lib/uwb_twr_nrng_ss
+pkg.name: lib/uwb_nrng_ss
 pkg.description: Single Sided NRNG library
 pkg.author: "UWB Core <uwbcore@gmail.com>"
 pkg.homepage: "http://www.decawave.com/"

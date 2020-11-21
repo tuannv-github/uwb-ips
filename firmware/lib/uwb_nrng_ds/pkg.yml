@@ -17,12 +17,12 @@
 # under the License.
 #
 
-pkg.name: lib/uwb_twr_nrng
-pkg.description: TWR nrng library superset
+pkg.name: lib/uwb_nrng_ds
+pkg.description: Double Sided TWR library
 pkg.author: "UWB Core <uwbcore@gmail.com>"
 pkg.homepage: "http://www.decawave.com/"
 pkg.keywords:
-    - uwb
+    - dw1000
     - CCP
 
 pkg.cflags:
@@ -33,8 +33,7 @@ pkg.lflags:
     - "-lm"
 
 pkg.deps:
-    - "@decawave-uwb-core/lib/json"
-    - "@rtls/lib/uwb_rng"
+    - "@decawave-uwb-core/lib/nranges"
 
 pkg.init:
-    nrng_pkg_init: 411
+    twr_ds_nrng_pkg_init: 412
