@@ -50,8 +50,12 @@ def loop_mqtt():
 
 def loop_serial():
     while True:
-        byte = serial.read()    
-        msg = mav.parse_char(byte)
+        byte = serial.read()
+        try:  
+            msg = mav.parse_char(byte)
+        except:
+            print("Message parse exception")
+            continue
         if(msg is not None):
             print("BLE->NET: %s" % (msg.to_json()))
             try:

@@ -87,7 +87,7 @@ button_pkg_init(void)
 {
 #if MYNEWT_VAL(UWB_PKG_INIT_LOG)
     printf("{\"utime\": %"PRIu32",\"msg\": \"button_pkg_init\"}\n",
-           dpl_cputime_ticks_to_usecs(dpl_cputime_get32()));
+           (uint32_t)dpl_cputime_ticks_to_usecs(dpl_cputime_get32()));
 #endif
 
     /* Check if the tasks are already initiated */

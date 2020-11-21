@@ -1,0 +1,13 @@
+syscfg.defs:
+    SERIAL_RX_RBUF_SIZE:
+        description: ''
+        value: 128
+    SERIAL_TX_RBUF_SIZE:
+        description: ''
+        value: 128
+    SERIAL_UART_DEV:
+        description: 'Serial UART dev'
+        value: '"uart0"'
+    SERIAL_UART_BAUD:
+        description: 'Serial UART baud'
+        value: 115200

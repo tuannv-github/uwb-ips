@@ -13,3 +13,13 @@ newt build button
 newt create-image button 0.0.0.0
 newt load button
 ```
+
+
+```no-highlight
+newt target create button
+newt target set button app=apps/button
+newt target set button bsp=@apache-mynewt-core/hw/bsp/nordic_pca10040
+newt build button
+newt create-image button 0.0.0.0
+newt load button
+```

@@ -17,3 +17,7 @@ newt build dwm1001_boot
 newt load dwm1001_boot
 
 ```
+
+```
+JLinkGDBServer -device NRF52 -if swd -endian little -port 2431 -swoport 2432 -telnetport 2433 -RTTTelnetport 2434 -vd -noir -strict -timeout 0 -select USB=760085865
+````

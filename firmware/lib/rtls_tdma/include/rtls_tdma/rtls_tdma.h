@@ -4,7 +4,6 @@
 
 #include <uwb/uwb.h>
 #include <tdma/tdma.h>
-#include <uwb_rng/uwb_rng.h>
 
 typedef enum{
     RTS_JOINT_NONE,
@@ -14,8 +13,8 @@ typedef enum{
 }rts_t;
 
 typedef enum{
-    RTR_ANCHOR,
-    RTR_TAG
+    RTR_ANCHOR = 1,
+    RTR_TAG = 2
 }rtr_t;
 
 typedef uint64_t slot_map_t;
@@ -44,22 +43,18 @@ struct _rtls_tdma_instance_t {
     tdma_instance_t *tdma;                      //!< Pointer to tdma instant
     struct uwb_dev *dev_inst;                   //!< UWB device instance
     struct uwb_mac_interface umi;               //!< Mac interface
-    struct uwb_rng_instance *uri;               //!= UWB ranging instance
-    
+
     rts_t cstate;                               //!< Current rtls tdma state
     struct dpl_sem sem;                         //!< Structure containing os semaphores
     rtr_t role;                                 //!< RTLS TDMA role
     uint8_t seqno;
     uint16_t slot_idx;                          //!< slot_idx != 0 means I have slot already
 
-    slot_map_t  slot_req;
-    uint16_t    slot_req_cntr;
-    uint16_t    slot_req_addr;
+    uint16_t slot_reqt;
+    uint16_t slot_reqt_cntr;
+    uint16_t slot_reqt_addr;
     
     rtls_tdma_cb_t rtls_tdma_cb;
-
-    slot_map_t node_anchor_mask;
-    slot_map_t node_tag_mask;
 
     rtls_tdma_node_t nodes[MYNEWT_VAL(TDMA_NSLOTS)]; // nodes[0] save my node info
 };
@@ -97,14 +92,32 @@ typedef struct _rt_bcn_loca_t{
     }__attribute__((__packed__,aligned(1)));
 }__attribute__((__packed__,aligned(1))) rt_loca_t;
 
-typedef struct _rt_slot_t{
+ struct _rt_slot_reqt_t{
     struct _msg_hdr_t;
-    struct _rt_slot_data_t
+    struct _rt_slot_reqt_data_t
+    {
+        uint8_t slot;
+        uint8_t slot_reqt;
+    }__attribute__((__packed__,aligned(1)));
+}__attribute__((__packed__,aligned(1)));
+
+typedef struct _rt_slot_reqt_t rt_slot_reqt_t;
+typedef struct _rt_slot_reqt_data_t rt_slot_reqt_data_t;
+
+typedef struct _rt_slot_reqt_t rt_slot_acpt_t;
+typedef struct _rt_slot_reqt_data_t rt_slot_acpt_data_t;
+
+struct _rt_slot_map_t{
+    struct _msg_hdr_t;
+    struct _rt_slot_map_data_t
     {
         uint8_t slot;
         slot_map_t slot_map;
     }__attribute__((__packed__,aligned(1)));
-}__attribute__((__packed__,aligned(1))) rt_slot_t;
+}__attribute__((__packed__,aligned(1)));
+
+typedef struct _rt_slot_map_t rt_slot_map_t;
+typedef struct _rt_slot_map_data_t rt_slot_map_data_t;
 
 void rtls_tdma_start(rtls_tdma_instance_t *rtls_tdma_instance, struct uwb_dev* udev);
 

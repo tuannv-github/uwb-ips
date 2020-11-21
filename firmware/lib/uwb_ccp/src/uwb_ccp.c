@@ -238,9 +238,12 @@ ccp_slave_timer_ev_cb(struct dpl_event *ev)
 
         /* May change to master role if rx_timeout_acc reach thresh */
         if(ccp->rx_timeout_acc > MYNEWT_VAL(UWB_RX_TIMEOUT_THRESH) + inst->euid%MYNEWT_VAL(UWB_RX_TIMEOUT_THRESH)){
-            ccp->config.role = CCP_ROLE_MASTER;
-            dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
-            return;
+            /* I only try to change to master mode if master mode is allowed in config */
+            if(ccp->uwb_ccp_role & CCP_ROLE_MASTER){
+                ccp->config.role = CCP_ROLE_MASTER;
+                dpl_eventq_put(&ccp->eventq, &ccp->change_role_event);
+                return;
+            }
         }
         goto reset_timer;
     }
@@ -721,8 +724,8 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
         frame->rxttcko = 0;
     }
 
-    /* Cascade relay of ccp packet */
-    if (ccp->config.role == CCP_ROLE_RELAY && ccp->status.valid && frame->rpt_count < frame->rpt_max) {
+    /* Cascade relay of ccp packet if relay role is configured */
+    if ((ccp->uwb_ccp_role & CCP_ROLE_RELAY) && ccp->status.valid && frame->rpt_count < frame->rpt_max) {
         uwb_ccp_frame_t tx_frame;
         memcpy(tx_frame.array, frame->array, sizeof(uwb_ccp_frame_t));
 
@@ -770,7 +773,7 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     }
 
     if (ccp->config.postprocess && ccp->status.valid) {
-        dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->postprocess_event);
+        dpl_eventq_put(&ccp->eventq, &ccp->postprocess_event);
     }
 
     dpl_sem_release(&ccp->sem);
@@ -839,7 +842,7 @@ tx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     }
 
     if (ccp->config.postprocess && ccp->status.valid)
-        dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->postprocess_event);
+        dpl_eventq_put(&ccp->eventq, &ccp->postprocess_event);
 
     if(dpl_sem_get_count(&ccp->sem) == 0){
         dpl_error_t err = dpl_sem_release(&ccp->sem);
@@ -1207,9 +1210,20 @@ void rtls_ccp_start(struct uwb_ccp_instance *ccp){
     
     ccp->master_role_request = false;
     ccp->config.role = CCP_ROLE_SLAVE;
-    dpl_eventq_put(dpl_eventq_dflt_get(), &ccp->change_role_event);
+    ccp->uwb_ccp_role = CCP_ROLE_MASTER | CCP_ROLE_SLAVE;
+    dpl_eventq_put(&ccp->eventq, &ccp->change_role_event);
 }
 EXPORT_SYMBOL(rtls_ccp_start);
+
+void rtls_ccp_start_role(struct uwb_ccp_instance *ccp, uwb_ccp_role_t uwb_ccp_role){
+    dpl_event_init(&ccp->change_role_event, ccp_change_role, (void *) ccp);
+    
+    ccp->master_role_request = false;
+    ccp->config.role = CCP_ROLE_SLAVE;
+    ccp->uwb_ccp_role = uwb_ccp_role;
+    dpl_eventq_put(&ccp->eventq, &ccp->change_role_event);
+}
+EXPORT_SYMBOL(rtls_ccp_start_role);
 
 void rtls_ccp_set_sync_cb(struct uwb_ccp_instance *ccp, uwb_ccp_sync_cb_t uwb_ccp_sync_cb, void *arg){
     ccp->uwb_ccp_sync_cb = uwb_ccp_sync_cb;
