@@ -38,7 +38,7 @@
 #include <uwb/uwb.h>
 #include <uwb/uwb_mac.h>
 #include <uwb/uwb_ftypes.h>
-#include <nrng/nrng.h>
+#include <uwb_nrng/nrng.h>
 #if MYNEWT_VAL(UWB_WCS_ENABLED)
 #include <uwb_wcs/uwb_wcs.h>
 #endif

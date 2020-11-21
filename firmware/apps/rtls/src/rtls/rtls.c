@@ -10,7 +10,7 @@
 #include <message/mavlink/protocol/mavlink.h>
 
 #include <uwb/uwb.h>
-#include <nrng/nrng.h>
+#include <uwb_nrng/nrng.h>
 #include <uwb/uwb_mac.h>
 
 static struct {
@@ -177,20 +177,22 @@ void rtls_tdma_cb(rtls_tdma_instance_t *rti, tdma_slot_t *slot){
         nrng_listen(g_nrng, UWB_BLOCKING);
     }
     else if(rtls_conf.node_type == RTR_TAG){
+        if(slot->idx == g_rtls_tdma_instance.slot_idx){
         /* Range with the anchors */
-        uint64_t dx_time = tdma_tx_slot_start(slot->parent, slot->idx) & 0xFFFFFFFFFE00UL;
-        uint32_t slot_mask = 0;
-        for (uint16_t i = MYNEWT_VAL(NODE_START_SLOT_ID);
-             i <= MYNEWT_VAL(NODE_END_SLOT_ID); i++) {
-            slot_mask |= 1UL << i;
-        }
+            uint64_t dx_time = tdma_tx_slot_start(slot->parent, slot->idx) & 0xFFFFFFFFFE00UL;
+            uint32_t slot_mask = 0;
+            for (uint16_t i = MYNEWT_VAL(NODE_START_SLOT_ID);
+                i <= MYNEWT_VAL(NODE_END_SLOT_ID); i++) {
+                slot_mask |= 1UL << i;
+            }
 
-        if(nrng_request_delay_start(
-               g_nrng, UWB_BROADCAST_ADDRESS, dx_time,
-               UWB_DATA_CODE_SS_TWR_NRNG, slot_mask, 0).start_tx_error) {
-            uint32_t utime = os_cputime_ticks_to_usecs(os_cputime_get32());
-            printf("{\"utime\": %lu,\"msg\": \"slot_timer_cb_%d:start_tx_error\"}\n",
-                   utime, slot->idx);
+            if(nrng_request_delay_start(
+                g_nrng, UWB_BROADCAST_ADDRESS, dx_time,
+                UWB_DATA_CODE_SS_TWR_NRNG, slot_mask, 0).start_tx_error) {
+                uint32_t utime = os_cputime_ticks_to_usecs(os_cputime_get32());
+                printf("{\"utime\": %lu,\"msg\": \"slot_timer_cb_%d:start_tx_error\"}\n",
+                    utime, slot->idx);
+            }
         }
     }
 }
@@ -204,6 +206,9 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     }
     // struct nrng_instance *nrng = (struct nrng_instance *)cbs->inst_ptr;
 
+    // float range[10];
+    // nrng_get_ranges( nrng, ranges[], 10, 0);
+    // for(int i=0; i<10; i++)
     // uint16_t idx = (nrng->idx)%nrng->nframes;
     // dpl_float64_t time_of_flight = uwb_rng_twr_to_tof(nrng, idx);
     // double r = uwb_rng_tof_to_meters(time_of_flight);

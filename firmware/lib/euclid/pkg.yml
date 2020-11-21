@@ -17,13 +17,11 @@
 # under the License.
 #
 
-pkg.name: lib/uwb_nrng
-pkg.description: TWR nrng library superset
+pkg.name: lib/euclid
+pkg.description: Euclidean geometry functions
 pkg.author: "UWB Core <uwbcore@gmail.com>"
 pkg.homepage: "http://www.decawave.com/"
 pkg.keywords:
-    - uwb
-    - CCP
 
 pkg.cflags:
     - "-std=gnu99"
@@ -31,11 +29,3 @@ pkg.cflags:
 
 pkg.lflags:
     - "-lm"
-
-pkg.deps:
-    - "@rtls/lib/json"
-    - "@rtls/lib/uwb_rng"
-    - "@rtls/lib/euclid"
-
-pkg.init:
-    nrng_pkg_init: 411

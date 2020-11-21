@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,23 +17,27 @@
  * under the License.
  */
 
-#ifndef _NRNG_ENCODE_H_
-#define _NRNG_ENCODE_H_
+#ifndef _RNG_TEST_H
+#define _RNG_TEST_H
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <nrng/nrng.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "os/mynewt.h"
+#include "testutil/testutil.h"
+#include "euclid/norm.h"
+#include "euclid/triad.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void nrng_encode(struct nrng_instance * nrng, uint8_t seq_num, uint16_t base);
+extern union _triad_t test_triads[];
+extern union _triadf_t test_triads_f[];
+bool epsilon_same_float(float a, float b);
+bool epsilon_same_double(double a, double b);
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif
+#endif /* _RNG_TEST_H_ */

@@ -22,8 +22,8 @@
 #include <stdio.h>
 #include <uwb_rng/uwb_rng.h>
 #include <json/json.h>
-#include <nrng/nrng_encode.h>
-#include <nrng/nrng_json.h>
+#include <uwb_nrng/nrng_encode.h>
+#include <uwb_nrng/nrng_json.h>
 
 #if MYNEWT_VAL(NRNG_VERBOSE)
 
@@ -49,7 +49,7 @@ nrng_encode(struct nrng_instance * nrng, uint8_t seq_num, uint16_t base){
         }
     }
     // tdoa results are reference to slot 0, so reject it slot 0 did not respond. An alternative approach is needed @Niklas
-    if (valid_mask == 0 || (valid_mask & 1) == 0)
+    if (valid_mask == 0)
        return;
 
     uint16_t j=0;

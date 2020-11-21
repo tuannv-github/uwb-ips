@@ -25,7 +25,7 @@
 
 #include <uwb/uwb.h>
 #include <uwb/uwb_ftypes.h>
-#include <nrng/nrng.h>
+#include <uwb_nrng/nrng.h>
 #include <uwb_rng/uwb_rng.h>
 #if MYNEWT_VAL(UWB_WCS_ENABLED)
 #include <uwb_wcs/uwb_wcs.h>
@@ -35,7 +35,7 @@
 #endif
 #include <uwb_rng/slots.h>
 #if MYNEWT_VAL(NRNG_VERBOSE)
-#include <nrng/nrng_encode.h>
+#include <uwb_nrng/nrng_encode.h>
 static bool complete_cb(struct uwb_dev * udev, struct uwb_mac_interface * cbs);
 #endif
 
@@ -455,7 +455,7 @@ nrng_request(struct nrng_instance * nrng, uint16_t dst_address, uwb_dataframe_co
 #else
     frame->ptype = PTYPE_RANGE;
     frame->end_slot_id = cell_id;
-    frame->start_slot_id = slot_mask;
+    frame->start_slot_id = nrng->slot_mask = slot_mask;
 #endif
 
     uwb_write_tx(inst, frame->array, 0, sizeof(nrng_request_frame_t));

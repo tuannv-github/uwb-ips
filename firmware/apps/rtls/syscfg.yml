@@ -45,11 +45,11 @@ syscfg.defs:
     NODE_START_SLOT_ID:
         description: >
             Slot ID from which the nodes should respond
-        value: 1
+        value: 0
     NODE_END_SLOT_ID:
         description: >
             Slot ID till which the nodes should respond
-        value: 5
+        value: 10
 
 syscfg.vals:
     LOG_LEVEL: 5
@@ -119,3 +119,5 @@ syscfg.vals:
     NRNG_STATS: 1
     # RNG_TX_HOLDOFF: ((uint32_t)7D0)
     UWBCFG_DEF_FRAME_FILTER: '"0xF"'
+
+    CELL_ENABLED: 0

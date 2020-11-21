@@ -29,7 +29,7 @@
 #include <stddef.h>
 #include <assert.h>
 #include <dpl/dpl_types.h>
-#include <nrng/nrng_json.h>
+#include <uwb_nrng/nrng_json.h>
 
 static int nrng_write_line(void *buf, char* data, int len);
 

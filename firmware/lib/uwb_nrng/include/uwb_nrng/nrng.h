@@ -28,10 +28,10 @@
 #include <uwb/uwb_ftypes.h>
 #include <euclid/triad.h>
 #include <stats/stats.h>
+#include <uwb_rng/slots.h>
 
 #if MYNEWT_VAL(UWB_RNG_ENABLED)
 #include <uwb_rng/uwb_rng.h>
-#include <uwb_rng/slots.h>
 #endif
 
 #ifdef __cplusplus

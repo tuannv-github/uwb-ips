@@ -17,25 +17,22 @@
 # under the License.
 #
 
-pkg.name: lib/uwb_nrng
-pkg.description: TWR nrng library superset
+pkg.name: lib/euclid/selftest
+pkg.type: unittest
+pkg.description: "Euclid test"
 pkg.author: "UWB Core <uwbcore@gmail.com>"
 pkg.homepage: "http://www.decawave.com/"
 pkg.keywords:
     - uwb
-    - CCP
+    - ranging
+
+pkg.deps:
+    - "@decawave-uwb-core/lib/euclid"
+    - "@apache-mynewt-core/sys/console/stub"
+    - "@apache-mynewt-core/sys/log/stub"
+    - "@apache-mynewt-core/test/testutil"
+
 
 pkg.cflags:
     - "-std=gnu99"
     - "-fms-extensions"
-
-pkg.lflags:
-    - "-lm"
-
-pkg.deps:
-    - "@rtls/lib/json"
-    - "@rtls/lib/uwb_rng"
-    - "@rtls/lib/euclid"
-
-pkg.init:
-    nrng_pkg_init: 411
