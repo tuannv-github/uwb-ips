@@ -31,8 +31,7 @@ pkg.cflags:
 
 pkg.deps:
     - "@rtls/lib/uwb_ccp"
-    - "@decawave-uwb-core/lib/tdma"
-    - "@decawave-uwb-core/lib/twr_ss"
+    - "@rtls/lib/tdma"
 
 pkg.lflags:
     - "-lm"

@@ -154,45 +154,39 @@ void rtls_set_ntype(uint8_t ntype){
     hal_system_reset();
 }
 
+struct uwb_rng_instance *uri;
+
 void rtls_tdma_cb(rtls_tdma_instance_t *rti, tdma_slot_t *slot){
     
-#if MYNEWT_VAL(RTR_ROLE) == RTR_ANCHOR
-    static uint16_t timeout = 0;
-    struct uwb_rng_instance *rng = rti->uri;
-    struct uwb_dev *inst = rti->dev_inst;
-    uint16_t idx = slot->idx;
-
-    if (!timeout) {
-        timeout = uwb_usecs_to_dwt_usecs(uwb_phy_frame_duration(inst, sizeof(ieee_rng_request_frame_t)))
-            + rng->config.rx_timeout_delay;
-        printf("Range request set timeout to: %d %d = %d\n",
-               uwb_phy_frame_duration(inst, sizeof(ieee_rng_request_frame_t)),
-               rng->config.rx_timeout_delay, timeout);
-    }
-    tdma_instance_t *tdma = slot->parent;
-    uwb_rng_listen_delay_start(rng, tdma_rx_slot_start(tdma, idx), timeout, UWB_BLOCKING);
-    // struct uwb_dev_status status = uwb_rng_listen_delay_start(rng, tdma_rx_slot_start(tdma, idx), timeout, UWB_BLOCKING);
-    // if(!status.rx_timeout_error){
-    //     printf("Rx timeout Slot %d\n", idx);
-    // }
-
-#elif MYNEWT_VAL(RTR_ROLE) == RTR_TAG
-
-    /* Only start range requests if I this is my slot*/
-    if(rti->slot_idx == slot->idx){
-        tdma_instance_t * tdma = slot->parent;
+    if(rtls_conf.node_type == RTR_ANCHOR){
+        static uint16_t timeout = 0;
+        struct uwb_dev *inst = rti->dev_inst;
         uint16_t idx = slot->idx;
-        struct uwb_rng_instance *rng = rti->uri;
 
-        uint64_t dx_time = tdma_tx_slot_start(tdma, idx) & 0xFFFFFFFFFE00UL;
-
-        /* Range with the clock master by default */
-        uint16_t node_address = rti->nodes[1].addr;
-
-        uwb_rng_request_delay_start(rng, node_address, dx_time, UWB_DATA_CODE_SS_TWR);
+        if (!timeout) {
+            timeout = uwb_usecs_to_dwt_usecs(uwb_phy_frame_duration(inst, sizeof(ieee_rng_request_frame_t)))
+                + uri->config.rx_timeout_delay;
+            printf("Range request set timeout to: %d %d = %d\n",
+                uwb_phy_frame_duration(inst, sizeof(ieee_rng_request_frame_t)),
+                uri->config.rx_timeout_delay, timeout);
+        }
+        tdma_instance_t *tdma = slot->parent;
+        uwb_rng_listen_delay_start(uri, tdma_rx_slot_start(tdma, idx), timeout, UWB_BLOCKING);
     }
+    else if(rtls_conf.node_type == RTR_TAG){
+        /* Only start range requests if I this is my slot*/
+        // if(rti->slot_idx == slot->idx){
+            tdma_instance_t * tdma = slot->parent;
+            uint16_t idx = slot->idx;
 
-#endif
+            uint64_t dx_time = tdma_tx_slot_start(tdma, idx) & 0xFFFFFFFFFE00UL;
+
+            /* Range with the clock master by default */
+            uint16_t node_address = rti->nodes[1].addr;
+
+            uwb_rng_request_delay_start(uri, node_address, dx_time, UWB_DATA_CODE_SS_TWR);
+        // }
+    }
 }
 
 rtls_tdma_instance_t g_rtls_tdma_instance = {
@@ -209,29 +203,15 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     }
     struct uwb_rng_instance *rng = (struct uwb_rng_instance *)cbs->inst_ptr;
 
-    dpl_float64_t time_of_flight = uwb_rng_twr_to_tof(rng, rng->idx_current);
+    uint16_t idx = (rng->idx)%rng->nframes;
+    dpl_float64_t time_of_flight = uwb_rng_twr_to_tof(rng, idx);
     double r = uwb_rng_tof_to_meters(time_of_flight);
-    printf("d: %d.%d\n", (int)r, (int)(1000*(r - (int)r)));
+    printf("idx: %d, d: %d.%d\n", idx, (int)r, (int)(1000*(r - (int)r)));
     return true;
 }
 
 void rtls_init(){
     int rc;
-
-    udev = uwb_dev_idx_lookup(0);
-    uwb_set_dblrxbuff(udev, false);
-
-    g_rtls_tdma_instance.uri  = (struct uwb_rng_instance *)uwb_mac_find_cb_inst_ptr(udev, UWBEXT_RNG);
-
-    g_cbs = (struct uwb_mac_interface){
-        .id =  UWBEXT_APP0,
-        .inst_ptr = g_rtls_tdma_instance.uri,
-        .complete_cb = complete_cb,
-    };
-    uwb_mac_append_interface(udev, &g_cbs);
-    
-    g_rtls_tdma_instance.role = MYNEWT_VAL(RTR_ROLE);
-    rtls_tdma_start(&g_rtls_tdma_instance, udev);
 
     rc = conf_register(&rtls_handler);
     if(rc){
@@ -241,4 +221,22 @@ void rtls_init(){
         conf_load();
         printf("RTLS config loaded\n");
     }
+
+    udev = uwb_dev_idx_lookup(0);
+    uwb_set_dblrxbuff(udev, false);
+
+    uri  = (struct uwb_rng_instance *)uwb_mac_find_cb_inst_ptr(udev, UWBEXT_RNG);
+
+    g_cbs = (struct uwb_mac_interface){
+        .id =  UWBEXT_APP0,
+        .inst_ptr = uri,
+        .complete_cb = complete_cb,
+    };
+    uwb_mac_append_interface(udev, &g_cbs);
+    
+    g_rtls_tdma_instance.role = rtls_conf.node_type;
+    printf("Role: %d\n", rtls_conf.node_type);
+    rtls_tdma_start(&g_rtls_tdma_instance, udev);
+
+
 }

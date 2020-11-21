@@ -31,7 +31,8 @@
 			"ostream": "c",
 			"ratio": "c",
 			"system_error": "c",
-			"cstdio": "c"
+			"cstdio": "c",
+			"unordered_map": "c"
 		},
 		"cSpell.words": [
 			"aroot",

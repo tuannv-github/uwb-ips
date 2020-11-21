@@ -17,13 +17,13 @@
 # under the License.
 #
 
-pkg.name: lib/uwb_twr_nrng
-pkg.description: TWR nrng library superset
+pkg.name: lib/tdma
+pkg.description: Time-division multiple access
 pkg.author: "UWB Core <uwbcore@gmail.com>"
 pkg.homepage: "http://www.decawave.com/"
 pkg.keywords:
     - uwb
-    - CCP
+    - TDMA
 
 pkg.cflags:
     - "-std=gnu99"
@@ -32,9 +32,8 @@ pkg.cflags:
 pkg.lflags:
     - "-lm"
 
-pkg.deps:
-    - "@decawave-uwb-core/lib/json"
-    - "@rtls/lib/uwb_rng"
-
 pkg.init:
-    nrng_pkg_init: 411
+    tdma_pkg_init: 404
+
+pkg.down:
+    tdma_pkg_down: 404

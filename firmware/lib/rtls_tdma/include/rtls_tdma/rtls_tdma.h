@@ -4,7 +4,6 @@
 
 #include <uwb/uwb.h>
 #include <tdma/tdma.h>
-#include <uwb_rng/uwb_rng.h>
 
 typedef enum{
     RTS_JOINT_NONE,
@@ -14,12 +13,9 @@ typedef enum{
 }rts_t;
 
 typedef enum{
-    RTR_ANCHOR,
-    RTR_TAG
+    RTR_ANCHOR = 1,
+    RTR_TAG = 2
 }rtr_t;
-
-#define RTR_ANCHOR  0
-#define RTR_TAG     1
 
 typedef uint64_t slot_map_t;
 
@@ -47,8 +43,7 @@ struct _rtls_tdma_instance_t {
     tdma_instance_t *tdma;                      //!< Pointer to tdma instant
     struct uwb_dev *dev_inst;                   //!< UWB device instance
     struct uwb_mac_interface umi;               //!< Mac interface
-    struct uwb_rng_instance *uri;               //!= UWB ranging instance
-    
+
     rts_t cstate;                               //!< Current rtls tdma state
     struct dpl_sem sem;                         //!< Structure containing os semaphores
     rtr_t role;                                 //!< RTLS TDMA role

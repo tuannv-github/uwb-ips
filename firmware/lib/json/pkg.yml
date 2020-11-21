@@ -17,24 +17,14 @@
 # under the License.
 #
 
-pkg.name: lib/uwb_twr_nrng
-pkg.description: TWR nrng library superset
+pkg.name: lib/json
+pkg.description: JSON encoding / decoding library utils
 pkg.author: "UWB Core <uwbcore@gmail.com>"
-pkg.homepage: "http://www.decawave.com/"
+pkg.homepage: "http://mynewt.apache.org/"
 pkg.keywords:
-    - uwb
-    - CCP
 
-pkg.cflags:
-    - "-std=gnu99"
-    - "-fms-extensions"
-
-pkg.lflags:
-    - "-lm"
+pkg.cflags.FLOAT_USER: -DFLOAT_SUPPORT
 
 pkg.deps:
-    - "@decawave-uwb-core/lib/json"
-    - "@rtls/lib/uwb_rng"
-
-pkg.init:
-    nrng_pkg_init: 411
+    - "@decawave-uwb-core/porting/dpl/mynewt"
+    - "@decawave-uwb-core/porting/dpl_lib"

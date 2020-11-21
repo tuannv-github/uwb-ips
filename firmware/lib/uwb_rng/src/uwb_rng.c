@@ -792,8 +792,8 @@ superframe_reset_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
         dpl_error_t err = dpl_sem_release(&rng->sem);
         assert(err == DPL_OK);
         RNG_STATS_INC(superframe_reset);
-        printf("{\"utime\": %"PRIu32",\"msg\": \"superframe_reset\"}\n",
-               dpl_cputime_ticks_to_usecs(dpl_cputime_get32()));
+        // printf("{\"utime\": %"PRIu32",\"msg\": \"superframe_reset\"}\n",
+        //        dpl_cputime_ticks_to_usecs(dpl_cputime_get32()));
         rng->status.rx_ack_expected = 0;
         rng->status.tx_ack_expected = 0;
     }

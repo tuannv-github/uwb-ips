@@ -34,7 +34,7 @@ pkg.lflags:
 
 pkg.deps:
     - "@decawave-uwb-core/hw/drivers/uwb"
-    - "@decawave-uwb-core/lib/rng_math"
+    - "@rtls/lib/rng_math"
     - "@decawave-uwb-core/lib/json"
     - "@decawave-uwb-core/lib/euclid"
     - "@decawave-uwb-core/lib/dsp"
