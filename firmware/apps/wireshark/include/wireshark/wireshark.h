@@ -17,41 +17,18 @@
  * under the License.
  */
 
-#include <stdio.h>
-#include <os/os.h>
-#include <uwb/uwb.h>
+#ifndef _WIRESHARK_H_
+#define _WIRESHARK_H_
 
-#include <wireshark/config.h>
+typedef enum{
+    CMD_CHANNEL,
+    CMD_SLEEP,
+    CMD_RECV,
+}cmd_t;
 
-static void
-uwb_config_eventq(struct os_event * ev)
-{
-    printf("UWB config update\n");
-    struct uwb_dev *inst = uwb_dev_idx_lookup(0);
-    uwb_mac_config(inst, &inst->config);
-}
+typedef void (*on_cmd_t)(cmd_t, void *arg);
 
-static int
-uwb_config_updated()
-{
-    static struct os_event ev = {
-        .ev_queued = 0,
-        .ev_cb = uwb_config_eventq,
-        .ev_arg = 0};
-    os_eventq_put(os_eventq_dflt_get(), &ev);
-    return 0;
-}
+int wireshark_init(on_cmd_t on_cmd);
+int wireshark_printf(const char *fmt, ...);
 
-static struct uwbcfg_cbs uwbcfg_cb = {
-    .uc_update = uwb_config_updated
-};
-
-int app_conf_init(){
-    int ret;
-
-    ret = uwbcfg_register(&uwbcfg_cb);
-    if (ret!=0) return ret;
-
-    ret = conf_load();
-    return ret;
-}
+#endif
