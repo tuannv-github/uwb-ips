@@ -17,13 +17,13 @@
 # under the License.
 #
 
-pkg.name: lib/uwb_nrng_ss
-pkg.description: Single Sided NRNG library
+pkg.name: lib/dsp/selftest
+pkg.type: unittest
+pkg.description: Signal processing toolbox tests
 pkg.author: "UWB Core <uwbcore@gmail.com>"
 pkg.homepage: "http://www.decawave.com/"
 pkg.keywords:
     - uwb
-    - CCP
 
 pkg.cflags:
     - "-std=gnu99"
@@ -33,8 +33,7 @@ pkg.lflags:
     - "-lm"
 
 pkg.deps:
-    - "@rtls/lib/uwb_nrng"
-    - "@rtls/lib/dsp"
-
-pkg.init:
-    twr_ss_nrng_pkg_init: 414
+    - "@decawave-uwb-core/lib/dsp"
+    - "@apache-mynewt-core/sys/console/stub"
+    - "@apache-mynewt-core/sys/log/stub"
+    - "@apache-mynewt-core/test/testutil"

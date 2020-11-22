@@ -34,8 +34,9 @@ pkg.lflags:
 
 pkg.deps:
     - "@rtls/lib/json"
-    - "@rtls/lib/uwb_rng"
+    # - "@rtls/lib/uwb_rng"
     - "@rtls/lib/euclid"
+    - "@rtls/lib/rng_math"
 
 pkg.init:
     nrng_pkg_init: 411

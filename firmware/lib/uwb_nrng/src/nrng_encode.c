@@ -20,10 +20,11 @@
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
-#include <uwb_rng/uwb_rng.h>
+// #include <uwb_rng/uwb_rng.h>
 #include <json/json.h>
 #include <uwb_nrng/nrng_encode.h>
 #include <uwb_nrng/nrng_json.h>
+#include <rng_math/rng_math.h>
 
 #if MYNEWT_VAL(NRNG_VERBOSE)
 

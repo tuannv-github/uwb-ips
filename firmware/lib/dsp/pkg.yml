@@ -17,13 +17,12 @@
 # under the License.
 #
 
-pkg.name: lib/uwb_nrng_ss
-pkg.description: Single Sided NRNG library
+pkg.name: lib/dsp
+pkg.description: Signal processing toolbox
 pkg.author: "UWB Core <uwbcore@gmail.com>"
 pkg.homepage: "http://www.decawave.com/"
 pkg.keywords:
     - uwb
-    - CCP
 
 pkg.cflags:
     - "-std=gnu99"
@@ -33,8 +32,4 @@ pkg.lflags:
     - "-lm"
 
 pkg.deps:
-    - "@rtls/lib/uwb_nrng"
-    - "@rtls/lib/dsp"
-
-pkg.init:
-    twr_ss_nrng_pkg_init: 414
+    - "@decawave-uwb-core/porting/dpl/mynewt"

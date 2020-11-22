@@ -26,14 +26,14 @@
 #include <uwb/uwb.h>
 #include <uwb/uwb_ftypes.h>
 #include <uwb_nrng/nrng.h>
-#include <uwb_rng/uwb_rng.h>
+// #include <uwb_rng/uwb_rng.h>
 #if MYNEWT_VAL(UWB_WCS_ENABLED)
 #include <uwb_wcs/uwb_wcs.h>
 #endif
 #if MYNEWT_VAL(CIR_ENABLED)
 #include <cir/cir.h>
 #endif
-#include <uwb_rng/slots.h>
+#include <uwb_nrng/slots.h>
 #if MYNEWT_VAL(NRNG_VERBOSE)
 #include <uwb_nrng/nrng_encode.h>
 static bool complete_cb(struct uwb_dev * udev, struct uwb_mac_interface * cbs);
@@ -177,6 +177,25 @@ nrng_set_frames(struct nrng_instance * nrng, uint16_t nframes)
         assert(nrng->frames[i]);
         memcpy(nrng->frames[i], &default_frame, sizeof(nrng_frame_t));
     }
+}
+
+/**
+ * @fn uwb_rng_tof_to_meters(float ToF)
+ * @brief API to calculate range in meters from time of flight base on type of ranging
+ *
+ * @param ToF Time of flight in float.
+ *
+ * @return range in meters
+ */
+dpl_float64_t
+uwb_rng_tof_to_meters(dpl_float64_t ToF)
+{
+    if (DPL_FLOAT64_ISNAN(ToF)) {
+        return DPL_FLOAT64_NAN();
+    }
+    /* ToF * (299792458.0l/1.000293l) * (1.0/499.2e6/128.0) */
+    dpl_float64_t tmp = DPL_FLOAT64_INIT((299792458.0l/1.000293l) * (1.0/499.2e6/128.0));
+    return DPL_FLOAT64_MUL(ToF, tmp);
 }
 
 /**
