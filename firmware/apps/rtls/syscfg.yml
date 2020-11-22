@@ -115,7 +115,7 @@ syscfg.vals:
     TDMA_TASK_STACK_SZ: 1024
 
     RNG_VERBOSE: 0
-    NRNG_VERBOSE: 1
+    # NRNG_VERBOSE: 1
     NRNG_STATS: 1
     # RNG_TX_HOLDOFF: ((uint32_t)7D0)
     UWBCFG_DEF_FRAME_FILTER: '"0xF"'

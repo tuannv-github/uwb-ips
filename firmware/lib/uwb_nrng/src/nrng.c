@@ -248,6 +248,46 @@ nrng_get_ranges(struct nrng_instance * nrng, float ranges[], uint16_t nranges, u
  * @return valid mask
  */
 uint32_t
+nrng_get_ranges_addresses(struct nrng_instance * nrng, float ranges[], uint16_t addresses[], uint16_t nranges, uint16_t base)
+{
+    uint32_t mask = 0;
+
+    // Which slots responded with a valid frames
+    for (uint16_t i=0; i < nranges; i++){
+        if (nrng->slot_mask & 1UL << i){
+            // the set of all requested slots
+            uint16_t idx = BitIndex(nrng->slot_mask, 1UL << i, SLOT_POSITION);
+            nrng_frame_t * frame = nrng->frames[(base + idx)%nrng->nframes];
+            if (frame->code == UWB_DATA_CODE_SS_TWR_NRNG_FINAL && frame->seq_num == nrng->seq_num){
+                // the set of all positive responses
+                mask |= 1UL << i;
+            }
+        }
+    }
+    // Construct output vector
+    uint16_t j = 0;
+    for (uint16_t i=0; i < nranges; i++){
+        if (mask & 1UL << i){
+            uint16_t idx = BitIndex(nrng->slot_mask, 1UL << i, SLOT_POSITION);
+            nrng_frame_t * frame = nrng->frames[(base + idx)%nrng->nframes];
+            ranges[j] = uwb_rng_tof_to_meters(nrng_twr_to_tof_frames(nrng->dev_inst, frame, frame));
+            addresses[j++] = frame->dst_address;
+        }
+    }
+    return mask;
+}
+
+/**
+ * API to configure dw1000 to start transmission after certain delay.
+ *
+ * @param inst          Pointer to struct nrng_instance.
+ * @param ranges        []] to return results
+ * @param nranges       side of  ranges[]
+ * @param code          base address of curcular buffer
+ *
+ * @return valid mask
+ */
+uint32_t
 nrng_get_uids(struct nrng_instance * nrng, uint16_t uids[], uint16_t nranges, uint16_t base)
 {
     uint32_t mask = 0;

@@ -204,15 +204,20 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
         inst->fctrl != (FCNTL_IEEE_RANGE_16|UWB_FCTRL_ACK_REQUESTED)) {
         return false;
     }
-    // struct nrng_instance *nrng = (struct nrng_instance *)cbs->inst_ptr;
+    struct nrng_instance *nrng = (struct nrng_instance *)cbs->inst_ptr;
 
-    // float range[10];
-    // nrng_get_ranges( nrng, ranges[], 10, 0);
-    // for(int i=0; i<10; i++)
-    // uint16_t idx = (nrng->idx)%nrng->nframes;
-    // dpl_float64_t time_of_flight = uwb_rng_twr_to_tof(nrng, idx);
-    // double r = uwb_rng_tof_to_meters(time_of_flight);
-    // printf("idx: %d, d: %d.%d\n", idx, (int)r, (int)(1000*(r - (int)r)));
+    uint16_t anchors = MYNEWT_VAL(NODE_END_SLOT_ID) - MYNEWT_VAL(NODE_START_SLOT_ID) + 1;
+    float ranges[anchors];
+    uint16_t addresses[anchors];
+    memset(addresses, 0, sizeof(addresses));
+    nrng_get_ranges_addresses( nrng, ranges, addresses, 10, nrng->idx);
+    for(int i=0; i<anchors; i++){
+        if(addresses[i] != 0){
+            float r = ranges[i];
+            printf("0x%04X: %d.%d\n", addresses[i], (int)r, (int)(1000*(r - (int)r)));  
+        }
+    }
+
     return true;
 }
 
