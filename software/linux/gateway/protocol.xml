@@ -31,5 +31,10 @@
 			<field type="uint8_t" name="type" enum="type_t"/>
 			<field type="uint8_t" name="value"/>
 		</message>
+		<message id="2" name="DISTANCE">
+			<description>Distnace message</description>
+			<field type="uint16_t" name="anchor"/>
+			<field type="float" name="distance"/>
+		</message>
 	</messages>
 </mavlink>

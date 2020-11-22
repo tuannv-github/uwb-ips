@@ -288,6 +288,7 @@ enums['node_t'][3] = EnumEntry('node_t_ENUM_END', '''''')
 MAVLINK_MSG_ID_BAD_DATA = -1
 MAVLINK_MSG_ID_LOCATION = 0
 MAVLINK_MSG_ID_ONOFF = 1
+MAVLINK_MSG_ID_DISTANCE = 2
 
 class MAVLink_location_message(MAVLink_message):
         '''
@@ -360,10 +361,44 @@ class MAVLink_onoff_message(MAVLink_message):
         def pack(self, mav, force_mavlink1=False):
                 return MAVLink_message.pack(self, mav, 53, struct.pack('<HBB', self.dstsrc, self.type, self.value), force_mavlink1=force_mavlink1)
 
+class MAVLink_distance_message(MAVLink_message):
+        '''
+        Distnace message
+        '''
+        id = MAVLINK_MSG_ID_DISTANCE
+        name = 'DISTANCE'
+        fieldnames = ['anchor', 'distance']
+        ordered_fieldnames = ['distance', 'anchor']
+        fieldtypes = ['uint16_t', 'float']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {}
+        fieldunits_by_name = {}
+        format = '<fH'
+        native_format = bytearray('<fH', 'ascii')
+        orders = [1, 0]
+        lengths = [1, 1]
+        array_lengths = [0, 0]
+        crc_extra = 187
+        unpacker = struct.Struct('<fH')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, anchor, distance):
+                MAVLink_message.__init__(self, MAVLink_distance_message.id, MAVLink_distance_message.name)
+                self._fieldnames = MAVLink_distance_message.fieldnames
+                self._instance_field = MAVLink_distance_message.instance_field
+                self._instance_offset = MAVLink_distance_message.instance_offset
+                self.anchor = anchor
+                self.distance = distance
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 187, struct.pack('<fH', self.distance, self.anchor), force_mavlink1=force_mavlink1)
+
 
 mavlink_map = {
         MAVLINK_MSG_ID_LOCATION : MAVLink_location_message,
         MAVLINK_MSG_ID_ONOFF : MAVLink_onoff_message,
+        MAVLINK_MSG_ID_DISTANCE : MAVLink_distance_message,
 }
 
 class MAVError(Exception):
@@ -844,4 +879,24 @@ class MAVLink(object):
 
                 '''
                 return self.send(self.onoff_encode(dstsrc, type, value), force_mavlink1=force_mavlink1)
+
+        def distance_encode(self, anchor, distance):
+                '''
+                Distnace message
+
+                anchor                    :  (type:uint16_t)
+                distance                  :  (type:float)
+
+                '''
+                return MAVLink_distance_message(anchor, distance)
+
+        def distance_send(self, anchor, distance, force_mavlink1=False):
+                '''
+                Distnace message
+
+                anchor                    :  (type:uint16_t)
+                distance                  :  (type:float)
+
+                '''
+                return self.send(self.distance_encode(anchor, distance), force_mavlink1=force_mavlink1)
 
