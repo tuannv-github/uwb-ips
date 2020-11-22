@@ -1,0 +1,18 @@
+syscfg.defs:
+    ELEMENT_ADDRESS:
+        description: ''
+        value: 1
+
+syscfg.vals:
+    CONSOLE_UART: false
+    CONSOLE_RTT: true
+    CONSOLE_HISTORY_SIZE: 0
+    RTT_TERMINAL_BUFFER_SIZE_UP: 256
+    RTT_TERMINAL_BUFFER_SIZE_DOWN: 256
+    CONSOLE_ECHO: false
+
+    BLE_MESH: 1
+    LOG_LEVEL: 5
+
+    CONFIG_NFFS: 0
+    BLE_MESH_SETTINGS: 0

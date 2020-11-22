@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "web-server"
+		},
+		{
+			"path": "gateway"
+		}
+	],
+	"settings": {
+		"cSpell.words": [
+			"automargin",
+			"autosize",
+			"scaleanchor",
+			"textfont",
+			"textposition"
+		]
+	}
+}

@@ -31,4 +31,5 @@ tags
 *.swo
 repos
 targets
-.vscode
+
+**/env

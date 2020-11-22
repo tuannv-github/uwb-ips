@@ -2,13 +2,63 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "../software/linux/gateway"
+		},
+		{
+			"path": "scripts"
 		}
 	],
 	"settings": {
 		"files.associations": {
 			"type_traits": "cpp",
 			"cmath": "cpp",
-			"limits": "cpp"
-		}
+			"limits": "cpp",
+			"functional": "c",
+			"array": "cpp",
+			"string": "cpp",
+			"string_view": "cpp",
+			"*.tcc": "c",
+			"memory": "c",
+			"istream": "c",
+			"tuple": "c",
+			"utility": "c",
+			"initializer_list": "c",
+			"mesh_msg.h": "c",
+			"mavlink.h": "c",
+			"optional": "c",
+			"ostream": "c",
+			"ratio": "c",
+			"system_error": "c",
+			"cstdio": "c",
+			"unordered_map": "c"
+		},
+		"cSpell.words": [
+			"aroot",
+			"artls",
+			"calc",
+			"dw",
+			"dw calc fppl",
+			"dw phy read wakeupvbat",
+			"dwt",
+			"dwt txconfig t",
+			"fppl",
+			"m",
+			"m aroot",
+			"m artls",
+			"ma",
+			"ma swch",
+			"phy",
+			"read",
+			"recv",
+			"recv succed",
+			"succed",
+			"swch",
+			"swoport",
+			"t",
+			"txconfig",
+			"wakeupvbat"
+		]
 	}
 }

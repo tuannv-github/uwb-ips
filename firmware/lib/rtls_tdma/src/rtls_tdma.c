@@ -1,82 +1,22 @@
 #include <dpl/dpl.h>
+#include <stats/stats.h>
 
 #include <rtls_tdma/rtls_tdma.h>
 
-static void rst_joint_list_cb(tdma_slot_t *tdma_slot);
-static void rst_joint_reqt_cb(tdma_slot_t *tdma_slot);
-static void rst_joint_jted_cb(tdma_slot_t *tdma_slot);
+STATS_SECT_START(rtls_tdma_stat_t)
+    STATS_SECT_ENTRY(start_rx_error)
+STATS_SECT_END
 
-static void
-slot_cb(struct dpl_event * ev)
-{
-    tdma_slot_t *tdma_slot = (tdma_slot_t *)dpl_event_get_arg(ev);
-    if(tdma_slot->idx == 0) return;
+STATS_SECT_DECL(rtls_tdma_stat_t) g_rtls_tdma_stat;
 
-    switch (((rtls_tdma_instance_t *)tdma_slot->arg)->cstate)
-    {
-    case RTS_JOINT_LIST:
-        rst_joint_list_cb(tdma_slot);
-        break;
-    case RTS_JOINT_REQT:
-        rst_joint_reqt_cb(tdma_slot);
-        break;
-    case RTS_JOINT_JTED:
-        rst_joint_jted_cb(tdma_slot);
-        break;
-    default:
-        break;
-    }
-}
+STATS_NAME_START(rtls_tdma_stat_t)
+    STATS_NAME(rtls_tdma_stat_t, start_rx_error)
+STATS_NAME_END(rtls_tdma_stat_t)
 
-static void 
-uwb_ccp_sync_cb(ccp_sync_t ccp_sync, void *arg){
-    rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)arg;
+static void bcn_slot_cb_mine(tdma_slot_t *tdma_slot);
+static void bcn_slot_cb_othr(tdma_slot_t *tdma_slot);
+static void svc_slot_cb(tdma_slot_t *tdma_slot);
 
-    memset(rti->anchors, 0, (MYNEWT_VAL(UWB_BCN_SLOT_MAX)+1) * sizeof(rtls_tdma_anchor_t));
-    for(int i=0; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
-        rti->anchors[i].slot = 0x01;
-    }
-
-    switch (ccp_sync)
-    {
-    case CCP_SYNC_LOST:
-        printf("CCP_SYNC_LOST\n");
-        rti->cstate = RTS_JOINT_LIST;
-        rti->seqno = 0;
-        break;
-    case CCP_SYNC_SYED:
-        printf("CCP_SYNC_SYED\n");
-        if(rti->tdma->ccp->config.role == CCP_ROLE_MASTER){
-            rti->my_slot = MYNEWT_VAL(RT_MASTER_SLOT);
-            rti->anchors[MYNEWT_VAL(RT_MASTER_SLOT)].addr = rti->dev_inst->my_short_address;
-            rti->anchors[MYNEWT_VAL(RT_MASTER_SLOT)].slot |= 0x01 << MYNEWT_VAL(RT_MASTER_SLOT);
-            rti->anchors[MYNEWT_VAL(RT_MASTER_SLOT)].location_x = 1.234;
-            rti->anchors[MYNEWT_VAL(RT_MASTER_SLOT)].location_y = 5.6789;
-            rti->anchors[MYNEWT_VAL(RT_MASTER_SLOT)].location_z = 9.87654321;
-            rti->cstate = RTS_JOINT_JTED;
-            printf("state: RTS_JOINT_JTED, slot: %d, anchor.slot: %d\n", rti->my_slot, rti->anchors[MYNEWT_VAL(RT_MASTER_SLOT)].slot);
-        }
-        else{
-            printf("state: RTS_JOINT_LIST\n");
-        }
-        break;
-    default:
-        break;
-    }
-}
-
-/**
- * @fn rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
- * @brief This is an internal static function that executes on both the pan_master Node and the TAG/ANCHOR
- * that initiated the blink. On the pan_master the postprocess function should allocate a PANID and a SLOTID,
- * while on the TAG/ANCHOR the returned allocations are assigned and the PAN discover event is stopped. The pan
- * discovery resources can be released.
- *
- * @param inst    Pointer to struct uwb_dev.
- * @param cbs     Pointer to struct uwb_mac_interface.
- *
- * @return bool
- */
 static bool
 rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs){
     rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)cbs->inst_ptr;
@@ -88,15 +28,6 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs){
     return false;
 }
 
-/**
- * @fn rx_timeout_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
- * @brief API for receive timeout callback.
- *
- * @param inst    Pointer to struct uwb_dev.
- * @param cbs     Pointer to struct uwb_mac_interface.
- *
- * @return bool
- */
 static bool
 rx_timeout_cb(struct uwb_dev *inst, struct uwb_mac_interface *cbs)
 {
@@ -109,55 +40,12 @@ rx_timeout_cb(struct uwb_dev *inst, struct uwb_mac_interface *cbs)
     return false;
 }
 
-/**
- * @fn superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
- * @brief
- *
- * @param inst  Pointer to struct uwb_dev.
- * @param cbs   Pointer to struct uwb_mac_interface.
- *
- * @return bool based on the totality of the handling which is false this implementation.
- */
-static bool
-superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
+static bool 
+rtls_tdma_slot_listen(rtls_tdma_instance_t *rti, uint16_t idx)
 {
-    rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)cbs->inst_ptr;
-    if(rti->joint_reqt){
-        rti->joint_reqt_cnt++;
-        if(rti->cstate == RTS_JOINT_REQT && rti->joint_reqt_cnt > MYNEWT_VAL(RT_BCN_REQT_THRESH)){
-            rti->cstate = RTS_JOINT_LIST;
-            printf("joint_reqt_timeout\nrti->cstate:RTS_JOINT_LIST\n");
-        }
-    }
+    uwb_set_rx_timeout(rti->dev_inst, 3*rti->tdma->ccp->period/rti->tdma->nslots/4);
+    uwb_set_delay_start(rti->dev_inst, tdma_rx_slot_start(rti->tdma, idx));
 
-    for(int i=0; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
-        if(rti->anchors[i].addr != 0) {
-            rti->anchors[i].timeout++;
-            if(rti->anchors[i].timeout > MYNEWT_VAL(RT_ANCHOR_TIMEOUT)){
-                printf("Anchor timeout: %d\n", i);
-                memset(&rti->anchors[i], 0, sizeof(rtls_tdma_anchor_t));
-                rti->anchors[i].slot = 0x01;
-                if(rti->cstate == RTS_JOINT_JTED){
-                    rti->anchors[rti->my_slot].slot &= ~(0x0001 << i);
-                }
-            }
-        }
-    }
-    return false;
-}
-
-/**
- * @fn rtls_tdma_listen(struct uwb_dev * inst, uwb_dev_modes_t mode)
- * @brief Listen for polls / requests
- *
- * @param inst          Pointer to struct uwb_dev.
- * @param mode          uwb_dev_modes_t of UWB_BLOCKING and UWB_NONBLOCKING.
- *
- * @return struct uwb_dev_status
- */
-struct uwb_dev_status
-rtls_tdma_listen(rtls_tdma_instance_t *rti, uwb_dev_modes_t mode)
-{
     dpl_error_t err = dpl_sem_pend(&rti->sem,  DPL_TIMEOUT_NEVER);
     assert(err == DPL_OK);
 
@@ -166,17 +54,161 @@ rtls_tdma_listen(rtls_tdma_instance_t *rti, uwb_dev_modes_t mode)
         assert(err == DPL_OK);
     }
 
-    if (mode == UWB_BLOCKING){
-        err = dpl_sem_pend(&rti->sem, DPL_TIMEOUT_NEVER);
-        assert(err == DPL_OK);
-        err = dpl_sem_release(&rti->sem);
-        assert(err == DPL_OK);
+    err = dpl_sem_pend(&rti->sem, DPL_TIMEOUT_NEVER);
+    assert(err == DPL_OK);
+    err = dpl_sem_release(&rti->sem);
+    assert(err == DPL_OK);
+
+    return rti->dev_inst->status.rx_timeout_error == 0 ? true : false;
+}
+
+static void
+node_slot_map_printf(rtls_tdma_instance_t *rti){
+    printf("- My slot: %d\n", rti->slot_idx);
+    for(int i=1; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
+        if(rti->nodes[i].addr!=0){
+            printf("--- Slot: %02d, addr: 0x%04x, accepted: %d, map:", i, rti->nodes[i].addr, rti->nodes[i].accepted);
+            for(int j=0; j<MYNEWT_VAL(TDMA_NSLOTS); j++){
+                printf("%d", (uint8_t)((rti->nodes[i].slot_map >> j) & 0x01));
+            }
+            printf(" \n");
+        }
+    }
+}
+
+static void 
+node_rmv(rtls_tdma_instance_t *rti, uint16_t idx){
+    /* Remove node from slot map */
+    rti->nodes[rti->slot_idx].slot_map &= ~((uint64_t)1 << idx);
+
+    /* Clear node's data from node table */
+    memset(&rti->nodes[idx], 0, sizeof(rtls_tdma_node_t));
+    /* The first slot is reserved for synchronization */
+    rti->nodes[idx].slot_map = 0x01;
+}
+
+static void 
+node_add_me(rtls_tdma_instance_t *rti, uint16_t idx){
+    /* Change my index */
+    rti->slot_idx = idx;
+    /* Copy slot map from temp slot 0 to new slot */ 
+    rti->nodes[idx].slot_map = rti->nodes[0].slot_map | ((slot_map_t)0x01 << idx);
+    /* Update address */
+    rti->nodes[idx].addr = rti->dev_inst->my_short_address;
+    /* I always accept mysefl*/
+    rti->nodes[idx].accepted = true;
+}
+
+static bool
+node_all_accepted(rtls_tdma_instance_t *rti){
+    bool accepted = true;
+    uint8_t cnt = 0;
+    if(rti->tdma->ccp->config.role == CCP_ROLE_MASTER) return true;
+    for(int i=1; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
+        if(rti->nodes[i].addr == 0) continue;
+        cnt++;
+        if(rti->nodes[i].accepted == false){
+            accepted = false;
+            break;
+        }
+    }
+    return cnt == 0 ? false : accepted;
+}
+
+static void
+slot_cb(struct dpl_event * ev)
+{
+    tdma_slot_t *tdma_slot = (tdma_slot_t *)dpl_event_get_arg(ev);
+    rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)tdma_slot->arg;
+    /* Slot 0 is used for synchronization */
+    if(tdma_slot->idx == 0) return;
+
+    if(tdma_slot->idx <= MYNEWT_VAL(UWB_BCN_SLOT_MAX)){
+        /* This is my node */
+        if(rti->slot_idx == tdma_slot->idx && node_all_accepted(rti)){
+            /* my slot */
+            bcn_slot_cb_mine(tdma_slot);
+        }
+        /* Maintain anchor list */
+        else
+        {
+            bcn_slot_cb_othr(tdma_slot);
+        }
+    }
+    /* Request for slot if needed */
+    else if(tdma_slot->idx == MYNEWT_VAL(UWB_SVC_SLOT)){
+        svc_slot_cb(tdma_slot);
+    }
+    else{
+        if(rti->slot_idx != 0){
+            if(rti->rtls_tdma_cb != NULL){
+                rti->rtls_tdma_cb(rti, tdma_slot);
+            }
+        }
+    }
+}
+
+static void 
+uwb_ccp_sync_cb(ccp_sync_t ccp_sync, void *arg){
+    rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)arg;
+
+    /* My slot idx return to 0 when sync is lost */
+    rti->slot_idx = 0;
+
+    /* Remove nodes from slot map */
+    rti->nodes[rti->slot_idx].slot_map = 0x01;
+
+    /* Clear node's data from node table */
+    memset(rti->nodes, 0, MYNEWT_VAL(TDMA_NSLOTS) * sizeof(rtls_tdma_node_t));
+    /* The first slot is reserved for synchronization */
+    for(int i=0; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
+        rti->nodes[i].slot_map = 0x01;
     }
 
-    return rti->dev_inst->status;
+    switch (ccp_sync)
+    {
+    case CCP_SYNC_LOST:
+        printf("CCP_SYNC_LOST\n");
+        break;
+    case CCP_SYNC_SYED:
+        printf("CCP_SYNC_SYED\n");
+        if(rti->tdma->ccp->config.role == CCP_ROLE_MASTER){
+            /* Add me to nodes list */
+            node_add_me(rti, MYNEWT_VAL(RT_MASTER_SLOT));
+            node_slot_map_printf(rti);
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+static bool
+superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
+{
+    rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)cbs->inst_ptr;
+    /* Check timeout and availability of ANCHOR only */
+    for(int i=1; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
+        rti->nodes[i].available = false;
+        if(rti->nodes[i].addr != 0){
+            rti->nodes[i].timeout++;
+            if(rti->nodes[i].timeout > MYNEWT_VAL(RT_ANCHOR_TIMEOUT)){
+                node_rmv(rti, i);
+                printf("Remove node: %d\n", i);
+                node_slot_map_printf(rti);
+            }
+        }
+    }
+
+    if(rti->slot_reqt){
+        rti->slot_reqt_cntr++;
+    }
+    return false;
 }
 
 void rtls_tdma_start(rtls_tdma_instance_t *rti, struct uwb_dev* udev){
+    int rc;
+
     tdma_instance_t *tdma = (tdma_instance_t*)uwb_mac_find_cb_inst_ptr(udev, UWBEXT_TDMA);
     assert(tdma);
     rti->tdma = tdma;
@@ -193,386 +225,314 @@ void rtls_tdma_start(rtls_tdma_instance_t *rti, struct uwb_dev* udev){
 
     uwb_mac_append_interface(rti->dev_inst, &rti->umi);
 
+    rti->slot_idx = 0; /*rti->slot_idx = 0 mean no sync yet */
     rtls_ccp_set_sync_cb(rti->tdma->ccp, uwb_ccp_sync_cb, rti);
-    rtls_ccp_start(rti->tdma->ccp);
+
+    if(rti->role == RTR_TAG){
+        rtls_ccp_start_role(rti->tdma->ccp, CCP_ROLE_SLAVE);
+    }
+    else if(rti->role == RTR_ANCHOR){
+        rtls_ccp_start_role(rti->tdma->ccp, CCP_ROLE_MASTER | CCP_ROLE_SLAVE);
+    }
+    else{
+        printf("Undefined RTR role\n");
+    }
 
     for (uint16_t i = 0; i < MYNEWT_VAL(TDMA_NSLOTS); i++){
         tdma_assign_slot(rti->tdma, slot_cb,  i, rti);
     }
+
+    rc = stats_init(
+        STATS_HDR(g_rtls_tdma_stat),
+        STATS_SIZE_INIT_PARMS(g_rtls_tdma_stat, STATS_SIZE_32),
+        STATS_NAME_INIT_PARMS(rtls_tdma_stat_t));
+    assert(rc == 0);
+
+    rc = stats_register("rtls_tdma", STATS_HDR(g_rtls_tdma_stat));
+    assert(rc == 0);
 }
 
-void rst_joint_list_cb(tdma_slot_t *tdma_slot){
+static void
+bcn_slot_cb_mine(tdma_slot_t *tdma_slot){
 
-    if(tdma_slot->idx > MYNEWT_VAL(UWB_BCN_SLOT_MAX)) return;
-
+    uint8_t *rt_msg;
+    uint16_t rt_msg_size;
+    ieee_std_frame_hdr_t *ieee_std_frame_hdr;
     rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)tdma_slot->arg;
-    assert(rti);
 
-    uwb_set_rx_timeout(rti->dev_inst, 3*rti->tdma->ccp->period/rti->tdma->nslots/4);
-    uwb_set_delay_start(rti->dev_inst, tdma_rx_slot_start(rti->tdma, tdma_slot->idx));
-    if(rtls_tdma_listen(rti, UWB_BLOCKING).start_rx_error){
-        printf("start_rx_error: %s:%d\n", __FILE__, __LINE__);
+    /* I do have slot, so I always available in this supper frame, also reset node timer */
+    rti->nodes[rti->slot_idx].available = true;
+    rti->nodes[tdma_slot->idx].timeout = 0;
+
+    /* If I received a slot request, I will response for this request immediately */
+    if(rti->slot_reqt){
+
+        rt_msg_size = sizeof(ieee_std_frame_hdr_t) + sizeof(rt_slot_acpt_t) + sizeof(rt_slot_map_t);
+        rt_msg = calloc(1, rt_msg_size);
+        if(!rt_msg) return;
+
+        rt_slot_acpt_t *rt_slot_acpt = (rt_slot_acpt_t *)(rt_msg + sizeof(ieee_std_frame_hdr_t));
+        rt_slot_acpt->msg_type = RT_ACPT_MSG;
+        rt_slot_acpt->len = sizeof(rt_slot_acpt_data_t);
+        rt_slot_acpt->slot = tdma_slot->idx;
+        rt_slot_acpt->slot_reqt = ((~rti->nodes[rti->slot_idx].slot_map) & ((slot_map_t)0x01 << rti->slot_reqt)) ? rti->slot_reqt : 0;
+
+        /* I can now receive new request if I do not accept this request */
+        if(rt_slot_acpt->slot_reqt == 0) {
+            printf("I do not accept 0x%04X for slot %d\n", rti->slot_reqt_addr, rti->slot_reqt);
+            rti->slot_reqt = 0;
+        }
+
+        ieee_std_frame_hdr = (ieee_std_frame_hdr_t *)rt_msg;
+        ieee_std_frame_hdr->dst_address = rti->slot_reqt_addr;
+
+        rt_slot_map_t *rt_slot_map = (rt_slot_map_t *)(rt_msg + sizeof(rt_slot_reqt_t) + sizeof(ieee_std_frame_hdr_t));
+        rt_slot_map->msg_type = RT_SLOT_MSG;
+        rt_slot_map->len = sizeof(rt_slot_map_data_t);
+        rt_slot_map->slot = tdma_slot->idx;
+        rt_slot_map->slot_map = rti->nodes[rti->slot_idx].slot_map;
     }
+    /* else: just do my beacon job */
     else{
-        if(rti->dev_inst->status.rx_timeout_error) return;
-        if(rti->dev_inst->fctrl != UWB_FCTRL_STD_DATA_FRAME) return;
+        if(rti->seqno % 2){
+            rt_msg_size = sizeof(ieee_std_frame_hdr_t) + sizeof(rt_loca_t);
+            rt_msg = calloc(1, rt_msg_size);
+            if(!rt_msg) return;
 
-        /* Reset anchor timout */
-        rti->anchors[tdma_slot->idx].timeout = 0;
+            rt_loca_t *rt_loca = (rt_loca_t *)(rt_msg + sizeof(ieee_std_frame_hdr_t));
+            rt_loca->msg_type = RT_LOCA_MSG;
+            rt_loca->len = sizeof(struct _rt_loca_data_t);
+            rt_loca->slot = tdma_slot->idx;
+            rt_loca->location_x = rti->nodes[rti->slot_idx].location_x;
+            rt_loca->location_y = rti->nodes[rti->slot_idx].location_y;
+            rt_loca->location_z = rti->nodes[rti->slot_idx].location_z;
+        }
+        else{
+            rt_msg_size = sizeof(ieee_std_frame_hdr_t) + sizeof(rt_slot_map_t);
+            rt_msg = calloc(1, rt_msg_size);
+            if(!rt_msg) return;
+
+            rt_slot_map_t *rt_slot_map = (rt_slot_map_t *)(rt_msg + sizeof(ieee_std_frame_hdr_t));
+            rt_slot_map->msg_type = RT_SLOT_MSG;
+            rt_slot_map->len = sizeof(rt_slot_map_data_t);
+            rt_slot_map->slot = tdma_slot->idx;
+            rt_slot_map->slot_map = rti->nodes[rti->slot_idx].slot_map;
+        }
+
+        ieee_std_frame_hdr = (ieee_std_frame_hdr_t *)rt_msg;
+        ieee_std_frame_hdr->dst_address = RT_BROADCAST_ADDR;
+    }
+    
+    ieee_std_frame_hdr->fctrl = UWB_FCTRL_STD_DATA_FRAME;
+    ieee_std_frame_hdr->seq_num = rti->seqno++;
+    ieee_std_frame_hdr->PANID = rti->tdma->dev_inst->pan_id;
+    ieee_std_frame_hdr->src_address = rti->tdma->dev_inst->my_short_address;
+    
+    UWB_TX(rti, rt_msg, rt_msg_size, tdma_slot->idx);
+
+    if(rti->slot_reqt) {
+        printf("I accept 0x%04X for slot %d\n", rti->slot_reqt_addr, rti->slot_reqt);
+        /* If I accept for a RANGE slot, I do not wait for see its BCN message */
+        if(rti->slot_reqt > MYNEWT_VAL(UWB_SVC_SLOT)){
+            rti->nodes[rti->slot_idx].slot_map |= (slot_map_t)0x01 << rti->slot_reqt;
+            rti->nodes[rti->slot_reqt].addr = rti->slot_reqt_addr;
+            /* Release request context if it is not BCN slot */
+            rti->slot_reqt = 0;
+            node_slot_map_printf(rti);
+        }
+    }
+
+    if(rt_msg) free(rt_msg);
+}
+
+static void
+bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
+    rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)tdma_slot->arg;
+    if(rtls_tdma_slot_listen(rti, tdma_slot->idx)){
 
         ieee_std_frame_hdr_t *ieee_std_frame_hdr = (ieee_std_frame_hdr_t *)rti->dev_inst->rxbuf;
         if(ieee_std_frame_hdr->PANID != rti->dev_inst->pan_id) return;
-        if(ieee_std_frame_hdr->dst_address != RT_BROADCAST_ADDR) return;
+        
+        /* Strange node detected */
+        if(ieee_std_frame_hdr->src_address != rti->nodes[tdma_slot->idx].addr){
+            /* I do not have see any node in this bcn slot before, it is a new node for this slot */
+            if(rti->nodes[tdma_slot->idx].addr == 0){
+                /* I am a network member */
+                if(rti->slot_idx != 0){
+                    /* I see a slot request from this node before. It is up now */
+                    if(rti->slot_reqt != 0 && rti->slot_reqt_addr == ieee_std_frame_hdr->src_address){
+                        rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
+                        printf("Node up: 0x%04X\n", ieee_std_frame_hdr->src_address);
+                        /* This have request thi slot before, it must acctept my slot before joining */
+                        rti->nodes[tdma_slot->idx].accepted = true;
+                        /* Release request context */
+                        rti->slot_reqt = 0;
+                    }
+                    /* I am a tag, and I see a new anchor */
+                    else if(rti->role == RTR_TAG){
+                        printf("I am a tag and I see new anchor!\n");
+                    }
+                    /* I am a anchor */
+                    else{
+                        /* I has joint the network and I do not see any request from this node before */
+                        /* This node take this slot without permission */
+                        printf("Unknown node: 0x%04X at slot %d\n", ieee_std_frame_hdr->src_address, tdma_slot->idx);
+                        return;
+                    }
+                }
+                /* I am not a network member, just update this slot in table */
+                else{
+                    rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
+                    node_slot_map_printf(rti);
+                }
+            }else{
+                printf("Slot colission: 0x%04X at slot %d\n", ieee_std_frame_hdr->src_address, tdma_slot->idx);
+                return;
+            }
+        }
 
-        /* Continue process only if there is at least sizeof(_msg_hdr_t) in frame payload */
+        /* If I received message from tabled node. Mark it available in this supperframe and reset timer */
+        rti->nodes[tdma_slot->idx].available = true;
+        rti->nodes[tdma_slot->idx].timeout = 0;
+        rti->nodes[rti->slot_idx].slot_map |= (slot_map_t)1 << tdma_slot->idx;
+
         if(rti->dev_inst->rxbuf_size - sizeof(ieee_std_frame_hdr_t) < sizeof(msg_hdr_t)) return;
         uint16_t frame_idx = sizeof(ieee_std_frame_hdr_t);
-
         while(frame_idx < rti->dev_inst->rxbuf_size){
-
-            if(ieee_std_frame_hdr->src_address != rti->anchors[tdma_slot->idx].addr){
-                rti->anchors[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
-                rti->anchors[tdma_slot->idx].listen_cnt = 0;
-            }
-
             switch(rti->dev_inst->rxbuf[frame_idx]){
+                case RT_ACPT_MSG:
+                {
+                    if(ieee_std_frame_hdr->dst_address != rti->dev_inst->my_short_address) return;
+                    rt_slot_acpt_t *rt_slot_acpt = (rt_slot_acpt_t *)(&rti->dev_inst->rxbuf[frame_idx]);
+                    if(rt_slot_acpt->slot_reqt  == rti->slot_reqt){
+                        rti->nodes[tdma_slot->idx].accepted = true;
+                        printf("0x%x accepted me in slot: %d\n", ieee_std_frame_hdr->src_address, rti->slot_reqt);
+                        /* Add me to node list */
+                        if(node_all_accepted(rti)){
+                            node_add_me(rti, rti->slot_reqt);
+                            printf("All node has accepted in slot: %d\n", rti->slot_reqt);
+                            node_slot_map_printf(rti);
+                            /* Reset slot_reqt to change it purpose */
+                            rti->slot_reqt = 0;
+                        };
+                    }
+                    else{
+                        printf("0x%04X do not accept for slot %d\n", ieee_std_frame_hdr->src_address, rti->slot_reqt);
+                    }
+                }
+                break;
                 case RT_LOCA_MSG:
                 {
-                    rt_loca_t *rt_bcn_norm_payload = (rt_loca_t *)(&rti->dev_inst->rxbuf[frame_idx]);
-
-                    rti->anchors[tdma_slot->idx].location_x = rt_bcn_norm_payload->location_x;
-                    rti->anchors[tdma_slot->idx].location_y = rt_bcn_norm_payload->location_y;
-                    rti->anchors[tdma_slot->idx].location_z = rt_bcn_norm_payload->location_z;
+                    rt_loca_t *rt_loca = (rt_loca_t *)(&rti->dev_inst->rxbuf[frame_idx]);
+                    rti->nodes[tdma_slot->idx].location_x = rt_loca->location_x;
+                    rti->nodes[tdma_slot->idx].location_y = rt_loca->location_y;
+                    rti->nodes[tdma_slot->idx].location_z = rt_loca->location_z;
                 }
                 break;
                 case RT_SLOT_MSG:
                 {
-                    rt_slot_t *rt_slot = (rt_slot_t *)(&rti->dev_inst->rxbuf[frame_idx]);
-
-                    rti->anchors[tdma_slot->idx].slot = rt_slot->slot;
-                    rti->anchors[tdma_slot->idx].listen_cnt++;
-
-                    bool next_state = true;
-                    for(int i=0; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
-                        if(rti->anchors[i].addr != 0 && rti->anchors[i].listen_cnt < MYNEWT_VAL(RT_JOINT_LIST_THRESH)){
-                            next_state = false;
-                        }
-                    }
-
-                    if(next_state){
-                        printf("Anchor list: \n");
-                        for(int i=0; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
-                            if(rti->anchors[i].addr != 0){
-                                printf("-- 0x%X:%d:", rti->anchors[i].addr, rti->anchors[i].listen_cnt);
-                                printf("{%d.%d, ", (int)rti->anchors[i].location_x, (int)(1000.0*(rti->anchors[i].location_x - (int)rti->anchors[i].location_x)));
-                                printf("%d.%d, " , (int)rti->anchors[i].location_y, (int)(1000.0*(rti->anchors[i].location_y - (int)rti->anchors[i].location_y)));
-                                printf("%d.%d}:{", (int)rti->anchors[i].location_z, (int)(1000.0*(rti->anchors[i].location_z - (int)rti->anchors[i].location_z)));
-                                for(int j=0; j<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); j++){
-                                    printf("%d", (rti->anchors[i].slot >> j) & 0x01);
-                                }
-                                printf(":%d}\n", rti->anchors[i].slot);
-                            }
-                        }
-                        rti->joint_reqt_cnt = 0;
-                        rti->joint_reqt = true;
-                        rti->cstate = RTS_JOINT_REQT;
-                        printf("state: RTS_JOINT_REQT\n");
-                    }
+                    rt_slot_map_t *rt_slot = (rt_slot_map_t *)(&rti->dev_inst->rxbuf[frame_idx]);
+                    rti->nodes[tdma_slot->idx].slot_map = rt_slot->slot_map;
                 }
-                break;
                 default:
                 break;
             }
             uint8_t msg_len = rti->dev_inst->rxbuf[frame_idx+1];
-            frame_idx += 2 + msg_len;
+            frame_idx += sizeof(msg_hdr_t) + msg_len;
         }
     }
 }
 
-void rst_joint_reqt_cb(tdma_slot_t *tdma_slot){
-    rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)tdma_slot->arg;
-    assert(rti);
-
-    if(tdma_slot->idx == MYNEWT_VAL(UWB_SVC_SLOT)){
-        if(rti->joint_reqt_cnt > MYNEWT_VAL(RT_BCN_REQT_THRESH)){
-            rti->joint_reqt = false;
-            rti->cstate = RTS_JOINT_LIST;
-            printf("state: RTS_JOINT_LIST\n");
-            return;
-        }
-
-        uint16_t rt_msg_size = sizeof(ieee_std_frame_hdr_t) + sizeof(rt_slot_t);;
-        uint8_t *rt_msg = calloc(1, rt_msg_size);
-
-        ieee_std_frame_hdr_t *ieee_std_frame_hdr = (ieee_std_frame_hdr_t *)rt_msg;
-        rt_slot_t *rt_slot = (rt_slot_t *)(rt_msg + sizeof(ieee_std_frame_hdr_t));
-
-        ieee_std_frame_hdr->fctrl = UWB_FCTRL_STD_DATA_FRAME;
-        ieee_std_frame_hdr->seq_num = rti->seqno++;
-        ieee_std_frame_hdr->PANID = rti->tdma->dev_inst->pan_id;
-        ieee_std_frame_hdr->dst_address = RT_BROADCAST_ADDR;
-        ieee_std_frame_hdr->src_address = rti->tdma->dev_inst->my_short_address;
-
-        rt_slot->msg_type = RT_REQT_MSG;
-        rt_slot->len = sizeof(struct _rt_slot_data_t);
-        rti->joint_reqt_slot = 0xFF;
-        for(int i=0; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
-            if(rti->anchors[i].addr == 0) continue;
-            rti->joint_reqt_slot &= ~rti->anchors[i].slot;
-        }
-        if(rti->joint_reqt_slot == 0){
-            rti->cstate = RTS_JOINT_LIST;
-            return;
-        }
-
-        for(int i=0; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
-            uint16_t slot = (0x0001 << i);
-            if(rti->joint_reqt_slot & slot){
-                rti->joint_reqt_slot    = slot;
-                rt_slot->slot           = slot;
-
-                for(int i=0; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
-                    if(rti->anchors[i].addr == 0) continue;
-                    rti->anchors[i].accepted = false;
-                }
-
-                uwb_write_tx(rti->dev_inst, rt_msg, 0, rt_msg_size);
-                uwb_write_tx_fctrl(rti->dev_inst, rt_msg_size, 0);
-                uwb_set_wait4resp(rti->dev_inst, false);
-
-                uint64_t dx_time = tdma_tx_slot_start(rti->tdma, tdma_slot->idx) & 0xFFFFFFFFFE00UL;
-                uwb_set_delay_start(rti->dev_inst, dx_time);
-                if (uwb_start_tx(rti->dev_inst).start_tx_error) {
-                    printf("rst_joint_reqt_cb TX error\n");
-                }
-                break;
-            }
-        }
-    }
-    else if (tdma_slot->idx <= MYNEWT_VAL(UWB_BCN_SLOT_MAX)){
-
-        uwb_set_rx_timeout(rti->dev_inst, 3*rti->tdma->ccp->period/rti->tdma->nslots/4);
-        uwb_set_delay_start(rti->dev_inst, tdma_rx_slot_start(rti->tdma, tdma_slot->idx));
-        if(rtls_tdma_listen(rti, UWB_BLOCKING).start_rx_error){
-            printf("start_rx_error: %s:%d\n", __FILE__, __LINE__);
-        }
-        else{
-            if(rti->dev_inst->status.rx_timeout_error) return;
-
-            rti->anchors[tdma_slot->idx].timeout = 0;
-
-            ieee_std_frame_hdr_t *ieee_std_frame_hdr = (ieee_std_frame_hdr_t *)rti->dev_inst->rxbuf;
-            if(ieee_std_frame_hdr->PANID != rti->dev_inst->pan_id) return;
-            if(ieee_std_frame_hdr->dst_address != rti->dev_inst->my_short_address) return;
-            if(rti->anchors[tdma_slot->idx].addr != ieee_std_frame_hdr->src_address){
-                rti->cstate = RTS_JOINT_LIST;
-                return;
-            }
-
-            if(rti->dev_inst->rxbuf_size - sizeof(ieee_std_frame_hdr_t) < sizeof(msg_hdr_t)) return;
-            uint16_t frame_idx = sizeof(ieee_std_frame_hdr_t);
-            while(frame_idx < rti->dev_inst->rxbuf_size){
-                switch(rti->dev_inst->rxbuf[frame_idx]){
-                    case RT_ACPT_MSG:
-                    {
-                        rt_slot_t *rt_slot = (rt_slot_t *)(&rti->dev_inst->rxbuf[frame_idx]);
-                        rti->anchors[tdma_slot->idx].accepted = true;
-                        rti->joint_reqt_slot &= rt_slot->slot;
-
-                        bool all_accepted = true;
-                        for(int i=0; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
-                            if(rti->anchors[i].addr != 0 && !rti->anchors[i].accepted){
-                                all_accepted = false;
-                                break;
-                            }
-                        }
-
-                        if(all_accepted && rti->joint_reqt_slot != 0){
-                            rti->cstate = RTS_JOINT_JTED;
-                            for(rti->my_slot = 0; rti->my_slot<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); rti->my_slot++){
-                                if(rti->joint_reqt_slot & (0x0001 << rti->my_slot)) break;
-                            }
-                            printf("jointed: slot:%d\n", rti->my_slot);
-                            rti->anchors[rti->my_slot].addr = rti->dev_inst->my_short_address;
-                            rti->anchors[rti->my_slot].slot |= 0x0001 << rti->my_slot;
-                        }
-                    }
-                    break;
-                }
-                uint8_t msg_len = rti->dev_inst->rxbuf[frame_idx+1];
-                frame_idx += 2 + msg_len;
-            }
-        }
-    }
-}
-
-void rst_joint_jted_cb(tdma_slot_t *tdma_slot){
-
+static void
+svc_slot_cb(tdma_slot_t *tdma_slot){
     rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)tdma_slot->arg;
 
-    if(tdma_slot->idx <= MYNEWT_VAL(UWB_BCN_SLOT_MAX)){
-        if(tdma_slot->idx == rti->my_slot){
-            
-            /* Reset anchor timout */
-            rti->anchors[tdma_slot->idx].timeout = 0;
-
-            if(rti->joint_reqt_cnt > MYNEWT_VAL(RT_BCN_REQT_THRESH)){
-                rti->joint_reqt_cnt = 0;
-                rti->joint_reqt = false;
-            }
-
-            uint8_t *rt_msg;
-            uint16_t rt_msg_size;
-
-            ieee_std_frame_hdr_t *ieee_std_frame_hdr;
-
-            if(rti->joint_reqt){
-
-                rt_msg_size = sizeof(ieee_std_frame_hdr_t) + sizeof(rt_slot_t);
-                rt_msg = calloc(1, rt_msg_size);
-                if(!rt_msg) return;
-                rt_slot_t *rt_slot = (rt_slot_t *)(rt_msg + sizeof(ieee_std_frame_hdr_t));
-                rt_slot->msg_type = RT_ACPT_MSG;
-                rt_slot->len = sizeof(struct _rt_slot_data_t);
-                rt_slot->slot = ~rti->anchors[rti->my_slot].slot & rti->joint_reqt_slot;
-
-                ieee_std_frame_hdr = (ieee_std_frame_hdr_t *)rt_msg;
-                ieee_std_frame_hdr->dst_address = rti->joint_reqt_src;
-            }
-            else{
-                if(rti->seqno % 2){
-                    rt_msg_size = sizeof(ieee_std_frame_hdr_t) + sizeof(rt_loca_t);
-                    rt_msg = calloc(1, rt_msg_size);
-                    if(!rt_msg) return;
-                    rt_loca_t *rt_bcn_norm_payload = (rt_loca_t *)(rt_msg + sizeof(ieee_std_frame_hdr_t));
-                    rt_bcn_norm_payload->msg_type = RT_LOCA_MSG;
-                    rt_bcn_norm_payload->len = sizeof(struct _rt_loca_data_t);
-                    rt_bcn_norm_payload->location_x = rti->anchors[rti->my_slot].location_x;
-                    rt_bcn_norm_payload->location_y = rti->anchors[rti->my_slot].location_y;
-                    rt_bcn_norm_payload->location_z = rti->anchors[rti->my_slot].location_z;
-                }
-                else{
-                    rt_msg_size = sizeof(ieee_std_frame_hdr_t) + sizeof(rt_slot_t);
-                    rt_msg = calloc(1, rt_msg_size);
-                    if(!rt_msg) return;
-                    rt_slot_t *rt_slot = (rt_slot_t *)(rt_msg + sizeof(ieee_std_frame_hdr_t));
-                    rt_slot->msg_type = RT_SLOT_MSG;
-                    rt_slot->len = sizeof(struct _rt_slot_data_t);
-                    rt_slot->slot = rti->anchors[rti->my_slot].slot;
-                }
-
-                ieee_std_frame_hdr = (ieee_std_frame_hdr_t *)rt_msg;
-                ieee_std_frame_hdr->dst_address = RT_BROADCAST_ADDR;
-            }
-    
-            ieee_std_frame_hdr->fctrl = UWB_FCTRL_STD_DATA_FRAME;
-            ieee_std_frame_hdr->seq_num = rti->seqno++;
-            ieee_std_frame_hdr->PANID = rti->tdma->dev_inst->pan_id;
-            ieee_std_frame_hdr->src_address = rti->tdma->dev_inst->my_short_address;
-
-            uwb_write_tx(rti->dev_inst, rt_msg, 0, rt_msg_size);
-            uwb_write_tx_fctrl(rti->dev_inst, rt_msg_size, 0);
-            uwb_set_wait4resp(rti->dev_inst, false);
-
-            uint64_t dx_time = tdma_tx_slot_start(rti->tdma, tdma_slot->idx) & 0xFFFFFFFFFE00UL;
-            uwb_set_delay_start(rti->dev_inst, dx_time);
-            if (uwb_start_tx(rti->dev_inst).start_tx_error) {
-                printf("BCN TX error\n");
-            }
-
-            free(rt_msg);
+    /* If I did have slot */
+    if(node_all_accepted(rti)){
+        /* I have been waiting for requested node to up too long. It must request again */
+        if(rti->slot_reqt && rti->slot_reqt_cntr > MYNEWT_VAL(RT_SLOT_REQT_TIMEOUT)){
+            printf("Node 0x%04X request slot %d accept timeout\n", rti->slot_reqt_addr, rti->slot_reqt);
+            /* Release request context */
+            rti->slot_reqt = 0;
         }
-        else{
 
-            uwb_set_rx_timeout(rti->dev_inst, 3*rti->tdma->ccp->period/rti->tdma->nslots/4);
-            uwb_set_delay_start(rti->dev_inst, tdma_rx_slot_start(rti->tdma, tdma_slot->idx));
-            if(rtls_tdma_listen(rti, UWB_BLOCKING).start_rx_error){
-                printf("start_rx_error: %s:%d\n", __FILE__, __LINE__);
-            }
-            else{
-                if(rti->dev_inst->status.rx_timeout_error) return;
-
-                /* Reset anchor timout */
-                rti->anchors[tdma_slot->idx].timeout = 0;
-
-                ieee_std_frame_hdr_t *ieee_std_frame_hdr = (ieee_std_frame_hdr_t *)rti->dev_inst->rxbuf;
-                if(ieee_std_frame_hdr->PANID != rti->dev_inst->pan_id) return;
-                if(ieee_std_frame_hdr->dst_address != RT_BROADCAST_ADDR) return;
-
-                if(rti->dev_inst->rxbuf_size - sizeof(ieee_std_frame_hdr_t) < sizeof(msg_hdr_t)) return;
-                uint16_t frame_idx = sizeof(ieee_std_frame_hdr_t);
-
-                rti->anchors[rti->my_slot].slot |= 0x0001 << tdma_slot->idx;
-
-                if(rti->joint_reqt && rti->joint_reqt_src == ieee_std_frame_hdr->src_address){
-                    rti->joint_reqt_cnt = 0;
-                    rti->joint_reqt = false;
-                }
-                while(frame_idx < rti->dev_inst->rxbuf_size){
-
-                    if(ieee_std_frame_hdr->src_address != rti->anchors[tdma_slot->idx].addr){
-                        rti->anchors[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
-                        rti->anchors[tdma_slot->idx].listen_cnt = 0;
-                    }
-                            
-                    switch(rti->dev_inst->rxbuf[frame_idx]){
-                        case RT_LOCA_MSG:
-                        {
-                            rt_loca_t *rt_bcn_norm_payload = (rt_loca_t *)(&rti->dev_inst->rxbuf[frame_idx]);
-
-
-
-                            rti->anchors[tdma_slot->idx].location_x = rt_bcn_norm_payload->location_x;
-                            rti->anchors[tdma_slot->idx].location_y = rt_bcn_norm_payload->location_y;
-                            rti->anchors[tdma_slot->idx].location_z = rt_bcn_norm_payload->location_z;
-                        }
-                        break;
-                        case RT_SLOT_MSG:
-                        {
-                            rt_slot_t *rt_slot = (rt_slot_t *)(&rti->dev_inst->rxbuf[frame_idx]);
-
-                            rti->anchors[tdma_slot->idx].slot = rt_slot->slot;
-                            rti->anchors[tdma_slot->idx].listen_cnt++;
-                        }
-                        break;
-                    }
-                    uint8_t msg_len = rti->dev_inst->rxbuf[frame_idx+1];
-                    frame_idx += 2 + msg_len;
-                }
-            }
-        }
-    }
-    else if(tdma_slot->idx == MYNEWT_VAL(UWB_SVC_SLOT)){
-        uwb_set_rx_timeout(rti->dev_inst, 3*rti->tdma->ccp->period/rti->tdma->nslots/4);
-        uwb_set_delay_start(rti->dev_inst, tdma_rx_slot_start(rti->tdma, tdma_slot->idx));
-        if(rtls_tdma_listen(rti, UWB_BLOCKING).start_rx_error){
-            printf("start_rx_error: %s:%d\n", __FILE__, __LINE__);
-        }
-        else{
-            if(rti->dev_inst->status.rx_timeout_error) return;
-            if(rti->joint_reqt) return;
-
+        /* I would listen for slot request */
+        if(rtls_tdma_slot_listen(rti, tdma_slot->idx)){
             ieee_std_frame_hdr_t *ieee_std_frame_hdr = (ieee_std_frame_hdr_t *)rti->dev_inst->rxbuf;
             if(ieee_std_frame_hdr->PANID != rti->dev_inst->pan_id) return;
             if(ieee_std_frame_hdr->dst_address != RT_BROADCAST_ADDR) return;
 
-            if(rti->dev_inst->rxbuf_size - sizeof(ieee_std_frame_hdr_t) < sizeof(msg_hdr_t)) return;
-            uint16_t frame_idx = sizeof(ieee_std_frame_hdr_t);
-            while(frame_idx < rti->dev_inst->rxbuf_size){
-                switch(rti->dev_inst->rxbuf[frame_idx]){
-                    case RT_REQT_MSG:
-                    {
-                        rt_slot_t *rt_slot = (rt_slot_t *)(&rti->dev_inst->rxbuf[frame_idx]);
-                        rti->joint_reqt = true;
-                        rti->joint_reqt_src = ieee_std_frame_hdr->src_address;
-                        rti->joint_reqt_slot = rt_slot->slot;
-                        rti->joint_reqt_cnt = 0;
-                    }
-                    break;
-                }
-                uint8_t msg_len = rti->dev_inst->rxbuf[frame_idx+1];
-                frame_idx += 2 + msg_len;
+            if(rti->dev_inst->rxbuf_size - sizeof(ieee_std_frame_hdr_t) < sizeof(rt_slot_reqt_t)) return;
+
+            rt_slot_reqt_t *rt_slot_reqt = (rt_slot_reqt_t *)(rti->dev_inst->rxbuf + sizeof(ieee_std_frame_hdr_t));
+
+            /* Only receive one RT_REQT_MSG for a session */
+            if(rti->slot_reqt == 0 && rt_slot_reqt->msg_type == RT_REQT_MSG){
+                /* Lock request context */
+                rti->slot_reqt = rt_slot_reqt->slot_reqt;
+                rti->slot_reqt_cntr = 0;
+                rti->slot_reqt_addr = ieee_std_frame_hdr->src_address;
+                printf("Request slot %d from 0x%04X\n", rti->slot_reqt, ieee_std_frame_hdr->src_address);
             }
         }
+    }
+    /* My slot is not accepted by all node mean I have to send more request */
+    else{
+        uint16_t rt_msg_size = sizeof(ieee_std_frame_hdr_t) + sizeof(rt_slot_reqt_t);
+        uint8_t *rt_msg = calloc(1, rt_msg_size);
+        if(!rt_msg) return;
+
+        ieee_std_frame_hdr_t *ieee_std_frame_hdr = (ieee_std_frame_hdr_t *)rt_msg;
+        rt_slot_reqt_t *rt_slot_reqt = (rt_slot_reqt_t *)(rt_msg + sizeof(ieee_std_frame_hdr_t));
+
+        ieee_std_frame_hdr->fctrl = UWB_FCTRL_STD_DATA_FRAME;
+        ieee_std_frame_hdr->seq_num = rti->seqno++;
+        ieee_std_frame_hdr->PANID = rti->tdma->dev_inst->pan_id;
+        ieee_std_frame_hdr->src_address = rti->tdma->dev_inst->my_short_address;
+
+        rt_slot_reqt->msg_type = RT_REQT_MSG;
+        rt_slot_reqt->len = sizeof(rt_slot_reqt_data_t);
+        rt_slot_reqt->slot = tdma_slot->idx;
+
+        slot_map_t slot_map = (slot_map_t)-1;
+
+        /* Find ANCHOR slot */
+        if(rti->role == RTR_ANCHOR){
+            for(int i=1; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
+                /* Ignore if node is not available in this frame and my slot node*/
+                if(rti->nodes[i].addr == 0 || !rti->nodes[i].available) continue; 
+                slot_map &= ~rti->nodes[i].slot_map;
+            }
+            for(int i=1; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
+                if(slot_map & ((slot_map_t)1 << i)){
+                    rt_slot_reqt->slot_reqt = rti->slot_reqt = i;
+                    break;
+                }
+            }
+        }
+        /* Find TAG slot */
+        else if(rti->role == RTR_TAG){
+            for(int i=1; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
+                /* Ignore if node is not available in this frame and my slot node*/
+                if(rti->nodes[i].addr == 0 || !rti->nodes[i].available) continue; 
+                slot_map &= ~rti->nodes[i].slot_map;
+            }
+            for(int i=MYNEWT_VAL(UWB_SVC_SLOT) + 1; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
+                if(slot_map & ((slot_map_t)1 << i)){
+                    rt_slot_reqt->slot_reqt = rti->slot_reqt = i;
+                    break;
+                }
+            }
+        }
+
+        /* Slot 1 is automatically assigned for MASTER */
+        /* rt_slot_reqt->slot_reqt = 1 mean I no anchor available */
+        if(rt_slot_reqt->slot_reqt > 1){
+            ieee_std_frame_hdr->dst_address = RT_BROADCAST_ADDR;
+            UWB_TX(rti, rt_msg, rt_msg_size, tdma_slot->idx);
+            printf("I (0x%04X) request slot: %d\n", ieee_std_frame_hdr->src_address, rt_slot_reqt->slot_reqt);
+        }
+
+        free(rt_msg);
     }
 }
