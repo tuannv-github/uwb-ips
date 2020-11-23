@@ -103,7 +103,7 @@ task_rtls_func(void *arg){
     msg_rtls_t msg_rtls;
 
     while (1) {
-        dpl_time_delay(dpl_time_ms_to_ticks32(1000));
+        dpl_time_delay(dpl_time_ms_to_ticks32(500));
         if (pub->addr == BT_MESH_ADDR_UNASSIGNED) continue;
 
         msg_rtls.type = MAVLINK_MSG_ID_LOCATION;
@@ -119,6 +119,27 @@ task_rtls_func(void *arg){
             STATS_INC(g_model_root_stat, send_failed);
         }
         os_mbuf_free(pub->msg);
+
+        distance_t *distances = get_distances();
+        for(int i=0; i<ANCHOR_NUM; i++){
+            if(distances->updated[i]){
+                distances->updated[i] = false;
+
+                msg_rtls.type = MAVLINK_MSG_ID_DISTANCE;
+                msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
+                msg_rtls.anchor = distances->anchors[i];
+                msg_rtls.distance = distances->ranges[i];
+
+                msg_prepr_rtls(&pub->msg, &msg_rtls);
+
+                int err = bt_mesh_model_publish(model);
+                if (err) {
+                    STATS_INC(g_model_root_stat, send_failed);
+                }
+                os_mbuf_free(pub->msg);
+                dpl_time_delay(dpl_time_ms_to_ticks32(100));
+            }
+        }
     }
 }
 

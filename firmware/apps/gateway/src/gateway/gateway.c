@@ -161,6 +161,8 @@ process_ble_to_net_queue(struct os_event *ev)
             case MAVLINK_MSG_ID_ONOFF:
                 mavlink_msg_onoff_pack(0, 0, &mavlink_msg, msg_rtls.dstsrc, msg_rtls.opcode, msg_rtls.value);
                 break;
+            case MAVLINK_MSG_ID_DISTANCE:
+                mavlink_msg_distance_pack(0,0, &mavlink_msg, msg_rtls.anchor, msg_rtls.distance);
             default:
                 continue;
         }

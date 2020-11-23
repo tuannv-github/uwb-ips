@@ -109,7 +109,7 @@ process_net_to_ble_queue(struct os_event *ev)
         if(model->pub->addr != BT_MESH_ADDR_UNASSIGNED) {
             msg_parse_rtls_pipe(om, &msg_rtls);
             msg_print_rtls(&msg_rtls);
-            msg_prepr_rtls(model->pub->msg, &msg_rtls);
+            msg_prepr_rtls(&model->pub->msg, &msg_rtls);
             rc = bt_mesh_model_publish(model);
             if(rc){
                 printf("Unable to publish message from net to ble\n");

@@ -197,6 +197,12 @@ void rtls_tdma_cb(rtls_tdma_instance_t *rti, tdma_slot_t *slot){
     }
 }
 
+static distance_t g_distance;
+
+distance_t *get_distances(){
+    return &g_distance;
+}
+
 static bool
 complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
 {
@@ -206,15 +212,11 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     }
     struct nrng_instance *nrng = (struct nrng_instance *)cbs->inst_ptr;
 
-    uint16_t anchors = MYNEWT_VAL(NODE_END_SLOT_ID) - MYNEWT_VAL(NODE_START_SLOT_ID) + 1;
-    float ranges[anchors];
-    uint16_t addresses[anchors];
-    memset(addresses, 0, sizeof(addresses));
-    nrng_get_ranges_addresses( nrng, ranges, addresses, 10, nrng->idx);
-    for(int i=0; i<anchors; i++){
-        if(addresses[i] != 0){
-            float r = ranges[i];
-            printf("0x%04X: %d.%d\n", addresses[i], (int)r, (int)(1000*(r - (int)r)));  
+    nrng_get_ranges_addresses( nrng, g_distance.ranges, g_distance.anchors, g_distance.updated, ANCHOR_NUM, nrng->idx);
+    for(int i=0; i<ANCHOR_NUM; i++){
+        if(g_distance.anchors[i] != 0){
+            float r = g_distance.ranges[i];
+            printf("0x%04X: %d.%d\n", g_distance.anchors[i], (int)r, (int)(1000*(r - (int)r)));  
         }
     }
 

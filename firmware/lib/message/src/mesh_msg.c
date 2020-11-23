@@ -35,6 +35,12 @@ void msg_prepr_rtls(struct os_mbuf **mbuf, msg_rtls_t *msg){
         net_buf_simple_add_be16(*mbuf, msg->dstsrc);
         net_buf_simple_add_u8(*mbuf, msg->value);
         break;
+    case MAVLINK_MSG_ID_DISTANCE:
+        *mbuf = NET_BUF_SIMPLE(header + 4);
+        bt_mesh_model_msg_init(*mbuf, msg->opcode);
+        net_buf_simple_add_be16(*mbuf, msg->anchor);
+        net_buf_simple_add_be32(*mbuf, *((uint32_t *)(&msg->distance)));
+        break;
     default:
         break;
     }
@@ -55,6 +61,10 @@ void msg_parse_rtls(struct os_mbuf *mbuf, msg_rtls_t *msg){
     case MAVLINK_MSG_ID_ONOFF:
         msg->value = net_buf_simple_pull_u8(mbuf);
         break;
+    case MAVLINK_MSG_ID_DISTANCE:
+        msg->anchor = net_buf_simple_pull_be16(mbuf);
+        *((uint32_t *)(&msg->distance)) = net_buf_simple_pull_be32(mbuf);
+        break;
     default:
         break;
     }
@@ -73,6 +83,10 @@ void msg_print_rtls(msg_rtls_t *msg){
     case MAVLINK_MSG_ID_ONOFF:
         printf("{opcode: %ld, type: %d, dstsrc: 0x%02x, value: %d}\n", 
                 msg->opcode, msg->type, msg->dstsrc, msg->value);
+        break;
+    case MAVLINK_MSG_ID_DISTANCE:
+        printf("{opcode: %ld, type: %d, dstsrc: 0x%02x, anchor 0x%04X,value: %d.%d}\n", 
+                msg->opcode, msg->type, msg->dstsrc, msg->anchor, (int)msg->location_z, (int)(1000*(msg->location_z - (int)msg->location_z)));
         break;
     default:
         break;
@@ -94,6 +108,10 @@ void msg_parse_rtls_pipe(struct os_mbuf *mbuf, msg_rtls_t *msg){
     case MAVLINK_MSG_ID_ONOFF:
         msg->value = net_buf_simple_pull_u8(mbuf);
         break;
+    case MAVLINK_MSG_ID_DISTANCE:
+        msg->anchor = net_buf_simple_pull_be16(mbuf);
+        *((uint32_t *)(&msg->distance)) = net_buf_simple_pull_be32(mbuf);
+        break;
     default:
         break;
     }
@@ -113,6 +131,10 @@ void msg_prepr_rtls_pipe(struct os_mbuf *mbuf, msg_rtls_t *msg){
         break;
     case MAVLINK_MSG_ID_ONOFF:
         net_buf_simple_add_u8(mbuf, msg->value);
+        break;
+    case MAVLINK_MSG_ID_DISTANCE:
+        net_buf_simple_add_be16(mbuf, msg->anchor);
+        net_buf_simple_add_be32(mbuf, *((uint32_t *)(&msg->distance)));
         break;
     default:
         break;

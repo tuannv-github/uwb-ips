@@ -248,7 +248,7 @@ nrng_get_ranges(struct nrng_instance * nrng, float ranges[], uint16_t nranges, u
  * @return valid mask
  */
 uint32_t
-nrng_get_ranges_addresses(struct nrng_instance * nrng, float ranges[], uint16_t addresses[], uint16_t nranges, uint16_t base)
+nrng_get_ranges_addresses(struct nrng_instance * nrng, float ranges[], uint16_t addresses[], bool updated[], uint16_t nranges, uint16_t base)
 {
     uint32_t mask = 0;
 
@@ -271,7 +271,8 @@ nrng_get_ranges_addresses(struct nrng_instance * nrng, float ranges[], uint16_t 
             uint16_t idx = BitIndex(nrng->slot_mask, 1UL << i, SLOT_POSITION);
             nrng_frame_t * frame = nrng->frames[(base + idx)%nrng->nframes];
             ranges[j] = uwb_rng_tof_to_meters(nrng_twr_to_tof_frames(nrng->dev_inst, frame, frame));
-            addresses[j++] = frame->dst_address;
+            addresses[j] = frame->dst_address;
+            updated[j++] = true;
         }
     }
     return mask;
