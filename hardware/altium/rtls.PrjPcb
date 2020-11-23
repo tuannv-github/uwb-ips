@@ -28,7 +28,7 @@ DItemRevisionGUID=
 ReportSuppressedErrorsInMessages=0
 FSMCodingStyle=eFMSDropDownList_OneProcess
 FSMEncodingStyle=eFMSDropDownList_OneHot
-OutputPath=Project Outputs for rtls
+OutputPath=
 LogFolderPath=
 ManagedProjectGUID=
 IncludeDesignInRelease=0
@@ -973,111 +973,7 @@ GenerateClassCluster=0
 DocumentUniqueId=
 
 [GeneratedDocument1]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\BOM\Bill of Materials-rtls.xlsx
-DItemRevisionGUID=
-
-[GeneratedDocument2]
 DocumentPath=Project Outputs for rtls\Design Rule Check - rtls.html
-DItemRevisionGUID=
-
-[GeneratedDocument3]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\NC Drill\rtls.DRR
-DItemRevisionGUID=
-
-[GeneratedDocument4]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.EXTREP
-DItemRevisionGUID=
-
-[GeneratedDocument5]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.GBL
-DItemRevisionGUID=
-
-[GeneratedDocument6]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.GBO
-DItemRevisionGUID=
-
-[GeneratedDocument7]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.GBP
-DItemRevisionGUID=
-
-[GeneratedDocument8]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.GBS
-DItemRevisionGUID=
-
-[GeneratedDocument9]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.GD1
-DItemRevisionGUID=
-
-[GeneratedDocument10]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.GG1
-DItemRevisionGUID=
-
-[GeneratedDocument11]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.GKO
-DItemRevisionGUID=
-
-[GeneratedDocument12]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.GM1
-DItemRevisionGUID=
-
-[GeneratedDocument13]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.GM5
-DItemRevisionGUID=
-
-[GeneratedDocument14]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.GM13
-DItemRevisionGUID=
-
-[GeneratedDocument15]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.GM15
-DItemRevisionGUID=
-
-[GeneratedDocument16]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.GM16
-DItemRevisionGUID=
-
-[GeneratedDocument17]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.GM29
-DItemRevisionGUID=
-
-[GeneratedDocument18]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.GPB
-DItemRevisionGUID=
-
-[GeneratedDocument19]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.GPT
-DItemRevisionGUID=
-
-[GeneratedDocument20]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.GTL
-DItemRevisionGUID=
-
-[GeneratedDocument21]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.GTO
-DItemRevisionGUID=
-
-[GeneratedDocument22]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.GTP
-DItemRevisionGUID=
-
-[GeneratedDocument23]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.GTS
-DItemRevisionGUID=
-
-[GeneratedDocument24]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\NC Drill\rtls.LDP
-DItemRevisionGUID=
-
-[GeneratedDocument25]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.REP
-DItemRevisionGUID=
-
-[GeneratedDocument26]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\Gerber\rtls.RUL
-DItemRevisionGUID=
-
-[GeneratedDocument27]
-DocumentPath=Project Outputs for rtls\RTLS-2020-11-07\NC Drill\rtls.TXT
 DItemRevisionGUID=
 
 [Configuration1]
@@ -1091,7 +987,7 @@ ContentTypeGUID=CB6F2064-E317-11DF-B822-12313F0024A2
 ConfigurationType=Source
 
 [Generic_EDE]
-OutputDir=Project Outputs for rtls
+OutputDir=
 
 [OutputGroup1]
 Name=Netlist Outputs
