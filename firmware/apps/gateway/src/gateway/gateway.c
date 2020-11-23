@@ -4,6 +4,8 @@
 
 #include <dpl/dpl.h>
 #include <os/mynewt.h>
+#include <hal/hal_gpio.h>
+#include <bsp/bsp.h>
 #include <gateway/gateway/gateway.h>
 
 #include <serial/serial.h>
@@ -51,6 +53,8 @@ task_downlink_func(void *arg)
 
     while(1){
         chr = serial_read();
+        hal_gpio_write(LED_DOWNLINK_0, LED_ON);
+
         uint8_t msg_received = mavlink_parse_char(MAVLINK_COMM_0, chr, &g_mavlink_msg, &g_mavlink_status);
 		if(msg_received){
             printf("Msg from net\n");
@@ -135,6 +139,7 @@ task_downlink_func(void *arg)
                 continue;
             }
 		}
+        hal_gpio_write(LED_DOWNLINK_0, LED_OFF);
     }
     return;
 }
@@ -151,6 +156,7 @@ process_ble_to_net_queue(struct os_event *ev)
     struct os_mbuf *om;
     struct os_mqueue *mqueue = (struct os_mqueue *)ev->ev_arg;
     while ((om = os_mqueue_get(mqueue)) != NULL) {
+        hal_gpio_write(LED_UPLINK_1, LED_ON);
         msg_parse_rtls_pipe(om, &msg_rtls);
         printf("BLE->NET: ");
         msg_print_rtls(&msg_rtls);
@@ -162,7 +168,8 @@ process_ble_to_net_queue(struct os_event *ev)
                 mavlink_msg_onoff_pack(0, 0, &mavlink_msg, msg_rtls.dstsrc, msg_rtls.opcode, msg_rtls.value);
                 break;
             case MAVLINK_MSG_ID_DISTANCE:
-                mavlink_msg_distance_pack(0,0, &mavlink_msg, msg_rtls.anchor, msg_rtls.distance);
+                mavlink_msg_distance_pack(0,0, &mavlink_msg, msg_rtls.opcode, msg_rtls.dstsrc, msg_rtls.anchor, msg_rtls.distance);
+                break;
             default:
                 continue;
         }
@@ -170,6 +177,7 @@ process_ble_to_net_queue(struct os_event *ev)
         len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
         serial_write(mav_send_buf, len);
         os_mbuf_free_chain(om);
+        hal_gpio_write(LED_UPLINK_1, LED_OFF);
     }
 }
 
@@ -188,6 +196,9 @@ void get_ble_to_net_mqueue_eventq(struct os_mqueue **mqueue, struct os_eventq **
 
 void gateway_init(){
     int rc;
+
+    hal_gpio_init_out(LED_UPLINK_1, LED_OFF);
+    hal_gpio_init_out(LED_DOWNLINK_0, LED_OFF);
 
     os_mqueue_init(&mqueue_ble_to_net, process_ble_to_net_queue, &mqueue_ble_to_net);
     os_eventq_init(&eventq_ble_to_net);

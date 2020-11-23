@@ -57,7 +57,7 @@ rtls_model_set(struct bt_mesh_model *model,
         msg_print_rtls(&msg_rtls);
         break;
     case MAVLINK_MSG_ID_ONOFF:
-        hal_gpio_init_out(LED_1, msg_rtls.value);
+        hal_gpio_write(LED_1, !msg_rtls.value);
         STATS_INC(g_model_root_stat, recv_succed);
         break;
     default:
@@ -127,6 +127,7 @@ task_rtls_func(void *arg){
 
                 msg_rtls.type = MAVLINK_MSG_ID_DISTANCE;
                 msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
+                rtls_get_address(&msg_rtls.dstsrc);
                 msg_rtls.anchor = distances->anchors[i];
                 msg_rtls.distance = distances->ranges[i];
 

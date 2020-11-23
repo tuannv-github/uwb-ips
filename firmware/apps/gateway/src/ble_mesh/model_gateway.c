@@ -40,6 +40,8 @@ rtls_model_status(struct bt_mesh_model *model,
               struct bt_mesh_msg_ctx *ctx,
               struct os_mbuf *buf)
 {
+    hal_gpio_write(LED_UPLINK_0, LED_ON);
+
     int rc;
     struct os_mbuf *om;
     struct os_mqueue *mqueue;
@@ -57,6 +59,7 @@ rtls_model_status(struct bt_mesh_model *model,
             printf("Unable to put mqueue: %d\n", rc);
         }
     }
+    hal_gpio_write(LED_UPLINK_0, LED_OFF);
 }
 
 static const struct bt_mesh_model_op rtls_op[] = {
@@ -106,6 +109,7 @@ process_net_to_ble_queue(struct os_event *ev)
     int rc;
 
     while ((om = os_mqueue_get(mqueue)) != NULL) {
+        hal_gpio_write(LED_DOWNLINK_1, LED_ON);
         if(model->pub->addr != BT_MESH_ADDR_UNASSIGNED) {
             msg_parse_rtls_pipe(om, &msg_rtls);
             msg_print_rtls(&msg_rtls);
@@ -120,6 +124,7 @@ process_net_to_ble_queue(struct os_event *ev)
             os_mbuf_free_chain(model->pub->msg);
         }
         os_mbuf_free_chain(om);
+        hal_gpio_write(LED_DOWNLINK_1, LED_OFF);
     }
 }
 
@@ -138,6 +143,9 @@ get_net_to_ble_mqueue_eventq(struct os_mqueue **mqueue, struct os_eventq **event
 
 void model_gateway_init(){
     int rc;
+    
+    hal_gpio_init_out(LED_UPLINK_0, LED_OFF);
+    hal_gpio_init_out(LED_DOWNLINK_1, LED_OFF);
 
     os_mqueue_init(&mqueue_net_to_ble, process_net_to_ble_queue, &mqueue_net_to_ble);
     os_eventq_init(&eventq_net_to_ble);

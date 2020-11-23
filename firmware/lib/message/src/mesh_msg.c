@@ -38,6 +38,8 @@ void msg_prepr_rtls(struct os_mbuf **mbuf, msg_rtls_t *msg){
     case MAVLINK_MSG_ID_DISTANCE:
         *mbuf = NET_BUF_SIMPLE(header + 4);
         bt_mesh_model_msg_init(*mbuf, msg->opcode);
+        net_buf_simple_add_u8(*mbuf, msg->type);
+        net_buf_simple_add_be16(*mbuf, msg->dstsrc);
         net_buf_simple_add_be16(*mbuf, msg->anchor);
         net_buf_simple_add_be32(*mbuf, *((uint32_t *)(&msg->distance)));
         break;
@@ -85,8 +87,9 @@ void msg_print_rtls(msg_rtls_t *msg){
                 msg->opcode, msg->type, msg->dstsrc, msg->value);
         break;
     case MAVLINK_MSG_ID_DISTANCE:
-        printf("{opcode: %ld, type: %d, dstsrc: 0x%02x, anchor 0x%04X,value: %d.%d}\n", 
-                msg->opcode, msg->type, msg->dstsrc, msg->anchor, (int)msg->location_z, (int)(1000*(msg->location_z - (int)msg->location_z)));
+        printf("{opcode: %ld, type: %d, dstsrc: 0x%02x, anchor 0x%04X, value: %d.%d}\n", 
+                msg->opcode, msg->type, msg->dstsrc, msg->anchor, (int)msg->location_z, 
+                (int)(1000*(msg->distance - (int)msg->distance)));
         break;
     default:
         break;

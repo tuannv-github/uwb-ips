@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import pylink
 import threading
 from subprocess import PIPE, run
