@@ -177,6 +177,9 @@ function onMessageArrived(message) {
 			case "DISTANCE":
 				console.log(msg)
 				break;
+			case "TOF":
+				console.log(msg)
+				break;
 			default:
 				console.error("UNKNOWN MSG: "+message.payloadString);
 				break;
