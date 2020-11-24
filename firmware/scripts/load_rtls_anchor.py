@@ -20,13 +20,13 @@ def run_cmd(serial_number, app):
 
 def main(argv):
     print(argv[0])
+    cmd = build_template % (argv[0])
+    os.system(cmd)
+    cmd = image_template % (argv[0])
+    os.system(cmd)
     jlink = pylink.JLink()
     for (i, emulator) in enumerate(jlink.connected_emulators()):
         if emulator.SerialNumber in device_serial_numbers:
-            cmd = build_template % (argv[0])
-            os.system(cmd)
-            cmd = image_template % (argv[0])
-            os.system(cmd)
             run_cmd(emulator.SerialNumber, argv[0])
 
 if __name__ == "__main__":

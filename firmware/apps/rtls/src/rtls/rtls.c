@@ -215,8 +215,7 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     nrng_get_tofs_addresses( nrng, g_distance.tofs, g_distance.anchors, g_distance.updated, ANCHOR_NUM, nrng->idx);
     for(int i=0; i<ANCHOR_NUM; i++){
         if(g_distance.anchors[i] != 0){
-            float r = g_distance.ranges[i];
-            printf("0x%04X: %d.%d\n", g_distance.anchors[i], (int)r, (int)(1000*(r - (int)r)));  
+            printf("0x%04X: %5ld\n", g_distance.anchors[i], g_distance.tofs[i]);  
         }
     }
 
