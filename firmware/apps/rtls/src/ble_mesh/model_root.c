@@ -125,11 +125,11 @@ task_rtls_func(void *arg){
             if(distances->updated[i]){
                 distances->updated[i] = false;
 
-                msg_rtls.type = MAVLINK_MSG_ID_DISTANCE;
+                msg_rtls.type = MAVLINK_MSG_ID_TOF;
                 msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
                 rtls_get_address(&msg_rtls.dstsrc);
                 msg_rtls.anchor = distances->anchors[i];
-                msg_rtls.distance = distances->ranges[i];
+                msg_rtls.tof = distances->tofs[i];
 
                 msg_prepr_rtls(&pub->msg, &msg_rtls);
 

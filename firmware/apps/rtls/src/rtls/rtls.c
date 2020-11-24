@@ -212,7 +212,7 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     }
     struct nrng_instance *nrng = (struct nrng_instance *)cbs->inst_ptr;
 
-    nrng_get_ranges_addresses( nrng, g_distance.ranges, g_distance.anchors, g_distance.updated, ANCHOR_NUM, nrng->idx);
+    nrng_get_tofs_addresses( nrng, g_distance.tofs, g_distance.anchors, g_distance.updated, ANCHOR_NUM, nrng->idx);
     for(int i=0; i<ANCHOR_NUM; i++){
         if(g_distance.anchors[i] != 0){
             float r = g_distance.ranges[i];

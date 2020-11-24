@@ -7,7 +7,11 @@
 #define ANCHOR_NUM  (MYNEWT_VAL(NODE_END_SLOT_ID) - MYNEWT_VAL(NODE_START_SLOT_ID) + 1)
 typedef struct{
     uint16_t anchors[ANCHOR_NUM];
-    float ranges[ANCHOR_NUM];
+    union{
+        float ranges[ANCHOR_NUM];
+        uint32_t tofs[ANCHOR_NUM];
+    };
+
     bool updated[ANCHOR_NUM];
 }distance_t;
 

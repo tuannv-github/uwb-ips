@@ -38,5 +38,12 @@
 			<field type="uint16_t" name="anchor"/>
 			<field type="float" name="distance"/>
 		</message>
+		<message id="3" name="TOF">
+			<description>Distnace message</description>
+			<field type="uint8_t" name="type" enum="type_t"/>
+			<field type="uint16_t" name="tag"/>
+			<field type="uint16_t" name="anchor"/>
+			<field type="uint32_t" name="tof"/>
+		</message>
 	</messages>
 </mavlink>

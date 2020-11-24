@@ -35,6 +35,7 @@
 			"unordered_map": "c"
 		},
 		"cSpell.words": [
+			"addresses",
 			"aroot",
 			"artls",
 			"calc",
@@ -44,11 +45,14 @@
 			"dwt",
 			"dwt txconfig t",
 			"fppl",
+			"get",
 			"m",
 			"m aroot",
 			"m artls",
 			"ma",
 			"ma swch",
+			"nrng",
+			"nrng get tofs addresses",
 			"phy",
 			"read",
 			"recv",
@@ -57,6 +61,7 @@
 			"swch",
 			"swoport",
 			"t",
+			"tofs",
 			"txconfig",
 			"wakeupvbat"
 		]

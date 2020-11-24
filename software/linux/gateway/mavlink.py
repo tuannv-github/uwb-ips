@@ -289,6 +289,7 @@ MAVLINK_MSG_ID_BAD_DATA = -1
 MAVLINK_MSG_ID_LOCATION = 0
 MAVLINK_MSG_ID_ONOFF = 1
 MAVLINK_MSG_ID_DISTANCE = 2
+MAVLINK_MSG_ID_TOF = 3
 
 class MAVLink_location_message(MAVLink_message):
         '''
@@ -396,11 +397,47 @@ class MAVLink_distance_message(MAVLink_message):
         def pack(self, mav, force_mavlink1=False):
                 return MAVLink_message.pack(self, mav, 255, struct.pack('<fHHB', self.distance, self.tag, self.anchor, self.type), force_mavlink1=force_mavlink1)
 
+class MAVLink_tof_message(MAVLink_message):
+        '''
+        Distnace message
+        '''
+        id = MAVLINK_MSG_ID_TOF
+        name = 'TOF'
+        fieldnames = ['type', 'tag', 'anchor', 'tof']
+        ordered_fieldnames = ['tof', 'tag', 'anchor', 'type']
+        fieldtypes = ['uint8_t', 'uint16_t', 'uint16_t', 'uint32_t']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {"type": "type_t"}
+        fieldunits_by_name = {}
+        format = '<IHHB'
+        native_format = bytearray('<IHHB', 'ascii')
+        orders = [3, 1, 2, 0]
+        lengths = [1, 1, 1, 1]
+        array_lengths = [0, 0, 0, 0]
+        crc_extra = 151
+        unpacker = struct.Struct('<IHHB')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, type, tag, anchor, tof):
+                MAVLink_message.__init__(self, MAVLink_tof_message.id, MAVLink_tof_message.name)
+                self._fieldnames = MAVLink_tof_message.fieldnames
+                self._instance_field = MAVLink_tof_message.instance_field
+                self._instance_offset = MAVLink_tof_message.instance_offset
+                self.type = type
+                self.tag = tag
+                self.anchor = anchor
+                self.tof = tof
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 151, struct.pack('<IHHB', self.tof, self.tag, self.anchor, self.type), force_mavlink1=force_mavlink1)
+
 
 mavlink_map = {
         MAVLINK_MSG_ID_LOCATION : MAVLink_location_message,
         MAVLINK_MSG_ID_ONOFF : MAVLink_onoff_message,
         MAVLINK_MSG_ID_DISTANCE : MAVLink_distance_message,
+        MAVLINK_MSG_ID_TOF : MAVLink_tof_message,
 }
 
 class MAVError(Exception):
@@ -905,4 +942,28 @@ class MAVLink(object):
 
                 '''
                 return self.send(self.distance_encode(type, tag, anchor, distance), force_mavlink1=force_mavlink1)
+
+        def tof_encode(self, type, tag, anchor, tof):
+                '''
+                Distnace message
+
+                type                      :  (type:uint8_t, values:type_t)
+                tag                       :  (type:uint16_t)
+                anchor                    :  (type:uint16_t)
+                tof                       :  (type:uint32_t)
+
+                '''
+                return MAVLink_tof_message(type, tag, anchor, tof)
+
+        def tof_send(self, type, tag, anchor, tof, force_mavlink1=False):
+                '''
+                Distnace message
+
+                type                      :  (type:uint8_t, values:type_t)
+                tag                       :  (type:uint16_t)
+                anchor                    :  (type:uint16_t)
+                tof                       :  (type:uint32_t)
+
+                '''
+                return self.send(self.tof_encode(type, tag, anchor, tof), force_mavlink1=force_mavlink1)
 
