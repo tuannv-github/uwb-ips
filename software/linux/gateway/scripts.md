@@ -72,3 +72,9 @@ cd mavlink-1.0.13
 python -m pymavlink.tools.mavgen --lang=Python --wire-protocol=1.0 --output=../mavlink.py ../protocol.xml
 python -m pymavlink.tools.mavgen --lang=C --wire-protocol=1.0 --output=../mavlink/ ../protocol.xml
 ```
+
+Udev rule file:
+```
+/etc/udev/rules.d/
+```
+systemctl restart systemd-udevd.service
