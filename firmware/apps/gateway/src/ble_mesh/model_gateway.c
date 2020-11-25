@@ -71,16 +71,8 @@ static const struct bt_mesh_model_op rtls_op[] = {
 static struct bt_mesh_cfg_srv cfg_srv = {
     .relay = BT_MESH_RELAY_DISABLED,
     .beacon = BT_MESH_BEACON_ENABLED,
-    #if MYNEWT_VAL(BLE_MESH_FRIEND)
-        .frnd = BT_MESH_FRIEND_ENABLED,
-    #else
-        .gatt_proxy = BT_MESH_GATT_PROXY_NOT_SUPPORTED,
-    #endif
-    #if MYNEWT_VAL(BLE_MESH_GATT_PROXY)
-        .gatt_proxy = BT_MESH_GATT_PROXY_ENABLED,
-    #else
-        .gatt_proxy = BT_MESH_GATT_PROXY_NOT_SUPPORTED,
-    #endif
+    .frnd = BT_MESH_FRIEND_DISABLED,
+    .gatt_proxy = BT_MESH_GATT_PROXY_ENABLED,
     .default_ttl = 7,
 
     /* 3 transmissions with 20ms interval */
