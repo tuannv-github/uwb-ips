@@ -1,21 +1,6 @@
 import numpy as np
 import json
 
-f = open("dataset.txt", "r")
-line = json.load(f)
-
-dataset = line[0]['data']
-
-eq = []
-
-for data in dataset:
-    temp = []
-    temp.append(data['x'])
-    temp.append(data['y'])
-    temp.append(data['z'])
-    temp.append(data['d'])
-    eq.append(temp)
-
 def trilaterate3D(distances):
     p1=np.array(distances[0][:3])
     p2=np.array(distances[1][:3])
@@ -44,5 +29,22 @@ def trilaterate3D(distances):
     else: 
         return ans2
 
-location = trilaterate3D(eq)
-print(location)
+read = open("dataset.txt", "r")
+write = open("location.txt", "w")
+lines = json.load(read)
+
+for dataset in lines:
+    eq = []
+    for data in dataset["data"]:
+        temp = []
+        temp.append(data['x'])
+        temp.append(data['y'])
+        temp.append(data['z'])
+        temp.append(data['d'])
+        eq.append(temp)
+    location = trilaterate3D(eq)
+    print(location)
+    write.write(str(location) + "\n")
+
+read.close()
+write.close()

@@ -2,7 +2,6 @@ from matplotlib.pyplot import errorbar
 import numpy as np
 import matplotlib.pyplot as plt
 import math as m
-import json
 
 ANCHORS = np.array([
     [0, 0, 1],
@@ -14,7 +13,7 @@ ANCHORS = np.array([
 CENTER_X        = 2.5
 CENTER_Y        = 2.5
 RADIUS          = 2
-STD_DEVIATION   = 0.2
+STD_DEVIATION   = 0.1
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
@@ -29,7 +28,7 @@ f = open("dataset.txt", 'w')
 
 TAGS = []
 DISTANCES = []
-f.write("[\n")
+f.write("[")
 phis = np.arange(0, 2*m.pi, m.pi/50)
 for j, phi in enumerate(phis):
     x = CENTER_X + RADIUS*m.cos(phi)
@@ -62,6 +61,5 @@ tag_y = TAGS[:, 1]
 tag_z = TAGS[:, 2]
 ax.scatter(tag_x, tag_y, tag_z)
 
-
 f.close()
-# plt.show()
+plt.show()
