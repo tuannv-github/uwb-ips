@@ -4,7 +4,7 @@ import pylink
 import os
 import sys
 
-device_serial_numbers = {760085687}
+device_serial_numbers = {682192956}
 
 build_template  = "newt build %s"
 image_template  = "newt create-image %s 0.0.0.0"
@@ -19,7 +19,7 @@ def run_cmd(serial_number, app):
 
 def main(argv):
     print(argv[0])
-    
+
     cmd = build_template % (argv[0])
     os.system(cmd)
     cmd = image_template % (argv[0])
@@ -31,4 +31,4 @@ def main(argv):
             run_cmd(emulator.SerialNumber, argv[0])
 
 if __name__ == "__main__":
-   main(["gateway"])
+   main(["gateway_pca10040"])
