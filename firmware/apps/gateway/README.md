@@ -72,3 +72,13 @@ newt build gateway
 newt create-image gateway 0.0.0.0
 newt load gateway
 ```
+
+```
+newt target create gateway_pca10040
+newt target set gateway_pca10040 app=apps/gateway
+newt target set gateway_pca10040 bsp=hw/bsp/nordic_pca10040_464
+newt target set gateway_pca10040 build_profile=optimized
+newt build gateway_pca10040
+newt create-image gateway_pca10040 0.0.0.0
+newt load gateway_pca10040
+```

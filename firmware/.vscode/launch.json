@@ -42,7 +42,7 @@
           "type": "gnu-debugger",
           "request": "launch",
           "name": "Debug: gateway",
-          "program": "/home/tuannv/thesis/firmware/bin/targets/gateway/app/apps/gateway/gateway.elf",
+          "program": "/home/tuannv/thesis/firmware/bin/targets/gateway_pca10040/app/apps/gateway/gateway.elf",
           "toolchain": "/usr/local/bin/",
           "client": "arm-none-eabi-gdb",
           "server": "JLinkGDBServer",

@@ -30,5 +30,7 @@ def main(argv):
         if emulator.SerialNumber in device_serial_numbers:
             run_cmd(emulator.SerialNumber, argv[0])
 
+    os.system("./rtt.py")
+
 if __name__ == "__main__":
    main(["gateway_pca10040"])
