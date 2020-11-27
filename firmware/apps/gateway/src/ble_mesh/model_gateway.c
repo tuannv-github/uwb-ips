@@ -69,15 +69,15 @@ static const struct bt_mesh_model_op rtls_op[] = {
 };
 
 static struct bt_mesh_cfg_srv cfg_srv = {
-    .relay = BT_MESH_RELAY_ENABLED,
+    .relay = BT_MESH_RELAY_DISABLED,
     .beacon = BT_MESH_BEACON_ENABLED,
     .frnd = BT_MESH_FRIEND_DISABLED,
     .gatt_proxy = BT_MESH_GATT_PROXY_ENABLED,
 
     /* 7 transmissions with 20ms interval */
-    .default_ttl = 5,
-    .net_transmit = BT_MESH_TRANSMIT(1, 20),
-    .relay_retransmit = BT_MESH_TRANSMIT(1, 20),
+    .default_ttl = 7,
+    .net_transmit = BT_MESH_TRANSMIT(7, 20),
+    .relay_retransmit = BT_MESH_TRANSMIT(7, 20),
 };
 static struct bt_mesh_model_pub model_pub_rtls;
 

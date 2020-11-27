@@ -4,7 +4,7 @@ import pylink
 import os
 import sys
 
-device_serial_numbers = {760085687}
+device_serial_numbers = {682269690}
 
 build_template  = "newt build %s"
 image_template  = "newt create-image %s 0.0.0.0"
