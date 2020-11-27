@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "gateway"
+		},
+		{
+			"path": "../algorithm"
 		}
 	],
 	"settings": {

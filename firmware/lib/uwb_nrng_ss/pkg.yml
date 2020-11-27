@@ -34,6 +34,7 @@ pkg.lflags:
 
 pkg.deps:
     - "@rtls/lib/uwb_nrng"
+    - "@rtls/lib/dsp"
 
 pkg.init:
     twr_ss_nrng_pkg_init: 414

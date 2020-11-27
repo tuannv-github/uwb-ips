@@ -197,6 +197,12 @@ void rtls_tdma_cb(rtls_tdma_instance_t *rti, tdma_slot_t *slot){
     }
 }
 
+static distance_t g_distance;
+
+distance_t *get_distances(){
+    return &g_distance;
+}
+
 static bool
 complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
 {
@@ -204,15 +210,15 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
         inst->fctrl != (FCNTL_IEEE_RANGE_16|UWB_FCTRL_ACK_REQUESTED)) {
         return false;
     }
-    // struct nrng_instance *nrng = (struct nrng_instance *)cbs->inst_ptr;
+    struct nrng_instance *nrng = (struct nrng_instance *)cbs->inst_ptr;
 
-    // float range[10];
-    // nrng_get_ranges( nrng, ranges[], 10, 0);
-    // for(int i=0; i<10; i++)
-    // uint16_t idx = (nrng->idx)%nrng->nframes;
-    // dpl_float64_t time_of_flight = uwb_rng_twr_to_tof(nrng, idx);
-    // double r = uwb_rng_tof_to_meters(time_of_flight);
-    // printf("idx: %d, d: %d.%d\n", idx, (int)r, (int)(1000*(r - (int)r)));
+    nrng_get_tofs_addresses( nrng, g_distance.tofs, g_distance.anchors, g_distance.updated, ANCHOR_NUM, nrng->idx);
+    for(int i=0; i<ANCHOR_NUM; i++){
+        if(g_distance.anchors[i] != 0){
+            printf("0x%04X: %5ld\n", g_distance.anchors[i], g_distance.tofs[i]);  
+        }
+    }
+
     return true;
 }
 

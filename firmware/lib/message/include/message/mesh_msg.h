@@ -44,6 +44,13 @@ typedef struct _msg_rtls_t
         {
             uint8_t value;
         };
+        struct _msg_rtls_distance_tof_t{
+            uint16_t anchor;
+            union{
+                float distance;
+                uint32_t tof;
+            };
+        };
     };
 }__attribute__((__packed__, aligned(1))) msg_rtls_t;
 

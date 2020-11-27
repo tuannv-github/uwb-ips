@@ -60,7 +60,6 @@
           height: 90vh
 	}
 </style>
-
 <script>
 
 client = new Paho.Client('{{mqtt_server_addr}}', Number({{mqtt_server_port}}), "client_id_" + Date.now());
@@ -174,6 +173,12 @@ function onMessageArrived(message) {
 				break;
 			case "ONOFF":
 				handler_onoff(msg)
+				break;
+			case "DISTANCE":
+				console.log(msg)
+				break;
+			case "TOF":
+				console.log(msg)
 				break;
 			default:
 				console.error("UNKNOWN MSG: "+message.payloadString);
@@ -355,7 +360,6 @@ function onIdentifyBtnClick(address){
 }
 
 </script>
-
 <script>
 
 	var plotAnchors = {
@@ -430,5 +434,4 @@ function onIdentifyBtnClick(address){
 	};
 
 </script>
-
 </html>
