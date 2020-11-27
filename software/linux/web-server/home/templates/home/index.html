@@ -76,6 +76,7 @@ class Node{
 		this.locationZ = locationZ;
 		this.editing = false;
 		this.identifying = false;
+		this.anchors = new Array();
 	}
 	valueOf(){
     	return this.address;
@@ -164,6 +165,56 @@ function handler_onoff(msg_onoff){
 	console.log("handler_onoff: " + JSON.stringify(msg_onoff));
 }
 
+function handler_tof(msg_tof){
+	idx = 0;
+	found = false
+	for(idx=0; idx<nodeList.length; idx++){
+		if(msg_tof["anchor"] == nodeList[idx].address) {
+			found = true;
+			break;
+		}
+	}
+	if(!found) return;
+	anchor = nodeList[idx];
+
+	idx = 0;
+	for(idx=0; idx<nodeList.length; idx++){
+		if(msg_tof["tag"] == nodeList[idx].address) break;
+	}
+	tag = nodeList[idx];
+
+	found = false;
+	tag.anchors.forEach(tmp_anchor => {
+		if(tmp_anchor.anchor.equal(anchor)){
+			found = true;
+			tmp_anchor.tof = msg_tof["tof"];
+			clearTimeout(tmp_anchor.id);
+			tmp_anchor.id = tmp_anchor.timeout();
+			console.log(tmp_anchor.anchor.address + ": " + tmp_anchor.tof.toString() + ": " + tmp_anchor.valid.toString());
+		}
+	});
+
+	if(!found){
+		anchor = {
+			"anchor": anchor,
+			"tof": msg_tof["tof"],
+			"valid": true,
+			"timeout": function() {
+				var id = setTimeout(function timeout(anchor){
+					anchor.valid = false;
+				}, 5000, anchor);
+				return id;
+			},
+		}
+		tag.anchors.push(anchor);
+		anchor.id = anchor.timeout();
+	}
+
+	if(tag.anchors.length > 3){
+
+	}
+}
+
 function onMessageArrived(message) {
 	try{
 		msg = JSON.parse(message.payloadString);
@@ -178,7 +229,7 @@ function onMessageArrived(message) {
 				console.log(msg)
 				break;
 			case "TOF":
-				console.log(msg)
+				handler_tof(msg)
 				break;
 			default:
 				console.error("UNKNOWN MSG: "+message.payloadString);
