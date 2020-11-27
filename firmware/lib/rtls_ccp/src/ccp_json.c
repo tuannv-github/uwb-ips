@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <assert.h>
-#include <uwb_ccp/ccp_json.h>
+#include <rtls_ccp/ccp_json.h>
 
 
 static int ccp_write_line(void *buf, char* data, int len);

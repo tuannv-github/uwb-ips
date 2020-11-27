@@ -36,12 +36,12 @@
 
 #include <uwb/uwb.h>
 #include <uwb/uwb_ftypes.h>
-#include <uwb_ccp/uwb_ccp.h>
+#include <rtls_ccp/rtls_ccp.h>
 #if MYNEWT_VAL(UWB_WCS_ENABLED)
 #include <uwb_wcs/uwb_wcs.h>
 #endif
 #if MYNEWT_VAL(UWB_CCP_VERBOSE)
-#include <uwb_ccp/ccp_json.h>
+#include <rtls_ccp/ccp_json.h>
 #endif
 
 // #define DIAGMSG(s,u) printf(s,u)

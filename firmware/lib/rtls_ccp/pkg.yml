@@ -17,7 +17,7 @@
 # under the License.
 #
 
-pkg.name: lib/uwb_ccp
+pkg.name: lib/rtls_ccp
 pkg.description: UWB Clock Calibration (Packets)
 pkg.author: "UWB Core <uwbcore@gmail.com>"
 pkg.homepage: "http://www.decawave.com/"

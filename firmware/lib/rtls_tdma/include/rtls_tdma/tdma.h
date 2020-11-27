@@ -40,7 +40,7 @@ extern "C" {
 #include <stats/stats.h>
 #include <uwb/uwb.h>
 #include <uwb/uwb_ftypes.h>
-#include <uwb_ccp/uwb_ccp.h>
+#include <rtls_ccp/rtls_ccp.h>
 
 #define TDMA_TASKS_ENABLE
 

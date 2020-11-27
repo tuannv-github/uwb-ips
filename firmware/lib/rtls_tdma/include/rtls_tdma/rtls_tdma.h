@@ -3,7 +3,7 @@
 #define _RTLS_TDMA_H_
 
 #include <uwb/uwb.h>
-#include <tdma/tdma.h>
+#include <rtls_tdma/tdma.h>
 
 typedef enum{
     RTS_JOINT_NONE,

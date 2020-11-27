@@ -37,14 +37,14 @@
 #include <dpl/dpl_cputime.h>
 
 #include <uwb/uwb.h>
-#include <tdma/tdma.h>
+#include <rtls_tdma/tdma.h>
 
 #if __KERNEL__
 #include <linux/math64.h>
 #endif
 
 #if MYNEWT_VAL(UWB_CCP_ENABLED)
-#include <uwb_ccp/uwb_ccp.h>
+#include <rtls_ccp/rtls_ccp.h>
 #endif
 #if MYNEWT_VAL(UWB_WCS_ENABLED)
 #include <uwb_wcs/uwb_wcs.h>
