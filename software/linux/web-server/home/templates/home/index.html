@@ -498,7 +498,8 @@ function onIdentifyBtnClick(address){
 		},
 		title:'Map',
 		autosize: true,
-		hovermode: "closest"
+		hovermode: "closest",
+		dragmode: "pan"
 	};
 
 	Plotly.newPlot('map', plotData, layout, {scrollZoom: true, responsive: true});
