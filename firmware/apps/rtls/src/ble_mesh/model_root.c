@@ -57,7 +57,15 @@ rtls_model_set(struct bt_mesh_model *model,
         msg_print_rtls(&msg_rtls);
         break;
     case MAVLINK_MSG_ID_ONOFF:
+        hal_gpio_write(14, !msg_rtls.value);
+        hal_gpio_write(22, !msg_rtls.value);
+        hal_gpio_write(23, !msg_rtls.value);
+        hal_gpio_write(13, !msg_rtls.value);
+        hal_gpio_write(9, !msg_rtls.value);
+        hal_gpio_write(10, !msg_rtls.value);
+
         hal_gpio_write(LED_1, !msg_rtls.value);
+
         STATS_INC(g_model_root_stat, recv_succed);
         break;
     default:
@@ -149,7 +157,15 @@ static os_stack_t g_task_rtls_stack[MYNEWT_VAL(APP_RTLS_TASK_STACK_SIZE)];
 void model_gateway_init(){
     int rc;
 
+    hal_gpio_init_out(14, 1);
+    hal_gpio_init_out(22, 1);
+    hal_gpio_init_out(23, 1);
+    hal_gpio_init_out(13, 1);
+    hal_gpio_init_out(9, 1);
+    hal_gpio_init_out(10, 1);
+
     hal_gpio_init_out(LED_1, 1);
+
     os_task_init(&g_rtls_task, "m_rtls",
                 task_rtls_func,
                 NULL,
