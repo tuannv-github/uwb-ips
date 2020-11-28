@@ -253,23 +253,28 @@ function handler_tof(msg_tof){
 function onMessageArrived(message) {
 	try{
 		msg = JSON.parse(message.payloadString);
-		value = parseInt($('#node' + msg.dstsrc + 'Counter').text());
-		if(!isNaN(value)){
-			value += 1;
-			$('#node' + msg.dstsrc + 'Counter').text(value);
-		}
 		switch(msg.mavpackettype){
 			case "LOCATION":
-				handler_location(msg)
+				value = parseInt($('#node' + msg.dstsrc + 'CounterLoc').text());
+				if(!isNaN(value)){
+					value += 1;
+					$('#node' + msg.dstsrc + 'CounterLoc').text(value);
+				}
+				handler_location(msg);
 				break;
 			case "ONOFF":
-				handler_onoff(msg)
+				handler_onoff(msg);
 				break;
 			case "DISTANCE":
-				console.log(msg)
+				console.log(msg);
 				break;
 			case "TOF":
-				handler_tof(msg)
+				value = parseInt($('#node' + msg.tag + 'CounterTof').text());
+				if(!isNaN(value)){
+					value += 1;
+					$('#node' + msg.tag + 'CounterTof').text(value);
+				}
+				handler_tof(msg);
 				break;
 			default:
 				console.error("UNKNOWN MSG: "+message.payloadString);
@@ -287,7 +292,8 @@ const nodeTemplate = ({ address, addressHex, type, locationX, locationY, locatio
     <div class="card-heading p-1 node-title-${type}" role="button" data-toggle="collapse" href="#node${address}Toggle">
 		<h5 class="card-title m-1 node-title row">
 			<span class="col-sm-8"> Node ${addressHex} </span>
-			<span class="col-sm-4" id="node${address}Counter" style="text-align:right;">0</span>
+			<span class="col-sm-2" id="node${address}CounterLoc" style="text-align:right;">0</span>
+			<span class="col-sm-2" id="node${address}CounterTof" style="text-align:right;">0</span>
 		</h5>
     </div>
     <div class="collapse" id="node${address}Toggle">
