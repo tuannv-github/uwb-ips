@@ -253,6 +253,11 @@ function handler_tof(msg_tof){
 function onMessageArrived(message) {
 	try{
 		msg = JSON.parse(message.payloadString);
+		value = parseInt($('#node' + msg.dstsrc + 'Counter').text());
+		if(!isNaN(value)){
+			value += 1;
+			$('#node' + msg.dstsrc + 'Counter').text(value);
+		}
 		switch(msg.mavpackettype){
 			case "LOCATION":
 				handler_location(msg)
@@ -280,9 +285,10 @@ const nodeTemplate = ({ address, addressHex, type, locationX, locationY, locatio
 `
 <div class="card m-1" style="display: none;" id="node${address}Card">
     <div class="card-heading p-1 node-title-${type}" role="button" data-toggle="collapse" href="#node${address}Toggle">
-        <h5 class="row card-title m-1 node-title">
-            Node <span style='margin-left:0.25em'>${addressHex}</span>
-        </h5>
+		<h5 class="card-title m-1 node-title row">
+			<span class="col-sm-8"> Node ${addressHex} </span>
+			<span class="col-sm-4" id="node${address}Counter" style="text-align:right;">0</span>
+		</h5>
     </div>
     <div class="collapse" id="node${address}Toggle">
         <div class="card-body p-2">
