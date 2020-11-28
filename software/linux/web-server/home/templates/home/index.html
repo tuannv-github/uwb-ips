@@ -165,6 +165,8 @@ function handler_onoff(msg_onoff){
 	console.log("handler_onoff: " + JSON.stringify(msg_onoff));
 }
 
+shapesList = new Array()
+
 function handler_tof(msg_tof){
 	idx = 0;
 	found = false
@@ -190,7 +192,44 @@ function handler_tof(msg_tof){
 			tmp_anchor.tof = msg_tof["tof"];
 			clearTimeout(tmp_anchor.id);
 			tmp_anchor.id = tmp_anchor.timeout();
-			console.log(tmp_anchor.anchor.address + ": " + tmp_anchor.tof.toString() + ": " + tmp_anchor.valid.toString());
+			// console.log(tmp_anchor.anchor.address + ": " + tmp_anchor.tof.toString() + ": " + tmp_anchor.valid.toString());
+
+			tmp_anchor.distance = 0.003842240264187552*msg_tof["tof"] + 0.051304771935538396;
+
+			found = false;
+			shapesList.forEach(shape => {
+				if(shape.tag == tag.address && shape.anchor == tmp_anchor.anchor.address){
+					found = true;
+					shape.x0 = tmp_anchor.anchor.locationX - tmp_anchor.distance;
+					shape.y0 = tmp_anchor.anchor.locationY - tmp_anchor.distance;
+					shape.x1 = tmp_anchor.anchor.locationX + tmp_anchor.distance;
+					shape.y1 = tmp_anchor.anchor.locationY + tmp_anchor.distance;
+				}
+			});
+			
+			if(!found){
+				tmp_anchor.distance = 0.003842240264187552*msg_tof["tof"] + 0.051304771935538396;
+				shape = {
+					type: 'circle',
+					xref: 'x',
+					yref: 'y',
+					x0: tmp_anchor.anchor.locationX - tmp_anchor.distance,
+					y0: tmp_anchor.anchor.locationY - tmp_anchor.distance,
+					x1: tmp_anchor.anchor.locationX + tmp_anchor.distance,
+					y1: tmp_anchor.anchor.locationY + tmp_anchor.distance,
+					line: {
+						color: 'rgba(50, 171, 96, 1)'
+					},
+					anchor: anchor.address,
+					tag: tag.address,
+				}
+				shapesList.push(shape);
+			}
+
+			updateLayout = {
+				shapes: shapesList
+			}
+			Plotly.update('map', null, updateLayout, 0);
 		}
 	});
 
@@ -208,10 +247,6 @@ function handler_tof(msg_tof){
 		}
 		tag.anchors.push(anchor);
 		anchor.id = anchor.timeout();
-	}
-
-	if(tag.anchors.length > 3){
-
 	}
 }
 
@@ -440,17 +475,17 @@ function onIdentifyBtnClick(address){
 	var plotData = [ plotAnchors, plotTags ];
 
 	var layout = {
-		// xaxis: {
-		// 	range: [0, 5],
-		// 	// automargin: true,
-		// },
-		// yaxis: {
-		// 	range: [0, 5],
-		// 	// automargin: true,
+		xaxis: {
+			range: [-5, 5],
+			// automargin: true,
+		},
+		yaxis: {
+			range: [-5, 5],
+			// automargin: true,
 			
-		// },
-		'xaxis.autorange': true,
-        'yaxis.autorange': true,
+		},
+		// 'xaxis.autorange': true,
+        // 'yaxis.autorange': true,
 		legend: {
 			y: 0.5,
 			yref: 'paper',

@@ -35,6 +35,8 @@ plt.plot(x,y)
 # x = [352]
 # y = model.predict(np.array(x).reshape((-1, 1)))
 # print(y)
+print(model.coef_[0])
+print(model.intercept_)
 x = 368
 y = model.coef_[0] * x + model.intercept_
 print(str(x) + ": " + str(y))
