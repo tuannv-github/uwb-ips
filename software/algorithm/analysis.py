@@ -18,7 +18,7 @@ for filename in os.listdir(DATA_DIR):
         print(str(x) + ": " + str(y))
         xs.append(x)
         ys.append(y)
-    plt.plot(xs,ys)
+    plt.plot(xs,ys, 'x')
     xss.append(xs)
     yss.append(ys)
 
@@ -28,7 +28,7 @@ y = np.array(yss).reshape((-1))
 model = LinearRegression()
 model.fit(x, y)
 
-x = np.arange(0, 1000, 1)
+x = np.arange(0, 3500, 1)
 y = model.predict(np.array(x).reshape((-1, 1)))
 plt.plot(x,y)
 
