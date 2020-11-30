@@ -76,6 +76,7 @@ class Node{
 		this.locationZ = locationZ;
 		this.editing = false;
 		this.identifying = false;
+		this.anchors = new Array();
 	}
 	valueOf(){
     	return this.address;
@@ -164,21 +165,116 @@ function handler_onoff(msg_onoff){
 	console.log("handler_onoff: " + JSON.stringify(msg_onoff));
 }
 
+shapesList = new Array()
+
+function handler_tof(msg_tof){
+	idx = 0;
+	found = false
+	for(idx=0; idx<nodeList.length; idx++){
+		if(msg_tof["anchor"] == nodeList[idx].address) {
+			found = true;
+			break;
+		}
+	}
+	if(!found) return;
+	anchor = nodeList[idx];
+
+	idx = 0;
+	for(idx=0; idx<nodeList.length; idx++){
+		if(msg_tof["tag"] == nodeList[idx].address) break;
+	}
+	tag = nodeList[idx];
+
+	found = false;
+	tag.anchors.forEach(tmp_anchor => {
+		if(tmp_anchor.anchor.equal(anchor)){
+			found = true;
+			tmp_anchor.tof = msg_tof["tof"];
+			clearTimeout(tmp_anchor.id);
+			tmp_anchor.id = tmp_anchor.timeout();
+			// console.log(tmp_anchor.anchor.address + ": " + tmp_anchor.tof.toString() + ": " + tmp_anchor.valid.toString());
+
+			tmp_anchor.distance = 0.003842240264187552*msg_tof["tof"] + 0.051304771935538396;
+
+			found = false;
+			shapesList.forEach(shape => {
+				if(shape.tag == tag.address && shape.anchor == tmp_anchor.anchor.address){
+					found = true;
+					shape.x0 = tmp_anchor.anchor.locationX - tmp_anchor.distance;
+					shape.y0 = tmp_anchor.anchor.locationY - tmp_anchor.distance;
+					shape.x1 = tmp_anchor.anchor.locationX + tmp_anchor.distance;
+					shape.y1 = tmp_anchor.anchor.locationY + tmp_anchor.distance;
+				}
+			});
+			
+			if(!found){
+				tmp_anchor.distance = 0.003842240264187552*msg_tof["tof"] + 0.051304771935538396;
+				shape = {
+					type: 'circle',
+					xref: 'x',
+					yref: 'y',
+					x0: tmp_anchor.anchor.locationX - tmp_anchor.distance,
+					y0: tmp_anchor.anchor.locationY - tmp_anchor.distance,
+					x1: tmp_anchor.anchor.locationX + tmp_anchor.distance,
+					y1: tmp_anchor.anchor.locationY + tmp_anchor.distance,
+					line: {
+						color: 'rgba(50, 171, 96, 1)'
+					},
+					anchor: anchor.address,
+					tag: tag.address,
+				}
+				shapesList.push(shape);
+			}
+
+			updateLayout = {
+				shapes: shapesList
+			}
+			Plotly.update('map', null, updateLayout, 0);
+		}
+	});
+
+	if(!found){
+		anchor = {
+			"anchor": anchor,
+			"tof": msg_tof["tof"],
+			"valid": true,
+			"timeout": function() {
+				var id = setTimeout(function timeout(anchor){
+					anchor.valid = false;
+				}, 5000, anchor);
+				return id;
+			},
+		}
+		tag.anchors.push(anchor);
+		anchor.id = anchor.timeout();
+	}
+}
+
 function onMessageArrived(message) {
 	try{
 		msg = JSON.parse(message.payloadString);
 		switch(msg.mavpackettype){
 			case "LOCATION":
-				handler_location(msg)
+				value = parseInt($('#node' + msg.dstsrc + 'CounterLoc').text());
+				if(!isNaN(value)){
+					value += 1;
+					$('#node' + msg.dstsrc + 'CounterLoc').text(value);
+				}
+				handler_location(msg);
 				break;
 			case "ONOFF":
-				handler_onoff(msg)
+				handler_onoff(msg);
 				break;
 			case "DISTANCE":
-				console.log(msg)
+				console.log(msg);
 				break;
 			case "TOF":
-				console.log(msg)
+				value = parseInt($('#node' + msg.tag + 'CounterTof').text());
+				if(!isNaN(value)){
+					value += 1;
+					$('#node' + msg.tag + 'CounterTof').text(value);
+				}
+				handler_tof(msg);
 				break;
 			default:
 				console.error("UNKNOWN MSG: "+message.payloadString);
@@ -194,9 +290,11 @@ const nodeTemplate = ({ address, addressHex, type, locationX, locationY, locatio
 `
 <div class="card m-1" style="display: none;" id="node${address}Card">
     <div class="card-heading p-1 node-title-${type}" role="button" data-toggle="collapse" href="#node${address}Toggle">
-        <h5 class="row card-title m-1 node-title">
-            Node <span style='margin-left:0.25em'>${addressHex}</span>
-        </h5>
+		<h5 class="card-title m-1 node-title row">
+			<span class="col-sm-8"> Node ${addressHex} </span>
+			<span class="col-sm-2" id="node${address}CounterLoc" style="text-align:right;">0</span>
+			<span class="col-sm-2" id="node${address}CounterTof" style="text-align:right;">0</span>
+		</h5>
     </div>
     <div class="collapse" id="node${address}Toggle">
         <div class="card-body p-2">
@@ -389,17 +487,18 @@ function onIdentifyBtnClick(address){
 	var plotData = [ plotAnchors, plotTags ];
 
 	var layout = {
-		// xaxis: {
-		// 	range: [0, 5],
-		// 	// automargin: true,
-		// },
-		// yaxis: {
-		// 	range: [0, 5],
-		// 	// automargin: true,
+		xaxis: {
+			range: [-5, 5],
+			scaleanchor: "y"
+			// automargin: true,
+		},
+		yaxis: {
+			range: [-5, 5],
+			// automargin: true,
 			
-		// },
-		'xaxis.autorange': true,
-        'yaxis.autorange': true,
+		},
+		// 'xaxis.autorange': true,
+        // 'yaxis.autorange': true,
 		legend: {
 			y: 0.5,
 			yref: 'paper',
@@ -411,7 +510,8 @@ function onIdentifyBtnClick(address){
 		},
 		title:'Map',
 		autosize: true,
-		hovermode: "closest"
+		hovermode: "closest",
+		dragmode: "pan"
 	};
 
 	Plotly.newPlot('map', plotData, layout, {scrollZoom: true, responsive: true});

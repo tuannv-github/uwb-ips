@@ -1,7 +1,7 @@
 import paho.mqtt.client as mqtt
 import json
 
-DISTANCE_M = "1.5"
+DISTANCE_M = "14.1583968019"
 FILE_NAME = "distance/" + DISTANCE_M
 
 client = mqtt.Client()

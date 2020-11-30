@@ -1,0 +1,63 @@
+\documentclass[./main.tex]{subfiles}
+
+\usepackage{amsmath}
+\usepackage{mathtools}
+
+\begin{document}
+
+\chapter{Algebraic solution to the multilateration problem}
+
+\section{Solution based on three reference point}
+Given are the three reference points $P_1(x_1, y_1, z_1)$, $P_2(x_2, y_2, z_2)$, $P_3(x_3, y_3, z_3)$ and the range measurements $s_1$, $s_2$, $s_3$ to point $N(x,y,z)$, the location $(x,y,z)$ of $N$ is the solutions of the following system of quadratic equations:
+
+\begin{equation}
+    \begin{dcases*}
+        (x-x_1)^2 + (y-y_1)^2 + (z-z_1)^2 = s_1^2 \\
+        (x-x_2)^2 + (y-y_2)^2 + (z-z_2)^2 = s_2^2 \\
+        (x-x_3)^2 + (y-y_3)^2 + (z-z_3)^2 = s_3^2 
+    \end{dcases*}
+    \label{eqn:three_ref_point_localization}
+\end{equation}
+
+\ref{eqn:three_ref_point_localization} can be arranged as:
+
+\begin{equation}
+    \begin{dcases*}
+        (x^2 + y^2 + z^2) -2x_1x - 2y_1y - 2z_1z = s_1^2 - x_1^2 - y_1^2 - z_1^2 \\
+        (x^2 + y^2 + z^2) -2x_2x - 2y_2y - 2z_2z = s_2^2 - x_2^2 - y_2^2 - z_2^2 \\
+        (x^2 + y^2 + z^2) -2x_3x - 2y_3y - 2z_3z = s_1^2 - x_3^2 - y_3^2 - z_3^2
+    \end{dcases*}
+    \label{eqn:three_ref_point_localization}
+\end{equation}
+Or in the matrix representation:
+
+\begin{equation}
+    \begin{bmatrix}
+        1 & -2x_1 & -2y_1 & -2z_1\\
+        1 & -2x_2 & -2y_2 & -2z_2\\
+        1 & -2x_3 & -2y_3 & -2z_3
+    \end{bmatrix}
+    \begin{bmatrix}
+        x^2 + y^2 + z^2\\
+        x\\
+        y\\
+        z\\
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        s_1^2 - x_1^2 - y_1^2 - z_1^2\\
+        s_2^2 - x_2^2 - y_2^2 - z_2^2\\
+        s_1^2 - x_3^2 - y_3^2 - z_3^2\\
+    \end{bmatrix}
+    \label{eqn:three_ref_point_localization_matrix}
+\end{equation}
+Thus, \ref{eqn:three_ref_point_localization_matrix} is represented in the known form:
+\begin{equation}
+    \mathbf{A}_0 \mathbf{x}=\mathbf{b}_0
+    \label{eqn:three_ref_point_localization_general_form}
+\end{equation}
+With the constraint: $\mathbf{x} \in \mathbf{E}$\\
+Where $\mathbf{E}=\{(x_0, x_1, x_2, x_3)^T / x_0 = x_1^2 + x_2^2 + x_3^2 \}$
+\subsection{Solution of equation \ref{eqn:three_ref_point_localization_general_form}}
+
+\end{document}
