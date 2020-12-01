@@ -53,7 +53,9 @@ function trilaterate(ranges){
     /* Trilateration */
     x  = (r0*r0 - r1*r1 + U*U) / (2*U);
     y  = (r0*r0 - r2*r2 + Vx*Vx + Vy*Vy - 2*Vx*x) / (2*Vy);
-    z0 = Math.sqrt(r0**2 - x**2 - y**2);
+    z  = r0**2 - x**2 - y**2;
+    if(z < 0) z = 0;
+    z0 = Math.sqrt(z);
     z1 = -z0;
 
     /* Transform to original coordinate */
