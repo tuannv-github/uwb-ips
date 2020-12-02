@@ -165,7 +165,122 @@ function handler_onoff(msg_onoff){
 	console.log("handler_onoff: " + JSON.stringify(msg_onoff));
 }
 
-shapesList = new Array()
+/** Javascript implementation for trilateration
+ * 
+ * @param {*} ranges range data with format: [[x,y,z,d],[x,y,z,d],[x,y,z,d]]
+ */
+function trilaterate(ranges){
+
+	/* Prepare all parameters */
+	a0x = ranges[0][0];
+	a0y = ranges[0][1];
+	a0z = ranges[0][2];
+
+	a1x = ranges[1][0];
+	a1y = ranges[1][1];
+	a1z = ranges[1][2];
+
+	a2x = ranges[2][0];
+	a2y = ranges[2][1];
+	a2z = ranges[2][2];
+
+	r0 = ranges[0][3];
+	r1 = ranges[1][3];
+	r2 = ranges[2][3];
+
+	/* Transform to standard coordinate */
+	a0tx = 0;
+	a0ty = 0;
+	a0tz = 0;
+
+	a1tx = a1x - a0x;
+	a1ty = a1y - a0y;
+	a1tz = a1z - a0z;
+
+	a2tx = a2x - a0x;
+	a2ty = a2y - a0y;
+	a2tz = a2z - a0z;
+
+	U = Math.sqrt(a1tx*a1tx + a1ty*a1ty + a1tz*a1tz);
+	exx = a1tx/U;
+	exy = a1ty/U;
+	exz = a1tz/U;
+	Vx = a2tx*exx + a2ty*exy + a2tz*exz;
+	temp_x = a2tx - Vx*exx;
+	temp_y = a2ty - Vx*exy;
+	temp_z = a2tz - Vx*exz;
+	Vy = Math.sqrt(temp_x*temp_x + temp_y*temp_y + temp_z*temp_z);
+	eyx = temp_x/Vy;
+	eyy = temp_y/Vy;
+	eyz = temp_z/Vy;
+	ezx = exy*eyz - exz*eyy;
+	ezy = exz*eyx - exx*eyz;
+	ezz = exx*eyy - exy*eyx;
+
+	/* Trilateration */
+	x  = (r0*r0 - r1*r1 + U*U) / (2*U);
+	y  = (r0*r0 - r2*r2 + Vx*Vx + Vy*Vy - 2*Vx*x) / (2*Vy);
+    z  = r0**2 - x**2 - y**2;
+	if(z < 0) z = 0;
+	z0 = Math.sqrt(z);
+	z1 = -z0;
+
+	/* Transform to original coordinate */
+	PAx = a0x + x*exx + y*eyx + z0*ezx;
+	PAy = a0y + x*exy + y*eyy + z0*ezy;
+	PAz = a0z + x*exz + y*eyz + z0*ezz;
+
+	PBx = a0x + x*exx + y*eyx + z1*ezx;
+	PBy = a0y + x*exy + y*eyy + z1*ezy;
+	PBz = a0z + x*exz + y*eyz + z1*ezz;
+
+	/* Return the result */
+	return [[PAx, PAy, PAz], [PBx, PBy, PBz]];
+}
+
+function nearest_finder(sphere, locationA, locationB){
+	distA = (locationA[0]- sphere[0])*(locationA[0]- sphere[0]) 
+			+ (locationA[1]- sphere[1])*(locationA[1]- sphere[1])
+			+ (locationA[2]- sphere[2])*(locationA[2]- sphere[2]);
+	distB = (locationB[0]- sphere[0])*(locationB[0]- sphere[0]) 
+			+ (locationB[1]- sphere[1])*(locationB[1]- sphere[1])
+			+ (locationB[2]- sphere[2])*(locationB[2]- sphere[2]);    
+	range = sphere[3]*sphere[3];
+	if(Math.abs(distA - range) < Math.abs(distB - range)){
+		return locationA;
+	}
+	else{
+		return locationB;
+	}
+}
+
+shapesList = new Array();
+
+function localization(tag){
+	ranges = Array();
+	anchorInfos = Array();
+	tag.anchors.forEach(anchorInfo =>{
+		anchor = anchorInfo.anchor;
+		if(anchorInfo.valid && anchorInfo.distance){
+			ranges.push([anchor.locationX, anchor.locationY, anchor.locationZ, anchorInfo.distance]);
+			anchorInfos.push(anchorInfo);
+		}
+	});
+	if(ranges.length >= 4){
+		anchorInfos.forEach(anchorInfo =>{
+			anchorInfo.valid = false;
+		});
+		// console.log(ranges);
+		PAB = trilaterate(ranges);
+		P = nearest_finder(ranges[3], PAB[0], PAB[1]);
+		console.log(P);
+
+		tag.locationX = P[0];
+		tag.locationY = P[1];
+		tag.locationZ = P[2];
+		plot(nodeList);
+	}
+}
 
 function handler_tof(msg_tof){
 	idx = 0;
@@ -248,6 +363,94 @@ function handler_tof(msg_tof){
 		tag.anchors.push(anchor);
 		anchor.id = anchor.timeout();
 	}
+
+	localization(tag);
+}
+
+function handler_distance(msg){
+	idx = 0;
+	found = false
+	for(idx=0; idx<nodeList.length; idx++){
+		if(msg["anchor"] == nodeList[idx].address) {
+			found = true;
+			break;
+		}
+	}
+	if(!found) return;
+	anchor = nodeList[idx];
+
+	idx = 0;
+	for(idx=0; idx<nodeList.length; idx++){
+		if(msg["tag"] == nodeList[idx].address) break;
+	}
+	tag = nodeList[idx];
+
+	anchorFound = false;
+	tag.anchors.forEach(anchorInfo => {
+		if(anchorInfo.anchor.equal(anchor)){
+			anchorFound = true;
+
+			anchorInfo.valid = true;
+			clearTimeout(anchorInfo.id);
+			anchorInfo.id = anchorInfo.timeout();
+			
+			anchorInfo.tof = msg["tof"];
+			anchorInfo.distance = msg["distance"];
+
+			found = false;
+			shapesList.forEach(shape => {
+				if(shape.tag == tag.address && shape.anchor == anchorInfo.anchor.address){
+					found = true;
+					shape.x0 = anchorInfo.anchor.locationX - anchorInfo.distance;
+					shape.y0 = anchorInfo.anchor.locationY - anchorInfo.distance;
+					shape.x1 = anchorInfo.anchor.locationX + anchorInfo.distance;
+					shape.y1 = anchorInfo.anchor.locationY + anchorInfo.distance;
+				}
+			});
+
+			if(!found){
+				anchorInfo.distance = msg["distance"];
+				shape = {
+					type: 'circle',
+					xref: 'x',
+					yref: 'y',
+					x0: anchorInfo.anchor.locationX - anchorInfo.distance,
+					y0: anchorInfo.anchor.locationY - anchorInfo.distance,
+					x1: anchorInfo.anchor.locationX + anchorInfo.distance,
+					y1: anchorInfo.anchor.locationY + anchorInfo.distance,
+					line: {
+						color: 'rgba(50, 171, 96, 1)'
+					},
+					anchor: anchor.address,
+					tag: tag.address,
+				}
+				shapesList.push(shape);
+			}
+
+			updateLayout = {
+				shapes: shapesList
+			}
+			Plotly.update('map', null, updateLayout, 0);
+		}
+	});
+
+	if(!anchorFound){
+		anchor = {
+			"anchor": anchor,
+			"tof": msg["tof"],
+			"valid": true,
+			"timeout": function() {
+				var id = setTimeout(function timeout(anchor){
+					anchor.valid = false;
+				}, 5000, anchor);
+				return id;
+			},
+		}
+		tag.anchors.push(anchor);
+		anchor.id = anchor.timeout();
+	}
+
+	localization(tag);
 }
 
 function onMessageArrived(message) {
@@ -266,13 +469,18 @@ function onMessageArrived(message) {
 				handler_onoff(msg);
 				break;
 			case "DISTANCE":
-				console.log(msg);
-				break;
-			case "TOF":
-				value = parseInt($('#node' + msg.tag + 'CounterTof').text());
+				value = parseInt($('#node' + msg.tag + 'TofDistanceCounter').text());
 				if(!isNaN(value)){
 					value += 1;
-					$('#node' + msg.tag + 'CounterTof').text(value);
+					$('#node' + msg.tag + 'TofDistanceCounter').text(value);
+				}
+				handler_distance(msg);
+				break;
+			case "TOF":
+				value = parseInt($('#node' + msg.tag + 'TofDistanceCounter').text());
+				if(!isNaN(value)){
+					value += 1;
+					$('#node' + msg.tag + 'TofDistanceCounter').text(value);
 				}
 				handler_tof(msg);
 				break;
@@ -293,7 +501,7 @@ const nodeTemplate = ({ address, addressHex, type, locationX, locationY, locatio
 		<h5 class="card-title m-1 node-title row">
 			<span class="col-sm-8"> Node ${addressHex} </span>
 			<span class="col-sm-2" id="node${address}CounterLoc" style="text-align:right;">0</span>
-			<span class="col-sm-2" id="node${address}CounterTof" style="text-align:right;">0</span>
+			<span class="col-sm-2" id="node${address}TofDistanceCounter" style="text-align:right;">0</span>
 		</h5>
     </div>
     <div class="collapse" id="node${address}Toggle">
@@ -339,10 +547,12 @@ const nodeTemplate = ({ address, addressHex, type, locationX, locationY, locatio
 
 function nodeUpdate(idx, node){
 	nodeList[idx].type = node.type;
-	nodeList[idx].locationX = node.locationX;
-	nodeList[idx].locationY = node.locationY;
-	nodeList[idx].locationZ = node.locationZ;
-	
+	if(node.type == anchor){
+		nodeList[idx].locationX = node.locationX;
+		nodeList[idx].locationY = node.locationY;
+		nodeList[idx].locationZ = node.locationZ;
+	}
+
 	switch(node.type){
 		case "ANCHOR":
 			$('#node' + node.address + 'Select').children("option")[0].selected = true;
