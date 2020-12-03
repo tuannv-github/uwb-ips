@@ -1,25 +1,49 @@
 
 syscfg.defs:
-    APP_RTLS_LOCATION_TASK_STACK_SIZE:
+    APP_SW_TASK_STACK_SZ:
         description: 'Size of task stack'
-        value: 256
-    APP_RTLS_LOCATION_TASK_PRIORITY:
+        value: 512
+    APP_SW_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 210
+
+    APP_ROOT_TASK_STACK_SZ:
+        description: 'Size of task stack'
+        value: 128
+    APP_ROOT_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 211
+
+    APP_GATEWAY_DOWNLINK_TASK_STACK_SZ:
+        description: 'Size of task stack'
+        value: 128
+    APP_GATEWAY_DOWNLINK_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 212
+
+    APP_GATEWAY_UPLINK_TASK_STACK_SZ:
+        description: 'Size of task stack'
+        value: 512
+    APP_GATEWAY_UPLINK_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 213
+    APP_GATEWAY_UPLINK_MAV_BUFFER_SIZE:
+        description: 'Buffer size'
+        value: 32
+
+    APP_RTLS_TASK_STACK_SIZE:
+        description: 'Size of task stack'
+        value: 512
+    APP_RTLS_TASK_PRIORITY:
         description: 'Priority of task'
         value: 214
-
-    APP_RTLS_DISTANCE_TASK_STACK_SIZE:
-        description: 'Size of task stack'
-        value: 256
-    APP_RTLS_DISTANCE_TASK_PRIORITY:
-        description: 'Priority of task'
-        value: 215
 
     TASK_LED_TASK_STACK_SIZE:
         description: 'Size of task stack'
         value: 64
     TASK_LED_TASK_PRIORITY:
         description: 'Priority of task'
-        value: 216
+        value: 215
 
     RTR_ROLE:
         description: 'Priority of task'

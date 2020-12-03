@@ -15,8 +15,9 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-pkg.name: apps/mesh_provisioner
+pkg.name: apps/ble_mesh
 pkg.type: app
+pkg.description: Ble mesh application
 pkg.author: "Tuan Ngo Van <tuanngo0898@gmail.com>"
 pkg.homepage: "https://github.com/tuanngo0898"
 
@@ -24,11 +25,18 @@ pkg.deps:
     - "@apache-mynewt-core/kernel/os"
     - "@apache-mynewt-core/sys/console/full"
     - "@apache-mynewt-core/sys/log/full"
-    - "@apache-mynewt-core/sys/shell"
     - "@apache-mynewt-core/sys/stats/full"
+    - "@apache-mynewt-core/sys/shell"
 
     - "@apache-mynewt-nimble/nimble/controller"
     - "@apache-mynewt-nimble/nimble/host"
-    - "@apache-mynewt-nimble/nimble/host/mesh"
-    - "@apache-mynewt-nimble/nimble/transport/ram"
+    - "@apache-mynewt-nimble/nimble/host/services/gap"
     - "@apache-mynewt-nimble/nimble/host/services/gatt"
+    - "@apache-mynewt-nimble/nimble/host/store/ram"
+    - "@apache-mynewt-nimble/nimble/transport/ram"
+
+pkg.cflags:
+    - "-Waddress-of-packed-member"
+    - "-std=gnu11"
+    - "-fms-extensions"
+    - "-g"
