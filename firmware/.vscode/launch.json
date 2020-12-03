@@ -64,5 +64,31 @@
           "autoRun": false,
           "debugOutput": false,
       },
+      {
+        "type": "gnu-debugger",
+        "request": "launch",
+        "name": "Debug: ble_mesh",
+        "program": "/home/tuannv/thesis/firmware/bin/targets/ble_mesh/app/apps/ble_mesh/ble_mesh.elf",
+        "toolchain": "/usr/local/bin/",
+        "client": "arm-none-eabi-gdb",
+        "server": "JLinkGDBServer",
+        "windows": {
+          "server": "JLinkGDBServerCL",
+        },
+        "serverArgs": [
+          "-device", "nrf52",
+          "-if", "SWD",
+          "-speed", "4000"
+        ],
+        "serverPort": 2331,
+        "serverHost": "localhost",
+        "customVariables": [
+          "port0",
+          "port1",
+          "port2",
+        ],
+        "autoRun": false,
+        "debugOutput": false,
+    },
     ]
 }

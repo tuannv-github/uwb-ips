@@ -1,0 +1,128 @@
+
+syscfg.defs:
+    APP_SW_TASK_STACK_SZ:
+        description: 'Size of task stack'
+        value: 512
+    APP_SW_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 210
+
+    APP_ROOT_TASK_STACK_SZ:
+        description: 'Size of task stack'
+        value: 128
+    APP_ROOT_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 211
+
+    APP_GATEWAY_DOWNLINK_TASK_STACK_SZ:
+        description: 'Size of task stack'
+        value: 128
+    APP_GATEWAY_DOWNLINK_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 212
+
+    APP_GATEWAY_UPLINK_TASK_STACK_SZ:
+        description: 'Size of task stack'
+        value: 512
+    APP_GATEWAY_UPLINK_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 213
+    APP_GATEWAY_UPLINK_MAV_BUFFER_SIZE:
+        description: 'Buffer size'
+        value: 32
+
+    APP_RTLS_TASK_STACK_SIZE:
+        description: 'Size of task stack'
+        value: 512
+    APP_RTLS_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 214
+
+    TASK_LED_TASK_STACK_SIZE:
+        description: 'Size of task stack'
+        value: 64
+    TASK_LED_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 215
+
+    RTR_ROLE:
+        description: 'Priority of task'
+        value: RTR_ANCHOR
+
+    NODE_START_SLOT_ID:
+        description: >
+            Slot ID from which the nodes should respond
+        value: 0
+    NODE_END_SLOT_ID:
+        description: >
+            Slot ID till which the nodes should respond
+        value: 10
+
+syscfg.vals:
+    LOG_LEVEL: 5
+
+    # CONSOLE_UART: false
+    # CONSOLE_RTT: true
+    # RTT_TERMINAL_BUFFER_SIZE_UP: 2048
+    # RTT_TERMINAL_BUFFER_SIZE_DOWN: 128
+    # CONSOLE_ECHO: false
+
+    CONSOLE_RTT: false
+    CONSOLE_UART: true
+    CONSOLE_UART_BAUD: 115200
+    CONSOLE_UART_TX_BUF_SIZE: 1024
+    CONSOLE_UART_RX_BUF_SIZE: 256
+
+    # Shell
+    SHELL_TASK: 1
+    SHELL_PROMPT_MODULE: 1
+    SHELL_NEWTMGR: 1
+    CONFIG_CLI: 1
+    CONFIG_CLI_DEBUG: 1
+    DW1000_CLI: 1
+    STATS_NAMES: 1
+    STATS_CLI: 1
+
+    # Enable DW1000
+    UWB_DEVICE_0: 1
+    UWBCFG_APPLY_AT_INIT: 1
+    CIR_ENABLED: 0
+    CIR_VERBOSE: 0
+    CIR_OFFSET:  4
+    CIR_SIZE:    8
+    UWB_CLI:  1
+    UWB_CLI_BACKTRACE: 0
+
+    UWB_CCP_ENABLED: 1
+    UWB_CCP_PERIOD: ((uint32_t)1000000)
+    UWB_CCP_MAX_CASCADE_RPTS: 2
+    
+    ## Where to store config
+    CONFIG_FCB: 1
+    CONFIG_NEWTMGR: 1
+    CONFIG_FCB_FLASH_AREA: FLASH_AREA_NFFS
+
+    MSYS_1_BLOCK_COUNT: 14
+    MSYS_1_BLOCK_SIZE:  512
+
+    MSYS_2_BLOCK_COUNT: 20
+    MSYS_2_BLOCK_SIZE: 256
+
+    UWB_PKG_INIT_LOG: 0
+
+    BLE_MESH: 1
+    OS_MAIN_STACK_SIZE: 512
+
+    BLE_MESH_ADV_BUF_COUNT: 15
+    BLE_MESH_TX_SEG_MAX: 10
+
+    TDMA_NSLOTS: 20
+    TDMA_TASK_STACK_SZ: 1024
+
+    RNG_VERBOSE: 0
+    # NRNG_VERBOSE: 1
+    NRNG_STATS: 1
+    # RNG_TX_HOLDOFF: ((uint32_t)7D0)
+    UWBCFG_DEF_FRAME_FILTER: '"0xF"'
+
+    CELL_ENABLED: 0
