@@ -1,4 +1,5 @@
 #include <assert.h>
+#include "nrfx.h"
 #include "os/mynewt.h"
 #include "console/console.h"
 #include "hal/hal_system.h"
@@ -19,7 +20,7 @@
 #include <rtls/ble_mesh/mesh_define.h>
 #include <rtls/ble_mesh/model.h>
 
-static uint8_t g_dev_uuid[16] = MYNEWT_VAL(BLE_MESH_DEV_UUID);
+static uint8_t g_dev_uuid[16] = {'r','t','l','s','t','u','a','n','n','v'};
 
 /* Element definition */
 static struct bt_mesh_elem g_elements[] = {
@@ -48,7 +49,7 @@ static void prov_complete(u16_t net_idx, u16_t addr)
 static const struct bt_mesh_prov prov = {
     .uuid = g_dev_uuid,
     .output_size = 4,
-    .output_actions = BT_MESH_DISPLAY_NUMBER | BT_MESH_BEEP | BT_MESH_VIBRATE | BT_MESH_BLINK,
+    .output_actions = BT_MESH_DISPLAY_NUMBER,
     .output_number = output_number,
     .complete = prov_complete,
 };
@@ -64,31 +65,26 @@ blemesh_on_sync(void)
 {
     int err;
     ble_addr_t addr;
-    console_printf("BLE initialized\n");
 
     /* Use NRPA */
     err = ble_hs_id_gen_rnd(1, &addr);
     assert(err == 0);
     err = ble_hs_id_set_rnd(addr.val);
     assert(err == 0);
+    printf("Random address: ");
+    for(int i=0; i<6; i++){
+        printf("0x%02x ", addr.val[i]);
+    }
+    printf(" \n");
 
-    ble_hw_get_public_addr(&addr);
+    memcpy(&g_dev_uuid[10], (const void *)&NRF_FICR->DEVICEADDR[0], 4);
+    memcpy(&g_dev_uuid[14], (const void *)&NRF_FICR->DEVICEADDR[1], 2);
+    printf("UUID: ");
+    for(int i=0; i<16; i++){
+        printf("0x%02x ", prov.uuid[i]);
+    }
+    printf(" \n");
 
-    // printf("HW address: ");
-    // for(int i=0; i<6; i++){
-    //     printf("0x%02x ", addr.val[i]);
-    // }
-    // printf(" \n");
-
-    uint8_t *uuid = (uint8_t *)prov.uuid;
-    memcpy(uuid, addr.val, 6);
-
-    // printf("UUID: ");
-    // for(int i=0; i<16; i++){
-    //     printf("0x%02x ", prov.uuid[i]);
-    // }
-    // printf(" \n");
-    
     err = bt_mesh_init(addr.type, &prov, &g_comp);
     if (err) {
         console_printf("Mesh init failed (err %d)\n", err);
@@ -104,6 +100,8 @@ blemesh_on_sync(void)
     if (bt_mesh_is_provisioned()) {
         printk("Mesh network restored from flash\n");
     }
+
+    printf("BLE initialized\n");
 }
 
 void ble_mesh_init(){
