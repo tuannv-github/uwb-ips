@@ -213,7 +213,7 @@ superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
                 node_slot_map_printf(rti);
 
                 /* Anchor may down when trying to get a slot */
-                if(rti->slot_reqt != 0 && node_all_accepted(rti)){
+                if(rti->slot_reqt != 0 && node_all_accepted(rti) && rti->role == RTR_TAG){
                     node_add_me(rti, rti->slot_reqt);
                     printf("All node has accepted in slot: %d\n", rti->slot_reqt);
                     node_slot_map_printf(rti);
