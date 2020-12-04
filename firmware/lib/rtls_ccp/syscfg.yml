@@ -56,3 +56,19 @@ syscfg.defs:
     CCP_MASTER_REQUEST:
         description: 'Number master request blink before the node really change to master mode'
         value: 100
+
+    RTLS_CPP_USE_LED:
+        description: 'Use led to indicate master or slave role'
+        value: 1
+    RTLS_CPP_MASTER_LED:
+        value: LED_3
+    RTLS_CPP_SLAVE_LED:
+        value: LED_4
+    RTLS_CPP_MASTER_LED_ON:
+        value: 0
+    RTLS_CPP_MASTER_LED_OFF:
+        value: 1
+    RTLS_CPP_SLAVE_LED_ON:
+        value: 0
+    RTLS_CPP_SLAVE_LED_OFF:
+        value: 1

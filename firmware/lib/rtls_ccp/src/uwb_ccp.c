@@ -44,6 +44,9 @@
 #include <rtls_ccp/ccp_json.h>
 #endif
 
+#include <hal/hal_gpio.h>
+#include <bsp/bsp.h>
+
 // #define DIAGMSG(s,u) printf(s,u)
 
 #ifndef DIAGMSG
@@ -1195,15 +1198,21 @@ ccp_change_role(struct dpl_event * ev)
 
         if(ccp->master_role_request){
             uwb_ccp_start(ccp, CCP_ROLE_MASTER);
+            hal_gpio_write(MYNEWT_VAL(RTLS_CPP_MASTER_LED), MYNEWT_VAL(RTLS_CPP_MASTER_LED_ON));
+            hal_gpio_write(MYNEWT_VAL(RTLS_CPP_SLAVE_LED), MYNEWT_VAL(RTLS_CPP_MASTER_LED_OFF));
         }
         else
         {
             uwb_ccp_start(ccp, CCP_ROLE_SLAVE);
+            hal_gpio_write(MYNEWT_VAL(RTLS_CPP_MASTER_LED), MYNEWT_VAL(RTLS_CPP_MASTER_LED_OFF));
+            hal_gpio_write(MYNEWT_VAL(RTLS_CPP_SLAVE_LED), MYNEWT_VAL(RTLS_CPP_MASTER_LED_ON));
         } 
     }
     else{
         ccp->master_role_request = false;
         uwb_ccp_start(ccp, ccp->config.role);
+        hal_gpio_write(MYNEWT_VAL(RTLS_CPP_MASTER_LED), MYNEWT_VAL(RTLS_CPP_MASTER_LED_OFF));
+        hal_gpio_write(MYNEWT_VAL(RTLS_CPP_SLAVE_LED), MYNEWT_VAL(RTLS_CPP_MASTER_LED_ON));
     }
 
     /* sync synced event */
@@ -1314,6 +1323,10 @@ uwb_ccp_pkg_init(void)
 #endif  /* __KERNEL__ */
     }
 
+    #if MYNEWT_VAL(RTLS_CPP_USE_LED)
+    hal_gpio_init_out(MYNEWT_VAL(RTLS_CPP_MASTER_LED), MYNEWT_VAL(RTLS_CPP_MASTER_LED_OFF));
+    hal_gpio_init_out(MYNEWT_VAL(RTLS_CPP_SLAVE_LED), MYNEWT_VAL(RTLS_CPP_SLAVE_LED_OFF));
+    #endif
 }
 
 /**
