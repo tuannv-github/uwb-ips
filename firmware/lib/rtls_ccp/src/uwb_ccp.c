@@ -244,6 +244,11 @@ ccp_slave_timer_ev_cb(struct dpl_event *ev)
                 dpl_eventq_put(&ccp->eventq, &ccp->change_role_event);
                 return;
             }
+            else{
+                ccp->config.role = CCP_ROLE_SLAVE;
+                dpl_eventq_put(&ccp->eventq, &ccp->change_role_event);
+                return;
+            }
         }
         goto reset_timer;
     }

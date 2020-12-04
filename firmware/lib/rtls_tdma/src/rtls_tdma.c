@@ -154,6 +154,7 @@ slot_cb(struct dpl_event * ev)
     else{
         if(rti->slot_idx != 0){
             if(rti->rtls_tdma_cb != NULL){
+                if(tdma_slot->idx == rti->slot_idx) rti->nodes[rti->slot_idx].timeout = 0;
                 current_ranging_slot = tdma_slot->idx;
                 rti->rtls_tdma_cb(rti, tdma_slot);
                 current_ranging_slot = 0;
@@ -210,6 +211,15 @@ superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
                 node_rmv(rti, i);
                 printf("Remove node: %d\n", i);
                 node_slot_map_printf(rti);
+
+                /* Anchor may down when trying to get a slot */
+                if(rti->slot_reqt != 0 && node_all_accepted(rti)){
+                    node_add_me(rti, rti->slot_reqt);
+                    printf("All node has accepted in slot: %d\n", rti->slot_reqt);
+                    node_slot_map_printf(rti);
+                    /* Reset slot_reqt to change it purpose */
+                    // rti->slot_reqt = 0;
+                };
             }
         }
     }
@@ -385,12 +395,16 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                     /* I am a tag, and I see a new anchor */
                     else if(rti->role == RTR_TAG){
                         printf("I am a tag and I see new anchor!\n");
+                        rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
+                        rti->nodes[tdma_slot->idx].accepted = false;
                     }
                     /* I am a anchor */
                     else{
                         /* I has joint the network and I do not see any request from this node before */
                         /* This node take this slot without permission */
                         printf("Unknown node: 0x%04X at slot %d\n", ieee_std_frame_hdr->src_address, tdma_slot->idx);
+                        rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
+                        rti->nodes[tdma_slot->idx].accepted = true;
                         return;
                     }
                 }
@@ -471,7 +485,7 @@ svc_slot_cb(tdma_slot_t *tdma_slot){
         }
 
         /* I would listen for slot request */
-        if(rtls_tdma_slot_listen(rti, tdma_slot->idx)){
+        if(rtls_tdma_slot_listen(rti, tdma_slot->idx) && rti->role == RTR_ANCHOR){
             ieee_std_frame_hdr_t *ieee_std_frame_hdr = (ieee_std_frame_hdr_t *)rti->dev_inst->rxbuf;
             if(ieee_std_frame_hdr->PANID != rti->dev_inst->pan_id) return;
             if(ieee_std_frame_hdr->dst_address != RT_BROADCAST_ADDR) return;
