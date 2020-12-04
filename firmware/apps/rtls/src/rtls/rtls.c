@@ -172,8 +172,7 @@ void rtls_tdma_cb(rtls_tdma_instance_t *rti, tdma_slot_t *slot){
         uint16_t timeout = uwb_phy_frame_duration(udev, sizeof(nrng_request_frame_t))
             + g_nrng->config.rx_timeout_delay;
 
-        /* Padded timeout to allow us to receive any nmgr packets too */
-        uwb_set_rx_timeout(udev, timeout + 0x1000);
+        uwb_set_rx_timeout(udev, timeout);
         nrng_listen(g_nrng, UWB_BLOCKING);
     }
     else if(rtls_conf.node_type == RTR_TAG){
@@ -211,7 +210,6 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
         return false;
     }
     struct nrng_instance *nrng = (struct nrng_instance *)cbs->inst_ptr;
-
     nrng_get_tofs_addresses( nrng, g_distance.tofs, g_distance.anchors, g_distance.updated, ANCHOR_NUM, nrng->idx);
     for(int i=0; i<ANCHOR_NUM; i++){
         if(g_distance.anchors[i] != 0){

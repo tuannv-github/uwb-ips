@@ -21,10 +21,6 @@ syscfg.defs:
         description: 'Priority of task'
         value: 216
 
-    RTR_ROLE:
-        description: 'Priority of task'
-        value: RTR_ANCHOR
-
     NODE_START_SLOT_ID:
         description: >
             Slot ID from which the nodes should respond
@@ -86,7 +82,7 @@ syscfg.vals:
 
     UWB_PKG_INIT_LOG: 0
 
-    BLE_MESH: 1
+    # BLE_MESH: 1
     OS_MAIN_STACK_SIZE: 512
 
     BLE_MESH_ADV_BUF_COUNT: 15

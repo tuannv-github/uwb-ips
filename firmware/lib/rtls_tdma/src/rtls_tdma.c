@@ -17,9 +17,21 @@ static void bcn_slot_cb_mine(tdma_slot_t *tdma_slot);
 static void bcn_slot_cb_othr(tdma_slot_t *tdma_slot);
 static void svc_slot_cb(tdma_slot_t *tdma_slot);
 
+static uint16_t current_ranging_slot = 0;
+
 static bool
 rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs){
     rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)cbs->inst_ptr;
+
+    if(inst->fctrl == FCNTL_IEEE_RANGE_16){
+        if(current_ranging_slot != 0){
+            nrng_request_frame_t * _frame = (nrng_request_frame_t * )inst->rxbuf;
+            if(_frame->src_address == rti->nodes[current_ranging_slot].addr){
+                rti->nodes[current_ranging_slot].timeout = 0;
+            }
+        }
+    }
+
     if (dpl_sem_get_count(&rti->sem) == 0){
         dpl_error_t err = dpl_sem_release(&rti->sem);
         assert(err == DPL_OK);
@@ -142,7 +154,9 @@ slot_cb(struct dpl_event * ev)
     else{
         if(rti->slot_idx != 0){
             if(rti->rtls_tdma_cb != NULL){
+                current_ranging_slot = tdma_slot->idx;
                 rti->rtls_tdma_cb(rti, tdma_slot);
+                current_ranging_slot = 0;
             }
         }
     }
@@ -188,7 +202,7 @@ superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
 {
     rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)cbs->inst_ptr;
     /* Check timeout and availability of ANCHOR only */
-    for(int i=1; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
+    for(int i=1; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
         rti->nodes[i].available = false;
         if(rti->nodes[i].addr != 0){
             rti->nodes[i].timeout++;
