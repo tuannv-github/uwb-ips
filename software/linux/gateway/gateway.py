@@ -3,6 +3,8 @@ from serial import Serial
 import threading
 import config
 import json
+import signal
+import sys
 
 from mavlink import *
 
@@ -91,3 +93,10 @@ try:
     thread_serial.start()
 except:
    print("Error: unable to start thread")
+
+def signal_handler(sig, frame):
+    print('You pressed Ctrl+C!')
+    serial.close()
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
