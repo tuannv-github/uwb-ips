@@ -76,6 +76,7 @@ class Node{
 		this.locationZ = locationZ;
 		this.editing = false;
 		this.identifying = false;
+		this.lighting = false;
 		this.anchors = new Array();
 	}
 	valueOf(){
@@ -534,11 +535,10 @@ const nodeTemplate = ({ address, addressHex, type, locationX, locationY, locatio
                 </div>
             </div>
 			<div class="row col-sm-12 no-gutters pt-1">
-				<div class="col-sm-4 p-2">
-					<button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}BtnIdentify" onclick="onIdentifyBtnClick('${address}')">Identify</button>
-				</div>
-                <div class="col-sm-4 p-2"><button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}BtnEdit" onclick="onEditBtnClick('${address}')">Edit</button></div>
-				<div class="col-sm-4 p-2"><button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}Update" onclick="onUpdateBtnClick('${address}')">Update</button></div>
+				<div class="col-sm-3 p-1"><button type="button" class="btn btn-outline-primary btn-block" id="node${address}BtnIdentify" onclick="onIdentifyBtnClick('${address}')">Identify</button></div>
+				<div class="col-sm-3 p-1"><button type="button" class="btn btn-outline-primary btn-block" id="node${address}BtnBulb" onclick="onBulbBtnClick('${address}')">Bulb</button></div>
+                <div class="col-sm-3 p-1"><button type="button" class="btn btn-outline-primary btn-block" id="node${address}BtnEdit" onclick="onEditBtnClick('${address}')">Edit</button></div>
+				<div class="col-sm-3 p-1"><button type="button" class="btn btn-outline-primary btn-block" id="node${address}Update" onclick="onUpdateBtnClick('${address}')">Update</button></div>
             </div>
         </div>
     </div>
@@ -547,7 +547,7 @@ const nodeTemplate = ({ address, addressHex, type, locationX, locationY, locatio
 
 function nodeUpdate(idx, node){
 	nodeList[idx].type = node.type;
-	if(node.type == anchor){
+	if(node.type == "ANCHOR"){
 		nodeList[idx].locationX = node.locationX;
 		nodeList[idx].locationY = node.locationY;
 		nodeList[idx].locationZ = node.locationZ;
@@ -663,6 +663,36 @@ function onIdentifyBtnClick(address){
 		$('#node' + address + 'BtnIdentify').text('Identifying').button("refresh");
 		// $('#node' + address + 'Identifying').show();
 		cmd = '{"mavpackettype": "ONOFF", "dstsrc": '+ address +', "type": "SET", "value": 1}'
+	}
+	publish("{{topic_publish}}", cmd)
+}
+
+function onBulbBtnClick(address){
+	console.log("onBulbBtnClick: " + address);
+
+	let idx = 0;
+	for(idx=0; idx<nodeList.length; idx++){
+		if(address == nodeList[idx].address) break;
+	}
+	let node = nodeList[idx];
+
+	address = parseInt(address);
+	if(isNaN(address)){
+		toastError("Invalid node address");
+		return;
+	}
+
+	if(node.lighting){
+		node.lighting = false;
+		$('#node' + address + 'BtnBulb').text('OFF').button("refresh");
+		// $('#node' + address + 'Identifying').hide();
+		cmd = '{"mavpackettype": "ONOFF", "dstsrc": '+ address +', "type": "SET", "value": 0}'
+	}
+	else{
+		node.lighting = true;
+		$('#node' + address + 'BtnBulb').text('ON').button("refresh");
+		// $('#node' + address + 'Identifying').show();
+		cmd = '{"mavpackettype": "ONOFF", "dstsrc": '+ address +', "type": "SET", "value": 2}'
 	}
 	publish("{{topic_publish}}", cmd)
 }
