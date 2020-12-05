@@ -300,18 +300,15 @@ function handler_tof(msg_tof){
 	}
 	tag = nodeList[idx];
 
-	found = false;
+	anchorFound = false;
 	tag.anchors.forEach(anchorInfo => {
 		if(anchorInfo.anchor.equal(anchor)){
-			found = true;
+			anchorFound = true;
 
 			anchorInfo.valid = true;
 			clearTimeout(anchorInfo.id);
 			anchorInfo.id = anchorInfo.timeout();
 			anchorInfo.tof = msg_tof["tof"];
-			anchorInfo.id = anchorInfo.timeout();
-			// console.log(anchorInfo.anchor.address + ": " + anchorInfo.tof.toString() + ": " + anchorInfo.valid.toString());
-
 			anchorInfo.distance = 0.003842240264187552*msg_tof["tof"] + 0.051304771935538396;
 
 			found = false;
@@ -351,7 +348,7 @@ function handler_tof(msg_tof){
 		}
 	});
 
-	if(!found){
+	if(!anchorFound){
 		anchor = {
 			"anchor": anchor,
 			"tof": msg_tof["tof"],
