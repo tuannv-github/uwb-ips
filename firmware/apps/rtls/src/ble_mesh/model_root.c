@@ -18,7 +18,7 @@
 
 #include <stats/stats.h>
 
-#define LED_DELAY_MS   100
+#define LED_DELAY_MS   200
 
 STATS_SECT_START(model_root_stat_t)
     STATS_SECT_ENTRY(send_loca_succed)
@@ -214,19 +214,11 @@ task_led_func(void *arg){
         hal_gpio_write(13, 0);
         dpl_time_delay(dpl_time_ms_to_ticks32(LED_DELAY_MS));
         hal_gpio_write(23, 0);
-        dpl_time_delay(dpl_time_ms_to_ticks32(LED_DELAY_MS));
-        hal_gpio_write(22, 0);
-        dpl_time_delay(dpl_time_ms_to_ticks32(LED_DELAY_MS));
-        hal_gpio_write(14, 0);
 
         dpl_time_delay(dpl_time_ms_to_ticks32(LED_DELAY_MS));
         hal_gpio_write(13, 1);
         dpl_time_delay(dpl_time_ms_to_ticks32(LED_DELAY_MS));
         hal_gpio_write(23, 1);
-        dpl_time_delay(dpl_time_ms_to_ticks32(LED_DELAY_MS));
-        hal_gpio_write(22, 1);
-        dpl_time_delay(dpl_time_ms_to_ticks32(LED_DELAY_MS));
-        hal_gpio_write(14, 1);
 
         hal_gpio_write(12, 0);
         hal_gpio_write(9, 1);
@@ -243,8 +235,6 @@ void model_gateway_init(){
     pub =  model->pub;
 
     /* RTLS LED */
-    hal_gpio_init_out(14, 1);
-    hal_gpio_init_out(22, 1);
     hal_gpio_init_out(23, 1);
     hal_gpio_init_out(13, 1);
 

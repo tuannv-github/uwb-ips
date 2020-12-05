@@ -61,9 +61,9 @@ syscfg.defs:
         description: 'Use led to indicate master or slave role'
         value: 1
     RTLS_CPP_MASTER_LED:
-        value: LED_3
+        value: 22
     RTLS_CPP_SLAVE_LED:
-        value: LED_4
+        value: 14
     RTLS_CPP_MASTER_LED_ON:
         value: 0
     RTLS_CPP_MASTER_LED_OFF:
