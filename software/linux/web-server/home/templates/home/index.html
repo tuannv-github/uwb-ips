@@ -301,37 +301,40 @@ function handler_tof(msg_tof){
 	tag = nodeList[idx];
 
 	found = false;
-	tag.anchors.forEach(tmp_anchor => {
-		if(tmp_anchor.anchor.equal(anchor)){
+	tag.anchors.forEach(anchorInfo => {
+		if(anchorInfo.anchor.equal(anchor)){
 			found = true;
-			tmp_anchor.tof = msg_tof["tof"];
-			clearTimeout(tmp_anchor.id);
-			tmp_anchor.id = tmp_anchor.timeout();
-			// console.log(tmp_anchor.anchor.address + ": " + tmp_anchor.tof.toString() + ": " + tmp_anchor.valid.toString());
 
-			tmp_anchor.distance = 0.003842240264187552*msg_tof["tof"] + 0.051304771935538396;
+			anchorInfo.valid = true;
+			clearTimeout(anchorInfo.id);
+			anchorInfo.id = anchorInfo.timeout();
+			anchorInfo.tof = msg_tof["tof"];
+			anchorInfo.id = anchorInfo.timeout();
+			// console.log(anchorInfo.anchor.address + ": " + anchorInfo.tof.toString() + ": " + anchorInfo.valid.toString());
+
+			anchorInfo.distance = 0.003842240264187552*msg_tof["tof"] + 0.051304771935538396;
 
 			found = false;
 			shapesList.forEach(shape => {
-				if(shape.tag == tag.address && shape.anchor == tmp_anchor.anchor.address){
+				if(shape.tag == tag.address && shape.anchor == anchorInfo.anchor.address){
 					found = true;
-					shape.x0 = tmp_anchor.anchor.locationX - tmp_anchor.distance;
-					shape.y0 = tmp_anchor.anchor.locationY - tmp_anchor.distance;
-					shape.x1 = tmp_anchor.anchor.locationX + tmp_anchor.distance;
-					shape.y1 = tmp_anchor.anchor.locationY + tmp_anchor.distance;
+					shape.x0 = anchorInfo.anchor.locationX - anchorInfo.distance;
+					shape.y0 = anchorInfo.anchor.locationY - anchorInfo.distance;
+					shape.x1 = anchorInfo.anchor.locationX + anchorInfo.distance;
+					shape.y1 = anchorInfo.anchor.locationY + anchorInfo.distance;
 				}
 			});
 			
 			if(!found){
-				tmp_anchor.distance = 0.003842240264187552*msg_tof["tof"] + 0.051304771935538396;
+				anchorInfo.distance = 0.003842240264187552*msg_tof["tof"] + 0.051304771935538396;
 				shape = {
 					type: 'circle',
 					xref: 'x',
 					yref: 'y',
-					x0: tmp_anchor.anchor.locationX - tmp_anchor.distance,
-					y0: tmp_anchor.anchor.locationY - tmp_anchor.distance,
-					x1: tmp_anchor.anchor.locationX + tmp_anchor.distance,
-					y1: tmp_anchor.anchor.locationY + tmp_anchor.distance,
+					x0: anchorInfo.anchor.locationX - anchorInfo.distance,
+					y0: anchorInfo.anchor.locationY - anchorInfo.distance,
+					x1: anchorInfo.anchor.locationX + anchorInfo.distance,
+					y1: anchorInfo.anchor.locationY + anchorInfo.distance,
 					line: {
 						color: 'rgba(50, 171, 96, 1)'
 					},
