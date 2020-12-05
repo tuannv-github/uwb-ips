@@ -230,7 +230,8 @@ superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     return false;
 }
 
-void rtls_tdma_start(rtls_tdma_instance_t *rti, struct uwb_dev* udev){
+void 
+rtls_tdma_start(rtls_tdma_instance_t *rti, struct uwb_dev* udev){
     int rc;
 
     tdma_instance_t *tdma = (tdma_instance_t*)uwb_mac_find_cb_inst_ptr(udev, UWBEXT_TDMA);
@@ -562,5 +563,14 @@ svc_slot_cb(tdma_slot_t *tdma_slot){
         }
 
         free(rt_msg);
+    }
+}
+
+void rtls_tdma_find_node(rtls_tdma_instance_t *rti, uint16_t addr, rtls_tdma_node_t **node){
+    for(int i =0; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
+        if(rti->nodes[i].addr == addr){
+            *node= &rti->nodes[i];
+            break;
+        }
     }
 }

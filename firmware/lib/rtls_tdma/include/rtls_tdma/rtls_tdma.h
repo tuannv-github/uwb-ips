@@ -121,6 +121,7 @@ typedef struct _rt_slot_map_t rt_slot_map_t;
 typedef struct _rt_slot_map_data_t rt_slot_map_data_t;
 
 void rtls_tdma_start(rtls_tdma_instance_t *rtls_tdma_instance, struct uwb_dev* udev);
+void rtls_tdma_find_node(rtls_tdma_instance_t *rti, uint16_t addr, rtls_tdma_node_t **node);
 
 #define UWB_TX(rti, msg, msg_size, slot)                            \
     uint64_t dx_time = tdma_tx_slot_start(rti->tdma, slot);         \
