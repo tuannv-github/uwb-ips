@@ -21,10 +21,6 @@ syscfg.defs:
         description: 'Priority of task'
         value: 216
 
-    RTR_ROLE:
-        description: 'Priority of task'
-        value: RTR_ANCHOR
-
     NODE_START_SLOT_ID:
         description: >
             Slot ID from which the nodes should respond

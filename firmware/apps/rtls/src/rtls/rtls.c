@@ -3,6 +3,7 @@
 #include <hal/hal_system.h>
 
 #include <rtls_tdma/rtls_tdma.h>
+#include <rtls/rtls/trilateration.h>
 
 #if __GNUC__ >= 9
 #pragma GCC diagnostic ignored "-Waddress-of-packed-member"
@@ -172,8 +173,7 @@ void rtls_tdma_cb(rtls_tdma_instance_t *rti, tdma_slot_t *slot){
         uint16_t timeout = uwb_phy_frame_duration(udev, sizeof(nrng_request_frame_t))
             + g_nrng->config.rx_timeout_delay;
 
-        /* Padded timeout to allow us to receive any nmgr packets too */
-        uwb_set_rx_timeout(udev, timeout + 0x1000);
+        uwb_set_rx_timeout(udev, timeout);
         nrng_listen(g_nrng, UWB_BLOCKING);
     }
     else if(rtls_conf.node_type == RTR_TAG){
@@ -203,6 +203,9 @@ distance_t *get_distances(){
     return &g_distance;
 }
 
+static sphere_t g_spheres[4];
+static trilateration_result_t g_tr;
+
 static bool
 complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
 {
@@ -211,14 +214,36 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
         return false;
     }
     struct nrng_instance *nrng = (struct nrng_instance *)cbs->inst_ptr;
-
     nrng_get_tofs_addresses( nrng, g_distance.tofs, g_distance.anchors, g_distance.updated, ANCHOR_NUM, nrng->idx);
+
+    int sphere_idx = 0;
     for(int i=0; i<ANCHOR_NUM; i++){
-        if(g_distance.anchors[i] != 0){
-            printf("0x%04X: %5ld\n", g_distance.anchors[i], g_distance.tofs[i]);  
+        if(g_distance.anchors[i] != 0 && g_distance.updated){
+            printf("0x%04X: %5ld\n", g_distance.anchors[i], g_distance.tofs[i]); 
+            if(rtls_conf.node_type == TAG){
+                rtls_tdma_node_t *node = NULL;
+                rtls_tdma_find_node(&g_rtls_tdma_instance, g_distance.anchors[i], &node);
+                if(node != NULL){
+                    g_spheres[sphere_idx].x = node->location_x;
+                    g_spheres[sphere_idx].y = node->location_y;
+                    g_spheres[sphere_idx].z = node->location_z;
+                    g_spheres[sphere_idx].r = 0.003842240264187552*g_distance.tofs[i] +  0.051304771935538396;
+                    sphere_idx++;
+                    if(sphere_idx == 4) break;
+                }
+            }
         }
     }
 
+    if(sphere_idx == 4){
+        trilaterate(g_spheres, &g_tr);
+        location_t result;
+        nearest_finder(&g_spheres[3], &g_tr.PA, &g_tr.PB, &result);
+        printf("Location: %d.%d %d.%d %d.%d\n", 
+                (int)result.x, (int)(1000*(result.x - (int)result.x)),
+                (int)result.y, (int)(1000*(result.y - (int)result.y)),
+                (int)result.z, (int)(1000*(result.z - (int)result.z)));
+    }
     return true;
 }
 

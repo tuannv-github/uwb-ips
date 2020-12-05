@@ -5,7 +5,7 @@ syscfg.defs:
     restrictions: OS_LATENCY
   TDMA_NSLOTS:
     description: 'Enable TDMA Services'
-    value: 128
+    value: 20
   TDMA_SANITY_INTERVAL:
     description: 'Sanity watchdog timeout (seconds)'
     value: 0
