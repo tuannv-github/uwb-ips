@@ -34,6 +34,11 @@ static struct{
     "0.0", "0.0", "0.0"
 };
 
+void rtls_tdma_cb(rtls_tdma_instance_t *rti, tdma_slot_t *slot);
+static rtls_tdma_instance_t g_rtls_tdma_instance = {
+    .rtls_tdma_cb = rtls_tdma_cb
+};
+
 static char *
 rtls_get(int argc, char **argv, char *val, int val_len_max)
 {
@@ -75,16 +80,19 @@ rtls_set(int argc, char **argv, char *val)
             rc = CONF_VALUE_SET(val, CONF_STRING, rtls_conf_str.location_x);
             if(rc) goto done;
             rtls_conf.location_x = strtod(rtls_conf_str.location_x, NULL);
+            g_rtls_tdma_instance.x = rtls_conf.location_x;
         }
         else if (!strcmp(argv[0], "location_y")) {
             rc = CONF_VALUE_SET(val, CONF_STRING, rtls_conf_str.location_y);
             if(rc) goto done;
             rtls_conf.location_y = strtod(rtls_conf_str.location_y, NULL);
+            g_rtls_tdma_instance.y = rtls_conf.location_y;
         }
         else if (!strcmp(argv[0], "location_z")) {
             rc = CONF_VALUE_SET(val, CONF_STRING, rtls_conf_str.location_z);
             if(rc) goto done;
             rtls_conf.location_z = strtod(rtls_conf_str.location_z, NULL);
+            g_rtls_tdma_instance.z = rtls_conf.location_z;
         }
     }
 
@@ -128,6 +136,11 @@ void rtls_set_location(float x, float y, float z){
     rtls_conf.location_z = z;
     sprintf(rtls_conf_str.location_z, "%d.%d", (int)rtls_conf.location_z, (int)(1000*(rtls_conf.location_z - (int)rtls_conf.location_z)));
     conf_save_one("rtls/location_z", rtls_conf_str.location_z);
+
+    /* Set location of anchor in rtls_tdma layer */
+    g_rtls_tdma_instance.x = x;
+    g_rtls_tdma_instance.y = y;
+    g_rtls_tdma_instance.z = z;
 }
 
 void rtls_get_address(uint16_t *address){
@@ -156,11 +169,6 @@ void rtls_set_ntype(uint8_t ntype){
     hal_system_reset();
 }
 
-void rtls_tdma_cb(rtls_tdma_instance_t *rti, tdma_slot_t *slot);
-
-static rtls_tdma_instance_t g_rtls_tdma_instance = {
-    .rtls_tdma_cb = rtls_tdma_cb
-};
 static struct uwb_mac_interface g_cbs;
 static struct nrng_instance* g_nrng;
 

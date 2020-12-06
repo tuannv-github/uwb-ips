@@ -328,9 +328,9 @@ bcn_slot_cb_mine(tdma_slot_t *tdma_slot){
             rt_loca->msg_type = RT_LOCA_MSG;
             rt_loca->len = sizeof(struct _rt_loca_data_t);
             rt_loca->slot = tdma_slot->idx;
-            rt_loca->location_x = rti->nodes[rti->slot_idx].location_x;
-            rt_loca->location_y = rti->nodes[rti->slot_idx].location_y;
-            rt_loca->location_z = rti->nodes[rti->slot_idx].location_z;
+            rt_loca->location_x = rti->x;
+            rt_loca->location_y = rti->y;
+            rt_loca->location_z = rti->z;
         }
         else{
             rt_msg_size = sizeof(ieee_std_frame_hdr_t) + sizeof(rt_slot_map_t);
