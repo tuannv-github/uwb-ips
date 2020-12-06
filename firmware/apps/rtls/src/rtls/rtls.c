@@ -227,7 +227,7 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
                     g_spheres[sphere_idx].x = node->location_x;
                     g_spheres[sphere_idx].y = node->location_y;
                     g_spheres[sphere_idx].z = node->location_z;
-                    g_spheres[sphere_idx].r = 0.003842240264187552*g_distance.tofs[i] +  0.051304771935538396;
+                    g_spheres[sphere_idx].r = 0.004632130984819555*g_distance.tofs[i] +  0.13043560944811894;
                     sphere_idx++;
                     if(sphere_idx == 4) break;
                 }

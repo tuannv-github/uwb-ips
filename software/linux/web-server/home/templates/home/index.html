@@ -301,6 +301,8 @@ function handler_tof(msg_tof){
 	}
 	tag = nodeList[idx];
 
+	A = 0.004632130984819555
+	b = 0.13043560944811894
 	anchorFound = false;
 	tag.anchors.forEach(anchorInfo => {
 		if(anchorInfo.anchor.equal(anchor)){
@@ -310,7 +312,7 @@ function handler_tof(msg_tof){
 			clearTimeout(anchorInfo.id);
 			anchorInfo.id = anchorInfo.timeout();
 			anchorInfo.tof = msg_tof["tof"];
-			anchorInfo.distance = 0.003842240264187552*msg_tof["tof"] + 0.051304771935538396;
+			anchorInfo.distance = A*msg_tof["tof"] + b;
 
 			found = false;
 			shapesList.forEach(shape => {
@@ -324,7 +326,7 @@ function handler_tof(msg_tof){
 			});
 			
 			if(!found){
-				anchorInfo.distance = 0.003842240264187552*msg_tof["tof"] + 0.051304771935538396;
+				anchorInfo.distance = A*msg_tof["tof"] + b;
 				shape = {
 					type: 'circle',
 					xref: 'x',
