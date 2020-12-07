@@ -287,16 +287,25 @@ task_rtls_gateway_func(void *arg){
             // mavlink_msg_location_pack(0, 0, &mavlink_msg, g_rtls_tdma_instance.dev_inst->my_short_address, STATUS, TAG, location_result.x, location_result.y, location_result.z);
             // len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
             // serial_write(mav_send_buf, len);
+
+            mavlink_msg_tag_pack(0,0,&mavlink_msg,
+                anchor_addrs[0], g_spheres[0].x, g_spheres[0].y, g_spheres[0].z, g_spheres[0].r,
+                anchor_addrs[1], g_spheres[1].x, g_spheres[1].y, g_spheres[1].z, g_spheres[1].r,
+                anchor_addrs[2], g_spheres[2].x, g_spheres[2].y, g_spheres[2].z, g_spheres[2].r,
+                anchor_addrs[3], g_spheres[3].x, g_spheres[3].y, g_spheres[3].z, g_spheres[3].r,
+                g_rtls_tdma_instance.dev_inst->my_short_address, location_result.x, location_result.y, location_result.z);
+                len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
+                serial_write(mav_send_buf, len);
         }
 
-        mavlink_msg_tag_pack(0,0,&mavlink_msg,
-        0x00, 0, 0, 1, 5.311632844683143,
-        0x01, 5, 0, 2, 3.33704088063755,
-        0x02, 5, 5, 3, 3.999118684674722,
-        0x03, 0, 5, 5, 7.180278010403454,
-        0x00, 4.5, 2.5, 0);
-        len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
-        serial_write(mav_send_buf, len);
+        // mavlink_msg_tag_pack(0,0,&mavlink_msg,
+        // 0x00, 0, 0, 1, 5.311632844683143,
+        // 0x01, 5, 0, 2, 3.33704088063755,
+        // 0x02, 5, 5, 3, 3.999118684674722,
+        // 0x03, 0, 5, 5, 7.180278010403454,
+        // 0x00, 4.5, 2.5, 0);
+        // len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
+        // serial_write(mav_send_buf, len);
 
         os_mutex_release(&g_gateway_mutex);
     }

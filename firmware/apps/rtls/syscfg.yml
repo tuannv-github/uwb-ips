@@ -2,7 +2,7 @@
 syscfg.defs:
     APP_RTLS_GATEWAY_TASK_STACK_SIZE:
         description: 'Size of task stack'
-        value: 64
+        value: 256
     APP_RTLS_GATEWAY_TASK_PRIORITY:
         description: 'Priority of task'
         value: 200
@@ -73,7 +73,7 @@ syscfg.vals:
     UWB_CLI_BACKTRACE: 0
 
     UWB_CCP_ENABLED: 1
-    UWB_CCP_PERIOD: ((uint32_t)1000000)
+    UWB_CCP_PERIOD: ((uint32_t)100000)
     UWB_CCP_MAX_CASCADE_RPTS: 2
     
     ## Where to store config

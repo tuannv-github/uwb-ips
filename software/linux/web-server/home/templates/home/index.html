@@ -894,7 +894,7 @@ function onBulbBtnClick(address){
 		for (const [address, node] of Object.entries(nodeList)) {
 			if(node.type == "TAG"){
 				for (const [address, range] of Object.entries(node.ranges)){
-					r = Math.sqrt(range.r**2 - (range.anchor.z-node.z)**2);
+					r = Math.sqrt(Math.abs(range.r**2 - (range.anchor.z-node.z)**2));
 					shapes.push({
 						"x0": range.anchor.x - r,
 						"y0": range.anchor.y - r,
@@ -910,7 +910,6 @@ function onBulbBtnClick(address){
 				}
 			}
 		}
-
 		updateLayout = {
 			shapes: shapes
 		};
