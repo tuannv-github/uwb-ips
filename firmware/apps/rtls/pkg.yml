@@ -42,6 +42,7 @@ pkg.deps:
     - "@rtls/lib/rtls_tdma"
     - "@rtls/lib/uwb_nrng_ss"
     - "@rtls/lib/message"
+    - "@rtls/lib/serial"
 
 pkg.cflags:
     - "-Waddress-of-packed-member"
