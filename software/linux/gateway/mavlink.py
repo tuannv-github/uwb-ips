@@ -290,6 +290,7 @@ MAVLINK_MSG_ID_LOCATION = 0
 MAVLINK_MSG_ID_ONOFF = 1
 MAVLINK_MSG_ID_DISTANCE = 2
 MAVLINK_MSG_ID_TOF = 3
+MAVLINK_MSG_ID_TAG = 4
 
 class MAVLink_location_message(MAVLink_message):
         '''
@@ -432,12 +433,68 @@ class MAVLink_tof_message(MAVLink_message):
         def pack(self, mav, force_mavlink1=False):
                 return MAVLink_message.pack(self, mav, 151, struct.pack('<IHHB', self.tof, self.tag, self.anchor, self.type), force_mavlink1=force_mavlink1)
 
+class MAVLink_tag_message(MAVLink_message):
+        '''
+        Tag message
+        '''
+        id = MAVLINK_MSG_ID_TAG
+        name = 'TAG'
+        fieldnames = ['a0', 'a0x', 'a0y', 'a0z', 'a0r', 'a1', 'a1x', 'a1y', 'a1z', 'a1r', 'a2', 'a2x', 'a2y', 'a2z', 'a2r', 'a3', 'a3x', 'a3y', 'a3z', 'a3r', 't0', 't0x', 't0y', 't0z']
+        ordered_fieldnames = ['a0x', 'a0y', 'a0z', 'a0r', 'a1x', 'a1y', 'a1z', 'a1r', 'a2x', 'a2y', 'a2z', 'a2r', 'a3x', 'a3y', 'a3z', 'a3r', 't0x', 't0y', 't0z', 'a0', 'a1', 'a2', 'a3', 't0']
+        fieldtypes = ['uint16_t', 'float', 'float', 'float', 'float', 'uint16_t', 'float', 'float', 'float', 'float', 'uint16_t', 'float', 'float', 'float', 'float', 'uint16_t', 'float', 'float', 'float', 'float', 'uint16_t', 'float', 'float', 'float']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {}
+        fieldunits_by_name = {}
+        format = '<fffffffffffffffffffHHHHH'
+        native_format = bytearray('<fffffffffffffffffffHHHHH', 'ascii')
+        orders = [19, 0, 1, 2, 3, 20, 4, 5, 6, 7, 21, 8, 9, 10, 11, 22, 12, 13, 14, 15, 23, 16, 17, 18]
+        lengths = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        array_lengths = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        crc_extra = 71
+        unpacker = struct.Struct('<fffffffffffffffffffHHHHH')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, a0, a0x, a0y, a0z, a0r, a1, a1x, a1y, a1z, a1r, a2, a2x, a2y, a2z, a2r, a3, a3x, a3y, a3z, a3r, t0, t0x, t0y, t0z):
+                MAVLink_message.__init__(self, MAVLink_tag_message.id, MAVLink_tag_message.name)
+                self._fieldnames = MAVLink_tag_message.fieldnames
+                self._instance_field = MAVLink_tag_message.instance_field
+                self._instance_offset = MAVLink_tag_message.instance_offset
+                self.a0 = a0
+                self.a0x = a0x
+                self.a0y = a0y
+                self.a0z = a0z
+                self.a0r = a0r
+                self.a1 = a1
+                self.a1x = a1x
+                self.a1y = a1y
+                self.a1z = a1z
+                self.a1r = a1r
+                self.a2 = a2
+                self.a2x = a2x
+                self.a2y = a2y
+                self.a2z = a2z
+                self.a2r = a2r
+                self.a3 = a3
+                self.a3x = a3x
+                self.a3y = a3y
+                self.a3z = a3z
+                self.a3r = a3r
+                self.t0 = t0
+                self.t0x = t0x
+                self.t0y = t0y
+                self.t0z = t0z
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 71, struct.pack('<fffffffffffffffffffHHHHH', self.a0x, self.a0y, self.a0z, self.a0r, self.a1x, self.a1y, self.a1z, self.a1r, self.a2x, self.a2y, self.a2z, self.a2r, self.a3x, self.a3y, self.a3z, self.a3r, self.t0x, self.t0y, self.t0z, self.a0, self.a1, self.a2, self.a3, self.t0), force_mavlink1=force_mavlink1)
+
 
 mavlink_map = {
         MAVLINK_MSG_ID_LOCATION : MAVLink_location_message,
         MAVLINK_MSG_ID_ONOFF : MAVLink_onoff_message,
         MAVLINK_MSG_ID_DISTANCE : MAVLink_distance_message,
         MAVLINK_MSG_ID_TOF : MAVLink_tof_message,
+        MAVLINK_MSG_ID_TAG : MAVLink_tag_message,
 }
 
 class MAVError(Exception):
@@ -966,4 +1023,68 @@ class MAVLink(object):
 
                 '''
                 return self.send(self.tof_encode(type, tag, anchor, tof), force_mavlink1=force_mavlink1)
+
+        def tag_encode(self, a0, a0x, a0y, a0z, a0r, a1, a1x, a1y, a1z, a1r, a2, a2x, a2y, a2z, a2r, a3, a3x, a3y, a3z, a3r, t0, t0x, t0y, t0z):
+                '''
+                Tag message
+
+                a0                        :  (type:uint16_t)
+                a0x                       :  (type:float)
+                a0y                       :  (type:float)
+                a0z                       :  (type:float)
+                a0r                       :  (type:float)
+                a1                        :  (type:uint16_t)
+                a1x                       :  (type:float)
+                a1y                       :  (type:float)
+                a1z                       :  (type:float)
+                a1r                       :  (type:float)
+                a2                        :  (type:uint16_t)
+                a2x                       :  (type:float)
+                a2y                       :  (type:float)
+                a2z                       :  (type:float)
+                a2r                       :  (type:float)
+                a3                        :  (type:uint16_t)
+                a3x                       :  (type:float)
+                a3y                       :  (type:float)
+                a3z                       :  (type:float)
+                a3r                       :  (type:float)
+                t0                        :  (type:uint16_t)
+                t0x                       :  (type:float)
+                t0y                       :  (type:float)
+                t0z                       :  (type:float)
+
+                '''
+                return MAVLink_tag_message(a0, a0x, a0y, a0z, a0r, a1, a1x, a1y, a1z, a1r, a2, a2x, a2y, a2z, a2r, a3, a3x, a3y, a3z, a3r, t0, t0x, t0y, t0z)
+
+        def tag_send(self, a0, a0x, a0y, a0z, a0r, a1, a1x, a1y, a1z, a1r, a2, a2x, a2y, a2z, a2r, a3, a3x, a3y, a3z, a3r, t0, t0x, t0y, t0z, force_mavlink1=False):
+                '''
+                Tag message
+
+                a0                        :  (type:uint16_t)
+                a0x                       :  (type:float)
+                a0y                       :  (type:float)
+                a0z                       :  (type:float)
+                a0r                       :  (type:float)
+                a1                        :  (type:uint16_t)
+                a1x                       :  (type:float)
+                a1y                       :  (type:float)
+                a1z                       :  (type:float)
+                a1r                       :  (type:float)
+                a2                        :  (type:uint16_t)
+                a2x                       :  (type:float)
+                a2y                       :  (type:float)
+                a2z                       :  (type:float)
+                a2r                       :  (type:float)
+                a3                        :  (type:uint16_t)
+                a3x                       :  (type:float)
+                a3y                       :  (type:float)
+                a3z                       :  (type:float)
+                a3r                       :  (type:float)
+                t0                        :  (type:uint16_t)
+                t0x                       :  (type:float)
+                t0y                       :  (type:float)
+                t0z                       :  (type:float)
+
+                '''
+                return self.send(self.tag_encode(a0, a0x, a0y, a0z, a0r, a1, a1x, a1y, a1z, a1r, a2, a2x, a2y, a2z, a2r, a3, a3x, a3y, a3z, a3r, t0, t0x, t0y, t0z), force_mavlink1=force_mavlink1)
 

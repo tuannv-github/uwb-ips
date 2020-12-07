@@ -1,1 +1,2 @@
 SUBSYSTEM=="tty", ATTRS{idVendor}=="1366", ATTRS{idProduct}=="1015", ATTRS{serial}=="000682269690", SYMLINK+="ttyGateway"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1366", ATTRS{idProduct}=="0105", ATTRS{serial}=="000760085954", SYMLINK+="ttyTag"

@@ -267,26 +267,37 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     return true;
 }
 
+static mavlink_message_t mavlink_msg;
+static char mav_send_buf[128];
+
 static void
 task_rtls_gateway_func(void *arg){
     uint16_t len;
-    static mavlink_message_t mavlink_msg;
-    static char mav_send_buf[32];
     while(1){
         os_mutex_pend(&g_gateway_mutex, OS_TIMEOUT_NEVER);
         dpl_time_delay(dpl_time_ms_to_ticks32(MYNEWT_VAL(UWB_CCP_PERIOD)/1000));
         if(location_updated){
             location_updated = false;
-            for(int i=0; i<4; i++){
-                mavlink_msg_location_pack(0, 0, &mavlink_msg, anchor_addrs[i], STATUS, ANCHOR, g_spheres[i].x, g_spheres[i].y, g_spheres[i].z);
-                len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
-                serial_write(mav_send_buf, len);
-            }
+            // for(int i=0; i<4; i++){
+            //     mavlink_msg_location_pack(0, 0, &mavlink_msg, anchor_addrs[i], STATUS, ANCHOR, g_spheres[i].x, g_spheres[i].y, g_spheres[i].z);
+            //     len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
+            //     serial_write(mav_send_buf, len);
+            // }
 
-            mavlink_msg_location_pack(0, 0, &mavlink_msg, g_rtls_tdma_instance.dev_inst->my_short_address, STATUS, TAG, location_result.x, location_result.y, location_result.z);
-            len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
-            serial_write(mav_send_buf, len);
+            // mavlink_msg_location_pack(0, 0, &mavlink_msg, g_rtls_tdma_instance.dev_inst->my_short_address, STATUS, TAG, location_result.x, location_result.y, location_result.z);
+            // len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
+            // serial_write(mav_send_buf, len);
         }
+
+        mavlink_msg_tag_pack(0,0,&mavlink_msg,
+        0x00, 0, 0, 1, 5.311632844683143,
+        0x01, 5, 0, 2, 3.33704088063755,
+        0x02, 5, 5, 3, 3.999118684674722,
+        0x03, 0, 5, 5, 7.180278010403454,
+        0x00, 4.5, 2.5, 0);
+        len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
+        serial_write(mav_send_buf, len);
+
         os_mutex_release(&g_gateway_mutex);
     }
 }
