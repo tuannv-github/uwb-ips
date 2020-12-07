@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
+
 <head>
 	<title>RTLS</title>
 	<link rel="stylesheet" href="{% static '/home/bootstrap-4.5.3-dist/css/bootstrap.min.css' %}"/>
@@ -10,6 +11,7 @@
 	<script src="{% static '/home/paho.javascript-1.1.0/paho-mqtt-min.js' %}"></script>
 	<script src="{% static '/home/plotjs-1.57.1/plotly.min.js' %}"></script>
 </head>
+
 <body>
     <nav class="navbar navbar-light bg-light">
         <span class="navbar-brand h1 m-1">RTLS</span>
@@ -46,6 +48,7 @@
 	</script>
 
 </body>
+
 <style>
 	.node-title-TAG{
 		background-color: rgb(83, 158, 255);
@@ -60,6 +63,7 @@
           height: 90vh
 	}
 </style>
+
 <script>
 
 client = new Paho.Client('{{mqtt_server_addr}}', Number({{mqtt_server_port}}), "client_id_" + Date.now());
@@ -700,6 +704,7 @@ function onBulbBtnClick(address){
 }
 
 </script>
+
 <script>
 
 	var plotAnchors = {
@@ -776,4 +781,5 @@ function onBulbBtnClick(address){
 	};
 
 </script>
+
 </html>
