@@ -14,15 +14,21 @@
 
 <body>
     <nav class="navbar navbar-light bg-light">
-        <span class="navbar-brand h1 m-1">RTLS</span>
+		<span class="navbar-brand h1 m-1">RTLS</span>
 	</nav>
 	<div class="row m-1">
 		<div class="col-sm-9">
 			<div id="map"></div>
 		</div>
 		<div class="col-sm-3" >
-				<div class="overflow-auto" style="max-height: calc(100vh - 80px);" id="idNodeList">
-				</div>
+			<div class="m-2">
+				<select class="form-control" id="modeSelect">
+					<option>Bluetooth Mesh</option>
+					<option>Wi-Fi</option>
+				</select>
+			</div>
+			<div class="overflow-auto" style="max-height: calc(100vh - 80px);" id="idNodeList">
+			</div>
 		</div>
 	</div>
 
@@ -463,7 +469,8 @@ function handler_distance(msg){
 function onMessageArrived(message) {
 	try{
 		msg = JSON.parse(message.payloadString);
-		switch(msg.mavpackettype){
+		if(document.getElementById("modeSelect").value == "Bluetooth Mesh"){
+			switch(msg.mavpackettype){
 			case "LOCATION":
 				value = parseInt($('#node' + msg.dstsrc + 'CounterLoc').text());
 				if(!isNaN(value)){
@@ -491,9 +498,14 @@ function onMessageArrived(message) {
 				}
 				handler_tof(msg);
 				break;
-			default:
-				console.error("UNKNOWN MSG: "+message.payloadString);
+			}
+		}
+		else if(document.getElementById("modeSelect").value == "Wi-Fi"){
+			switch(msg.mavpackettype){
+			case "TAG":
+				console.log(msg);
 				break;
+			}
 		}
 	}
 	catch(error){
