@@ -37,6 +37,7 @@ pkg.deps:
     - "@decawave-uwb-core/hw/drivers/uwb"
     - "@decawave-uwb-core/lib/cir"
 
+    - "@rtls/lib/serial"
 pkg.cflags:
     - "-std=gnu11"
     - "-fms-extensions"

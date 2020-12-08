@@ -32,7 +32,8 @@
 			"ratio": "c",
 			"system_error": "c",
 			"cstdio": "c",
-			"unordered_map": "c"
+			"unordered_map": "c",
+			"cstddef": "c"
 		},
 		"cSpell.words": [
 			"addresses",
@@ -62,6 +63,7 @@
 			"read",
 			"recv",
 			"recv succed",
+			"sbuff",
 			"sttmsg",
 			"succed",
 			"swch",
