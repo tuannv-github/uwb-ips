@@ -276,18 +276,9 @@ task_rtls_gateway_func(void *arg){
     while(1){
         os_mutex_pend(&g_gateway_mutex, OS_TIMEOUT_NEVER);
         dpl_time_delay(dpl_time_ms_to_ticks32(MYNEWT_VAL(UWB_CCP_PERIOD)/1000));
+
         if(location_updated){
             location_updated = false;
-            // for(int i=0; i<4; i++){
-            //     mavlink_msg_location_pack(0, 0, &mavlink_msg, anchor_addrs[i], STATUS, ANCHOR, g_spheres[i].x, g_spheres[i].y, g_spheres[i].z);
-            //     len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
-            //     serial_write(mav_send_buf, len);
-            // }
-
-            // mavlink_msg_location_pack(0, 0, &mavlink_msg, g_rtls_tdma_instance.dev_inst->my_short_address, STATUS, TAG, location_result.x, location_result.y, location_result.z);
-            // len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
-            // serial_write(mav_send_buf, len);
-
             mavlink_msg_tag_pack(0,0,&mavlink_msg,
                 anchor_addrs[0], g_spheres[0].x, g_spheres[0].y, g_spheres[0].z, g_spheres[0].r,
                 anchor_addrs[1], g_spheres[1].x, g_spheres[1].y, g_spheres[1].z, g_spheres[1].r,
