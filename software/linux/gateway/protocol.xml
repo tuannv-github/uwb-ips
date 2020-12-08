@@ -45,5 +45,32 @@
 			<field type="uint16_t" name="anchor"/>
 			<field type="uint32_t" name="tof"/>
 		</message>
+		<message id="4" name="TAG">
+			<description>Tag message</description>
+			<field type="uint16_t" name="a0"/>
+			<field type="float" name="a0x"/>
+			<field type="float" name="a0y"/>
+			<field type="float" name="a0z"/>
+			<field type="float" name="a0r"/>
+			<field type="uint16_t" name="a1"/>
+			<field type="float" name="a1x"/>
+			<field type="float" name="a1y"/>
+			<field type="float" name="a1z"/>
+			<field type="float" name="a1r"/>
+			<field type="uint16_t" name="a2"/>
+			<field type="float" name="a2x"/>
+			<field type="float" name="a2y"/>
+			<field type="float" name="a2z"/>
+			<field type="float" name="a2r"/>
+			<field type="uint16_t" name="a3"/>
+			<field type="float" name="a3x"/>
+			<field type="float" name="a3y"/>
+			<field type="float" name="a3z"/>
+			<field type="float" name="a3r"/>
+			<field type="uint16_t" name="t0"/>
+			<field type="float" name="t0x"/>
+			<field type="float" name="t0y"/>
+			<field type="float" name="t0z"/>
+		</message>
 	</messages>
 </mavlink>

@@ -1,27 +1,26 @@
 syscfg.defs:
-    COM_UART_DEV:
-        description: 'Communication UART device'
-        value: '"uart0"'
-    COM_UART_BAUD:
-        description: 'Console UART baud rate.'
-        value: 115200
     UWB_NUM_MBUFS:
         description: 'Number of message buffers'
         value: 64
     UWB_MBUF_SIZE:
         description: 'Size of each message buffer'
         value: 256
-    CMD_BUFF_SIZE:
-        description: 'Command buffer size'
-        value: 20
+
+    TASK_WIRESHARK_STACK_SIZE:
+        description: 'Size of task stack'
+        value: 512
+    TASK_WIRESHARK_PRIORITY:
+        description: 'Priority of task'
+        value: 200
 
 syscfg.vals:
     LOG_LEVEL: 2
-
+    UWB_PKG_INIT_LOG: 0
+    
     CONSOLE_UART: false
     CONSOLE_RTT: true
-    RTT_TERMINAL_BUFFER_SIZE_UP: 2048
-    RTT_TERMINAL_BUFFER_SIZE_DOWN: 128
+    RTT_TERMINAL_BUFFER_SIZE_UP: 256
+    RTT_TERMINAL_BUFFER_SIZE_DOWN: 256
     CONSOLE_ECHO: false
 
     # Shell
@@ -43,11 +42,6 @@ syscfg.vals:
     CIR_SIZE:    8
     UWB_CLI:  1
     UWB_CLI_BACKTRACE: 0
-
-    ## Where to store config
-    CONFIG_FCB: 1
-    CONFIG_NEWTMGR: 1
-    CONFIG_FCB_FLASH_AREA: FLASH_AREA_NFFS
 
     MSYS_1_BLOCK_COUNT: 24
     MSYS_1_BLOCK_SIZE: 512

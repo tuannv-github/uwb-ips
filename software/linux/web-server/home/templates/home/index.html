@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
+
 <head>
 	<title>RTLS</title>
 	<link rel="stylesheet" href="{% static '/home/bootstrap-4.5.3-dist/css/bootstrap.min.css' %}"/>
@@ -10,17 +11,24 @@
 	<script src="{% static '/home/paho.javascript-1.1.0/paho-mqtt-min.js' %}"></script>
 	<script src="{% static '/home/plotjs-1.57.1/plotly.min.js' %}"></script>
 </head>
+
 <body>
     <nav class="navbar navbar-light bg-light">
-        <span class="navbar-brand h1 m-1">RTLS</span>
+		<span class="navbar-brand h1 m-1">RTLS</span>
 	</nav>
 	<div class="row m-1">
 		<div class="col-sm-9">
 			<div id="map"></div>
 		</div>
 		<div class="col-sm-3" >
-				<div class="overflow-auto" style="max-height: calc(100vh - 80px);" id="idNodeList">
-				</div>
+			<div class="m-2">
+				<select class="form-control" id="modeSelect">
+					<option>Wi-Fi</option>
+					<option>Bluetooth Mesh</option>
+				</select>
+			</div>
+			<div class="overflow-auto" style="max-height: calc(100vh - 80px);" id="idNodeList">
+			</div>
 		</div>
 	</div>
 
@@ -46,6 +54,7 @@
 	</script>
 
 </body>
+
 <style>
 	.node-title-TAG{
 		background-color: rgb(83, 158, 255);
@@ -60,6 +69,7 @@
           height: 90vh
 	}
 </style>
+
 <script>
 
 client = new Paho.Client('{{mqtt_server_addr}}', Number({{mqtt_server_port}}), "client_id_" + Date.now());
@@ -76,6 +86,7 @@ class Node{
 		this.locationZ = locationZ;
 		this.editing = false;
 		this.identifying = false;
+		this.lighting = false;
 		this.anchors = new Array();
 	}
 	valueOf(){
@@ -300,38 +311,40 @@ function handler_tof(msg_tof){
 	}
 	tag = nodeList[idx];
 
-	found = false;
-	tag.anchors.forEach(tmp_anchor => {
-		if(tmp_anchor.anchor.equal(anchor)){
-			found = true;
-			tmp_anchor.tof = msg_tof["tof"];
-			clearTimeout(tmp_anchor.id);
-			tmp_anchor.id = tmp_anchor.timeout();
-			// console.log(tmp_anchor.anchor.address + ": " + tmp_anchor.tof.toString() + ": " + tmp_anchor.valid.toString());
+	A = 0.004632130984819555
+	b = 0.13043560944811894
+	anchorFound = false;
+	tag.anchors.forEach(anchorInfo => {
+		if(anchorInfo.anchor.equal(anchor)){
+			anchorFound = true;
 
-			tmp_anchor.distance = 0.003842240264187552*msg_tof["tof"] + 0.051304771935538396;
+			anchorInfo.valid = true;
+			clearTimeout(anchorInfo.id);
+			anchorInfo.id = anchorInfo.timeout();
+			anchorInfo.tof = msg_tof["tof"];
+			anchorInfo.distance = A*msg_tof["tof"] + b;
 
 			found = false;
 			shapesList.forEach(shape => {
-				if(shape.tag == tag.address && shape.anchor == tmp_anchor.anchor.address){
+				if(shape.tag == tag.address && shape.anchor == anchorInfo.anchor.address){
 					found = true;
-					shape.x0 = tmp_anchor.anchor.locationX - tmp_anchor.distance;
-					shape.y0 = tmp_anchor.anchor.locationY - tmp_anchor.distance;
-					shape.x1 = tmp_anchor.anchor.locationX + tmp_anchor.distance;
-					shape.y1 = tmp_anchor.anchor.locationY + tmp_anchor.distance;
+					shape.x0 = anchorInfo.anchor.locationX - anchorInfo.distance;
+					shape.y0 = anchorInfo.anchor.locationY - anchorInfo.distance;
+					shape.x1 = anchorInfo.anchor.locationX + anchorInfo.distance;
+					shape.y1 = anchorInfo.anchor.locationY + anchorInfo.distance;
 				}
 			});
 			
 			if(!found){
-				tmp_anchor.distance = 0.003842240264187552*msg_tof["tof"] + 0.051304771935538396;
+				anchorInfo.distance = A*msg_tof["tof"] + b;
 				shape = {
 					type: 'circle',
 					xref: 'x',
 					yref: 'y',
-					x0: tmp_anchor.anchor.locationX - tmp_anchor.distance,
-					y0: tmp_anchor.anchor.locationY - tmp_anchor.distance,
-					x1: tmp_anchor.anchor.locationX + tmp_anchor.distance,
-					y1: tmp_anchor.anchor.locationY + tmp_anchor.distance,
+					x0: anchorInfo.anchor.locationX - anchorInfo.distance,
+					y0: anchorInfo.anchor.locationY - anchorInfo.distance,
+					x1: anchorInfo.anchor.locationX + anchorInfo.distance,
+					y1: anchorInfo.anchor.locationY + anchorInfo.distance,
 					line: {
 						color: 'rgba(50, 171, 96, 1)'
 					},
@@ -348,7 +361,7 @@ function handler_tof(msg_tof){
 		}
 	});
 
-	if(!found){
+	if(!anchorFound){
 		anchor = {
 			"anchor": anchor,
 			"tof": msg_tof["tof"],
@@ -453,10 +466,91 @@ function handler_distance(msg){
 	localization(tag);
 }
 
+myNodeList = new Object();
+
+function dataUpdateNode(address, role, x, y, z){
+	if(address in myNodeList){
+		guiUpdateNodes(address, role, x, y, z);
+		myNodeList[address].x = x;
+		myNodeList[address].y = y;
+		myNodeList[address].z = z;
+		myNodeList[address].type = role;
+	}
+	else{
+		myNodeList[address] = {
+			"x" 		: x,
+			"y" 		: y,
+			"z" 		: z,
+			"type"		: role,
+			"msg"		: 0,
+			"ranges"	: Object(),
+		};
+		guiAddNodes(address, role, x, y, z);
+	}
+}
+
+function dataUpdateDistance(anchor, tag, distance){
+	if(tag in myNodeList){
+		myNodeList[tag].ranges[anchor.toString()] = {
+			"r": distance,
+			"update": true,
+			"anchor": myNodeList[anchor],
+		}
+	}
+}
+
+function handler_tag(msg){
+	dataUpdateNode(msg.a0, "ANCHOR", msg.a0x, msg.a0y, msg.a0z);
+	dataUpdateDistance(msg.a0, msg.t0, msg.a0r);
+	dataUpdateNode(msg.a1, "ANCHOR", msg.a1x, msg.a1y, msg.a1z);
+	dataUpdateDistance(msg.a1, msg.t0, msg.a1r);
+	dataUpdateNode(msg.a2, "ANCHOR", msg.a2x, msg.a2y, msg.a2z);
+	dataUpdateDistance(msg.a2, msg.t0, msg.a2r);
+	dataUpdateNode(msg.a3, "ANCHOR", msg.a3x, msg.a3y, msg.a3z);
+	dataUpdateDistance(msg.a3, msg.t0, msg.a3r);
+	dataUpdateNode(msg.t0, "TAG", 	 msg.t0x, msg.t0y, msg.t0z);
+	plotNodes(myNodeList);
+	plotCircle(myNodeList);
+}
+
+function guiAddNodes(address, role, x, y, z){
+	console.log("Add: "+ address);
+	$('#idNodeList').append(
+		[
+			{address: address, addressHex: dec2hexString(parseInt(address)), type: role, 
+				locationX: x, locationY: y, locationZ:z},
+		].map(nodeTemplate).join(''));
+	$('#node'+ address +'Card').show(300);
+	switch(role){
+		case "ANCHOR":
+			$('#node' + address + 'Select').children("option")[0].selected = true;
+			$('#node' + address + 'Select').children("option")[0].disabled = true;
+			$('#node' + address + 'Select').children("option")[1].disabled = true;
+			break;
+		case "TAG":
+			$('#node' + address + 'Select').children("option")[1].selected = true;
+			$('#node' + address + 'Select').children("option")[0].disabled = true;
+			$('#node' + address + 'Select').children("option")[1].disabled = true;
+			break;
+		default:
+			console.error("Unknown role: " + role);
+			break;
+	}
+}
+
+function guiUpdateNodes(address, role, x, y, z){
+	myNodeList[address].msg += 1;
+	$('#node' + address + 'CounterLoc').text(myNodeList[address].msg);
+	$('#node' + address + "LocationX").val(x);
+	$('#node' + address + "LocationY").val(y);
+	$('#node' + address + "LocationZ").val(z);
+}
+
 function onMessageArrived(message) {
 	try{
 		msg = JSON.parse(message.payloadString);
-		switch(msg.mavpackettype){
+		if(document.getElementById("modeSelect").value == "Bluetooth Mesh"){
+			switch(msg.mavpackettype){
 			case "LOCATION":
 				value = parseInt($('#node' + msg.dstsrc + 'CounterLoc').text());
 				if(!isNaN(value)){
@@ -484,9 +578,15 @@ function onMessageArrived(message) {
 				}
 				handler_tof(msg);
 				break;
-			default:
-				console.error("UNKNOWN MSG: "+message.payloadString);
+			}
+		}
+		else if(document.getElementById("modeSelect").value == "Wi-Fi"){
+			switch(msg.mavpackettype){
+			case "TAG":
+				// console.log(msg);
+				handler_tag(msg);
 				break;
+			}
 		}
 	}
 	catch(error){
@@ -534,11 +634,10 @@ const nodeTemplate = ({ address, addressHex, type, locationX, locationY, locatio
                 </div>
             </div>
 			<div class="row col-sm-12 no-gutters pt-1">
-				<div class="col-sm-4 p-2">
-					<button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}BtnIdentify" onclick="onIdentifyBtnClick('${address}')">Identify</button>
-				</div>
-                <div class="col-sm-4 p-2"><button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}BtnEdit" onclick="onEditBtnClick('${address}')">Edit</button></div>
-				<div class="col-sm-4 p-2"><button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}Update" onclick="onUpdateBtnClick('${address}')">Update</button></div>
+				<div class="col-sm-3 p-1"><button type="button" class="btn btn-outline-primary btn-block" id="node${address}BtnIdentify" onclick="onIdentifyBtnClick('${address}')">Identify</button></div>
+				<div class="col-sm-3 p-1"><button type="button" class="btn btn-outline-primary btn-block" id="node${address}BtnBulb" onclick="onBulbBtnClick('${address}')">Bulb</button></div>
+                <div class="col-sm-3 p-1"><button type="button" class="btn btn-outline-primary btn-block" id="node${address}BtnEdit" onclick="onEditBtnClick('${address}')">Edit</button></div>
+				<div class="col-sm-3 p-1"><button type="button" class="btn btn-outline-primary btn-block" id="node${address}Update" onclick="onUpdateBtnClick('${address}')">Update</button></div>
             </div>
         </div>
     </div>
@@ -547,7 +646,7 @@ const nodeTemplate = ({ address, addressHex, type, locationX, locationY, locatio
 
 function nodeUpdate(idx, node){
 	nodeList[idx].type = node.type;
-	if(node.type == anchor){
+	if(node.type == "ANCHOR"){
 		nodeList[idx].locationX = node.locationX;
 		nodeList[idx].locationY = node.locationY;
 		nodeList[idx].locationZ = node.locationZ;
@@ -667,7 +766,38 @@ function onIdentifyBtnClick(address){
 	publish("{{topic_publish}}", cmd)
 }
 
+function onBulbBtnClick(address){
+	console.log("onBulbBtnClick: " + address);
+
+	let idx = 0;
+	for(idx=0; idx<nodeList.length; idx++){
+		if(address == nodeList[idx].address) break;
+	}
+	let node = nodeList[idx];
+
+	address = parseInt(address);
+	if(isNaN(address)){
+		toastError("Invalid node address");
+		return;
+	}
+
+	if(node.lighting){
+		node.lighting = false;
+		$('#node' + address + 'BtnBulb').text('OFF').button("refresh");
+		// $('#node' + address + 'Identifying').hide();
+		cmd = '{"mavpackettype": "ONOFF", "dstsrc": '+ address +', "type": "SET", "value": 0}'
+	}
+	else{
+		node.lighting = true;
+		$('#node' + address + 'BtnBulb').text('ON').button("refresh");
+		// $('#node' + address + 'Identifying').show();
+		cmd = '{"mavpackettype": "ONOFF", "dstsrc": '+ address +', "type": "SET", "value": 2}'
+	}
+	publish("{{topic_publish}}", cmd)
+}
+
 </script>
+
 <script>
 
 	var plotAnchors = {
@@ -743,5 +873,49 @@ function onIdentifyBtnClick(address){
 		Plotly.update('map', updateNode, updateLayout, [0, 1]);
 	};
 
+	function plotNodes(nodeList){
+		updateNode = {x: [[], []], y: [[], []]};
+		updateLayout = {};
+		for (const [address, value] of Object.entries(nodeList)) {
+			if(value.type == "ANCHOR"){
+				updateNode.x[0].push(value.x);
+				updateNode.y[0].push(value.y);
+			}
+			else if(value.type == "TAG"){
+				updateNode.x[1].push(value.x);
+				updateNode.y[1].push(value.y);
+			}
+		}
+		Plotly.update('map', updateNode, updateLayout, [0, 1]);
+	};
+
+	function plotCircle(nodeList){
+		shapes = Array();
+		for (const [address, node] of Object.entries(nodeList)) {
+			if(node.type == "TAG"){
+				for (const [address, range] of Object.entries(node.ranges)){
+					r = Math.sqrt(Math.abs(range.r**2 - (range.anchor.z-node.z)**2));
+					shapes.push({
+						"x0": range.anchor.x - r,
+						"y0": range.anchor.y - r,
+						"x1": range.anchor.x + r,
+						"y1": range.anchor.y + r,
+						type: 'circle',
+						xref: 'x',
+						yref: 'y',
+						line: {
+							color: 'rgba(50, 171, 96, 1)'
+						},
+					});
+				}
+			}
+		}
+		updateLayout = {
+			shapes: shapes
+		};
+		Plotly.update('map', null, updateLayout, 0);
+	}
+
 </script>
+
 </html>

@@ -1,25 +1,32 @@
 
 syscfg.defs:
+    APP_RTLS_GATEWAY_TASK_STACK_SIZE:
+        description: 'Size of task stack'
+        value: 256
+    APP_RTLS_GATEWAY_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 200
+
     APP_RTLS_LOCATION_TASK_STACK_SIZE:
         description: 'Size of task stack'
         value: 256
     APP_RTLS_LOCATION_TASK_PRIORITY:
         description: 'Priority of task'
-        value: 214
+        value: 201
 
     APP_RTLS_DISTANCE_TASK_STACK_SIZE:
         description: 'Size of task stack'
         value: 256
     APP_RTLS_DISTANCE_TASK_PRIORITY:
         description: 'Priority of task'
-        value: 215
+        value: 202
 
     TASK_LED_TASK_STACK_SIZE:
         description: 'Size of task stack'
-        value: 64
+        value: 32
     TASK_LED_TASK_PRIORITY:
         description: 'Priority of task'
-        value: 216
+        value: 203
 
     NODE_START_SLOT_ID:
         description: >
@@ -33,17 +40,17 @@ syscfg.defs:
 syscfg.vals:
     LOG_LEVEL: 5
 
-    # CONSOLE_UART: false
-    # CONSOLE_RTT: true
-    # RTT_TERMINAL_BUFFER_SIZE_UP: 2048
-    # RTT_TERMINAL_BUFFER_SIZE_DOWN: 128
-    # CONSOLE_ECHO: false
+    CONSOLE_UART: false
+    CONSOLE_RTT: true
+    RTT_TERMINAL_BUFFER_SIZE_UP: 128
+    RTT_TERMINAL_BUFFER_SIZE_DOWN: 128
+    CONSOLE_ECHO: false
 
-    CONSOLE_RTT: false
-    CONSOLE_UART: true
-    CONSOLE_UART_BAUD: 115200
-    CONSOLE_UART_TX_BUF_SIZE: 1024
-    CONSOLE_UART_RX_BUF_SIZE: 256
+    # CONSOLE_RTT: false
+    # CONSOLE_UART: true
+    # CONSOLE_UART_BAUD: 115200
+    # CONSOLE_UART_TX_BUF_SIZE: 1024
+    # CONSOLE_UART_RX_BUF_SIZE: 256
 
     # Shell
     SHELL_TASK: 1
@@ -66,7 +73,7 @@ syscfg.vals:
     UWB_CLI_BACKTRACE: 0
 
     UWB_CCP_ENABLED: 1
-    UWB_CCP_PERIOD: ((uint32_t)1000000)
+    UWB_CCP_PERIOD: ((uint32_t)100000)
     UWB_CCP_MAX_CASCADE_RPTS: 2
     
     ## Where to store config

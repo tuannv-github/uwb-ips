@@ -57,6 +57,10 @@ struct _rtls_tdma_instance_t {
     
     rtls_tdma_cb_t rtls_tdma_cb;
 
+    float x;
+    float y;
+    float z;
+
     rtls_tdma_node_t nodes[MYNEWT_VAL(TDMA_NSLOTS)]; // nodes[0] save my node info
 };
 
