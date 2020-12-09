@@ -1,4 +1,24 @@
 syscfg.defs:
+  TDMA_ENABLED:
+    description: 'Enable TDMA Services'
+    value: 1
+    restrictions: OS_LATENCY
+  TDMA_NSLOTS:
+    description: 'Enable TDMA Services'
+    value: 20
+  TDMA_SANITY_INTERVAL:
+    description: 'Sanity watchdog timeout (seconds)'
+    value: 0
+  TDMA_STATS:
+    description: 'Enable statistics for the tdma module'
+    value: 1
+  TDMA_MAX_SLOT_DELAY_US:
+    description: 'Drop slots if they will start later than this many us late'
+    value: 500
+  TDMA_TASK_STACK_SZ:
+    description: 'Size of tdma task stack'
+    value: 256
+
   UWB_BCN_SLOT_MAX:
     description: 'BCN slot is slot from 1 to UWB_BCN_SLOT_MAX, slot 0 is used for ccp'
     value: 5

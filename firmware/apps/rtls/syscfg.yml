@@ -1,46 +1,32 @@
 
 syscfg.defs:
-    APP_SW_TASK_STACK_SZ:
+    APP_RTLS_GATEWAY_TASK_STACK_SIZE:
         description: 'Size of task stack'
-        value: 512
-    APP_SW_TASK_PRIORITY:
+        value: 256
+    APP_RTLS_GATEWAY_TASK_PRIORITY:
         description: 'Priority of task'
-        value: 210
+        value: 200
 
-    APP_ROOT_TASK_STACK_SZ:
+    APP_RTLS_LOCATION_TASK_STACK_SIZE:
         description: 'Size of task stack'
-        value: 128
-    APP_ROOT_TASK_PRIORITY:
+        value: 256
+    APP_RTLS_LOCATION_TASK_PRIORITY:
         description: 'Priority of task'
-        value: 211
+        value: 201
 
-    APP_GATEWAY_DOWNLINK_TASK_STACK_SZ:
+    APP_RTLS_DISTANCE_TASK_STACK_SIZE:
         description: 'Size of task stack'
-        value: 128
-    APP_GATEWAY_DOWNLINK_TASK_PRIORITY:
+        value: 256
+    APP_RTLS_DISTANCE_TASK_PRIORITY:
         description: 'Priority of task'
-        value: 212
+        value: 202
 
-    APP_GATEWAY_UPLINK_TASK_STACK_SZ:
+    TASK_LED_TASK_STACK_SIZE:
         description: 'Size of task stack'
-        value: 512
-    APP_GATEWAY_UPLINK_TASK_PRIORITY:
-        description: 'Priority of task'
-        value: 213
-    APP_GATEWAY_UPLINK_MAV_BUFFER_SIZE:
-        description: 'Buffer size'
         value: 32
-
-    APP_RTLS_TASK_STACK_SIZE:
-        description: 'Size of task stack'
-        value: 512
-    APP_RTLS_TASK_PRIORITY:
+    TASK_LED_TASK_PRIORITY:
         description: 'Priority of task'
-        value: 214
-
-    RTR_ROLE:
-        description: 'Priority of task'
-        value: RTR_ANCHOR
+        value: 203
 
     NODE_START_SLOT_ID:
         description: >
@@ -56,17 +42,15 @@ syscfg.vals:
 
     CONSOLE_UART: false
     CONSOLE_RTT: true
-    RTT_TERMINAL_BUFFER_SIZE_UP: 2048
+    RTT_TERMINAL_BUFFER_SIZE_UP: 128
     RTT_TERMINAL_BUFFER_SIZE_DOWN: 128
     CONSOLE_ECHO: false
 
-    # CONSOLE_UART: true
     # CONSOLE_RTT: false
+    # CONSOLE_UART: true
     # CONSOLE_UART_BAUD: 115200
     # CONSOLE_UART_TX_BUF_SIZE: 1024
     # CONSOLE_UART_RX_BUF_SIZE: 256
-    # RTT_TERMINAL_BUFFER_SIZE_UP: 1024
-    # RTT_TERMINAL_BUFFER_SIZE_DOWN: 256
 
     # Shell
     SHELL_TASK: 1
@@ -89,7 +73,7 @@ syscfg.vals:
     UWB_CLI_BACKTRACE: 0
 
     UWB_CCP_ENABLED: 1
-    UWB_CCP_PERIOD: ((uint32_t)1000000)
+    UWB_CCP_PERIOD: ((uint32_t)100000)
     UWB_CCP_MAX_CASCADE_RPTS: 2
     
     ## Where to store config

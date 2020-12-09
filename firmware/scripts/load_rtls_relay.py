@@ -31,4 +31,4 @@ def main(argv):
             run_cmd(emulator.SerialNumber, argv[0])
 
 if __name__ == "__main__":
-   main(["gateway_pca10040"])
+   main(["relay"])
