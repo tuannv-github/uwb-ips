@@ -85,6 +85,7 @@ serial_write_str(char *chr){
     while(*chr!=0){
         rbuf_put(&g_serial.rbuf_tx, *chr++);
     }
+    uart_start_tx(g_serial.uart_dev);
 }
 
 void 
@@ -94,6 +95,7 @@ serial_write_line(char *line){
     }
     rbuf_put(&g_serial.rbuf_tx, '\r');
     rbuf_put(&g_serial.rbuf_tx, '\n');
+    uart_start_tx(g_serial.uart_dev);
 }
 
 void
