@@ -1,0 +1,134 @@
+\ProvidesPackage{sty/feeehcmut}
+
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{indentfirst}
+\usepackage{geometry}
+\usepackage{graphicx}
+
+\def\thesislayout
+{
+	\geometry{
+        left=20mm,
+        right=20mm,
+        top=20mm,
+        bottom=20mm,
+        heightrounded
+	}
+}
+
+\usepackage{ltxcmds}
+\usepackage{fixltx2e}
+\usepackage{doc}
+\newif\ifallloaded
+\newcommand{\IfPackagesLoaded}[3]
+{
+    \allloadedtrue
+    \@for\@tempa:=#1\do{\ltx@ifpackageloaded{\@tempa}{}{\allloadedfalse}}
+    \ifallloaded #2\else #3\fi
+}
+  
+\newcommand{\@department}{FACULTY OF ELECTRICAL AND ELECTRONIC ENGINEERING}
+\newcommand{\department}[1]{\renewcommand{\@department}{#1}}
+
+\newcommand{\@thesistitle}{THESIS TITLE}
+\newcommand{\thesistitle}[1]{\renewcommand{\@thesistitle}{#1}}
+
+\newcommand{\@student}{First Student - 123456789\\[3pt]
+                       Second Student - 123456789}
+\newcommand{\student}[1]{\renewcommand{\@student}{#1}}
+
+\newcommand{\@reviewer}{Name Of Reviewer}
+\newcommand{\reviewer}[1]{\renewcommand{\@reviewer}{#1}}
+	
+\newcommand{\@supervisor}{Name Of Supervisor}
+\newcommand{\supervisor}[1]{\renewcommand{\@supervisor}{#1}}
+
+\newcommand{\@ttime}{\today}
+\newcommand{\cttime}[1]{\renewcommand{\@ttime}{#1}}
+
+\newcommand{\@thesistype}{Graduation Thesis}
+\newcommand{\thesistype}[1]{\renewcommand{\@thesistype}{#1}}
+
+\newcommand{\coverpage}
+{
+    \pagestyle{empty}
+    \begin{minipage}[b][3cm][t]{16cm}
+        % Draw border
+        \begin{tikzpicture}[remember picture, overlay]
+            % Thin line
+            \draw [line width=1pt]
+                ($ (current page.north west) + (1.5cm,-1.5cm) $)
+                rectangle
+                ($ (current page.south east) + (-1.5cm,1.5cm) $);
+            % Thick line
+            \draw [line width=3pt]
+                ($ (current page.north west) + (1.65cm,-1.65cm) $)
+                rectangle
+                ($ (current page.south east) + (-1.65cm,1.65cm) $); 
+        \end{tikzpicture}
+
+        \begin{center}
+            \begin{large}
+                \IfPackagesLoaded{vietnam}
+                    {ĐẠI HỌC QUỐC GIA THÀNH PHỐ HỒ CHÍ MINH\\
+                     TRƯỜNG ĐẠI HỌC BÁCH KHOA}
+                    {VIETNAM NATIONAL UNIVERSITY HO CHI MINH CITY\\
+                     HO CHI MINH CITY UNIVERSITY OF TECHNOLOGY}\\
+                \@department\\
+            \end{large}
+            \textbf{*******************************************************}\\[2cm]
+            \includegraphics[scale=0.5]{sty/logoBK.png}\\[1.5cm]
+                {\fontsize{15}{1}\selectfont \@thesistype }\\[2cm]
+                {\fontsize{20}{24}\selectfont \textbf{\parbox[c][3cm]{15cm}{\centering \@thesistitle}} }\\[3.2cm]
+        \end{center}
+
+        {
+            \fontsize{15}{1}\selectfont 
+            \hspace{8cm}\parbox[t][4cm]{10cm}
+            {
+                \IfPackagesLoaded{vietnam}
+                    {GVHD: \parbox[t]{8cm}{\@supervisor}\\[3pt]
+        	         GVPB: \@reviewer\\[3pt]
+        	         Sinh viên: \parbox[t][1.5cm]{10cm}{\@student}
+        	        }
+        	        {Supervior: \parbox[t]{8cm}{\@supervisor}\\[3pt]
+        	         Reviewer: \@reviewer\\[4pt]
+        	         Student: \parbox[t][1.5cm]{10cm}{\@student}
+        	        }
+            }
+        }
+        
+        \vspace{0.6cm}
+        \begin{center}
+            \IfPackagesLoaded{vietnam}
+                {{\fontsize{14}{1}\selectfont TP. HỒ CHÍ MINH, \@ttime }}
+                {{\fontsize{14}{1}\selectfont Ho Chi Minh City, \@ttime }}\\
+        \end{center}
+
+    \end{minipage}
+}
+
+\newcommand*{\SignatureAndDate}[1]{%
+    \par\noindent\makebox[.35\linewidth]{\hrulefill} \hfill\makebox[.5\linewidth]{\hrulefill}%
+    \par\noindent\makebox[.35\linewidth][l]{Date}      \hfill\makebox[.5\linewidth][l]{#1}%
+}%
+\newcommand{\CertificationPage}{
+% \begin{minipage}[b][3.25cm][t]{16cm}
+	\thispagestyle{plain}
+	\begin{center}\sloppy
+		The undersigned have examined the thesis entitled \textit{TITLE} presented by \textit{\@author}, a candidate for the degree of \textit{Master in Automation and Control Engineering} and hereby certify that it is worthy of acceptance.
+	\end{center}
+
+	\vspace{3cm}
+
+	\SignatureAndDate{Head of Department}\vspace{2.5cm}
+	
+	\SignatureAndDate{Supervisor's  name}\vspace{2.5cm}
+
+	\SignatureAndDate{Committee member's name}\vspace{2.5cm}
+
+	\SignatureAndDate{Committee member's name} 
+% \end{minipage}
+}
+

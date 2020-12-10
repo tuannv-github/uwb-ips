@@ -1,19 +1,25 @@
-\documentclass{book}
+\documentclass[oneside]{book}
 
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
+
+\usepackage{siunitx}
+\usepackage{lmodern}
 \usepackage{graphicx}
 \usepackage{subfiles}
 \usepackage{biblatex}
-\usepackage{hyperref}
-\usepackage{microtype}
-\usepackage{xcolor,colortbl}
 \usepackage{csquotes}
-\usepackage{dirtytalk}
 \usepackage{tabularx}
 \usepackage{multirow}
-\usepackage{siunitx}
-\usepackage[top=3cm,bottom=3cm,left=2cm,right=2cm,headsep=10pt,letterpaper]{geometry} 
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{bytefield}
+\usepackage{microtype}
+\usepackage{dirtytalk}
+\usepackage{xcolor,colortbl}
+\usepackage[hidelinks]{hyperref}
+
+\usepackage{sty/feeehcmut}
 
 \graphicspath{{imgs/}}
 \bibliography{references.bib}
@@ -26,8 +32,44 @@
 \newcolumntype{L}{>{\arraybackslash}X}
 \newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1\textwidth}}
 
-\begin{document}
 
-\subfile{template.tex}
+\thesistype{GRADUATION THESIS}
+\thesistitle{DESIGN AND IMPLEMENTATION OF INDOOR LOCALIZATION SYSTEM USING UWB AND MESH NETWORK}
+\supervisor{Dr. Vo Que Son}
+\reviewer{Dr. Vo Que Son}
+\student{Ngo Van Tuan - 1613861}
+\thesislayout
+
+\newlist{abbrv}{itemize}{1}
+\setlist[abbrv,1]{label=,labelwidth=1in,align=parleft,itemsep=0.1\baselineskip,leftmargin=!}
+
+\begin{document}
+\coverpage
+\tableofcontents
+\cleardoublepage 
+
+\chapter*{Acknowledgements}
+\addcontentsline{toc}{chapter}{Acknowledgements}
+This is acknowledgement chapter.
+
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+This is abstract chapter.
+
+\addcontentsline{toc}{chapter}{List of Figures}
+\listoffigures
+
+\addcontentsline{toc}{chapter}{List of Tables}
+\listoftables
+
+\chapter*{Symbols and acronyms}
+\addcontentsline{toc}{chapter}{Symbols and Acronyms}
+
+\begin{abbrv}
+    \item[ADL]                   Activities of Daily Life
+    \item[WHO]                   World Health Organization
+\end{abbrv}
+
+\subfile{firmware.tex}
 
 \end{document}
