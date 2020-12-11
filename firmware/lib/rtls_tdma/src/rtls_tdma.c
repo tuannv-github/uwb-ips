@@ -103,6 +103,7 @@ static void
 node_add_me(rtls_tdma_instance_t *rti, uint16_t idx){
     /* Change my index */
     rti->slot_idx = idx;
+    rti->dev_inst->slot_id = idx;
     /* Copy slot map from temp slot 0 to new slot */ 
     rti->nodes[idx].slot_map = rti->nodes[0].slot_map | ((slot_map_t)0x01 << idx);
     /* Update address */

@@ -79,6 +79,7 @@ STATS_NAME_START(uwb_ccp_stat_section)
     STATS_NAME(uwb_ccp_stat_section, rx_timeout)
     STATS_NAME(uwb_ccp_stat_section, sem_timeout)
     STATS_NAME(uwb_ccp_stat_section, reset)
+    STATS_NAME(uwb_ccp_stat_section, see_another_master)
 STATS_NAME_END(uwb_ccp_stat_section)
 
 #define CCP_STATS_INC(__X) STATS_INC(ccp->stat, __X)
@@ -613,13 +614,6 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
 {
     struct uwb_ccp_instance * ccp = (struct uwb_ccp_instance *)cbs->inst_ptr;
 
-    if (ccp->config.role == CCP_ROLE_MASTER && inst->fctrl_array[0] == FCNTL_IEEE_BLINK_CCP_64) {
-        if(ccp->master_role_request) {
-            ccp->master_role_request = false;
-        }
-        return true;
-    }
-
     if (inst->fctrl_array[0] != FCNTL_IEEE_BLINK_CCP_64){
         if(dpl_sem_get_count(&ccp->sem) == 0){
             /* We're hunting for a ccp but received something else,
@@ -631,6 +625,28 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
         return false;
     }
 
+    uwb_ccp_frame_t * frame = ccp->frames[(ccp->idx+1)%ccp->nframes];  // speculative frame advance
+    if (inst->frame_len >= sizeof(uwb_ccp_blink_frame_t) && inst->frame_len <= sizeof(frame->array)){
+        memcpy(frame->array, inst->rxbuf, sizeof(uwb_ccp_blink_frame_t));
+    }
+    else{
+        return true;
+    }
+    
+    if (ccp->config.role & CCP_ROLE_MASTER) {
+        if(ccp->master_role_request) {
+            ccp->master_role_request = false;
+        }
+        else{
+            // if(frame->euid < ccp->dev_inst->euid){
+                ccp->config.role = CCP_ROLE_MASTER;
+                dpl_eventq_put(&ccp->eventq, &ccp->change_role_event);
+                CCP_STATS_INC(see_another_master);
+            // }
+        }
+        return true;
+    }
+
     if(dpl_sem_get_count(&ccp->sem) != 0){
         //unsolicited inbound
         CCP_STATS_INC(rx_unsolicited);
@@ -639,13 +655,6 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
 
     DIAGMSG("{\"utime\": %"PRIu32",\"msg\": \"ccp:rx_complete_cb\"}\n",
             dpl_cputime_ticks_to_usecs(dpl_cputime_get32()));
-
-    uwb_ccp_frame_t * frame = ccp->frames[(ccp->idx+1)%ccp->nframes];  // speculative frame advance
-
-    if (inst->frame_len >= sizeof(uwb_ccp_blink_frame_t) && inst->frame_len <= sizeof(frame->array))
-        memcpy(frame->array, inst->rxbuf, sizeof(uwb_ccp_blink_frame_t));
-    else
-        return true;
 
     if (inst->status.lde_error)
         return true;
@@ -1203,6 +1212,7 @@ ccp_change_role(struct dpl_event * ev)
         }
         else
         {
+            ccp->my_master = 0;
             uwb_ccp_start(ccp, CCP_ROLE_SLAVE);
             hal_gpio_write(MYNEWT_VAL(RTLS_CPP_MASTER_LED), MYNEWT_VAL(RTLS_CPP_MASTER_LED_OFF));
             hal_gpio_write(MYNEWT_VAL(RTLS_CPP_SLAVE_LED), MYNEWT_VAL(RTLS_CPP_MASTER_LED_ON));

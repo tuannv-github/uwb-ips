@@ -68,6 +68,7 @@ STATS_SECT_START(uwb_ccp_stat_section)
     STATS_SECT_ENTRY(rx_timeout)
     STATS_SECT_ENTRY(sem_timeout)
     STATS_SECT_ENTRY(reset)
+    STATS_SECT_ENTRY(see_another_master)
 STATS_SECT_END
 #endif
 
