@@ -3,6 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 
+\usepackage{float}
 \usepackage{siunitx}
 \usepackage{lmodern}
 \usepackage{graphicx}
@@ -31,7 +32,6 @@
 \newcolumntype{w}{>{\columncolor{white}}c}
 \newcolumntype{L}{>{\arraybackslash}X}
 \newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1\textwidth}}
-
 
 \thesistype{GRADUATION THESIS}
 \thesistitle{DESIGN AND IMPLEMENTATION OF INDOOR LOCALIZATION SYSTEM USING UWB AND MESH NETWORK}
@@ -64,12 +64,12 @@ This is abstract chapter.
 
 \chapter*{Symbols and acronyms}
 \addcontentsline{toc}{chapter}{Symbols and Acronyms}
-
 \begin{abbrv}
     \item[ADL]                   Activities of Daily Life
     \item[WHO]                   World Health Organization
 \end{abbrv}
 
+\subfile{introduction.tex}
 \subfile{firmware.tex}
 
 \end{document}

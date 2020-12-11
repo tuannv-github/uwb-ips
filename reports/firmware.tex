@@ -9,7 +9,7 @@ The ranging system is implemented follow 3 layers model as shown in figure \ref{
     \item TDMA (Time Division Multiple Access): Each superframe is divided into multiple slots. TDMA layer provides slot service for its upper layer. 
     \item TWR (Two Way Ranging) layer runs ranging session in the time slot provided by TDMA layer.
 \end{itemize}
-\begin{figure}[ht]
+\begin{figure}[H]
     \begin{center}
         \includegraphics[scale=0.3]{ranging_layered_architecture}
     \end{center}
@@ -28,7 +28,7 @@ Three CCP roles are defined, allowing nodes to sync with others: Master, Slave, 
 \end{itemize}
 \subsection{CCP packet format}
 
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
     \begin{bytefield}[bitwidth=1.1em]{32}
         \bitheader{0-31} \\
@@ -71,7 +71,7 @@ In the TDMA layer, a jointed node must take one of two roles: Anchor or Tag.
 
 \subsection{TDMA slot}
 The superframe is divided into multiple slots as shown in figure \ref{fig:tdma_slot}.
-\begin{figure}[ht]
+\begin{figure}[H]
     \begin{center}
         \includegraphics[scale=0.4]{tdma_slot.png}
     \end{center}
@@ -94,7 +94,7 @@ The message include two parts: IEEE frame header and payload:
     \item IEEE fame header conforms the 802.15.4-2016 standard
     \item Payload field may contain more than one message. Each message have TLV (type-length-value) format as shown in figure \ref{fig:tdma_frame_payload}. Currently, three message types are defined: \textbf{Slot request/response}, \textbf{Location}, \textbf{Slot map}. The value of these message type are illustrated in figure \ref{fig:slot_request_response_message}, \ref{fig:location_value}, \ref{fig:slot_map_message}.
 \end{itemize}
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
     \begin{bytefield}[bitwidth=1.1em]{32}
         \bitheader{0-31} \\
@@ -124,7 +124,7 @@ The message include two parts: IEEE frame header and payload:
     \label{fig:tdma_frame_payload}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
     \begin{bytefield}[bitwidth=2em]{16}
         \bitheader{0-15} \\
@@ -135,7 +135,7 @@ The message include two parts: IEEE frame header and payload:
     \label{fig:slot_request_response_message}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
     \begin{bytefield}[bitwidth=1.1em]{32}
         \bitheader{0-31} \\
@@ -148,7 +148,7 @@ The message include two parts: IEEE frame header and payload:
     \label{fig:location_value}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[H]
     \centering
     \begin{bytefield}[bitwidth=1.1em]{32}
         \bitheader{0-31} \\
@@ -166,7 +166,7 @@ The message include two parts: IEEE frame header and payload:
 The TDMA state diagram is shown in figure \ref{fig:tdma_state_diagram}. 
 The master node is the initiator of the network. It has to be an anchor and occupy BCN slot 1. Since there is no jointed node before, the master node does not need to ask others. Hence, after ccp layer provides first synchronization, all nodes begin with REQT state except for the master node. 
 
-\begin{figure}[ht]
+\begin{figure}[H]
     \begin{center}
         \includegraphics[scale=0.6]{tdma_state_diagram.png}
     \end{center}
@@ -176,7 +176,7 @@ The master node is the initiator of the network. It has to be an anchor and occu
 
 \subsubsection{REQT state flow chart}
 The REQT state implementation is illustrated in the follow chart \ref{fig:REQT_state_diagram}.
-\begin{figure}[ht]
+\begin{figure}[H]
     \begin{center}
         \includegraphics[scale=0.33]{REQT_flow_chart.png}
     \end{center}
@@ -186,7 +186,7 @@ The REQT state implementation is illustrated in the follow chart \ref{fig:REQT_s
 
 \subsubsection{JOINTED state flow chart}
 The JOINTED state implementation is illustrated in the follow chart \ref{fig:JOINTED_state_diagram}
-\begin{figure}[ht]
+\begin{figure}[H]
     \begin{center}
         \includegraphics[scale=0.32]{JOINTED_state_flow_chart.png}
     \end{center}
@@ -195,4 +195,12 @@ The JOINTED state implementation is illustrated in the follow chart \ref{fig:JOI
 \end{figure}
 
 \section{Two way ranging (TWR)}
+By using TWR, the need of synchronized clocks is eliminated since both the round-trip time(s) and the reply time(s) can be calculated separately using timestamps derived from each device.
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.32]{single_sided_two_way_ranging.png}
+    \end{center}
+    \caption{Single-sided two-way ranging}
+    \label{fig:single_sided_two_way_ranging}
+\end{figure}
 \end{document}

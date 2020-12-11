@@ -10,7 +10,8 @@
 		"latex-workshop.latex.rootFile.doNotPrompt": true,
 		"cSpell.words": [
 			"superframes",
-			"sync"
+			"sync",
+			"unilateration"
 		]
 	}
 }
