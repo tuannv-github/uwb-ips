@@ -257,7 +257,7 @@ rtls_tdma_start(rtls_tdma_instance_t *rti, struct uwb_dev* udev){
         rtls_ccp_start_role(rti->tdma->ccp, CCP_ROLE_SLAVE);
     }
     else if(rti->role == RTR_ANCHOR){
-        rtls_ccp_start_role(rti->tdma->ccp, CCP_ROLE_MASTER | CCP_ROLE_SLAVE);
+        rtls_ccp_start_role(rti->tdma->ccp, CCP_ROLE_MASTER | CCP_ROLE_SLAVE | CCP_ROLE_RELAY);
     }
     else{
         printf("Undefined RTR role\n");

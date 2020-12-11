@@ -1184,7 +1184,7 @@ ccp_change_role(struct dpl_event * ev)
         ccp->master_role_request = true;
 
         uint16_t cnt = 0;
-        while(cnt < MYNEWT_VAL(CCP_MASTER_REQUEST) && ccp->master_role_request){
+        while(cnt < MYNEWT_VAL(UWB_CCP_PERIOD)/10000 && ccp->master_role_request){
             cnt++;
             printf("\33[2K\rTry to be master time: %d", cnt);
             uwb_set_rx_timeout(inst, MYNEWT_VAL(UWB_CCP_LONG_RX_TO) + inst->euid%MYNEWT_VAL(UWB_CCP_LONG_RX_TO));
