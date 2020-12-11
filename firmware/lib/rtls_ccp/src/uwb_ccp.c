@@ -659,11 +659,16 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     if (inst->status.lde_error)
         return true;
 
-    if(ccp->my_master == 0){
-        ccp->my_master = frame->euid;
-    }
-    else if(ccp->my_master != frame->euid){
-        return true;
+    if(ccp->config.role == CCP_ROLE_SLAVE){
+        if(ccp->my_master == 0){
+            ccp->my_master = frame->euid;
+        }
+        else if(ccp->my_master != frame->euid){
+            ccp->config.role = CCP_ROLE_MASTER;
+            dpl_eventq_put(&ccp->eventq, &ccp->change_role_event);
+            CCP_STATS_INC(see_another_master);
+            return true;
+        }
     }
 
 #if MYNEWT_VAL(UWB_CCP_TEST_CASCADE_RPTS)
