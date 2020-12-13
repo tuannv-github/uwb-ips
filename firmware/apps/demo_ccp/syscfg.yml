@@ -53,6 +53,6 @@ syscfg.vals:
 
     UWB_PKG_INIT_LOG: 0
     RTLS_CPP_VERBOSE: 1
-    OS_LATENCY: 1000
+    OS_LATENCY: 10000
     GPIO_AS_PIN_RESET: 1
     

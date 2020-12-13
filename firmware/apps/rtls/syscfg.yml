@@ -105,4 +105,5 @@ syscfg.vals:
     UWBCFG_DEF_FRAME_FILTER: '"0xF"'
 
     CELL_ENABLED: 0
+    OS_LATENCY: 3000
     GPIO_AS_PIN_RESET: 1

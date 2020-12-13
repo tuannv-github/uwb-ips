@@ -1,32 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
-/**
- * @file uwb_ccp.h
- * @author UWB Core <uwbcore@gmail.com>
- * @date 2018
- *
- * @brief clock calibration packets
- * @details This is the ccp base class which utilises the functions to enable/disable the configurations related to ccp.
- *
- */
-
 #ifndef _UWB_CCP_H_
 #define _UWB_CCP_H_
 
@@ -186,16 +157,14 @@ struct uwb_ccp_instance {
     uint16_t nframes;                               //!< Number of buffers defined to store the data
     uint16_t idx;                                   //!< Circular buffer index pointer
     uint8_t seq_num;                                //!< Clock Master reported sequence number
-    uint8_t missed_frames;                          //!< Num missed ccp-frames since last sync
-    struct hal_timer timer;                         //!< Timer structure
+    struct hal_timer master_slave_timer;                         //!< Timer structure
     struct dpl_eventq eventq;                       //!< Event queues
-    struct dpl_event timer_event;                   //!< Event callback
+    struct dpl_event master_slave_event;                   //!< Event callback
     struct dpl_task task_str;                       //!< Task structure
     uint8_t task_prio;                              //!< Priority based task
     uint16_t blink_frame_duration;                  //!< CCP blink duration in uus
     dpl_stack_t task_stack[MYNEWT_VAL(UWB_CCP_TASK_STACK_SZ)]
         __attribute__((aligned(DPL_STACK_ALIGNMENT))); //!< Task stack size
-    uint16_t rx_timeout_acc;                            //!< Slave rx timeout accumulator
     struct dpl_event change_role_event;                 //!< Event used to change role
     uint64_t my_master;                                 //!< Address of network master
     bool master_role_request;                            //!< Request for master role has been sent
