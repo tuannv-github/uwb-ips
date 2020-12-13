@@ -6,9 +6,6 @@ syscfg.defs:
         value: 1
         restrictions: UWB_CCP_PERIOD
         restrictions: XTALT_GUARD
-    UWB_CCP_VERBOSE:
-        description: 'Show debug output from postprocess'
-        value: 0
     UWB_CCP_VALID_THRESHOLD:
         description: 'Consider CCP valid once this many packets have been received (>=1)'
         value: 2
@@ -54,6 +51,8 @@ syscfg.defs:
         description: 'Number of rx timeout events in slave mode before turning into master mode'
         value: 10
 
+    RTLS_CPP_VERBOSE:
+        value: 0
     RTLS_CPP_USE_LED:
         description: 'Use led to indicate master or slave role'
         value: 1

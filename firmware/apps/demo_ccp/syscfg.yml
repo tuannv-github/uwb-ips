@@ -6,13 +6,19 @@ syscfg.defs:
 syscfg.vals:
     LOG_LEVEL: 5
 
-    CONSOLE_UART: false
-    CONSOLE_RTT: true
-    CONSOLE_HISTORY_SIZE: 8
-    RTT_TERMINAL_BUFFER_SIZE_UP: 1024
-    RTT_TERMINAL_BUFFER_SIZE_DOWN: 256
-    CONSOLE_ECHO: false
+    # CONSOLE_UART: false
+    # CONSOLE_RTT: true
+    # CONSOLE_HISTORY_SIZE: 8
+    # RTT_TERMINAL_BUFFER_SIZE_UP: 1024
+    # RTT_TERMINAL_BUFFER_SIZE_DOWN: 256
+    # CONSOLE_ECHO: false
     
+    CONSOLE_RTT: false
+    CONSOLE_UART: true
+    CONSOLE_UART_BAUD: 115200
+    CONSOLE_UART_TX_BUF_SIZE: 1024
+    CONSOLE_UART_RX_BUF_SIZE: 256
+
     # Shell
     SHELL_TASK: 1
     SHELL_PROMPT_MODULE: 1
@@ -36,7 +42,7 @@ syscfg.vals:
     UWB_CCP_ENABLED: 1
     UWB_CCP_PERIOD: ((uint32_t)1000000)
     UWB_CCP_MAX_CASCADE_RPTS: 2
-    
+
     ## Where to store config
     CONFIG_FCB: 1
     CONFIG_NEWTMGR: 1
@@ -46,4 +52,7 @@ syscfg.vals:
     MSYS_1_BLOCK_SIZE: 512
 
     UWB_PKG_INIT_LOG: 0
+    RTLS_CPP_VERBOSE: 1
+    OS_LATENCY: 1000
+    GPIO_AS_PIN_RESET: 1
     

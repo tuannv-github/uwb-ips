@@ -172,9 +172,6 @@ struct uwb_ccp_instance {
 #if MYNEWT_VAL(UWB_CCP_STATS)
     STATS_SECT_DECL(uwb_ccp_stat_section) stat;     //!< Stats instance
 #endif
-#if MYNEWT_VAL(UWB_WCS_ENABLED)
-    struct uwb_wcs_instance * wcs;                  //!< Wireless clock sync
-#endif
     struct uwb_mac_interface cbs;                   //!< MAC Layer Callbacks
     uint64_t master_euid;                           //!< Clock Master EUID, used to reset wcs if master changes
     struct dpl_sem sem;                             //!< Structure containing os semaphores
@@ -212,17 +209,10 @@ uint64_t uwb_ccp_local_to_master(struct uwb_ccp_instance *uwb_ccp, uint32_t time
 struct uwb_ccp_instance * uwb_ccp_init(struct uwb_dev* dev,  uint16_t nframes);
 void uwb_ccp_free(struct uwb_ccp_instance * inst);
 void uwb_ccp_set_postprocess(struct uwb_ccp_instance * inst, dpl_event_fn * uwb_ccp_postprocess);
-void uwb_ccp_set_tof_comp_cb(struct uwb_ccp_instance * inst, uwb_ccp_tof_compensation_cb_t tof_comp_cb);
-void uwb_ccp_start(struct uwb_ccp_instance *ccp, uwb_ccp_role_t role);
-void uwb_ccp_stop(struct uwb_ccp_instance *ccp);
 void ccp_encode(uint64_t epoch, uint64_t transmission_timestamp, uint64_t delta, uint8_t seq_num,  dpl_float64_t carrier_integrator);
-uint64_t uwb_ccp_skew_compensation_ui64(struct uwb_ccp_instance *ccp, uint64_t value);
-dpl_float64_t uwb_ccp_skew_compensation_f64(struct uwb_ccp_instance *ccp,  dpl_float64_t value);
 
-void rtls_ccp_start(struct uwb_ccp_instance *ccp);
 void rtls_ccp_start_role(struct uwb_ccp_instance *ccp, uwb_ccp_role_t uwb_ccp_role);
 void rtls_ccp_set_sync_cb(struct uwb_ccp_instance *ccp, uwb_ccp_sync_cb_t uwb_ccp_sync_cb, void *arg);
-bool rtls_ccp_stable(struct uwb_ccp_instance *ccp);
 
 /**
  * @}

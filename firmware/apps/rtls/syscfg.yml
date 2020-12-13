@@ -87,9 +87,9 @@ syscfg.vals:
     MSYS_2_BLOCK_COUNT: 20
     MSYS_2_BLOCK_SIZE: 256
 
-    UWB_PKG_INIT_LOG: 0
+    UWB_PKG_INIT_LOG: 1
 
-    BLE_MESH: 1
+    # BLE_MESH: 1
     OS_MAIN_STACK_SIZE: 512
 
     BLE_MESH_ADV_BUF_COUNT: 15
@@ -105,3 +105,4 @@ syscfg.vals:
     UWBCFG_DEF_FRAME_FILTER: '"0xF"'
 
     CELL_ENABLED: 0
+    GPIO_AS_PIN_RESET: 1

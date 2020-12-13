@@ -170,6 +170,7 @@ uwb_ccp_sync_cb(ccp_sync_t ccp_sync, void *arg){
 
     /* My slot idx return to 0 when sync is lost */
     rti->slot_idx = 0;
+    rti->dev_inst->slot_id = 0;
 
     /* Remove nodes from slot map */
     rti->nodes[rti->slot_idx].slot_map = 0x01;

@@ -17,7 +17,7 @@
 # under the License.
 #
 
-pkg.name: apps/ccp_master
+pkg.name: apps/demo_ccp
 pkg.type: app
 pkg.description: "UWB CCP Master"
 pkg.author: "Tuan Ngo Van <tuanngo0898@gmail.com>"
@@ -35,7 +35,7 @@ pkg.deps:
     - "@decawave-uwb-core/sys/uwbcfg"
     - "@decawave-uwb-core/hw/drivers/uwb"
 
-    - "@rtls/lib/uwb_ccp"
+    - "@rtls/lib/rtls_ccp"
 
 pkg.cflags:
     - "-std=gnu11"
