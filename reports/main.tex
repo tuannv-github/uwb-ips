@@ -15,9 +15,9 @@
 \usepackage{multirow}
 \usepackage{geometry}
 \usepackage{enumitem}
+\usepackage{pdfpages}
 \usepackage{bytefield}
 \usepackage{microtype}
-\usepackage{dirtytalk}
 \usepackage{alphabeta}
 \usepackage{xcolor,colortbl}
 \usepackage[hidelinks]{hyperref}
@@ -41,11 +41,6 @@
 \DeclareMathOperator*{\argmin}{argmin} 
 
 \thesislayout
-\graphicspath{{imgs/}{./}}
-\newcommand*{\swd}[1]{
-    \graphicspath{{#1/imgs/}{imgs/}{./}{../}{../imgs}}
-}
-
 \begin{document}
 
 \subfile{00_misc/cover.tex}
@@ -65,5 +60,7 @@
 \subfile{04_harware/hardware.tex}
 \subfile{05_software/software.tex}
 \subfile{06_result/result.tex}
+
+\subfile{07_appendix/appendix.tex}
 
 \end{document}

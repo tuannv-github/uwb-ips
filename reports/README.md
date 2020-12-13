@@ -1,1 +1,0 @@
-# latex-multi-file-template
