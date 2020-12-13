@@ -162,6 +162,7 @@ slot_cb(struct dpl_event * ev)
             }
         }
     }
+    // printf("tdma_slot->idx = %d\n", tdma_slot->idx);
 }
 
 static void 
@@ -405,14 +406,22 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                     else{
                         /* I has joint the network and I do not see any request from this node before */
                         /* This node take this slot without permission */
-                        printf("Unknown node: 0x%04X at slot %d\n", ieee_std_frame_hdr->src_address, tdma_slot->idx);
-                        rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
-                        rti->nodes[tdma_slot->idx].accepted = true;
+                        struct uwb_dev_rxdiag *diag = (struct uwb_dev_rxdiag *)(rti->dev_inst->rxdiag);
+                        float rssi = uwb_calc_rssi(rti->dev_inst, diag);
+                        if(rssi > -85){
+                            printf("Unknown node: 0x%04X at slot %d\n", ieee_std_frame_hdr->src_address, tdma_slot->idx);
+                            rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
+                            rti->nodes[tdma_slot->idx].accepted = true;
+                        }
                         return;
                     }
                 }
                 /* I am not a network member, just update this slot in table */
                 else{
+                    struct uwb_dev_rxdiag *diag = (struct uwb_dev_rxdiag *)(rti->dev_inst->rxdiag);
+                    float rssi = uwb_calc_rssi(rti->dev_inst, diag);
+                    printf("%d: 0x%04X: RSSI %d\n",tdma_slot->idx, ieee_std_frame_hdr->src_address, (int)(rssi));
+                    if(rssi < -90) return;
                     rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
                     node_slot_map_printf(rti);
                 }

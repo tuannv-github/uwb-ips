@@ -194,8 +194,8 @@ void rtls_tdma_cb(rtls_tdma_instance_t *rti, tdma_slot_t *slot){
         /* Range with the anchors */
             uint64_t dx_time = tdma_tx_slot_start(slot->parent, slot->idx) & 0xFFFFFFFFFE00UL;
             uint32_t slot_mask = 0;
-            for (uint16_t i = MYNEWT_VAL(NODE_START_SLOT_ID);
-                i <= MYNEWT_VAL(NODE_END_SLOT_ID); i++) {
+            for (uint16_t i = 1;
+                i <= MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++) {
                 slot_mask |= 1UL << i;
             }
 

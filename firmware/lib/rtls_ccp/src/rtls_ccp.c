@@ -219,11 +219,6 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
         return true;
     }
 
-    #if MYNEWT_VAL(RTLS_CPP_VERBOSE)
-    printf("{\"utime\": %lu,\"msg\": \"ccp:rx_complete_cb\"}\n",
-            dpl_cputime_ticks_to_usecs(dpl_cputime_get32()));
-    #endif
-
     /* CCP filter if able to process packet */
     uwb_ccp_frame_t *frame = ccp->frames[(ccp->idx+1)%ccp->nframes];  // speculative frame advance
     if(inst->frame_len != sizeof(uwb_ccp_blink_frame_t)) return true;
@@ -338,6 +333,7 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
 
     /* Cascade relay of ccp packet if relay role is configured */
     if ((ccp->uwb_ccp_role & CCP_ROLE_RELAY) && ccp->status.valid && frame->rpt_count < frame->rpt_max) {
+
         uwb_ccp_frame_t tx_frame;
         memcpy(tx_frame.array, frame->array, sizeof(uwb_ccp_frame_t));
 
@@ -551,10 +547,6 @@ ccp_send(struct uwb_ccp_instance *ccp)
 static struct uwb_ccp_status
 ccp_listen(struct uwb_ccp_instance *ccp, uint64_t dx_time)
 {
-    #if MYNEWT_VAL(RTLS_CPP_VERBOSE)
-    printf("{\"utime\": %lu,\"msg\": \"uwb_ccp_listen\"}\n",
-            dpl_cputime_ticks_to_usecs(dpl_cputime_get32()));
-    #endif
 
     struct uwb_dev *inst = ccp->dev_inst;
     uwb_phy_forcetrxoff(inst);

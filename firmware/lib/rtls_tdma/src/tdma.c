@@ -411,6 +411,7 @@ tdma_superframe_slot_cb(struct dpl_event * ev)
             tdma->slot[i]->cputime_slot_start = tdma->os_epoch
                 + dpl_cputime_usecs_to_ticks((uint32_t) (i * slot_period_us) - MYNEWT_VAL(OS_LATENCY));
             hal_timer_start_at(&tdma->slot[i]->timer, tdma->slot[i]->cputime_slot_start);
+            // printf("tdma->slot[i]: %d: %ld, %ld\n", i, slot_period_us, tdma->slot[i]->cputime_slot_start);
         }
     }
 
