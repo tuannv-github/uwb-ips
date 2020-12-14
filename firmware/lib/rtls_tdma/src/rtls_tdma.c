@@ -409,6 +409,7 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                         struct uwb_dev_rxdiag *diag = (struct uwb_dev_rxdiag *)(rti->dev_inst->rxdiag);
                         float rssi = uwb_calc_rssi(rti->dev_inst, diag);
                         if(rssi > -85){
+                            printf("%d: 0x%04X: RSSI %d\n",tdma_slot->idx, ieee_std_frame_hdr->src_address, (int)(rssi));
                             printf("Unknown node: 0x%04X at slot %d\n", ieee_std_frame_hdr->src_address, tdma_slot->idx);
                             rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
                             rti->nodes[tdma_slot->idx].accepted = true;
