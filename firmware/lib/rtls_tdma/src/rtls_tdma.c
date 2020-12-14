@@ -103,6 +103,7 @@ static void
 node_add_me(rtls_tdma_instance_t *rti, uint16_t idx){
     /* Change my index */
     rti->slot_idx = idx;
+    rti->dev_inst->slot_id = idx;
     /* Copy slot map from temp slot 0 to new slot */ 
     rti->nodes[idx].slot_map = rti->nodes[0].slot_map | ((slot_map_t)0x01 << idx);
     /* Update address */
@@ -161,6 +162,7 @@ slot_cb(struct dpl_event * ev)
             }
         }
     }
+    // printf("tdma_slot->idx = %d\n", tdma_slot->idx);
 }
 
 static void 
@@ -169,6 +171,7 @@ uwb_ccp_sync_cb(ccp_sync_t ccp_sync, void *arg){
 
     /* My slot idx return to 0 when sync is lost */
     rti->slot_idx = 0;
+    rti->dev_inst->slot_id = 0;
 
     /* Remove nodes from slot map */
     rti->nodes[rti->slot_idx].slot_map = 0x01;
@@ -257,7 +260,7 @@ rtls_tdma_start(rtls_tdma_instance_t *rti, struct uwb_dev* udev){
         rtls_ccp_start_role(rti->tdma->ccp, CCP_ROLE_SLAVE);
     }
     else if(rti->role == RTR_ANCHOR){
-        rtls_ccp_start_role(rti->tdma->ccp, CCP_ROLE_MASTER | CCP_ROLE_SLAVE);
+        rtls_ccp_start_role(rti->tdma->ccp, CCP_ROLE_MASTER | CCP_ROLE_SLAVE | CCP_ROLE_RELAY);
     }
     else{
         printf("Undefined RTR role\n");
@@ -403,14 +406,22 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                     else{
                         /* I has joint the network and I do not see any request from this node before */
                         /* This node take this slot without permission */
-                        printf("Unknown node: 0x%04X at slot %d\n", ieee_std_frame_hdr->src_address, tdma_slot->idx);
-                        rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
-                        rti->nodes[tdma_slot->idx].accepted = true;
+                        struct uwb_dev_rxdiag *diag = (struct uwb_dev_rxdiag *)(rti->dev_inst->rxdiag);
+                        float rssi = uwb_calc_rssi(rti->dev_inst, diag);
+                        if(rssi > -85){
+                            printf("Unknown node: 0x%04X at slot %d\n", ieee_std_frame_hdr->src_address, tdma_slot->idx);
+                            rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
+                            rti->nodes[tdma_slot->idx].accepted = true;
+                        }
                         return;
                     }
                 }
                 /* I am not a network member, just update this slot in table */
                 else{
+                    struct uwb_dev_rxdiag *diag = (struct uwb_dev_rxdiag *)(rti->dev_inst->rxdiag);
+                    float rssi = uwb_calc_rssi(rti->dev_inst, diag);
+                    printf("%d: 0x%04X: RSSI %d\n",tdma_slot->idx, ieee_std_frame_hdr->src_address, (int)(rssi));
+                    if(rssi < -90) return;
                     rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
                     node_slot_map_printf(rti);
                 }

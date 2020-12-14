@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <dpl/dpl.h>
 
-#define ANCHOR_NUM  (MYNEWT_VAL(NODE_END_SLOT_ID) - MYNEWT_VAL(NODE_START_SLOT_ID) + 1)
+#define ANCHOR_NUM  (MYNEWT_VAL(UWB_BCN_SLOT_MAX) + 1)
 typedef struct{
     uint16_t anchors[ANCHOR_NUM];
     union{

@@ -1,32 +1,3 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
-/**
- * @file uwb_ccp.h
- * @author UWB Core <uwbcore@gmail.com>
- * @date 2018
- *
- * @brief clock calibration packets
- * @details This is the ccp base class which utilises the functions to enable/disable the configurations related to ccp.
- *
- */
-
 #ifndef _UWB_CCP_H_
 #define _UWB_CCP_H_
 
@@ -68,6 +39,7 @@ STATS_SECT_START(uwb_ccp_stat_section)
     STATS_SECT_ENTRY(rx_timeout)
     STATS_SECT_ENTRY(sem_timeout)
     STATS_SECT_ENTRY(reset)
+    STATS_SECT_ENTRY(see_another_master)
 STATS_SECT_END
 #endif
 
@@ -171,9 +143,6 @@ struct uwb_ccp_instance {
 #if MYNEWT_VAL(UWB_CCP_STATS)
     STATS_SECT_DECL(uwb_ccp_stat_section) stat;     //!< Stats instance
 #endif
-#if MYNEWT_VAL(UWB_WCS_ENABLED)
-    struct uwb_wcs_instance * wcs;                  //!< Wireless clock sync
-#endif
     struct uwb_mac_interface cbs;                   //!< MAC Layer Callbacks
     uint64_t master_euid;                           //!< Clock Master EUID, used to reset wcs if master changes
     struct dpl_sem sem;                             //!< Structure containing os semaphores
@@ -188,16 +157,14 @@ struct uwb_ccp_instance {
     uint16_t nframes;                               //!< Number of buffers defined to store the data
     uint16_t idx;                                   //!< Circular buffer index pointer
     uint8_t seq_num;                                //!< Clock Master reported sequence number
-    uint8_t missed_frames;                          //!< Num missed ccp-frames since last sync
-    struct hal_timer timer;                         //!< Timer structure
+    struct hal_timer master_slave_timer;                         //!< Timer structure
     struct dpl_eventq eventq;                       //!< Event queues
-    struct dpl_event timer_event;                   //!< Event callback
+    struct dpl_event master_slave_event;                   //!< Event callback
     struct dpl_task task_str;                       //!< Task structure
     uint8_t task_prio;                              //!< Priority based task
     uint16_t blink_frame_duration;                  //!< CCP blink duration in uus
     dpl_stack_t task_stack[MYNEWT_VAL(UWB_CCP_TASK_STACK_SZ)]
         __attribute__((aligned(DPL_STACK_ALIGNMENT))); //!< Task stack size
-    uint16_t rx_timeout_acc;                            //!< Slave rx timeout accumulator
     struct dpl_event change_role_event;                 //!< Event used to change role
     uint64_t my_master;                                 //!< Address of network master
     bool master_role_request;                            //!< Request for master role has been sent
@@ -211,17 +178,10 @@ uint64_t uwb_ccp_local_to_master(struct uwb_ccp_instance *uwb_ccp, uint32_t time
 struct uwb_ccp_instance * uwb_ccp_init(struct uwb_dev* dev,  uint16_t nframes);
 void uwb_ccp_free(struct uwb_ccp_instance * inst);
 void uwb_ccp_set_postprocess(struct uwb_ccp_instance * inst, dpl_event_fn * uwb_ccp_postprocess);
-void uwb_ccp_set_tof_comp_cb(struct uwb_ccp_instance * inst, uwb_ccp_tof_compensation_cb_t tof_comp_cb);
-void uwb_ccp_start(struct uwb_ccp_instance *ccp, uwb_ccp_role_t role);
-void uwb_ccp_stop(struct uwb_ccp_instance *ccp);
 void ccp_encode(uint64_t epoch, uint64_t transmission_timestamp, uint64_t delta, uint8_t seq_num,  dpl_float64_t carrier_integrator);
-uint64_t uwb_ccp_skew_compensation_ui64(struct uwb_ccp_instance *ccp, uint64_t value);
-dpl_float64_t uwb_ccp_skew_compensation_f64(struct uwb_ccp_instance *ccp,  dpl_float64_t value);
 
-void rtls_ccp_start(struct uwb_ccp_instance *ccp);
 void rtls_ccp_start_role(struct uwb_ccp_instance *ccp, uwb_ccp_role_t uwb_ccp_role);
 void rtls_ccp_set_sync_cb(struct uwb_ccp_instance *ccp, uwb_ccp_sync_cb_t uwb_ccp_sync_cb, void *arg);
-bool rtls_ccp_stable(struct uwb_ccp_instance *ccp);
 
 /**
  * @}

@@ -71,6 +71,7 @@
 			"t",
 			"tofs",
 			"txconfig",
+			"txrx",
 			"wakeupvbat"
 		]
 	}
