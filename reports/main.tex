@@ -6,6 +6,7 @@
 \usepackage{float}
 \usepackage{siunitx}
 \usepackage{lmodern}
+\usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{subfiles}
 \usepackage{biblatex}
@@ -17,12 +18,12 @@
 \usepackage{bytefield}
 \usepackage{microtype}
 \usepackage{dirtytalk}
+\usepackage{alphabeta}
 \usepackage{xcolor,colortbl}
 \usepackage[hidelinks]{hyperref}
 
-\usepackage{sty/feeehcmut}
+\usepackage{../sty/feeehcmut}
 
-\graphicspath{{imgs/}}
 \bibliography{references.bib}
 
 \definecolor{Gray}{gray}{0.85}
@@ -33,43 +34,36 @@
 \newcolumntype{L}{>{\arraybackslash}X}
 \newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1\textwidth}}
 
-\thesistype{GRADUATION THESIS}
-\thesistitle{DESIGN AND IMPLEMENTATION OF INDOOR LOCALIZATION SYSTEM USING UWB AND MESH NETWORK}
-\supervisor{Dr. Vo Que Son}
-\reviewer{Dr. Vo Que Son}
-\student{Ngo Van Tuan - 1613861}
-\thesislayout
-
 \newlist{abbrv}{itemize}{1}
 \setlist[abbrv,1]{label=,labelwidth=1in,align=parleft,itemsep=0.1\baselineskip,leftmargin=!}
 
+\DeclareMathOperator*{\argmax}{argmax} 
+\DeclareMathOperator*{\argmin}{argmin} 
+
+\thesislayout
+\graphicspath{{imgs/}{./}}
+\newcommand*{\swd}[1]{
+    \graphicspath{{#1/imgs/}{imgs/}{./}{../}{../imgs}}
+}
+
 \begin{document}
-\coverpage
-\tableofcontents
-\cleardoublepage 
 
-\chapter*{Acknowledgements}
-\addcontentsline{toc}{chapter}{Acknowledgements}
-This is acknowledgement chapter.
+\subfile{00_misc/cover.tex}
+\subfile{00_misc/ack.tex}
+\subfile{00_misc/abs.tex}
+\subfile{00_misc/fig.tex}
+\subfile{00_misc/tab.tex}
+\subfile{00_misc/sym.tex}
 
-\chapter*{Abstract}
-\addcontentsline{toc}{chapter}{Abstract}
-This is abstract chapter.
+\subfile{01_intro/introduction.tex}
+\subfile{02_theory/ultra_wideband.tex}
+\subfile{02_theory/position_estimation.tex}
+\subfile{02_theory/ble_mesh.tex}
 
-\addcontentsline{toc}{chapter}{List of Figures}
-\listoffigures
+\subfile{03_firmware/firmware.tex}
 
-\addcontentsline{toc}{chapter}{List of Tables}
-\listoftables
-
-\chapter*{Symbols and acronyms}
-\addcontentsline{toc}{chapter}{Symbols and Acronyms}
-\begin{abbrv}
-    \item[ADL]                   Activities of Daily Life
-    \item[WHO]                   World Health Organization
-\end{abbrv}
-
-\subfile{introduction.tex}
-\subfile{firmware.tex}
+\subfile{04_harware/hardware.tex}
+\subfile{05_software/software.tex}
+\subfile{06_result/result.tex}
 
 \end{document}
