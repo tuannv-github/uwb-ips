@@ -40,7 +40,7 @@ int main(int argc, char **argv){
     struct uwb_ccp_instance *ccp = (struct uwb_ccp_instance*)uwb_mac_find_cb_inst_ptr(udev, UWBEXT_CCP);
     assert(ccp);
 
-    rtls_ccp_start_role(ccp, CCP_ROLE_MASTER);
+    rtls_ccp_start_role(ccp, CCP_ROLE_MASTER | CCP_ROLE_RELAY);
     rtls_ccp_set_sync_cb(ccp, uwb_ccp_sync_cb, NULL);
 
     udev->my_short_address = MYNEWT_VAL(NODE_ADDRESS);

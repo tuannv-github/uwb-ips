@@ -52,73 +52,46 @@ static bool error_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs);
 static bool reset_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs);
 
 static struct uwb_ccp_status ccp_send(struct uwb_ccp_instance * ccp);
-static struct uwb_ccp_status ccp_listen(struct uwb_ccp_instance * ccp, uint64_t dx_time);
-
-static void ccp_master_timer_ev_cb(struct dpl_event *ev);
-static void ccp_slave_timer_ev_cb(struct dpl_event *ev);
+static struct uwb_ccp_status ccp_listen(struct uwb_ccp_instance * ccp, uint64_t dx_time, uint32_t timeout);
 static void uwb_ccp_change_role(struct uwb_ccp_instance *ccp);
 
 static void
 ccp_master_timer_ev_cb(struct dpl_event *ev)
 {
-    int rc;
     assert(ev != NULL);
     assert(dpl_event_get_arg(ev));
-    // printf("ccp_master_timer_ev_cb\n");
 
-    struct uwb_ccp_instance * ccp = (struct uwb_ccp_instance *) dpl_event_get_arg(ev);
-
+    struct uwb_ccp_instance *ccp = (struct uwb_ccp_instance *) dpl_event_get_arg(ev);
     if (!ccp->status.enabled) return;
-
     CCP_STATS_INC(master_cnt);
-    ccp->status.timer_restarted = 0;
 
-    if (ccp_send(ccp).start_tx_error) {
-        // CCP failed to send, probably because os_latency wasn't enough
-        // margin to get in to prep the frame for sending.
-        // NOTE that os_epoch etc will be updated in ccp_send if it fails
-        // to send so timer update below will still point to next beacon time */
-        printf("start_tx_error\n");
-        if (!ccp->status.enabled) return;
-    }
+    if (ccp_send(ccp).start_tx_error) return;
 
-    if (!ccp->status.timer_restarted && ccp->status.enabled) {
-        rc = dpl_cputime_timer_start(&ccp->master_slave_timer, 
+    if (ccp->status.enabled) {
+        dpl_cputime_timer_start(&ccp->master_slave_timer, 
               ccp->os_epoch
             + dpl_cputime_usecs_to_ticks(uwb_dwt_usecs_to_usecs(ccp->period))
             - dpl_cputime_usecs_to_ticks(MYNEWT_VAL(OS_LATENCY))
         );
-        if (rc == 0) ccp->status.timer_restarted = 1;
     }
-    return;
 }
 
 static void
 ccp_slave_timer_ev_cb(struct dpl_event *ev)
 {
-    int rc;
     uint16_t timeout;
     uint64_t dx_time = 0;
-    uint32_t timer_expiry;
     assert(ev != NULL);
     assert(dpl_event_get_arg(ev));
     static uint16_t rx_timeout_acc;
-    // printf("ccp_slave_timer_ev_cb\n");
 
-    struct uwb_ccp_instance * ccp = (struct uwb_ccp_instance *) dpl_event_get_arg(ev);
-    struct uwb_dev * inst = ccp->dev_inst;
+    struct uwb_ccp_instance *ccp = (struct uwb_ccp_instance *) dpl_event_get_arg(ev);
+    struct uwb_dev *inst = ccp->dev_inst;
 
-    if (!ccp->status.enabled) {
-        return;
-    }
+    if (!ccp->status.enabled) return;
+    CCP_STATS_INC(slave_cnt);
 
-    /* Sync lost since earlier, just set a long rx timeout and
-     * keep listening */
     if (ccp->status.rx_timeout_error) {
-        printf("rx_timeout_error\n");
-        uwb_set_rx_timeout(inst, MYNEWT_VAL(UWB_CCP_LONG_RX_TO));
-        ccp_listen(ccp, 0);
-
         /* Timout accumulate */
         rx_timeout_acc++;
         printf("ccp->rx_timeout_acc: %d\n", rx_timeout_acc);
@@ -138,37 +111,31 @@ ccp_slave_timer_ev_cb(struct dpl_event *ev)
             if(dpl_sem_get_count(&ccp->sem) == 0){
                 dpl_sem_release(&ccp->sem);
             }
-            uwb_ccp_change_role(ccp);
+            dpl_eventq_put(&ccp->eventq, &ccp->change_role_event);
             return;
         }
-        goto reset_timer;
     }
 
-    CCP_STATS_INC(slave_cnt);
+    if(!rx_timeout_acc){
+        /* Calculate when to expect the ccp packet */
+        dx_time = ccp->local_epoch;
+        dx_time += ((uint64_t)ccp->period << 16);
+        dx_time -= ((uint64_t)ceilf(uwb_usecs_to_dwt_usecs(uwb_phy_SHR_duration(inst) +
+                                                        inst->config.rx.timeToRxStable)) << 16);
 
-    /* Calculate when to expect the ccp packet */
-    dx_time = ccp->local_epoch;
-    dx_time += ((uint64_t)ccp->period << 16);
-    dx_time -= ((uint64_t)ceilf(uwb_usecs_to_dwt_usecs(uwb_phy_SHR_duration(inst) +
-                                                       inst->config.rx.timeToRxStable)) << 16);
-
-    timeout = ccp->blink_frame_duration + MYNEWT_VAL(XTALT_GUARD);
-    /* Adjust timeout if we're using cascading ccp in anchors */
-    timeout += (ccp->config.tx_holdoff_dly + ccp->blink_frame_duration) * MYNEWT_VAL(UWB_CCP_MAX_CASCADE_RPTS);
-
-    uwb_set_rx_timeout(inst, timeout);
-    ccp_listen(ccp, dx_time);
-    if(ccp->status.start_rx_error){
-        /* Sync lost, set a long rx timeout */
-        uwb_set_rx_timeout(inst, MYNEWT_VAL(UWB_CCP_LONG_RX_TO));
-        ccp_listen(ccp, 0);
-        printf("start_rx_error: ccp_listen\n");
+        /* Predict timeout */
+        timeout = ccp->blink_frame_duration + MYNEWT_VAL(XTALT_GUARD);
+        /* Adjust timeout if we're using cascading ccp in anchors */
+        timeout += (ccp->config.tx_holdoff_dly + ccp->blink_frame_duration) * MYNEWT_VAL(UWB_CCP_MAX_CASCADE_RPTS);
+        
+        /* Listen */
+        ccp_listen(ccp, dx_time, timeout);
+        if(ccp->status.start_rx_error){
+            ccp_listen(ccp, 0, MYNEWT_VAL(UWB_CCP_LONG_RX_TO));
+        }
     }
-
-reset_timer:
-    /* Check if we're still enabled */
-    if (!ccp->status.enabled) {
-        return;
+    else{
+        ccp_listen(ccp, 0, MYNEWT_VAL(UWB_CCP_LONG_RX_TO));
     }
 
     /* Ensure timer isn't active */
@@ -176,22 +143,16 @@ reset_timer:
 
     if (ccp->status.rx_timeout_error) {
         /* No ccp received, reschedule immediately */
-        printf(" No ccp received, reschedule immediately\n");
-        dpl_sem_pend(&ccp->sem, DPL_TIMEOUT_NEVER);
-        rc = dpl_cputime_timer_relative(&ccp->master_slave_timer, 0);
-        dpl_sem_release(&ccp->sem);
+        dpl_cputime_timer_relative(&ccp->master_slave_timer, 0);
     } else {
         /* Reset rx_timeout_acc each time received blink message */
         rx_timeout_acc = 0;
-        /* ccp received ok, or close enough - reschedule for next ccp event */
-        ccp->status.rx_timeout_error = 0;
-        timer_expiry = ccp->os_epoch + dpl_cputime_usecs_to_ticks(
+        uint32_t timer_expiry = ccp->os_epoch + dpl_cputime_usecs_to_ticks(
             - MYNEWT_VAL(OS_LATENCY)
             + (uint32_t)uwb_dwt_usecs_to_usecs(ccp->period)
             - ccp->blink_frame_duration - inst->config.rx.timeToRxStable);
-        rc = dpl_cputime_timer_start(&ccp->master_slave_timer, timer_expiry);
+        dpl_cputime_timer_start(&ccp->master_slave_timer, timer_expiry);
     }
-    if (rc == 0) ccp->status.timer_restarted = 1;
 }
 
 static void
@@ -228,7 +189,8 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     if (ccp->config.role & CCP_ROLE_MASTER) {
         /* Master only receive ccp packet when master requesting */
         if(ccp->master_role_request) {
-            if(frame->euid < ccp->dev_inst->euid){
+            if(frame->euid != ccp->dev_inst->euid){
+                printf("%lld/%lld\n", frame->euid , ccp->dev_inst->euid);
                 ccp->master_role_request = false;
             }
         }
@@ -545,25 +507,22 @@ ccp_send(struct uwb_ccp_instance *ccp)
 }
 
 static struct uwb_ccp_status
-ccp_listen(struct uwb_ccp_instance *ccp, uint64_t dx_time)
+ccp_listen(struct uwb_ccp_instance *ccp, uint64_t dx_time, uint32_t timeout)
 {
-
+    CCP_STATS_INC(listen);
+    
     struct uwb_dev *inst = ccp->dev_inst;
     uwb_phy_forcetrxoff(inst);
-
-    dpl_error_t err = dpl_sem_pend(&ccp->sem,  DPL_TIMEOUT_NEVER);
-    assert(err == DPL_OK);
-
-    CCP_STATS_INC(listen);
-
+    uwb_set_rx_timeout(inst, timeout);
     if (dx_time) {
         uwb_set_delay_start(inst, dx_time);
     }
 
+    dpl_error_t err = dpl_sem_pend(&ccp->sem,  DPL_TIMEOUT_NEVER);
+    assert(err == DPL_OK);
     ccp->status.rx_timeout_error = 0;
     ccp->status.start_rx_error = uwb_start_rx(inst).start_rx_error;
     if (ccp->status.start_rx_error) {
-        printf("start_rx_error\n");
         #if MYNEWT_VAL(UWB_CCP_STATS)
         uint32_t behind = 0xffffffffU&(uwb_read_systime_lo32(inst) - dx_time);
         CCP_STATS_SET(os_lat_behind, uwb_dwt_usecs_to_usecs(behind>>16));
@@ -580,12 +539,12 @@ ccp_listen(struct uwb_ccp_instance *ccp, uint64_t dx_time)
         CCP_STATS_SET(os_lat_margin, uwb_dwt_usecs_to_usecs(margin>>16));
     }
     #endif
+
     /* Wait for completion of transactions */
     dpl_sem_pend(&ccp->sem, DPL_TIMEOUT_NEVER);
-    if(dpl_sem_get_count(&ccp->sem) == 0){
-        err = dpl_sem_release(&ccp->sem);
-        assert(err == DPL_OK);
-    }
+    err = dpl_sem_release(&ccp->sem);
+    assert(err == DPL_OK);
+
     return ccp->status;
 }
 
@@ -664,17 +623,23 @@ uwb_ccp_change_role(struct uwb_ccp_instance *ccp){
 
     if(ccp->config.role == CCP_ROLE_MASTER){
 
-        uwb_ccp_frame_t *frame = ccp->frames[0];
-        frame->seq_num++;
-        ccp->master_role_request = true;
+        uwb_ccp_frame_t * frame = ccp->frames[(ccp->idx+1)%ccp->nframes];
+        frame->rpt_count = 0;
+        frame->rpt_max = MYNEWT_VAL(UWB_CCP_MAX_CASCADE_RPTS);
+        frame->epoch_to_rm_us = uwb_phy_SHR_duration(inst);
+        frame->transmission_timestamp.timestamp = 0;
+        frame->seq_num = ++ccp->seq_num;
+        frame->euid = inst->euid;
+        frame->short_address = inst->my_short_address;
+        frame->transmission_interval = ((uint64_t)ccp->period << 16);
 
         uint16_t cnt = 0;
+        ccp->master_role_request = true;
         while(cnt < MYNEWT_VAL(UWB_CCP_PERIOD)/10000 && ccp->master_role_request){
             cnt++;
             // printf("\33[2K\rTry to be master time: %d", cnt);
             printf("Try to be master time: %d\n", cnt);
-            uwb_set_rx_timeout(inst, MYNEWT_VAL(UWB_CCP_LONG_RX_TO) + inst->euid%MYNEWT_VAL(UWB_CCP_LONG_RX_TO));
-            ccp_listen(ccp, 0);
+            ccp_listen(ccp, 0, MYNEWT_VAL(UWB_CCP_LONG_RX_TO) + inst->euid%MYNEWT_VAL(UWB_CCP_LONG_RX_TO));
 
             uwb_write_tx(inst, frame->array, 0, sizeof(uwb_ccp_blink_frame_t));
             uwb_write_tx_fctrl(inst, sizeof(uwb_ccp_blink_frame_t), 0);
