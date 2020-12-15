@@ -41,6 +41,8 @@
 \DeclareMathOperator*{\argmax}{argmax} 
 \DeclareMathOperator*{\argmin}{argmin} 
 
+\graphicspath{{imgs/}}
+
 \thesislayout
 \begin{document}
 
@@ -62,7 +64,20 @@
 \subfile{05_software/software.tex}
 \subfile{06_result/result.tex}
 
-\subfile{07_appendix/altium.tex}
-\subfile{07_appendix/solidwork.tex}
+\begin{appendices}
+    \includepdf[pages=1,pagecommand=\chapter{RTLS anchor Altium design},width=\textwidth, offset=0 -1cm]{RTLS-2020-11-09--04-03.PDF}
+    \includepdf[pages=2-,pagecommand={},width=\textwidth]{RTLS-2020-11-09--04-03.PDF}
+\end{appendices}
+
+\begin{appendices}
+    \chapter{RTLS SolidWork Design}
+    \begin{figure}[H]
+        \begin{center}
+            \includegraphics[scale=0.5]{Assem.JPG}
+        \end{center}
+        \caption{RTLS SolidWork Design}
+        \label{fig:RTLS_SolidWork_Design}
+    \end{figure}
+\end{appendices}
 
 \end{document}
