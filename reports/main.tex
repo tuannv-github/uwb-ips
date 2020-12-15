@@ -3,6 +3,8 @@
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 
+\usepackage{tikz}
+\usetikzlibrary{calc}
 \usepackage{float}
 \usepackage{siunitx}
 \usepackage{lmodern}
@@ -23,8 +25,6 @@
 \usepackage[titletoc]{appendix}
 \usepackage[hidelinks]{hyperref}
 
-\usepackage{../sty/feeehcmut}
-
 \bibliography{references.bib}
 
 \definecolor{Gray}{gray}{0.85}
@@ -43,7 +43,14 @@
 
 \graphicspath{{imgs/}}
 
-\thesislayout
+\geometry{
+    left=20mm,
+    right=20mm,
+    top=20mm,
+    bottom=20mm,
+    heightrounded
+}
+
 \begin{document}
 
 \subfile{00_misc/cover.tex}
