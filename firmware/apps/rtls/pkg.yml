@@ -29,12 +29,12 @@ pkg.deps:
     - "@apache-mynewt-core/sys/shell"
     - "@mynewt-timescale-lib/lib/timescale"
 
-    # - "@apache-mynewt-nimble/nimble/controller"
-    # - "@apache-mynewt-nimble/nimble/host"
-    # - "@apache-mynewt-nimble/nimble/host/services/gap"
-    # - "@apache-mynewt-nimble/nimble/host/services/gatt"
-    # - "@apache-mynewt-nimble/nimble/host/store/ram"
-    # - "@apache-mynewt-nimble/nimble/transport/ram"
+    - "@apache-mynewt-nimble/nimble/controller"
+    - "@apache-mynewt-nimble/nimble/host"
+    - "@apache-mynewt-nimble/nimble/host/services/gap"
+    - "@apache-mynewt-nimble/nimble/host/services/gatt"
+    - "@apache-mynewt-nimble/nimble/host/store/ram"
+    - "@apache-mynewt-nimble/nimble/transport/ram"
 
     - "@decawave-uwb-core/sys/uwbcfg"
     - "@decawave-uwb-core/hw/drivers/uwb"

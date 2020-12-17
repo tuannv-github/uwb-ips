@@ -1,21 +1,30 @@
-\documentclass{book}
+\documentclass[oneside]{book}
 
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
+
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{float}
+\usepackage{siunitx}
+\usepackage{lmodern}
+\usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{subfiles}
 \usepackage{biblatex}
-\usepackage{hyperref}
-\usepackage{microtype}
-\usepackage{xcolor,colortbl}
 \usepackage{csquotes}
-\usepackage{dirtytalk}
 \usepackage{tabularx}
 \usepackage{multirow}
-\usepackage{siunitx}
-\usepackage[top=3cm,bottom=3cm,left=2cm,right=2cm,headsep=10pt,letterpaper]{geometry} 
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{pdfpages}
+\usepackage{bytefield}
+\usepackage{microtype}
+\usepackage{alphabeta}
+\usepackage{xcolor,colortbl}
+\usepackage[titletoc]{appendix}
+\usepackage[hidelinks]{hyperref}
 
-\graphicspath{{imgs/}}
 \bibliography{references.bib}
 
 \definecolor{Gray}{gray}{0.85}
@@ -26,8 +35,56 @@
 \newcolumntype{L}{>{\arraybackslash}X}
 \newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1\textwidth}}
 
+\newlist{abbrv}{itemize}{1}
+\setlist[abbrv,1]{label=,labelwidth=1in,align=parleft,itemsep=0.1\baselineskip,leftmargin=!}
+
+\DeclareMathOperator*{\argmax}{argmax} 
+\DeclareMathOperator*{\argmin}{argmin} 
+
+\graphicspath{{imgs/}}
+
+\geometry{
+    left=20mm,
+    right=20mm,
+    top=20mm,
+    bottom=20mm,
+    heightrounded
+}
+
 \begin{document}
 
-\subfile{template.tex}
+\subfile{00_misc/cover.tex}
+\subfile{00_misc/ack.tex}
+\subfile{00_misc/abs.tex}
+\subfile{00_misc/fig.tex}
+\subfile{00_misc/tab.tex}
+\subfile{00_misc/sym.tex}
+
+\subfile{01_intro/introduction.tex}
+\subfile{02_theory/ultra_wideband.tex}
+\subfile{02_theory/position_estimation.tex}
+\subfile{02_theory/ble_mesh.tex}
+
+\subfile{03_firmware/firmware.tex}
+
+\subfile{04_harware/hardware.tex}
+\subfile{05_software/software.tex}
+\subfile{06_result/result.tex}
+
+\begin{appendices}
+    \includepdf[pages=1,pagecommand=\chapter{RTLS anchor Altium design},width=\textwidth, offset=0 -1cm]{RTLS-2020-11-09--04-03.PDF}
+    \includepdf[pages=2-,pagecommand={},width=\textwidth]{RTLS-2020-11-09--04-03.PDF}
+\end{appendices}
+
+\begin{appendices}
+    \chapter{RTLS SolidWork Design}
+    \begin{figure}[H]
+        \begin{center}
+            \includegraphics[scale=0.5]{Assem.JPG}
+        \end{center}
+        \caption{RTLS SolidWork Design}
+        \label{fig:RTLS_SolidWork_Design}
+    \end{figure}
+\end{appendices}
 
 \end{document}

@@ -73,7 +73,7 @@ syscfg.vals:
     UWB_CLI_BACKTRACE: 0
 
     UWB_CCP_ENABLED: 1
-    UWB_CCP_PERIOD: ((uint32_t)500000)
+    UWB_CCP_PERIOD: ((uint32_t)0x20000)
     UWB_CCP_MAX_CASCADE_RPTS: 2
     
     ## Where to store config
@@ -89,7 +89,7 @@ syscfg.vals:
 
     UWB_PKG_INIT_LOG: 1
 
-    # BLE_MESH: 1
+    BLE_MESH: 1
     OS_MAIN_STACK_SIZE: 512
 
     BLE_MESH_ADV_BUF_COUNT: 15

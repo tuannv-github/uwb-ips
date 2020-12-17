@@ -1,0 +1,17 @@
+\documentclass[../../main.tex]{subfiles}
+\graphicspath{{../}}
+
+\begin{document}
+
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+The bio-inspired robot is a category of robots, in which concepts are learnt from nature and applied them to design robots. Among bio-inspired robots, the snake robot is well-known due to their flexibility and scalability. With the modular design, snake robots have the capacity to operate in narrow environments. In addition, elastic actuators are currently applied to build snake robots. With good shock tolerance, elastic actuators are appropriate for robots moving in unstructured environments. The main challenge of controlling elastic actuators is damping the oscillation caused by the elastic component.
+
+In this thesis, three topics are considered. Firstly, the mathematical model and the low-level controller for elastic actuators are developed. This controller consists of two loops. The inner loop is a model-reference adaptive controller, which is responsible for controlling the motor angular position. The adaptive controller has an advantage that it is independent of the system's parameters uncertainties. The outer loop is a fuzzy proportional–integral controller, which is applied to control the load angular position. The fuzzy controller is a model-free controller. Thus, this controller is utilised to reduce the effect of external disturbance on the load.
+
+Secondly, the mid-level controller for snake robots is considered. This controller acts like a central pattern generator, which generates the control of rhythmic movements such as crawling, walking and running. This generator is famous in bio-inspired robotics. The central pattern generator for snake robots contains numerous sinusoidal wave generators. The sinusoidal wave generators produce the pattern for the joints of the snake robots. The parameters of these sinusoidal wave generators, such as amplitudes, frequencies, and phases, are optimised using the genetic algorithm.
+
+Thirdly, the virtual environment for simulating robots is studied. Simulating robots is a good approach to the robotic development process. It allows more experiments to be run without damaging the robots. ROS-Gazebo is a good robotics simulator. ROS has been proved as a promising middle-ware for robotic application. In addition, the integration of ROS and Gazebo is a well-known combination of virtual environments for simulating robots. It provides a robust physics engine to rapidly test algorithms, design and train robots.
+
+\end{document}
