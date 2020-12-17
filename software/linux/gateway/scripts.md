@@ -47,8 +47,11 @@ sudo make install
 sudo cp mosquitto.conf /etc/mosquitto
 ```
 
-/etc/mosquitto/mosquitto.conf
+sudo subl /etc/mosquitto/conf.d/websocket.conf 
 ```
+per_listener_settings false
+allow_anonymous true
+
 listener 1883
 protocol mqtt
 
