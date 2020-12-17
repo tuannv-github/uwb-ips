@@ -59,7 +59,29 @@ Three CCP roles are defined, allowing nodes to sync with others: Master, Slave, 
 \end{figure}
 
 \subsection{CCP master selection algorithm}
-To-do
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.6]{ccp_state_diagram.png}
+    \end{center}
+    \caption{CCP state diagram}
+    \label{fig:CCP_state_diagram}
+\end{figure}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.6]{ccp_master_flow_chart.png}
+    \end{center}
+    \caption{CCP master flow chart}
+    \label{fig:ccp_master_flow_chart}
+\end{figure}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.5]{ccp_slave_flow_chart.png}
+    \end{center}
+    \caption{CCP slave flow chart}
+    \label{fig:ccp_slave_flow_chart}
+\end{figure}
 
 \section{Time Division Multiple Access (TDMA)}
 The fundamental role of the TDMA layer is to give a notification to its upper layer when it is the time to run the service. To archive this, a node must firstly ask for getting an appropriate and available slot from jointed nodes.

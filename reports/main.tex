@@ -3,12 +3,15 @@
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 
+\usepackage{url}
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usepackage{float}
+\usepackage{ifthen}
 \usepackage{siunitx}
 \usepackage{lmodern}
 \usepackage{amsmath}
+\usepackage{listings}
 \usepackage{graphicx}
 \usepackage{subfiles}
 \usepackage{biblatex}
@@ -25,7 +28,15 @@
 \usepackage[titletoc]{appendix}
 \usepackage[hidelinks]{hyperref}
 
-\bibliography{references.bib}
+\providecommand{\main}{.}
+\addbibresource{\main/references.bib}   
+
+\newboolean{printBibInSubfiles}
+\setboolean{printBibInSubfiles}{true} 
+\def\bib{\ifthenelse{\boolean{printBibInSubfiles}}
+        {\printbibliography}
+        {}
+    }
 
 \definecolor{Gray}{gray}{0.85}
 \definecolor{LightCyan}{rgb}{0.2,0.7,1}
@@ -52,6 +63,7 @@
 }
 
 \begin{document}
+\setboolean{printBibInSubfiles}{false}
 
 \subfile{00_misc/cover.tex}
 \subfile{00_misc/ack.tex}
@@ -67,7 +79,7 @@
 
 \subfile{03_firmware/firmware.tex}
 
-\subfile{04_harware/hardware.tex}
+\subfile{04_hardware/hardware.tex}
 \subfile{05_software/software.tex}
 \subfile{06_result/result.tex}
 
@@ -80,11 +92,13 @@
     \chapter{RTLS SolidWork Design}
     \begin{figure}[H]
         \begin{center}
-            \includegraphics[scale=0.5]{Assem.JPG}
+            \includegraphics[scale=0.4]{Assem.JPG}
         \end{center}
         \caption{RTLS SolidWork Design}
         \label{fig:RTLS_SolidWork_Design}
     \end{figure}
 \end{appendices}
+
+\printbibliography[heading=bibintoc,title={References}]
 
 \end{document}
