@@ -173,6 +173,9 @@ process_ble_to_net_queue(struct os_event *ev)
             case MAVLINK_MSG_ID_TOF:
                 mavlink_msg_tof_pack(0,0, &mavlink_msg, msg_rtls.opcode, msg_rtls.dstsrc, msg_rtls.anchor, msg_rtls.tof);
                 break;
+            case MAVLINK_MSG_ID_SLOT:
+                mavlink_msg_slot_pack(0, 0, &mavlink_msg, msg_rtls.dstsrc, msg_rtls.opcode, msg_rtls.slot);
+                break;
             default:
                 continue;
         }

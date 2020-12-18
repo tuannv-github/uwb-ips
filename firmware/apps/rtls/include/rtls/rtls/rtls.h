@@ -23,6 +23,8 @@ void rtls_get_address(uint16_t *address);
 void rtls_get_ntype(uint8_t *ntype);
 void rtls_set_ntype(uint8_t ntype);
 
+void rtls_get_slot(uint8_t *slot);
+
 distance_t *get_distances();
 
 void rtls_init();

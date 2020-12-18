@@ -51,6 +51,13 @@ void msg_prepr_rtls(struct os_mbuf **mbuf, msg_rtls_t *msg){
         net_buf_simple_add_be16(*mbuf, msg->anchor);
         net_buf_simple_add_be32(*mbuf, msg->tof);
         break;
+    case MAVLINK_MSG_ID_SLOT:
+        *mbuf = NET_BUF_SIMPLE(header + 4);
+        bt_mesh_model_msg_init(*mbuf, msg->opcode);
+        net_buf_simple_add_u8(*mbuf, msg->type);
+        net_buf_simple_add_be16(*mbuf, msg->dstsrc);
+        net_buf_simple_add_u8(*mbuf, msg->slot);
+        break;
     default:
         break;
     }
@@ -78,6 +85,9 @@ void msg_parse_rtls(struct os_mbuf *mbuf, msg_rtls_t *msg){
     case MAVLINK_MSG_ID_TOF:
         msg->anchor = net_buf_simple_pull_be16(mbuf);
         msg->tof = net_buf_simple_pull_be32(mbuf);
+        break;
+    case MAVLINK_MSG_ID_SLOT:
+        msg->slot = net_buf_simple_pull_u8(mbuf);
         break;
     default:
         break;
@@ -107,6 +117,10 @@ void msg_print_rtls(msg_rtls_t *msg){
         printf("{opcode: %ld, type: %d, dstsrc: 0x%02x, anchor 0x%04X, tof: %ld}\n", 
                 msg->opcode, msg->type, msg->dstsrc, msg->anchor, msg->tof);
         break;
+    case MAVLINK_MSG_ID_SLOT:
+        printf("{opcode: %ld, type: %d, dstsrc: 0x%02x, slot: %d}\n", 
+                msg->opcode, msg->type, msg->dstsrc, msg->slot);
+        break;
     default:
         break;
     }
@@ -135,6 +149,9 @@ void msg_parse_rtls_pipe(struct os_mbuf *mbuf, msg_rtls_t *msg){
         msg->anchor = net_buf_simple_pull_be16(mbuf);
         msg->tof = net_buf_simple_pull_be32(mbuf);
         break;
+    case MAVLINK_MSG_ID_SLOT:
+        msg->slot = net_buf_simple_pull_u8(mbuf);
+        break;
     default:
         break;
     }
@@ -162,6 +179,9 @@ void msg_prepr_rtls_pipe(struct os_mbuf *mbuf, msg_rtls_t *msg){
     case MAVLINK_MSG_ID_TOF:
         net_buf_simple_add_be16(mbuf, msg->anchor);
         net_buf_simple_add_be32(mbuf, msg->tof);
+        break;
+    case MAVLINK_MSG_ID_SLOT:
+        net_buf_simple_add_u8(mbuf, msg->slot);
         break;
     default:
         break;
