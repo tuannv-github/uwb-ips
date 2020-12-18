@@ -9,9 +9,11 @@
 		"latex-workshop.latex.rootFile.useSubFile": true,
 		"latex-workshop.latex.rootFile.doNotPrompt": true,
 		"cSpell.words": [
+			"carrierless",
 			"superframes",
 			"sync",
 			"unilateration"
-		]
+		],
+		"restructuredtext.languageServer.disabled": true
 	}
 }

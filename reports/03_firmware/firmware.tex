@@ -1,7 +1,8 @@
-\documentclass[../../main.tex]{subfiles}
+\providecommand{\main}{..}
+\documentclass[\main/main.tex]{subfiles}
 
 \begin{document}
-\graphicspath{{imgs/}{03_firmware/imgs/}}
+\graphicspath{{img/}{03_firmware/img/}}
 
 \chapter{Ranging layered architecture}
 
@@ -222,9 +223,26 @@ The JOINTED state implementation is illustrated in the follow chart \ref{fig:JOI
 By using TWR, the need of synchronized clocks is eliminated since both the round-trip time(s) and the reply time(s) can be calculated separately using timestamps derived from each device.
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.32]{single_sided_two_way_ranging.png}
+        \includegraphics[scale=0.5]{single_sided_two_way_ranging.png}
     \end{center}
     \caption{Single-sided two-way ranging}
     \label{fig:single_sided_two_way_ranging}
 \end{figure}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.5]{twr_initiator.png}
+    \end{center}
+    \caption{TWR initiator flow chart}
+    \label{fig:twr_initiator}
+\end{figure}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.5]{twr_responder.png}
+    \end{center}
+    \caption{TWR responder flow chart}
+    \label{fig:twr_responder}
+\end{figure}
+
 \end{document}
