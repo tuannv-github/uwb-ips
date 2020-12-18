@@ -113,6 +113,9 @@ class Gateway:
                     print("Serial connection error: Retrying... " + str(retry_count))
                     retry_count+=1
                     serial = Serial(port, baud)
+                    mav = MAVLink(serial)
+                    if (port == "/dev/ttyGateway"):
+                        self.mav = mav
                 except:
                     print("Unable to open port: " + port)
 
