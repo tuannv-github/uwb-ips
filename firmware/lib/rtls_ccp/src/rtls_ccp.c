@@ -111,7 +111,9 @@ ccp_slave_timer_ev_cb(struct dpl_event *ev)
             if(dpl_sem_get_count(&ccp->sem) == 0){
                 dpl_sem_release(&ccp->sem);
             }
-            dpl_eventq_put(&ccp->eventq, &ccp->change_role_event);
+            // dpl_eventq_put(&ccp->eventq, &ccp->change_role_event);
+            uwb_ccp_change_role(ccp);
+            
             return;
         }
     }
