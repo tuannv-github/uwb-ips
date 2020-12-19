@@ -72,5 +72,11 @@
 			<field type="float" name="t0y"/>
 			<field type="float" name="t0z"/>
 		</message>
+		<message id="5" name="SLOT">
+			<description>Slot message</description>
+			<field type="uint16_t" name="dstsrc"/>
+			<field type="uint8_t" name="type" enum="type_t"/>
+			<field type="uint8_t" name="slot"/>
+		</message>
 	</messages>
 </mavlink>

@@ -131,6 +131,11 @@ void rtls_get_location(float *x, float *y, float *z){
     *z = rtls_conf.location_z;
 }
 
+void rtls_get_slot(uint8_t *slot){
+    *slot = udev->slot_id;
+}
+
+
 void rtls_set_location(float x, float y, float z){
     rtls_conf.location_x = x;
     sprintf(rtls_conf_str.location_x, "%d.%d", (int)rtls_conf.location_x, (int)(1000*(rtls_conf.location_x - (int)rtls_conf.location_x)));

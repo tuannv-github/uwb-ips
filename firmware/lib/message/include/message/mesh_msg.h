@@ -51,6 +51,10 @@ typedef struct _msg_rtls_t
                 uint32_t tof;
             };
         };
+        struct _msg_rtls_slot_t
+        {
+            uint8_t slot;
+        };
     };
 }__attribute__((__packed__, aligned(1))) msg_rtls_t;
 

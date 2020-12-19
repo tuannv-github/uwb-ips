@@ -23,8 +23,8 @@
 		<div class="col-sm-3" >
 			<div class="m-2">
 				<select class="form-control" id="modeSelect">
-					<option>Wi-Fi</option>
 					<option>Bluetooth Mesh</option>
+					<option>Wi-Fi</option>
 				</select>
 			</div>
 			<div class="overflow-auto" style="max-height: calc(100vh - 80px);" id="idNodeList">
@@ -174,6 +174,12 @@ function handler_location(msg_location){
 
 function handler_onoff(msg_onoff){
 	console.log("handler_onoff: " + JSON.stringify(msg_onoff));
+}
+
+function handler_slot(msg){
+	$('#node' + msg.dstsrc + 'Slot').fadeOut("fast");
+	$('#node' + msg.dstsrc + 'Slot').text(msg.slot);
+	$('#node' + msg.dstsrc + 'Slot').fadeIn("fast");
 }
 
 /** Javascript implementation for trilateration
@@ -578,6 +584,9 @@ function onMessageArrived(message) {
 				}
 				handler_tof(msg);
 				break;
+			case "SLOT":
+				handler_slot(msg);
+				break;
 			}
 		}
 		else if(document.getElementById("modeSelect").value == "Wi-Fi"){
@@ -600,8 +609,9 @@ const nodeTemplate = ({ address, addressHex, type, locationX, locationY, locatio
     <div class="card-heading p-1 node-title-${type}" role="button" data-toggle="collapse" href="#node${address}Toggle">
 		<h5 class="card-title m-1 node-title">
 			<span> Node ${addressHex} </span>
-			<span class="float-right ml-3 mr-3" id="node${address}TofDistanceCounter" style="text-align:right; ">0</span>
-			<span class="float-right ml-3 mr-3" id="node${address}CounterLoc" style="text-align:right;">0</span>
+			<span class="float-right ml-2 mr-2" id="node${address}TofDistanceCounter" style="text-align:right; ">0</span>
+			<span class="float-right ml-2 mr-2" id="node${address}CounterLoc" style="text-align:right;">0</span>
+			<span class="float-right ml-2 mr-2" id="node${address}Slot" style="text-align:right; ">0</span>
 		</h5>
     </div>
     <div class="collapse" id="node${address}Toggle">
