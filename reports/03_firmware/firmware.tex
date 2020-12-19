@@ -5,13 +5,15 @@
 \graphicspath{{img/}{03_firmware/img/}}
 
 \chapter{Ranging system architecture}
-This section provides an overview of the ranging network operation and layered system architecture.
+This section provides a detailed description of the ranging network operation and layered system architecture.
 
 \section{Prerequisite}
-Consider an UWB system which consist of a MCU and a UWB radio IC.
-Define:
+Before getting deeper, we should cover some fundamental definitions. It will make it easier for further discussions. 
+
+\subsection{Host and device}
+The implemented UWB ranging system consists of one host and one device.
 \begin{itemize}
-    \item Host: the MCU 
+    \item Host: the MCU which control the radio IC 
     \item Device: the radio IC transmitting and receiving over-the-air packet
 \end{itemize}
 
@@ -21,6 +23,21 @@ Define:
     \end{center}
     \caption{Host-device}
     \label{fig:host_device}
+\end{figure}
+
+\subsection{Timing system}
+Since there are two running systems: \textbf{host} and \textbf{device}, there are two timing systems. Unfortunately, these two timing systems may  not have an agreement in the smallest unit of time. A host can use a $1\mu s$ -resolution timer due to the number of redundancy timers it has. A device, on the other hand, may not have as many timers and clock source as a host has, so the device timing system is limited. In the case of DW1000 radio IC, $1\mu s$ is approximately 512 counts of the fundamental 499.2 MHz UWB clock which is actually \textbf{$\sim 1.026\mu s$}. 
+
+For precise timing, the implementation does not make any assumption about the equality of $1\mu s$ in host and device. Timestamp in the device must be converted to host reference for processing, upon completion, the result must be converted back to device reference before writing to that device. 
+\subsection{RMarker}
+Because of the limited transmission speed, the interval between the begin of preamble and the end of PHY data unit is relatively large compared with the propagation interval. For the ultimate purpose of ranging using time of flight, a point should be considered to be marker for timestamping packet. As defined in the context of the IEEE802.15.4-2011 standard \cite{IEEE_Std_802.15.4-2011}, RMarker is the first chip after the SFD, it also means that: RMarker defines the start of the PHR in either transmitter or receiver. 
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.3]{802_15_4_physical.png}
+    \end{center}
+    \caption{802.15.4 RMarker}
+    \label{fig:802_15_4_rmarker}
 \end{figure}
 
 \section{Layered architecture}
@@ -47,7 +64,7 @@ Three CCP roles are defined, allowing nodes to sync with others: Master, Slave, 
 \begin{itemize}
     \item \textbf{CCP master}: There is only and only one master node over the network. The master node is the only place where a clock calibration packet is produced. It will produce and transmit the clock calibration packet with the interval defined as a constant in the firmware. My implementation use the value of 100ms for such interval. 
     \item \textbf{CCP slave}: Slave nodes listen for the clock calibration packet to start their internal timer for each superframe.
-    \item \textbf{Relay}: Relay nodes repeat the clock calibration packet to extend the network physical area. Before repeating the packets, they must do some modification so the receiver can sync with the  master node. There is a constraint in the maximum of repeat level which will be analyzed afterward.
+    \item \textbf{CCP relay}: Relay nodes repeat the clock calibration packet to extend the network physical area. Before repeating the packets, they must do some modification so the receiver can sync with the  master node. There is a constraint in the maximum of repeat level which will be analyzed afterward.
 \end{itemize}
 
 To initialize the system, at least one of the nodes must be configured as a master. The master node will start and control the network and allow other nodes to join and form a network. It is possible to configure more than one node as master, but only one will be active and the others will take the role of slave and/or replay node. A node can take the slave and relay roles at the same time.
@@ -109,15 +126,47 @@ To initialize the system, at least one of the nodes must be configured as a mast
 
 \subsection{CCP implementation}
 
+\subsubsection{Os interupt for CCP packet}
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.35]{interupt_latency_master.png}
+    \end{center}
+    \caption{interrupt latency master}
+    \label{fig:interupt_latency_master}
+\end{figure}
 
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.35]{interupt_latency_listener.png}
+    \end{center}
+    \caption{interrupt latency listener}
+    \label{fig:interupt_latency_listener}
+\end{figure}
 
-There are two timeming 
-Timestamp:
+\subsubsection{Precise CCP packet sending and receiving}
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.35]{ccp_epoch_and_rmarker.png}
+    \end{center}
+    \caption{CCP epoch and RMarker}
+    \label{fig:ccp_epoch_and_rmarker}
+\end{figure}
+
 \begin{itemize}
-    \item $e_m$ Master epoch: Device transmission timestamp
-    \item $e_l$ Local epoch: Device receive timestamp
-    \item $e_o$ Os epoch: Host receive timestamp
+    \item Master epoch $e_m$: Packet timestamp referenced CCP master device timing system
+    \item Local epoch $e_l$: Packet timestamp referenced CCP slave device timing system
+    \item Os epoch $e_o$: Packet timestamp referenced CCP master and slave host timing system
 \end{itemize}
+
+\subsubsection{Repeat CCP packet}
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.35]{ccp_repeat.png}
+    \end{center}
+    \caption{CCP Repeat}
+    \label{fig:ccp_repeat}
+\end{figure}
+
 
 \section{Time Division Multiple Access (TDMA)}
 The fundamental role of the TDMA layer is to give a notification to its upper layer when it is the time to run the service. To archive this, a node must firstly ask for getting an appropriate and available slot from jointed nodes.
@@ -280,4 +329,5 @@ By using TWR, the need of synchronized clocks is eliminated since both the round
     \label{fig:twr_responder}
 \end{figure}
 
+\bib
 \end{document}

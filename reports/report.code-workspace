@@ -10,6 +10,8 @@
 		"latex-workshop.latex.rootFile.doNotPrompt": true,
 		"cSpell.words": [
 			"carrierless",
+			"marker",
+			"r",
 			"superframes",
 			"sync",
 			"unilateration"
