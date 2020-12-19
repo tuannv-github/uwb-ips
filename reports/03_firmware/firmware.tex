@@ -4,14 +4,34 @@
 \begin{document}
 \graphicspath{{img/}{03_firmware/img/}}
 
-\chapter{Ranging layered architecture}
+\chapter{Ranging system architecture}
+This section provides an overview of the ranging network operation and layered system architecture.
 
+\section{Prerequisite}
+Consider an UWB system which consist of a MCU and a UWB radio IC.
+Define:
+\begin{itemize}
+    \item Host: the MCU 
+    \item Device: the radio IC transmitting and receiving over-the-air packet
+\end{itemize}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.3]{host_device.png}
+    \end{center}
+    \caption{Host-device}
+    \label{fig:host_device}
+\end{figure}
+
+\section{Layered architecture}
 The ranging system is implemented follow 3 layers model as shown in figure \ref{fig:ranging_layered_architecture}. 
 \begin{itemize}
     \item CCP (Clock Calibration Packet) provides synchronization service for the upper layer. All nodes jointed to the network will be synced each time a new superframe start.
     \item TDMA (Time Division Multiple Access): Each superframe is divided into multiple slots. TDMA layer provides slot service for its upper layer. 
     \item TWR (Two Way Ranging) layer runs ranging session in the time slot provided by TDMA layer.
 \end{itemize}
+
+Detail description about each layer is provided in the following section.
 \begin{figure}[H]
     \begin{center}
         \includegraphics[scale=0.3]{ranging_layered_architecture}
@@ -27,8 +47,11 @@ Three CCP roles are defined, allowing nodes to sync with others: Master, Slave, 
 \begin{itemize}
     \item \textbf{CCP master}: There is only and only one master node over the network. The master node is the only place where a clock calibration packet is produced. It will produce and transmit the clock calibration packet with the interval defined as a constant in the firmware. My implementation use the value of 100ms for such interval. 
     \item \textbf{CCP slave}: Slave nodes listen for the clock calibration packet to start their internal timer for each superframe.
-    \item Relay: Relay nodes repeat the clock calibration packet to extend the network physical area. Before repeating the packets, they must do some modification so the receiver can sync with the  master node. There is a constraint in the maximum of repeat level which will be analyzed afterward.
+    \item \textbf{Relay}: Relay nodes repeat the clock calibration packet to extend the network physical area. Before repeating the packets, they must do some modification so the receiver can sync with the  master node. There is a constraint in the maximum of repeat level which will be analyzed afterward.
 \end{itemize}
+
+To initialize the system, at least one of the nodes must be configured as a master. The master node will start and control the network and allow other nodes to join and form a network. It is possible to configure more than one node as master, but only one will be active and the others will take the role of slave and/or replay node. A node can take the slave and relay roles at the same time.
+
 \subsection{CCP packet format}
 
 \begin{figure}[H]
@@ -83,6 +106,18 @@ Three CCP roles are defined, allowing nodes to sync with others: Master, Slave, 
     \caption{CCP slave flow chart}
     \label{fig:ccp_slave_flow_chart}
 \end{figure}
+
+\subsection{CCP implementation}
+
+
+
+There are two timeming 
+Timestamp:
+\begin{itemize}
+    \item $e_m$ Master epoch: Device transmission timestamp
+    \item $e_l$ Local epoch: Device receive timestamp
+    \item $e_o$ Os epoch: Host receive timestamp
+\end{itemize}
 
 \section{Time Division Multiple Access (TDMA)}
 The fundamental role of the TDMA layer is to give a notification to its upper layer when it is the time to run the service. To archive this, a node must firstly ask for getting an appropriate and available slot from jointed nodes.
