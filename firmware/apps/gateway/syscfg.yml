@@ -69,3 +69,5 @@ syscfg.vals:
     BLE_MESH_RELAY: 1
     # BLE_MESH_DEBUG: 1
     # BLE_MESH_DEBUG_NET: 1
+
+    BLE_MESH_CRPL: 0
