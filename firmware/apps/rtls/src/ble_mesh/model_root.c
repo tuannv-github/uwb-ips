@@ -121,8 +121,8 @@ static struct bt_mesh_cfg_srv cfg_srv = {
     .frnd = BT_MESH_FRIEND_NOT_SUPPORTED,
     .gatt_proxy = BT_MESH_GATT_PROXY_ENABLED,
     .default_ttl = 7,
-    .net_transmit = BT_MESH_TRANSMIT(1, 20),
-    .relay_retransmit = BT_MESH_TRANSMIT(1, 20),
+    .net_transmit = BT_MESH_TRANSMIT(0, 10),
+    .relay_retransmit = BT_MESH_TRANSMIT(0, 10),
 };
 static struct bt_mesh_model_pub model_pub_rtls;
 
