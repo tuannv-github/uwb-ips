@@ -216,9 +216,10 @@ void rtls_tdma_cb(rtls_tdma_instance_t *rti, tdma_slot_t *slot){
 }
 
 static distance_t g_distance;
+static distance_t g_distance4;
 
 distance_t *get_distances(){
-    return &g_distance;
+    return &g_distance4;
 }
 
 static sphere_t g_spheres[4];
@@ -234,25 +235,44 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
         inst->fctrl != (FCNTL_IEEE_RANGE_16|UWB_FCTRL_ACK_REQUESTED)) {
         return false;
     }
+    if(rtls_conf.node_type != TAG) return false;
+
     struct nrng_instance *nrng = (struct nrng_instance *)cbs->inst_ptr;
     nrng_get_tofs_addresses( nrng, g_distance.tofs, g_distance.anchors, g_distance.updated, ANCHOR_NUM, nrng->idx);
 
-    int sphere_idx = 0;
-    for(int i=0; i<ANCHOR_NUM; i++){
-        if(g_distance.anchors[i] != 0 && g_distance.updated){
-            printf("0x%04X: %5ld\n", g_distance.anchors[i], g_distance.tofs[i]); 
-            if(rtls_conf.node_type == TAG){
-                rtls_tdma_node_t *node = NULL;
-                rtls_tdma_find_node(&g_rtls_tdma_instance, g_distance.anchors[i], &node);
-                if(node != NULL){
-                    g_spheres[sphere_idx].x = node->location_x;
-                    g_spheres[sphere_idx].y = node->location_y;
-                    g_spheres[sphere_idx].z = node->location_z;
-                    g_spheres[sphere_idx].r = 0.004632130984819555*g_distance.tofs[i] +  0.13043560944811894;
-                    anchor_addrs[sphere_idx] = g_distance.anchors[i];
-                    sphere_idx++;
-                    if(sphere_idx == 4) break;
+    uint32_t max_tof = 0;
+    for(int i=0; i<4; i++){
+        uint32_t min_tof = -1;
+        for(int j=0; j<ANCHOR_NUM; j++){
+            if(g_distance.anchors[j] != 0 && g_distance.updated){
+                if(g_distance.tofs[j] < min_tof && g_distance.tofs[j] >= max_tof){
+                    min_tof = g_distance.tofs[j];
+                    g_distance4.tofs[i] =  g_distance.tofs[j];
+                    g_distance4.anchors[i] = g_distance.anchors[j];
+                    g_distance4.updated[i] = true;
                 }
+            }
+        }
+        max_tof = min_tof+1;
+    }
+    for(int j=0; j<ANCHOR_NUM; j++){
+        g_distance.updated[j] = false;
+    }
+
+    uint8_t sphere_idx = 0;
+    for(int i=0; i<ANCHOR_NUM; i++){
+        if(g_distance4.anchors[i] != 0 && g_distance4.updated){
+            printf("0x%04X: %5ld\n", g_distance4.anchors[i], g_distance4.tofs[i]); 
+            rtls_tdma_node_t *node = NULL;
+            rtls_tdma_find_node(&g_rtls_tdma_instance, g_distance4.anchors[i], &node);
+            if(node != NULL){
+                g_spheres[sphere_idx].x = node->location_x;
+                g_spheres[sphere_idx].y = node->location_y;
+                g_spheres[sphere_idx].z = node->location_z;
+                g_spheres[sphere_idx].r = 0.004632130984819555*g_distance4.tofs[i] +  0.13043560944811894;
+                anchor_addrs[sphere_idx] = g_distance4.anchors[i];
+                sphere_idx++;
+                if(sphere_idx == 4) break;
             }
         }
     }
