@@ -63,10 +63,10 @@ rtls_model_set(struct bt_mesh_model *model,
 {  
     STATS_INC(g_model_root_stat, recv_setmsg);
     msg_rtls_t msg_rtls;
-    uint16_t dstsrc;
+    uint16_t uwb_address;
     msg_parse_rtls(buf, &msg_rtls);
-    rtls_get_address(&dstsrc);
-    if(msg_rtls.dstsrc != dstsrc) return;
+    rtls_get_address(&uwb_address);
+    if(msg_rtls.uwb_address != uwb_address) return;
 
     switch (msg_rtls.type)
     {
@@ -150,7 +150,7 @@ task_rtls_location_func(void *arg){
             msg_rtls.type = MAVLINK_MSG_ID_LOCATION;
             msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
             rtls_get_ntype(&msg_rtls.node_type);
-            rtls_get_address(&msg_rtls.dstsrc);
+            rtls_get_address(&msg_rtls.uwb_address);
             rtls_get_location(&msg_rtls.location_x, &msg_rtls.location_y, &msg_rtls.location_z);
 
             msg_prepr_rtls(&pub->msg, &msg_rtls);
@@ -166,7 +166,7 @@ task_rtls_location_func(void *arg){
             msg_rtls.type = MAVLINK_MSG_ID_SLOT;
             msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
             rtls_get_ntype(&msg_rtls.node_type);
-            rtls_get_address(&msg_rtls.dstsrc);
+            rtls_get_address(&msg_rtls.uwb_address);
             rtls_get_slot(&msg_rtls.slot);
 
             msg_prepr_rtls(&pub->msg, &msg_rtls);
@@ -200,7 +200,7 @@ task_rtls_distance_func(void *arg){
 
                 msg_rtls.type = MAVLINK_MSG_ID_TOF;
                 msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
-                rtls_get_address(&msg_rtls.dstsrc);
+                rtls_get_address(&msg_rtls.uwb_address);
                 msg_rtls.anchor = distances->anchors[i];
                 msg_rtls.tof = distances->tofs[i];
 

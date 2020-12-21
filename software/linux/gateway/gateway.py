@@ -75,12 +75,12 @@ class Gateway:
             elif(msg["node"] == "TAG"):
                 msg["node"] = TAG
             try:
-                self.mav.location_send(msg["dstsrc"], msg["type"], msg["node"], msg["location_x"], msg["location_y"], msg["location_z"])
+                self.mav.location_send(0, msg["uwb_address"], msg["type"], msg["node"], msg["location_x"], msg["location_y"], msg["location_z"])
             except:
                 print("Unable to send downlink msg")
         elif(msg["mavpackettype"] == "ONOFF"):
             try:
-                self.mav.onoff_send(msg["dstsrc"], msg["type"], msg["value"])
+                self.mav.onoff_send(0, msg["uwb_address"], msg["type"], msg["value"])
             except:
                 print("Unable to send downlink msg")
 

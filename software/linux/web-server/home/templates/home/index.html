@@ -130,8 +130,8 @@ function dec2hexString(dec) {
    return '0x' + (dec+0x10000).toString(16).substr(-4).toUpperCase();
 }
 
-function handler_location(msg_location){
-	node = new Node(msg.dstsrc, msg.node, msg.location_x, msg.location_y, msg.location_z);
+function handler_location(msg){
+	node = new Node(msg.uwb_address, msg.node, msg.location_x, msg.location_y, msg.location_z);
 	let added = false;
 	let i = 0;
 	for(i=0; i<nodeList.length; i++){
@@ -144,6 +144,7 @@ function handler_location(msg_location){
 		if(!nodeList[i].editing){
 			nodeUpdate(i, node);
 			plot(nodeList);
+			$('#node' + msg.uwb_address + 'meshAddressHex').text(dec2hexString(parseInt(msg.mesh_address)));
 		}
 	}
 	else{
@@ -153,7 +154,7 @@ function handler_location(msg_location){
 		console.log("Add: "+ node.toString());
 		$('#idNodeList').append(
 			[
-				{address: node.address, addressHex: dec2hexString(parseInt(node.address)), type: node.type, 
+				{address: node.address, uwbAddressHex: dec2hexString(parseInt(node.address)), type: node.type, 
 					locationX: node.locationX.toString(), locationY: node.locationY.toString(), locationZ: node.locationZ.toString()},
 			].map(nodeTemplate).join(''));
 		$('#node'+ node.address +'Card').show(300);
@@ -169,6 +170,7 @@ function handler_location(msg_location){
 				$('#node' + node.address + 'Select').children("option")[1].disabled = true;
 				break;
 		}
+		// $('#node' + node.address + 'meshAddressHex').text(dec2hexString(parseInt(msg.mesh_address)));
 	}
 }
 
@@ -177,9 +179,9 @@ function handler_onoff(msg_onoff){
 }
 
 function handler_slot(msg){
-	$('#node' + msg.dstsrc + 'Slot').fadeOut("fast");
-	$('#node' + msg.dstsrc + 'Slot').text(msg.slot);
-	$('#node' + msg.dstsrc + 'Slot').fadeIn("fast");
+	$('#node' + msg.uwb_address + 'Slot').fadeOut("fast");
+	$('#node' + msg.uwb_address + 'Slot').text(msg.slot);
+	$('#node' + msg.uwb_address + 'Slot').fadeIn("fast");
 }
 
 /** Javascript implementation for trilateration
@@ -523,7 +525,7 @@ function guiAddNodes(address, role, x, y, z){
 	console.log("Add: "+ address);
 	$('#idNodeList').append(
 		[
-			{address: address, addressHex: dec2hexString(parseInt(address)), type: role, 
+			{address: address, uwbAddressHex: dec2hexString(parseInt(address)), type: role, 
 				locationX: x, locationY: y, locationZ:z},
 		].map(nodeTemplate).join(''));
 	$('#node'+ address +'Card').show(300);
@@ -558,10 +560,10 @@ function onMessageArrived(message) {
 		if(document.getElementById("modeSelect").value == "Bluetooth Mesh"){
 			switch(msg.mavpackettype){
 			case "LOCATION":
-				value = parseInt($('#node' + msg.dstsrc + 'CounterLoc').text());
+				value = parseInt($('#node' + msg.uwb_address + 'CounterLoc').text());
 				if(!isNaN(value)){
 					value += 1;
-					$('#node' + msg.dstsrc + 'CounterLoc').text(value);
+					$('#node' + msg.uwb_address + 'CounterLoc').text(value);
 				}
 				handler_location(msg);
 				break;
@@ -603,12 +605,13 @@ function onMessageArrived(message) {
 	}
 }
 
-const nodeTemplate = ({ address, addressHex, type, locationX, locationY, locationZ}) => 
+const nodeTemplate = ({ address, uwbAddressHex, type, locationX, locationY, locationZ}) => 
 `
 <div class="card m-1" style="display: none;" id="node${address}Card">
     <div class="card-heading p-1 node-title-${type}" role="button" data-toggle="collapse" href="#node${address}Toggle">
 		<h5 class="card-title m-1 node-title">
-			<span> Node ${addressHex} </span>
+			<span class="float-left" > Node ${uwbAddressHex} </span>
+			<span class="float-left ml-2 mr-2" id="node${address}meshAddressHex">0</span>
 			<span class="float-right ml-2 mr-2" id="node${address}TofDistanceCounter" style="text-align:right; ">0</span>
 			<span class="float-right ml-2 mr-2" id="node${address}CounterLoc" style="text-align:right;">0</span>
 			<span class="float-right ml-2 mr-2" id="node${address}Slot" style="text-align:right; ">0</span>
@@ -741,7 +744,7 @@ function onUpdateBtnClick(address){
 		node = "ANCHOR"
 	else
 		node = "TAG"
-	cmd = '{"mavpackettype": "LOCATION", "dstsrc": ' + address + ', "node": "' + node + '", "type": "SET", "location_x": ' + locationX +', "location_y": ' + locationY + ', "location_z": ' + locationZ + '}'
+	cmd = '{"mavpackettype": "LOCATION", "uwb_address": ' + address + ', "node": "' + node + '", "type": "SET", "location_x": ' + locationX +', "location_y": ' + locationY + ', "location_z": ' + locationZ + '}'
 
 	publish("{{topic_publish}}", cmd)
 }
@@ -765,13 +768,13 @@ function onIdentifyBtnClick(address){
 		node.identifying = false;
 		$('#node' + address + 'BtnIdentify').text('Identify').button("refresh");
 		// $('#node' + address + 'Identifying').hide();
-		cmd = '{"mavpackettype": "ONOFF", "dstsrc": '+ address +', "type": "SET", "value": 0}'
+		cmd = '{"mavpackettype": "ONOFF", "uwb_address": '+ address +', "type": "SET", "value": 0}'
 	}
 	else{
 		node.identifying = true;
 		$('#node' + address + 'BtnIdentify').text('Identifying').button("refresh");
 		// $('#node' + address + 'Identifying').show();
-		cmd = '{"mavpackettype": "ONOFF", "dstsrc": '+ address +', "type": "SET", "value": 1}'
+		cmd = '{"mavpackettype": "ONOFF", "uwb_address": '+ address +', "type": "SET", "value": 1}'
 	}
 	publish("{{topic_publish}}", cmd)
 }
@@ -795,13 +798,13 @@ function onBulbBtnClick(address){
 		node.lighting = false;
 		$('#node' + address + 'BtnBulb').text('OFF').button("refresh");
 		// $('#node' + address + 'Identifying').hide();
-		cmd = '{"mavpackettype": "ONOFF", "dstsrc": '+ address +', "type": "SET", "value": 0}'
+		cmd = '{"mavpackettype": "ONOFF", "uwb_address": '+ address +', "type": "SET", "value": 0}'
 	}
 	else{
 		node.lighting = true;
 		$('#node' + address + 'BtnBulb').text('ON').button("refresh");
 		// $('#node' + address + 'Identifying').show();
-		cmd = '{"mavpackettype": "ONOFF", "dstsrc": '+ address +', "type": "SET", "value": 2}'
+		cmd = '{"mavpackettype": "ONOFF", "uwb_address": '+ address +', "type": "SET", "value": 2}'
 	}
 	publish("{{topic_publish}}", cmd)
 }
