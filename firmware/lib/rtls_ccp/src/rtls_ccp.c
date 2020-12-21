@@ -65,7 +65,7 @@ ccp_master_timer_ev_cb(struct dpl_event *ev)
     if (!ccp->status.enabled) return;
     CCP_STATS_INC(master_cnt);
 
-    if (ccp_send(ccp).start_tx_error) return;
+    ccp_send(ccp);
 
     if (ccp->status.enabled) {
         dpl_cputime_timer_start(&ccp->master_slave_timer, 
