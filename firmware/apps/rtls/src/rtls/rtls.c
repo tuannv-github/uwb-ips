@@ -242,9 +242,10 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
 
     uint32_t max_tof = 0;
     for(int i=0; i<4; i++){
+        g_distance4.updated[i] = false;
         uint32_t min_tof = -1;
         for(int j=0; j<ANCHOR_NUM; j++){
-            if(g_distance.anchors[j] != 0 && g_distance.updated){
+            if(g_distance.anchors[j] != 0 && g_distance.updated[j]){
                 if(g_distance.tofs[j] < min_tof && g_distance.tofs[j] >= max_tof){
                     min_tof = g_distance.tofs[j];
                     g_distance4.tofs[i] =  g_distance.tofs[j];
@@ -255,13 +256,10 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
         }
         max_tof = min_tof+1;
     }
-    for(int j=0; j<ANCHOR_NUM; j++){
-        g_distance.updated[j] = false;
-    }
 
     uint8_t sphere_idx = 0;
-    for(int i=0; i<ANCHOR_NUM; i++){
-        if(g_distance4.anchors[i] != 0 && g_distance4.updated){
+    for(int i=0; i<4; i++){
+        if(g_distance4.anchors[i] != 0 && g_distance4.updated[i]){
             printf("0x%04X: %5ld\n", g_distance4.anchors[i], g_distance4.tofs[i]); 
             rtls_tdma_node_t *node = NULL;
             rtls_tdma_find_node(&g_rtls_tdma_instance, g_distance4.anchors[i], &node);
@@ -289,6 +287,11 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
         location_updated = true;
         os_mutex_release(&g_gateway_mutex);
     }
+
+    for(int j=0; j<ANCHOR_NUM; j++){
+        g_distance.updated[j] = false;
+    }
+
     return true;
 }
 
