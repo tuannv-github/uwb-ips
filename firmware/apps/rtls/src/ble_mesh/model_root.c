@@ -18,7 +18,9 @@
 
 #include <stats/stats.h>
 
-#define LED_DELAY_MS   200
+#define LED_DELAY_MS    200
+#define LIGHT_BULB_0    9
+#define LIGHT_BULB_1    10
 
 STATS_SECT_START(model_root_stat_t)
     STATS_SECT_ENTRY(send_loca_succed)
@@ -92,17 +94,17 @@ rtls_model_set(struct bt_mesh_model *model,
         }
 
         if(msg_rtls.value & 0x02){
-            hal_gpio_write(9, 0);
+            hal_gpio_write(LIGHT_BULB_0, 0);
         }
         else{
-            hal_gpio_write(9, 1);
+            hal_gpio_write(LIGHT_BULB_0, 1);
         }
 
         if(msg_rtls.value & 0x04){
-            hal_gpio_write(10, 0);
+            hal_gpio_write(LIGHT_BULB_1, 0);
         }
         else{
-            hal_gpio_write(10, 1);
+            hal_gpio_write(LIGHT_BULB_1, 1);
         }
         break;
     default:
@@ -146,7 +148,9 @@ task_rtls_location_func(void *arg){
 
         cnt++;
 
-        if(cnt%2){
+        switch (cnt%3)
+        {
+        case 0: {
             msg_rtls.type = MAVLINK_MSG_ID_LOCATION;
             msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
             rtls_get_ntype(&msg_rtls.node_type);
@@ -162,7 +166,9 @@ task_rtls_location_func(void *arg){
             else{
                 STATS_INC(g_model_root_stat, send_loca_succed);
             }
-        }else{
+        }
+            break;
+        case 1:{
             msg_rtls.type = MAVLINK_MSG_ID_SLOT;
             msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
             rtls_get_ntype(&msg_rtls.node_type);
@@ -177,7 +183,19 @@ task_rtls_location_func(void *arg){
             }
             else{
                 STATS_INC(g_model_root_stat, send_slot_succed);
-            } 
+            }
+        }
+            break;
+        case 2:{
+            msg_rtls.type = MAVLINK_MSG_ID_ONOFF;
+            msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
+            rtls_get_ntype(&msg_rtls.node_type);
+            rtls_get_address(&msg_rtls.uwb_address);
+            msg_rtls.value = g_led_running | (!hal_gpio_read(LIGHT_BULB_0) << 1) | (!hal_gpio_read(LIGHT_BULB_1) << 2);
+            msg_prepr_rtls(&pub->msg, &msg_rtls);
+            bt_mesh_model_publish(model);
+        }
+            break;
         }
 
         os_mbuf_free(pub->msg);
