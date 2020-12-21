@@ -171,6 +171,7 @@ struct uwb_ccp_instance {
     uwb_ccp_sync_cb_t uwb_ccp_sync_cb;                   //!< Ccp sync event callback
     void *uwb_ccp_sync_arg;                              //!< Ccp sync event callback argument
     uwb_ccp_role_t uwb_ccp_role;
+    bool recv_ccp_reqt;
     uwb_ccp_frame_t * frames[];                          //!< Buffers to uwb_ccp frames
 };
 

@@ -6,18 +6,19 @@
 
 typedef struct __mavlink_tof_t {
  uint32_t tof; /*<  */
+ uint16_t mesh_address; /*<  */
  uint16_t tag; /*<  */
  uint16_t anchor; /*<  */
  uint8_t type; /*<  */
 } mavlink_tof_t;
 
-#define MAVLINK_MSG_ID_TOF_LEN 9
-#define MAVLINK_MSG_ID_TOF_MIN_LEN 9
-#define MAVLINK_MSG_ID_3_LEN 9
-#define MAVLINK_MSG_ID_3_MIN_LEN 9
+#define MAVLINK_MSG_ID_TOF_LEN 11
+#define MAVLINK_MSG_ID_TOF_MIN_LEN 11
+#define MAVLINK_MSG_ID_3_LEN 11
+#define MAVLINK_MSG_ID_3_MIN_LEN 11
 
-#define MAVLINK_MSG_ID_TOF_CRC 151
-#define MAVLINK_MSG_ID_3_CRC 151
+#define MAVLINK_MSG_ID_TOF_CRC 149
+#define MAVLINK_MSG_ID_3_CRC 149
 
 
 
@@ -25,20 +26,22 @@ typedef struct __mavlink_tof_t {
 #define MAVLINK_MESSAGE_INFO_TOF { \
     3, \
     "TOF", \
-    4, \
-    {  { "type", NULL, MAVLINK_TYPE_UINT8_T, 0, 8, offsetof(mavlink_tof_t, type) }, \
-         { "tag", NULL, MAVLINK_TYPE_UINT16_T, 0, 4, offsetof(mavlink_tof_t, tag) }, \
-         { "anchor", NULL, MAVLINK_TYPE_UINT16_T, 0, 6, offsetof(mavlink_tof_t, anchor) }, \
+    5, \
+    {  { "mesh_address", NULL, MAVLINK_TYPE_UINT16_T, 0, 4, offsetof(mavlink_tof_t, mesh_address) }, \
+         { "type", NULL, MAVLINK_TYPE_UINT8_T, 0, 10, offsetof(mavlink_tof_t, type) }, \
+         { "tag", NULL, MAVLINK_TYPE_UINT16_T, 0, 6, offsetof(mavlink_tof_t, tag) }, \
+         { "anchor", NULL, MAVLINK_TYPE_UINT16_T, 0, 8, offsetof(mavlink_tof_t, anchor) }, \
          { "tof", NULL, MAVLINK_TYPE_UINT32_T, 0, 0, offsetof(mavlink_tof_t, tof) }, \
          } \
 }
 #else
 #define MAVLINK_MESSAGE_INFO_TOF { \
     "TOF", \
-    4, \
-    {  { "type", NULL, MAVLINK_TYPE_UINT8_T, 0, 8, offsetof(mavlink_tof_t, type) }, \
-         { "tag", NULL, MAVLINK_TYPE_UINT16_T, 0, 4, offsetof(mavlink_tof_t, tag) }, \
-         { "anchor", NULL, MAVLINK_TYPE_UINT16_T, 0, 6, offsetof(mavlink_tof_t, anchor) }, \
+    5, \
+    {  { "mesh_address", NULL, MAVLINK_TYPE_UINT16_T, 0, 4, offsetof(mavlink_tof_t, mesh_address) }, \
+         { "type", NULL, MAVLINK_TYPE_UINT8_T, 0, 10, offsetof(mavlink_tof_t, type) }, \
+         { "tag", NULL, MAVLINK_TYPE_UINT16_T, 0, 6, offsetof(mavlink_tof_t, tag) }, \
+         { "anchor", NULL, MAVLINK_TYPE_UINT16_T, 0, 8, offsetof(mavlink_tof_t, anchor) }, \
          { "tof", NULL, MAVLINK_TYPE_UINT32_T, 0, 0, offsetof(mavlink_tof_t, tof) }, \
          } \
 }
@@ -50,6 +53,7 @@ typedef struct __mavlink_tof_t {
  * @param component_id ID of this component (e.g. 200 for IMU)
  * @param msg The MAVLink message to compress the data into
  *
+ * @param mesh_address  
  * @param type  
  * @param tag  
  * @param anchor  
@@ -57,19 +61,21 @@ typedef struct __mavlink_tof_t {
  * @return length of the message in bytes (excluding serial stream start sign)
  */
 static inline uint16_t mavlink_msg_tof_pack(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg,
-                               uint8_t type, uint16_t tag, uint16_t anchor, uint32_t tof)
+                               uint16_t mesh_address, uint8_t type, uint16_t tag, uint16_t anchor, uint32_t tof)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char buf[MAVLINK_MSG_ID_TOF_LEN];
     _mav_put_uint32_t(buf, 0, tof);
-    _mav_put_uint16_t(buf, 4, tag);
-    _mav_put_uint16_t(buf, 6, anchor);
-    _mav_put_uint8_t(buf, 8, type);
+    _mav_put_uint16_t(buf, 4, mesh_address);
+    _mav_put_uint16_t(buf, 6, tag);
+    _mav_put_uint16_t(buf, 8, anchor);
+    _mav_put_uint8_t(buf, 10, type);
 
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), buf, MAVLINK_MSG_ID_TOF_LEN);
 #else
     mavlink_tof_t packet;
     packet.tof = tof;
+    packet.mesh_address = mesh_address;
     packet.tag = tag;
     packet.anchor = anchor;
     packet.type = type;
@@ -87,6 +93,7 @@ static inline uint16_t mavlink_msg_tof_pack(uint8_t system_id, uint8_t component
  * @param component_id ID of this component (e.g. 200 for IMU)
  * @param chan The MAVLink channel this message will be sent over
  * @param msg The MAVLink message to compress the data into
+ * @param mesh_address  
  * @param type  
  * @param tag  
  * @param anchor  
@@ -95,19 +102,21 @@ static inline uint16_t mavlink_msg_tof_pack(uint8_t system_id, uint8_t component
  */
 static inline uint16_t mavlink_msg_tof_pack_chan(uint8_t system_id, uint8_t component_id, uint8_t chan,
                                mavlink_message_t* msg,
-                                   uint8_t type,uint16_t tag,uint16_t anchor,uint32_t tof)
+                                   uint16_t mesh_address,uint8_t type,uint16_t tag,uint16_t anchor,uint32_t tof)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char buf[MAVLINK_MSG_ID_TOF_LEN];
     _mav_put_uint32_t(buf, 0, tof);
-    _mav_put_uint16_t(buf, 4, tag);
-    _mav_put_uint16_t(buf, 6, anchor);
-    _mav_put_uint8_t(buf, 8, type);
+    _mav_put_uint16_t(buf, 4, mesh_address);
+    _mav_put_uint16_t(buf, 6, tag);
+    _mav_put_uint16_t(buf, 8, anchor);
+    _mav_put_uint8_t(buf, 10, type);
 
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), buf, MAVLINK_MSG_ID_TOF_LEN);
 #else
     mavlink_tof_t packet;
     packet.tof = tof;
+    packet.mesh_address = mesh_address;
     packet.tag = tag;
     packet.anchor = anchor;
     packet.type = type;
@@ -129,7 +138,7 @@ static inline uint16_t mavlink_msg_tof_pack_chan(uint8_t system_id, uint8_t comp
  */
 static inline uint16_t mavlink_msg_tof_encode(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, const mavlink_tof_t* tof)
 {
-    return mavlink_msg_tof_pack(system_id, component_id, msg, tof->type, tof->tag, tof->anchor, tof->tof);
+    return mavlink_msg_tof_pack(system_id, component_id, msg, tof->mesh_address, tof->type, tof->tag, tof->anchor, tof->tof);
 }
 
 /**
@@ -143,13 +152,14 @@ static inline uint16_t mavlink_msg_tof_encode(uint8_t system_id, uint8_t compone
  */
 static inline uint16_t mavlink_msg_tof_encode_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, const mavlink_tof_t* tof)
 {
-    return mavlink_msg_tof_pack_chan(system_id, component_id, chan, msg, tof->type, tof->tag, tof->anchor, tof->tof);
+    return mavlink_msg_tof_pack_chan(system_id, component_id, chan, msg, tof->mesh_address, tof->type, tof->tag, tof->anchor, tof->tof);
 }
 
 /**
  * @brief Send a tof message
  * @param chan MAVLink channel to send the message
  *
+ * @param mesh_address  
  * @param type  
  * @param tag  
  * @param anchor  
@@ -157,19 +167,21 @@ static inline uint16_t mavlink_msg_tof_encode_chan(uint8_t system_id, uint8_t co
  */
 #ifdef MAVLINK_USE_CONVENIENCE_FUNCTIONS
 
-static inline void mavlink_msg_tof_send(mavlink_channel_t chan, uint8_t type, uint16_t tag, uint16_t anchor, uint32_t tof)
+static inline void mavlink_msg_tof_send(mavlink_channel_t chan, uint16_t mesh_address, uint8_t type, uint16_t tag, uint16_t anchor, uint32_t tof)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char buf[MAVLINK_MSG_ID_TOF_LEN];
     _mav_put_uint32_t(buf, 0, tof);
-    _mav_put_uint16_t(buf, 4, tag);
-    _mav_put_uint16_t(buf, 6, anchor);
-    _mav_put_uint8_t(buf, 8, type);
+    _mav_put_uint16_t(buf, 4, mesh_address);
+    _mav_put_uint16_t(buf, 6, tag);
+    _mav_put_uint16_t(buf, 8, anchor);
+    _mav_put_uint8_t(buf, 10, type);
 
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_TOF, buf, MAVLINK_MSG_ID_TOF_MIN_LEN, MAVLINK_MSG_ID_TOF_LEN, MAVLINK_MSG_ID_TOF_CRC);
 #else
     mavlink_tof_t packet;
     packet.tof = tof;
+    packet.mesh_address = mesh_address;
     packet.tag = tag;
     packet.anchor = anchor;
     packet.type = type;
@@ -186,7 +198,7 @@ static inline void mavlink_msg_tof_send(mavlink_channel_t chan, uint8_t type, ui
 static inline void mavlink_msg_tof_send_struct(mavlink_channel_t chan, const mavlink_tof_t* tof)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
-    mavlink_msg_tof_send(chan, tof->type, tof->tag, tof->anchor, tof->tof);
+    mavlink_msg_tof_send(chan, tof->mesh_address, tof->type, tof->tag, tof->anchor, tof->tof);
 #else
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_TOF, (const char *)tof, MAVLINK_MSG_ID_TOF_MIN_LEN, MAVLINK_MSG_ID_TOF_LEN, MAVLINK_MSG_ID_TOF_CRC);
 #endif
@@ -200,19 +212,21 @@ static inline void mavlink_msg_tof_send_struct(mavlink_channel_t chan, const mav
   is usually the receive buffer for the channel, and allows a reply to an
   incoming message with minimum stack space usage.
  */
-static inline void mavlink_msg_tof_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  uint8_t type, uint16_t tag, uint16_t anchor, uint32_t tof)
+static inline void mavlink_msg_tof_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  uint16_t mesh_address, uint8_t type, uint16_t tag, uint16_t anchor, uint32_t tof)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char *buf = (char *)msgbuf;
     _mav_put_uint32_t(buf, 0, tof);
-    _mav_put_uint16_t(buf, 4, tag);
-    _mav_put_uint16_t(buf, 6, anchor);
-    _mav_put_uint8_t(buf, 8, type);
+    _mav_put_uint16_t(buf, 4, mesh_address);
+    _mav_put_uint16_t(buf, 6, tag);
+    _mav_put_uint16_t(buf, 8, anchor);
+    _mav_put_uint8_t(buf, 10, type);
 
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_TOF, buf, MAVLINK_MSG_ID_TOF_MIN_LEN, MAVLINK_MSG_ID_TOF_LEN, MAVLINK_MSG_ID_TOF_CRC);
 #else
     mavlink_tof_t *packet = (mavlink_tof_t *)msgbuf;
     packet->tof = tof;
+    packet->mesh_address = mesh_address;
     packet->tag = tag;
     packet->anchor = anchor;
     packet->type = type;
@@ -228,13 +242,23 @@ static inline void mavlink_msg_tof_send_buf(mavlink_message_t *msgbuf, mavlink_c
 
 
 /**
+ * @brief Get field mesh_address from tof message
+ *
+ * @return  
+ */
+static inline uint16_t mavlink_msg_tof_get_mesh_address(const mavlink_message_t* msg)
+{
+    return _MAV_RETURN_uint16_t(msg,  4);
+}
+
+/**
  * @brief Get field type from tof message
  *
  * @return  
  */
 static inline uint8_t mavlink_msg_tof_get_type(const mavlink_message_t* msg)
 {
-    return _MAV_RETURN_uint8_t(msg,  8);
+    return _MAV_RETURN_uint8_t(msg,  10);
 }
 
 /**
@@ -244,7 +268,7 @@ static inline uint8_t mavlink_msg_tof_get_type(const mavlink_message_t* msg)
  */
 static inline uint16_t mavlink_msg_tof_get_tag(const mavlink_message_t* msg)
 {
-    return _MAV_RETURN_uint16_t(msg,  4);
+    return _MAV_RETURN_uint16_t(msg,  6);
 }
 
 /**
@@ -254,7 +278,7 @@ static inline uint16_t mavlink_msg_tof_get_tag(const mavlink_message_t* msg)
  */
 static inline uint16_t mavlink_msg_tof_get_anchor(const mavlink_message_t* msg)
 {
-    return _MAV_RETURN_uint16_t(msg,  6);
+    return _MAV_RETURN_uint16_t(msg,  8);
 }
 
 /**
@@ -277,6 +301,7 @@ static inline void mavlink_msg_tof_decode(const mavlink_message_t* msg, mavlink_
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     tof->tof = mavlink_msg_tof_get_tof(msg);
+    tof->mesh_address = mavlink_msg_tof_get_mesh_address(msg);
     tof->tag = mavlink_msg_tof_get_tag(msg);
     tof->anchor = mavlink_msg_tof_get_anchor(msg);
     tof->type = mavlink_msg_tof_get_type(msg);

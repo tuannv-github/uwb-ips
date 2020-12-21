@@ -6,18 +6,19 @@
 
 typedef struct __mavlink_distance_t {
  float distance; /*<  */
+ uint16_t mesh_address; /*<  */
  uint16_t tag; /*<  */
  uint16_t anchor; /*<  */
  uint8_t type; /*<  */
 } mavlink_distance_t;
 
-#define MAVLINK_MSG_ID_DISTANCE_LEN 9
-#define MAVLINK_MSG_ID_DISTANCE_MIN_LEN 9
-#define MAVLINK_MSG_ID_2_LEN 9
-#define MAVLINK_MSG_ID_2_MIN_LEN 9
+#define MAVLINK_MSG_ID_DISTANCE_LEN 11
+#define MAVLINK_MSG_ID_DISTANCE_MIN_LEN 11
+#define MAVLINK_MSG_ID_2_LEN 11
+#define MAVLINK_MSG_ID_2_MIN_LEN 11
 
-#define MAVLINK_MSG_ID_DISTANCE_CRC 255
-#define MAVLINK_MSG_ID_2_CRC 255
+#define MAVLINK_MSG_ID_DISTANCE_CRC 13
+#define MAVLINK_MSG_ID_2_CRC 13
 
 
 
@@ -25,20 +26,22 @@ typedef struct __mavlink_distance_t {
 #define MAVLINK_MESSAGE_INFO_DISTANCE { \
     2, \
     "DISTANCE", \
-    4, \
-    {  { "type", NULL, MAVLINK_TYPE_UINT8_T, 0, 8, offsetof(mavlink_distance_t, type) }, \
-         { "tag", NULL, MAVLINK_TYPE_UINT16_T, 0, 4, offsetof(mavlink_distance_t, tag) }, \
-         { "anchor", NULL, MAVLINK_TYPE_UINT16_T, 0, 6, offsetof(mavlink_distance_t, anchor) }, \
+    5, \
+    {  { "mesh_address", NULL, MAVLINK_TYPE_UINT16_T, 0, 4, offsetof(mavlink_distance_t, mesh_address) }, \
+         { "type", NULL, MAVLINK_TYPE_UINT8_T, 0, 10, offsetof(mavlink_distance_t, type) }, \
+         { "tag", NULL, MAVLINK_TYPE_UINT16_T, 0, 6, offsetof(mavlink_distance_t, tag) }, \
+         { "anchor", NULL, MAVLINK_TYPE_UINT16_T, 0, 8, offsetof(mavlink_distance_t, anchor) }, \
          { "distance", NULL, MAVLINK_TYPE_FLOAT, 0, 0, offsetof(mavlink_distance_t, distance) }, \
          } \
 }
 #else
 #define MAVLINK_MESSAGE_INFO_DISTANCE { \
     "DISTANCE", \
-    4, \
-    {  { "type", NULL, MAVLINK_TYPE_UINT8_T, 0, 8, offsetof(mavlink_distance_t, type) }, \
-         { "tag", NULL, MAVLINK_TYPE_UINT16_T, 0, 4, offsetof(mavlink_distance_t, tag) }, \
-         { "anchor", NULL, MAVLINK_TYPE_UINT16_T, 0, 6, offsetof(mavlink_distance_t, anchor) }, \
+    5, \
+    {  { "mesh_address", NULL, MAVLINK_TYPE_UINT16_T, 0, 4, offsetof(mavlink_distance_t, mesh_address) }, \
+         { "type", NULL, MAVLINK_TYPE_UINT8_T, 0, 10, offsetof(mavlink_distance_t, type) }, \
+         { "tag", NULL, MAVLINK_TYPE_UINT16_T, 0, 6, offsetof(mavlink_distance_t, tag) }, \
+         { "anchor", NULL, MAVLINK_TYPE_UINT16_T, 0, 8, offsetof(mavlink_distance_t, anchor) }, \
          { "distance", NULL, MAVLINK_TYPE_FLOAT, 0, 0, offsetof(mavlink_distance_t, distance) }, \
          } \
 }
@@ -50,6 +53,7 @@ typedef struct __mavlink_distance_t {
  * @param component_id ID of this component (e.g. 200 for IMU)
  * @param msg The MAVLink message to compress the data into
  *
+ * @param mesh_address  
  * @param type  
  * @param tag  
  * @param anchor  
@@ -57,19 +61,21 @@ typedef struct __mavlink_distance_t {
  * @return length of the message in bytes (excluding serial stream start sign)
  */
 static inline uint16_t mavlink_msg_distance_pack(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg,
-                               uint8_t type, uint16_t tag, uint16_t anchor, float distance)
+                               uint16_t mesh_address, uint8_t type, uint16_t tag, uint16_t anchor, float distance)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char buf[MAVLINK_MSG_ID_DISTANCE_LEN];
     _mav_put_float(buf, 0, distance);
-    _mav_put_uint16_t(buf, 4, tag);
-    _mav_put_uint16_t(buf, 6, anchor);
-    _mav_put_uint8_t(buf, 8, type);
+    _mav_put_uint16_t(buf, 4, mesh_address);
+    _mav_put_uint16_t(buf, 6, tag);
+    _mav_put_uint16_t(buf, 8, anchor);
+    _mav_put_uint8_t(buf, 10, type);
 
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), buf, MAVLINK_MSG_ID_DISTANCE_LEN);
 #else
     mavlink_distance_t packet;
     packet.distance = distance;
+    packet.mesh_address = mesh_address;
     packet.tag = tag;
     packet.anchor = anchor;
     packet.type = type;
@@ -87,6 +93,7 @@ static inline uint16_t mavlink_msg_distance_pack(uint8_t system_id, uint8_t comp
  * @param component_id ID of this component (e.g. 200 for IMU)
  * @param chan The MAVLink channel this message will be sent over
  * @param msg The MAVLink message to compress the data into
+ * @param mesh_address  
  * @param type  
  * @param tag  
  * @param anchor  
@@ -95,19 +102,21 @@ static inline uint16_t mavlink_msg_distance_pack(uint8_t system_id, uint8_t comp
  */
 static inline uint16_t mavlink_msg_distance_pack_chan(uint8_t system_id, uint8_t component_id, uint8_t chan,
                                mavlink_message_t* msg,
-                                   uint8_t type,uint16_t tag,uint16_t anchor,float distance)
+                                   uint16_t mesh_address,uint8_t type,uint16_t tag,uint16_t anchor,float distance)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char buf[MAVLINK_MSG_ID_DISTANCE_LEN];
     _mav_put_float(buf, 0, distance);
-    _mav_put_uint16_t(buf, 4, tag);
-    _mav_put_uint16_t(buf, 6, anchor);
-    _mav_put_uint8_t(buf, 8, type);
+    _mav_put_uint16_t(buf, 4, mesh_address);
+    _mav_put_uint16_t(buf, 6, tag);
+    _mav_put_uint16_t(buf, 8, anchor);
+    _mav_put_uint8_t(buf, 10, type);
 
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), buf, MAVLINK_MSG_ID_DISTANCE_LEN);
 #else
     mavlink_distance_t packet;
     packet.distance = distance;
+    packet.mesh_address = mesh_address;
     packet.tag = tag;
     packet.anchor = anchor;
     packet.type = type;
@@ -129,7 +138,7 @@ static inline uint16_t mavlink_msg_distance_pack_chan(uint8_t system_id, uint8_t
  */
 static inline uint16_t mavlink_msg_distance_encode(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, const mavlink_distance_t* distance)
 {
-    return mavlink_msg_distance_pack(system_id, component_id, msg, distance->type, distance->tag, distance->anchor, distance->distance);
+    return mavlink_msg_distance_pack(system_id, component_id, msg, distance->mesh_address, distance->type, distance->tag, distance->anchor, distance->distance);
 }
 
 /**
@@ -143,13 +152,14 @@ static inline uint16_t mavlink_msg_distance_encode(uint8_t system_id, uint8_t co
  */
 static inline uint16_t mavlink_msg_distance_encode_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, const mavlink_distance_t* distance)
 {
-    return mavlink_msg_distance_pack_chan(system_id, component_id, chan, msg, distance->type, distance->tag, distance->anchor, distance->distance);
+    return mavlink_msg_distance_pack_chan(system_id, component_id, chan, msg, distance->mesh_address, distance->type, distance->tag, distance->anchor, distance->distance);
 }
 
 /**
  * @brief Send a distance message
  * @param chan MAVLink channel to send the message
  *
+ * @param mesh_address  
  * @param type  
  * @param tag  
  * @param anchor  
@@ -157,19 +167,21 @@ static inline uint16_t mavlink_msg_distance_encode_chan(uint8_t system_id, uint8
  */
 #ifdef MAVLINK_USE_CONVENIENCE_FUNCTIONS
 
-static inline void mavlink_msg_distance_send(mavlink_channel_t chan, uint8_t type, uint16_t tag, uint16_t anchor, float distance)
+static inline void mavlink_msg_distance_send(mavlink_channel_t chan, uint16_t mesh_address, uint8_t type, uint16_t tag, uint16_t anchor, float distance)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char buf[MAVLINK_MSG_ID_DISTANCE_LEN];
     _mav_put_float(buf, 0, distance);
-    _mav_put_uint16_t(buf, 4, tag);
-    _mav_put_uint16_t(buf, 6, anchor);
-    _mav_put_uint8_t(buf, 8, type);
+    _mav_put_uint16_t(buf, 4, mesh_address);
+    _mav_put_uint16_t(buf, 6, tag);
+    _mav_put_uint16_t(buf, 8, anchor);
+    _mav_put_uint8_t(buf, 10, type);
 
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_DISTANCE, buf, MAVLINK_MSG_ID_DISTANCE_MIN_LEN, MAVLINK_MSG_ID_DISTANCE_LEN, MAVLINK_MSG_ID_DISTANCE_CRC);
 #else
     mavlink_distance_t packet;
     packet.distance = distance;
+    packet.mesh_address = mesh_address;
     packet.tag = tag;
     packet.anchor = anchor;
     packet.type = type;
@@ -186,7 +198,7 @@ static inline void mavlink_msg_distance_send(mavlink_channel_t chan, uint8_t typ
 static inline void mavlink_msg_distance_send_struct(mavlink_channel_t chan, const mavlink_distance_t* distance)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
-    mavlink_msg_distance_send(chan, distance->type, distance->tag, distance->anchor, distance->distance);
+    mavlink_msg_distance_send(chan, distance->mesh_address, distance->type, distance->tag, distance->anchor, distance->distance);
 #else
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_DISTANCE, (const char *)distance, MAVLINK_MSG_ID_DISTANCE_MIN_LEN, MAVLINK_MSG_ID_DISTANCE_LEN, MAVLINK_MSG_ID_DISTANCE_CRC);
 #endif
@@ -200,19 +212,21 @@ static inline void mavlink_msg_distance_send_struct(mavlink_channel_t chan, cons
   is usually the receive buffer for the channel, and allows a reply to an
   incoming message with minimum stack space usage.
  */
-static inline void mavlink_msg_distance_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  uint8_t type, uint16_t tag, uint16_t anchor, float distance)
+static inline void mavlink_msg_distance_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  uint16_t mesh_address, uint8_t type, uint16_t tag, uint16_t anchor, float distance)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char *buf = (char *)msgbuf;
     _mav_put_float(buf, 0, distance);
-    _mav_put_uint16_t(buf, 4, tag);
-    _mav_put_uint16_t(buf, 6, anchor);
-    _mav_put_uint8_t(buf, 8, type);
+    _mav_put_uint16_t(buf, 4, mesh_address);
+    _mav_put_uint16_t(buf, 6, tag);
+    _mav_put_uint16_t(buf, 8, anchor);
+    _mav_put_uint8_t(buf, 10, type);
 
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_DISTANCE, buf, MAVLINK_MSG_ID_DISTANCE_MIN_LEN, MAVLINK_MSG_ID_DISTANCE_LEN, MAVLINK_MSG_ID_DISTANCE_CRC);
 #else
     mavlink_distance_t *packet = (mavlink_distance_t *)msgbuf;
     packet->distance = distance;
+    packet->mesh_address = mesh_address;
     packet->tag = tag;
     packet->anchor = anchor;
     packet->type = type;
@@ -228,13 +242,23 @@ static inline void mavlink_msg_distance_send_buf(mavlink_message_t *msgbuf, mavl
 
 
 /**
+ * @brief Get field mesh_address from distance message
+ *
+ * @return  
+ */
+static inline uint16_t mavlink_msg_distance_get_mesh_address(const mavlink_message_t* msg)
+{
+    return _MAV_RETURN_uint16_t(msg,  4);
+}
+
+/**
  * @brief Get field type from distance message
  *
  * @return  
  */
 static inline uint8_t mavlink_msg_distance_get_type(const mavlink_message_t* msg)
 {
-    return _MAV_RETURN_uint8_t(msg,  8);
+    return _MAV_RETURN_uint8_t(msg,  10);
 }
 
 /**
@@ -244,7 +268,7 @@ static inline uint8_t mavlink_msg_distance_get_type(const mavlink_message_t* msg
  */
 static inline uint16_t mavlink_msg_distance_get_tag(const mavlink_message_t* msg)
 {
-    return _MAV_RETURN_uint16_t(msg,  4);
+    return _MAV_RETURN_uint16_t(msg,  6);
 }
 
 /**
@@ -254,7 +278,7 @@ static inline uint16_t mavlink_msg_distance_get_tag(const mavlink_message_t* msg
  */
 static inline uint16_t mavlink_msg_distance_get_anchor(const mavlink_message_t* msg)
 {
-    return _MAV_RETURN_uint16_t(msg,  6);
+    return _MAV_RETURN_uint16_t(msg,  8);
 }
 
 /**
@@ -277,6 +301,7 @@ static inline void mavlink_msg_distance_decode(const mavlink_message_t* msg, mav
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     distance->distance = mavlink_msg_distance_get_distance(msg);
+    distance->mesh_address = mavlink_msg_distance_get_mesh_address(msg);
     distance->tag = mavlink_msg_distance_get_tag(msg);
     distance->anchor = mavlink_msg_distance_get_anchor(msg);
     distance->type = mavlink_msg_distance_get_type(msg);

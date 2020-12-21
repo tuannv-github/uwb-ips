@@ -18,7 +18,9 @@
 
 #include <stats/stats.h>
 
-#define LED_DELAY_MS   200
+#define LED_DELAY_MS    200
+#define LIGHT_BULB_0    9
+#define LIGHT_BULB_1    10
 
 STATS_SECT_START(model_root_stat_t)
     STATS_SECT_ENTRY(send_loca_succed)
@@ -63,10 +65,10 @@ rtls_model_set(struct bt_mesh_model *model,
 {  
     STATS_INC(g_model_root_stat, recv_setmsg);
     msg_rtls_t msg_rtls;
-    uint16_t dstsrc;
+    uint16_t uwb_address;
     msg_parse_rtls(buf, &msg_rtls);
-    rtls_get_address(&dstsrc);
-    if(msg_rtls.dstsrc != dstsrc) return;
+    rtls_get_address(&uwb_address);
+    if(msg_rtls.uwb_address != uwb_address) return;
 
     switch (msg_rtls.type)
     {
@@ -92,17 +94,17 @@ rtls_model_set(struct bt_mesh_model *model,
         }
 
         if(msg_rtls.value & 0x02){
-            hal_gpio_write(9, 0);
+            hal_gpio_write(LIGHT_BULB_0, 0);
         }
         else{
-            hal_gpio_write(9, 1);
+            hal_gpio_write(LIGHT_BULB_0, 1);
         }
 
         if(msg_rtls.value & 0x04){
-            hal_gpio_write(10, 0);
+            hal_gpio_write(LIGHT_BULB_1, 0);
         }
         else{
-            hal_gpio_write(10, 1);
+            hal_gpio_write(LIGHT_BULB_1, 1);
         }
         break;
     default:
@@ -121,8 +123,8 @@ static struct bt_mesh_cfg_srv cfg_srv = {
     .frnd = BT_MESH_FRIEND_NOT_SUPPORTED,
     .gatt_proxy = BT_MESH_GATT_PROXY_ENABLED,
     .default_ttl = 7,
-    .net_transmit = BT_MESH_TRANSMIT(1, 20),
-    .relay_retransmit = BT_MESH_TRANSMIT(1, 20),
+    .net_transmit = BT_MESH_TRANSMIT(0, 10),
+    .relay_retransmit = BT_MESH_TRANSMIT(0, 10),
 };
 static struct bt_mesh_model_pub model_pub_rtls;
 
@@ -146,11 +148,13 @@ task_rtls_location_func(void *arg){
 
         cnt++;
 
-        if(cnt%2){
+        switch (cnt%3)
+        {
+        case 0: {
             msg_rtls.type = MAVLINK_MSG_ID_LOCATION;
             msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
             rtls_get_ntype(&msg_rtls.node_type);
-            rtls_get_address(&msg_rtls.dstsrc);
+            rtls_get_address(&msg_rtls.uwb_address);
             rtls_get_location(&msg_rtls.location_x, &msg_rtls.location_y, &msg_rtls.location_z);
 
             msg_prepr_rtls(&pub->msg, &msg_rtls);
@@ -162,11 +166,13 @@ task_rtls_location_func(void *arg){
             else{
                 STATS_INC(g_model_root_stat, send_loca_succed);
             }
-        }else{
+        }
+            break;
+        case 1:{
             msg_rtls.type = MAVLINK_MSG_ID_SLOT;
             msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
             rtls_get_ntype(&msg_rtls.node_type);
-            rtls_get_address(&msg_rtls.dstsrc);
+            rtls_get_address(&msg_rtls.uwb_address);
             rtls_get_slot(&msg_rtls.slot);
 
             msg_prepr_rtls(&pub->msg, &msg_rtls);
@@ -177,7 +183,24 @@ task_rtls_location_func(void *arg){
             }
             else{
                 STATS_INC(g_model_root_stat, send_slot_succed);
-            } 
+            }
+        }
+            break;
+        case 2:{
+            msg_rtls.type = MAVLINK_MSG_ID_ONOFF;
+            msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
+            rtls_get_ntype(&msg_rtls.node_type);
+            rtls_get_address(&msg_rtls.uwb_address);
+            if(g_led_running){
+                msg_rtls.value = g_led_running;
+            }
+            else{
+                msg_rtls.value = (!hal_gpio_read(LIGHT_BULB_0) << 1) | (!hal_gpio_read(LIGHT_BULB_1) << 2);
+            }
+            msg_prepr_rtls(&pub->msg, &msg_rtls);
+            bt_mesh_model_publish(model);
+        }
+            break;
         }
 
         os_mbuf_free(pub->msg);
@@ -200,7 +223,7 @@ task_rtls_distance_func(void *arg){
 
                 msg_rtls.type = MAVLINK_MSG_ID_TOF;
                 msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
-                rtls_get_address(&msg_rtls.dstsrc);
+                rtls_get_address(&msg_rtls.uwb_address);
                 msg_rtls.anchor = distances->anchors[i];
                 msg_rtls.tof = distances->tofs[i];
 

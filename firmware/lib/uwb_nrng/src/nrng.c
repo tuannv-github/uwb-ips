@@ -289,7 +289,7 @@ nrng_get_ranges_addresses(struct nrng_instance * nrng, float ranges[], uint16_t 
  * @return valid mask
  */
 uint32_t
-nrng_get_tofs_addresses(struct nrng_instance * nrng, uint32_t tofs[], uint16_t addresses[], bool updated[], uint16_t nranges, uint16_t base)
+nrng_get_tofs_addresses(struct nrng_instance * nrng, uint32_t tofs[], uint16_t addresses[], uint8_t updated[], uint16_t nranges, uint16_t base)
 {
     uint32_t mask = 0;
 

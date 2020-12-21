@@ -38,6 +38,9 @@ STATS_NAME_START(uwb_ccp_stat_section)
     STATS_NAME(uwb_ccp_stat_section, see_another_master)
 STATS_NAME_END(uwb_ccp_stat_section)
 
+#define FCNTL_CCP_SYNC 0x00C5
+#define FCNTL_CCP_REQT 0x00C6
+
 #define CCP_STATS_INC(__X) STATS_INC(ccp->stat, __X)
 #define CCP_STATS_SET(__X, __N) {STATS_CLEAR(ccp->stat, __X);STATS_INCN(ccp->stat, __X, __N);}
 #else
@@ -65,7 +68,7 @@ ccp_master_timer_ev_cb(struct dpl_event *ev)
     if (!ccp->status.enabled) return;
     CCP_STATS_INC(master_cnt);
 
-    if (ccp_send(ccp).start_tx_error) return;
+    ccp_send(ccp);
 
     if (ccp->status.enabled) {
         dpl_cputime_timer_start(&ccp->master_slave_timer, 
@@ -83,40 +86,13 @@ ccp_slave_timer_ev_cb(struct dpl_event *ev)
     uint64_t dx_time = 0;
     assert(ev != NULL);
     assert(dpl_event_get_arg(ev));
-    static uint16_t rx_timeout_acc;
+    static uint16_t rx_timeout_acc = 0;
 
     struct uwb_ccp_instance *ccp = (struct uwb_ccp_instance *) dpl_event_get_arg(ev);
     struct uwb_dev *inst = ccp->dev_inst;
 
     if (!ccp->status.enabled) return;
     CCP_STATS_INC(slave_cnt);
-
-    if (ccp->status.rx_timeout_error) {
-        /* Timout accumulate */
-        rx_timeout_acc++;
-        printf("ccp->rx_timeout_acc: %d\n", rx_timeout_acc);
-
-        /* May change to master role if rx_timeout_acc reach thresh */
-        if(rx_timeout_acc > MYNEWT_VAL(UWB_RX_TIMEOUT_THRESH) + ccp->dev_inst->euid%MYNEWT_VAL(UWB_RX_TIMEOUT_THRESH)){
-            rx_timeout_acc = 0;
-            /* I only try to change to master mode if master mode is allowed in config */
-            if(ccp->uwb_ccp_role & CCP_ROLE_MASTER){
-                printf("Thresh reached: change CCP_ROLE_MASTER\n");
-                ccp->config.role = CCP_ROLE_MASTER;
-            }
-            else{
-                printf("Thresh reached: change CCP_ROLE_SLAVE\n");
-                ccp->config.role = CCP_ROLE_SLAVE;
-            }
-            if(dpl_sem_get_count(&ccp->sem) == 0){
-                dpl_sem_release(&ccp->sem);
-            }
-            // dpl_eventq_put(&ccp->eventq, &ccp->change_role_event);
-            uwb_ccp_change_role(ccp);
-            
-            return;
-        }
-    }
 
     if(!rx_timeout_acc){
         /* Calculate when to expect the ccp packet */
@@ -144,7 +120,30 @@ ccp_slave_timer_ev_cb(struct dpl_event *ev)
     dpl_cputime_timer_stop(&ccp->master_slave_timer);
 
     if (ccp->status.rx_timeout_error) {
-        /* No ccp received, reschedule immediately */
+        rx_timeout_acc++;
+        printf("ccp->rx_timeout_acc: %d\n", rx_timeout_acc);
+
+        /* May change to master role if rx_timeout_acc reach thresh */
+        if(rx_timeout_acc > MYNEWT_VAL(UWB_RX_TIMEOUT_THRESH) + ccp->dev_inst->euid%MYNEWT_VAL(UWB_RX_TIMEOUT_THRESH)){
+            rx_timeout_acc = 0;
+            printf("Thresh reached\n");
+            /* I only try to change to master mode if master mode is allowed in config */
+            if(ccp->uwb_ccp_role & CCP_ROLE_MASTER){
+                printf("Thresh reached: change CCP_ROLE_MASTER\n");
+                ccp->config.role = CCP_ROLE_MASTER;
+            }
+            else{
+                printf("Thresh reached: change CCP_ROLE_SLAVE\n");
+                ccp->config.role = CCP_ROLE_SLAVE;
+            }
+            if(dpl_sem_get_count(&ccp->sem) == 0){
+                dpl_sem_release(&ccp->sem);
+            }
+            // dpl_eventq_put(&ccp->eventq, &ccp->change_role_event);
+            uwb_ccp_change_role(ccp);
+            return;
+        }
+
         dpl_cputime_timer_relative(&ccp->master_slave_timer, 0);
     } else {
         /* Reset rx_timeout_acc each time received blink message */
@@ -171,7 +170,7 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     struct uwb_ccp_instance *ccp = (struct uwb_ccp_instance *)cbs->inst_ptr;
 
     /* CCP filter function control */
-    if (inst->fctrl != FCNTL_IEEE_BLINK_CCP_64){
+    if (inst->fctrl != FCNTL_CCP_SYNC && inst->fctrl != FCNTL_CCP_REQT){
         if(dpl_sem_get_count(&ccp->sem) == 0){
             // We're hunting for a ccp but received something else,
             // set a long timeout and keep listening
@@ -197,28 +196,26 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
             }
         }
         else{
-            // if(frame->euid < ccp->dev_inst->euid){
-                ccp->config.role = CCP_ROLE_SLAVE;
-                dpl_eventq_put(&ccp->eventq, &ccp->change_role_event);
-                CCP_STATS_INC(see_another_master); 
-            // }
+            ccp->config.role = CCP_ROLE_SLAVE;
+            dpl_eventq_put(&ccp->eventq, &ccp->change_role_event);
+            CCP_STATS_INC(see_another_master); 
         }
         goto exit;
     }
 
     /* CCP filter for slave with strange master */
-    else if(ccp->config.role & CCP_ROLE_SLAVE){
-        if(ccp->my_master == 0){
-            ccp->my_master = frame->euid;
-        }
-        else if(ccp->my_master != frame->euid){
-            ccp->my_master = frame->euid;
-            ccp->config.role = CCP_ROLE_SLAVE;
-            dpl_eventq_put(&ccp->eventq, &ccp->change_role_event);
-            CCP_STATS_INC(see_another_master);
-            goto exit;
-        }
-    }
+    // else if(ccp->config.role & CCP_ROLE_SLAVE){
+    //     if(ccp->my_master == 0){
+    //         ccp->my_master = frame->euid;
+    //     }
+    //     else if(ccp->my_master != frame->euid){
+    //         ccp->my_master = frame->euid;
+    //         // ccp->config.role = CCP_ROLE_SLAVE;
+    //         // dpl_eventq_put(&ccp->eventq, &ccp->change_role_event);
+    //         // CCP_STATS_INC(see_another_master);
+    //         goto exit;
+    //     }
+    // }
 
     if(dpl_sem_get_count(&ccp->sem) != 0){
         //unsolicited inbound
@@ -333,12 +330,14 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
         }
     }
 
-    /* Call all available superframe callbacks */
-    struct uwb_mac_interface * lcbs = NULL;
-    if(!(SLIST_EMPTY(&inst->interface_cbs))) {
-        SLIST_FOREACH(lcbs, &inst->interface_cbs, next) {
-            if (lcbs != NULL && lcbs->superframe_cb) {
-                if(lcbs->superframe_cb((struct uwb_dev*)inst, lcbs)) continue;
+    if(inst->fctrl == FCNTL_CCP_SYNC){
+        /* Call all available superframe callbacks */
+        struct uwb_mac_interface * lcbs = NULL;
+        if(!(SLIST_EMPTY(&inst->interface_cbs))) {
+            SLIST_FOREACH(lcbs, &inst->interface_cbs, next) {
+                if (lcbs != NULL && lcbs->superframe_cb) {
+                    if(lcbs->superframe_cb((struct uwb_dev*)inst, lcbs)) continue;
+                }
             }
         }
     }
@@ -348,7 +347,10 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     }
 
 exit:
-    dpl_sem_release(&ccp->sem);
+    if(dpl_sem_get_count(&ccp->sem) == 0){
+        dpl_sem_release(&ccp->sem);
+    }
+
     return false;
 }
 
@@ -625,15 +627,16 @@ uwb_ccp_change_role(struct uwb_ccp_instance *ccp){
 
     if(ccp->config.role == CCP_ROLE_MASTER){
 
-        uwb_ccp_frame_t * frame = ccp->frames[(ccp->idx+1)%ccp->nframes];
-        frame->rpt_count = 0;
-        frame->rpt_max = MYNEWT_VAL(UWB_CCP_MAX_CASCADE_RPTS);
-        frame->epoch_to_rm_us = uwb_phy_SHR_duration(inst);
-        frame->transmission_timestamp.timestamp = 0;
-        frame->seq_num = ++ccp->seq_num;
-        frame->euid = inst->euid;
-        frame->short_address = inst->my_short_address;
-        frame->transmission_interval = ((uint64_t)ccp->period << 16);
+        uwb_ccp_frame_t frame;
+        frame.fctrl = FCNTL_CCP_REQT;
+        frame.rpt_count = 0;
+        frame.rpt_max = MYNEWT_VAL(UWB_CCP_MAX_CASCADE_RPTS);
+        frame.epoch_to_rm_us = uwb_phy_SHR_duration(inst);
+        frame.transmission_timestamp.timestamp = 0;
+        frame.seq_num = 0;
+        frame.euid = inst->euid;
+        frame.short_address = inst->my_short_address;
+        frame.transmission_interval = ((uint64_t)ccp->period << 16);
 
         uint16_t cnt = 0;
         ccp->master_role_request = true;
@@ -643,7 +646,8 @@ uwb_ccp_change_role(struct uwb_ccp_instance *ccp){
             printf("Try to be master time: %d\n", cnt);
             ccp_listen(ccp, 0, MYNEWT_VAL(UWB_CCP_LONG_RX_TO) + inst->euid%MYNEWT_VAL(UWB_CCP_LONG_RX_TO));
 
-            uwb_write_tx(inst, frame->array, 0, sizeof(uwb_ccp_blink_frame_t));
+            frame.seq_num += 1;
+            uwb_write_tx(inst, frame.array, 0, sizeof(uwb_ccp_blink_frame_t));
             uwb_write_tx_fctrl(inst, sizeof(uwb_ccp_blink_frame_t), 0);
             uwb_start_tx(inst);
         }
@@ -730,7 +734,7 @@ uwb_ccp_init(struct uwb_dev* dev, uint16_t nframes)
         ccp->status.selfmalloc = 1;
         ccp->nframes = nframes;
         uwb_ccp_frame_t ccp_default = {
-            .fctrl = FCNTL_IEEE_BLINK_CCP_64,    // frame control (FCNTL_IEEE_BLINK_64 to indicate a data frame using 64-bit addressing).
+            .fctrl = FCNTL_CCP_SYNC,    // frame control (FCNTL_IEEE_BLINK_64 to indicate a data frame using 64-bit addressing).
             .seq_num = 0xFF,
             .rpt_count = 0,
             .rpt_max = MYNEWT_VAL(UWB_CCP_MAX_CASCADE_RPTS)

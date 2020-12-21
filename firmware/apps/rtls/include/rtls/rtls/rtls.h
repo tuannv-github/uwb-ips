@@ -6,13 +6,12 @@
 
 #define ANCHOR_NUM  (MYNEWT_VAL(UWB_BCN_SLOT_MAX) + 1)
 typedef struct{
+    uint8_t updated[ANCHOR_NUM];
     uint16_t anchors[ANCHOR_NUM];
     union{
         float ranges[ANCHOR_NUM];
         uint32_t tofs[ANCHOR_NUM];
     };
-
-    bool updated[ANCHOR_NUM];
 }distance_t;
 
 void rtls_get_location(float *x, float *y, float *z);
