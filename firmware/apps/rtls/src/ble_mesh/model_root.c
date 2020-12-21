@@ -191,7 +191,12 @@ task_rtls_location_func(void *arg){
             msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
             rtls_get_ntype(&msg_rtls.node_type);
             rtls_get_address(&msg_rtls.uwb_address);
-            msg_rtls.value = g_led_running | (!hal_gpio_read(LIGHT_BULB_0) << 1) | (!hal_gpio_read(LIGHT_BULB_1) << 2);
+            if(g_led_running){
+                msg_rtls.value = g_led_running;
+            }
+            else{
+                msg_rtls.value = (!hal_gpio_read(LIGHT_BULB_0) << 1) | (!hal_gpio_read(LIGHT_BULB_1) << 2);
+            }
             msg_prepr_rtls(&pub->msg, &msg_rtls);
             bt_mesh_model_publish(model);
         }
