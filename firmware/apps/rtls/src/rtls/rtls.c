@@ -138,13 +138,13 @@ void rtls_get_slot(uint8_t *slot){
 
 void rtls_set_location(float x, float y, float z){
     rtls_conf.location_x = x;
-    sprintf(rtls_conf_str.location_x, "%d.%d", (int)rtls_conf.location_x, (int)(1000*(rtls_conf.location_x - (int)rtls_conf.location_x)));
+    sprintf(rtls_conf_str.location_x, "%d.%d", (int)rtls_conf.location_x, (int)(1000*(fabs(rtls_conf.location_x) - (int)fabs(rtls_conf.location_x))));
     conf_save_one("rtls/location_x", rtls_conf_str.location_x);
     rtls_conf.location_y = y;
-    sprintf(rtls_conf_str.location_y, "%d.%d", (int)rtls_conf.location_y, (int)(1000*(rtls_conf.location_y - (int)rtls_conf.location_y)));
+    sprintf(rtls_conf_str.location_y, "%d.%d", (int)rtls_conf.location_y, (int)(1000*(fabs(rtls_conf.location_y) - (int)fabs(rtls_conf.location_y))));
     conf_save_one("rtls/location_y", rtls_conf_str.location_y);
     rtls_conf.location_z = z;
-    sprintf(rtls_conf_str.location_z, "%d.%d", (int)rtls_conf.location_z, (int)(1000*(rtls_conf.location_z - (int)rtls_conf.location_z)));
+    sprintf(rtls_conf_str.location_z, "%d.%d", (int)rtls_conf.location_z, (int)(1000*(fabs(rtls_conf.location_z) - (int)fabs(rtls_conf.location_z))));
     conf_save_one("rtls/location_z", rtls_conf_str.location_z);
 
     /* Set location of anchor in rtls_tdma layer */
