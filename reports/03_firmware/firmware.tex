@@ -8,7 +8,7 @@
 This section provides a detailed description of the ranging network operation and layered system architecture.
 
 \section{Prerequisite}
-Before getting deeper, we should cover some fundamental definitions. It will make it easier for further discussions. 
+Before getting into, we should cover some fundamental definitions. It will make it easier for further discussions. 
 
 \subsection{Host and device}
 The implemented UWB ranging system consists of one host and one device.
@@ -26,7 +26,7 @@ The implemented UWB ranging system consists of one host and one device.
 \end{figure}
 
 \subsection{Timing system}
-Since there are two running systems: \textbf{host} and \textbf{device}, there are two timing systems. Unfortunately, these two timing systems may  not have an agreement in the smallest unit of time. A host can use a $1\mu s$ -resolution timer due to the number of redundancy timers it has. A device, on the other hand, may not have as many timers and clock source as a host has, so the device timing system is limited. In the case of DW1000 radio IC, $1\mu s$ is approximately 512 counts of the fundamental 499.2 MHz UWB clock which is actually \textbf{$\sim 1.026\mu s$}. 
+Since there are two running systems: \textbf{host} and \textbf{device}, there are two timing systems. Unfortunately, these two timing systems do not have an agreement in the smallest unit of time. A host can use a $1\mu s$ -resolution timer due to the number of redundancy timers it has. A device, on the other hand, may not have as many timers and clock source as a host has, so the device timing system is limited. In the case of DW1000 radio IC, $1\mu s$ is approximately 512 counts of the fundamental 499.2 MHz UWB clock which is actually \textbf{$\sim 1.026\mu s$}. 
 
 For precise timing, the implementation does not make any assumption about the equality of $1\mu s$ in host and device. Timestamp in the device must be converted to host reference for processing, upon completion, the result must be converted back to device reference before writing to that device. 
 \subsection{RMarker}
@@ -100,13 +100,20 @@ To initialize the system, at least one of the nodes must be configured as a mast
 \end{figure}
 
 \subsection{CCP master selection algorithm}
+
+When designing a synchronous system, one of the most fundamental problems is the persistence of the synchronization source. Here, the question is: what will happen if the synchronization source fails, will it stop the entire system from working? This problem is known as the single point of failure (SPOF) problem. SPOFs are undesirable in any system with a goal of high availability or reliability.
+
+To deal with SPOFs, in my implementation, there is no pre-configured node to be master. Instead, all nodes (except for the tag node) can be a master. So, how a node decides itself to be a master or slave? The main idea is the lazy mindset: master is hard work, I will not take it, but if nobody does, I will. Figure \ref{fig:CCP_state_diagram} illustrates this mindset.
+
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.6]{ccp_state_diagram.png}
+        \includegraphics[scale=0.3]{ccp_state_diagram.png}
     \end{center}
-    \caption{CCP state diagram}
+    \caption{CCP state transition diagram}
     \label{fig:CCP_state_diagram}
 \end{figure}
+
+As shown in figure \ref{fig:CCP_state_diagram}, all node will start with ccp slave role. If there is already a master node, a just-powered-on node will receive ccp packets from the master node and remain in the slave state. If there is no master node, after its internal counter reaches a conditional random thresh hold, it will turn into the master request state. It now sends ccp request packets and listens for objection for a while. If no node object, the new state is ccp master. If it receives any ccp packet or ccp request packet in the master or master request state, it will immediately turn into the slave state as it is lazy.
 
 \begin{figure}[H]
     \begin{center}
