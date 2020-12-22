@@ -30,7 +30,7 @@ Since there are two running systems: \textbf{host} and \textbf{device}, there ar
 
 For precise timing, the implementation does not make any assumption about the equality of $1\mu s$ in host and device. Timestamp in the device must be converted to host reference for processing, upon completion, the result must be converted back to device reference before writing to that device. 
 \subsection{RMarker}
-Because of the limited transmission speed, the interval between the begin of preamble and the end of PHY data unit is relatively large compared with the propagation interval. For the ultimate purpose of ranging using time of flight, a point should be considered to be marker for timestamping packet. As defined in the context of the IEEE802.15.4-2011 standard \cite{IEEE_Std_802.15.4-2011}, RMarker is the first chip after the SFD, it also means that: RMarker defines the start of the PHR in either transmitter or receiver. 
+Because of the limited transmission speed, the interval between the begin of preamble and the end of PHY data unit is relatively large compared with the propagation interval. For the ultimate purpose of ranging using time of flight, a point should be considered to be marker for timestamping packet. As defined in the context of the IEEE 802.15.4-2015 standard \cite{IEEE_Std_802_15_4_2015}, RMarker is the first chip after the SFD, it also means that: RMarker defines the start of the PHR in either transmitter or receiver. 
 
 \begin{figure}[H]
     \begin{center}
@@ -48,7 +48,7 @@ The ranging system is implemented follow 3 layers model as shown in figure \ref{
     \item TWR (Two Way Ranging) layer runs ranging session in the time slot provided by TDMA layer.
 \end{itemize}
 
-Detail description about each layer is provided in the following section.
+Follow the bottom-up approach, detail description about each layer is provided in following sections.
 \begin{figure}[H]
     \begin{center}
         \includegraphics[scale=0.3]{ranging_layered_architecture}
@@ -67,37 +67,97 @@ Three CCP roles are defined, allowing nodes to sync with others: Master, Slave, 
     \item \textbf{CCP relay}: Relay nodes repeat the clock calibration packet to extend the network physical area. Before repeating the packets, they must do some modification so the receiver can sync with the  master node. There is a constraint in the maximum of repeat level which will be analyzed afterward.
 \end{itemize}
 
-To initialize the system, at least one of the nodes must be configured as a master. The master node will start and control the network and allow other nodes to join and form a network. It is possible to configure more than one node as master, but only one will be active and the others will take the role of slave and/or replay node. A node can take the slave and relay roles at the same time.
+To initialize the system, at least one of many nodes must be chosen as a master. The master node will start and control the network and allow other nodes to join and form a network. It is possible to configure more than one node as master, but only one will be active and the others will take the role of slave and/or replay node. A node can take the slave and relay roles at the same time.
 
-\subsection{CCP packet format}
-
+\subsection{CCP frame format}
+The ccp frame used for synchronization shall be formatted as illustrated in figure \ref{fig:ccp_blink_frame}. The format follow the IEEE 802.15.4-2015 \cite{IEEE_Std_802_15_4_2015} multipurpose frame.
 \begin{figure}[H]
     \centering
     \begin{bytefield}[bitwidth=1.1em]{32}
         \bitheader{0-31} \\
-        \begin{rightwordgroup}{IEEE \\ bink frame}
-            \bitbox{8}{fctrl} & 
-            \bitbox{8}{seq num} & \\ 
-            \bitbox{32}{euid high} \\ 
-            \bitbox{32}{euid low}
+        \begin{rightwordgroup}{IEEE \\ header}
+            \bitbox{8}{frame control} & 
+            \bitbox{8}{sequence number} & \\ 
+            \bitbox{32}{extended unique identifier high} \\ 
+            \bitbox{32}{extended unique identifier low}
         \end{rightwordgroup} \\
-        \bitbox{16}{short address} &
-        \bitbox{8}{} &
-        \bitbox{8}{ti high} \\
-        \bitbox{32}{ti low} \\
-        \begin{rightwordgroup}{ccp timestamp}
-            \bitbox{1}{hf} & 
-            \bitbox{23}{} & 
-            \bitbox{8}{timestamp high} \\ 
-            \bitbox{32}{timestamp low}
-        \end{rightwordgroup} \\
-        \bitbox{8}{rpt count} &
-        \bitbox{8}{rpt max}
-        \bitbox{16}{epoch to rm us}
+        \begin{rightwordgroup}{Custom\\payload}
+            \bitbox{16}{short address} &
+            \bitbox{16}{transmission interval high} \\
+            \bitbox{32}{transmission interval low} \\
+            \bitbox{32}{transmission timestamp high} \\ 
+            \bitbox{32}{transmission timestamp low}\\
+            \bitbox{8}{repeat count} &
+            \bitbox{8}{repeat max}
+            \bitbox{16}{epoch to rm us}
+        \end{rightwordgroup}
     \end{bytefield}
     \caption{CCP blink frame}
     \label{fig:ccp_blink_frame}
 \end{figure}
+
+\subsubsection{Frame Control}
+The Frame Control field for the Multipurpose frame are specified in figure \ref{fig:multipurpose_frame_control_field}. Follow standard described in section 7.3.5 of IEEE 802.15.4 \cite{IEEE_Std_802_15_4_2015}, the field is filled up for the purpose of synchronization frame.
+
+\begin{figure}[H]
+    \centering
+    \begin{bytefield}[bitwidth=6em, bitheight=3em]{8}
+        \bitheader{0-7} \\
+        \bitbox{3}{Frame Type} &
+        \bitbox{1}{Long Frame Control} &
+        \bitbox{2}{Destination Addressing Mode} &
+        \bitbox{2}{Source Addressing Mode}
+        % \bitbox{1}{PAN ID Present} &
+        % \bitbox{1}{Security Enabled} &
+        % \bitbox{1}{Sequence Number Suppression} &
+        % \bitbox{1}{Frame Pending} &
+        % \bitbox{2}{Frame Version} &
+        % \bitbox{1}{Ack Request} &
+        % \bitbox{1}{IE Present}
+    \end{bytefield} 
+    \caption{Multipurpose frame control field}
+    \label{fig:multipurpose_frame_control_field}
+\end{figure}
+The Frame Type field shall contain the value that indicates a Multipurpose frame as define in IEEE 802.15.4-2015 ($b_2 b_1 b_0 = 101$).
+
+The Long Frame Control field shall be set to \textbf{0} to indicate an MP Short Frame Control field (only bits 0 to 7 make up the Frame Type field).
+
+The Destination Addressing Mode field shall be set to \textbf{0} to indicate PAN ID and destination address fields are not present.
+
+The Source Addressing Mode field shall be set to \textbf{11} to indicate source address field contains an extended address (64-bit Extended Unique Identifier).
+
+For the synchronization purpose, the final value of this field is \textbf{0xC5}.
+
+\subsubsection{Sequence Number}
+The Sequence Number field specifies the sequence identifier for the frame.
+
+\subsubsection{Extended Unique Identifier}
+Extended Unique Identifier as its name, it is 64-bit unique ID for each device over the globe. DW1000 radio IC takes it from its lot id and part id written by the manufacturer.
+
+\begin{equation}
+    \texttt{ euid = ((uint64\_t)lot\_id) << 32 + part\_id}
+\end{equation}
+
+\subsubsection{Short address}
+The address of sending node in the TDMA network.
+\begin{equation}
+   \texttt{ short\_address = (uint16\_t)euid \& 0xFFFF}
+\end{equation}
+
+\subsubsection{Transmission Interval}
+The interval of a superframe, unit of time is a microsecond of DW1000 timer. As previously discussed, 1 microsecond of DW1000 is approximately 512/499.2Mhz. The implementation uses the value of 0x20000, which mean that the transmission interval is:
+\begin{equation}
+    \texttt{0x20000*(512/499.2Mhz) = 127795.2$\mu$s = 127.7952ms}
+\end{equation}
+
+\subsubsection{Transmission Timestamp}
+The moment that RMarker is transmitted is the event nominated as the transmit time-stamp. The DW1000 digital transmit circuitry takes note of the system clock counter as the RAW transmit timestamp at the point when it begins sending the PHR. It then adds to this the transmit antenna delay to get the antenna adjusted transmit timestamp.
+
+\subsubsection{Repeat count}
+It is the number of non-master nodes that the ccp packet traveled before coming to this node.
+
+\subsubsection{Repeat max}
+It is the maximum number of repetition times per packet of ccp.
 
 \subsection{CCP master selection algorithm}
 
@@ -107,7 +167,7 @@ To deal with SPOFs, in my implementation, there is no pre-configured node to be 
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.3]{ccp_state_diagram.png}
+        \includegraphics[scale=0.2]{ccp_state_diagram.png}
     \end{center}
     \caption{CCP state transition diagram}
     \label{fig:CCP_state_diagram}
@@ -115,21 +175,49 @@ To deal with SPOFs, in my implementation, there is no pre-configured node to be 
 
 As shown in figure \ref{fig:CCP_state_diagram}, all node will start with ccp slave role. If there is already a master node, a just-powered-on node will receive ccp packets from the master node and remain in the slave state. If there is no master node, after its internal counter reaches a conditional random thresh hold, it will turn into the master request state. It now sends ccp request packets and listens for objection for a while. If no node object, the new state is ccp master. If it receives any ccp packet or ccp request packet in the master or master request state, it will immediately turn into the slave state as it is lazy.
 
+Figure \ref{fig:ccp_slave_flow_chart}, \ref{fig:ccp_master_reqt_flow_chart} and \ref{fig:ccp_master_flow_chart} are simplified flowcharts used for implementing each state.
+
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.6]{ccp_master_flow_chart.png}
+        \includegraphics[scale=0.3]{ccp_slave_flow_chart.png}
+    \end{center}
+    \caption{CCP slave flow chart}
+    \label{fig:ccp_slave_flow_chart}
+\end{figure}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.3]{ccp_master_reqt_flow_chart.png}
+    \end{center}
+    \caption{CCP master request flow chart}
+    \label{fig:ccp_master_reqt_flow_chart}
+\end{figure}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.3]{ccp_master_flow_chart.png}
     \end{center}
     \caption{CCP master flow chart}
     \label{fig:ccp_master_flow_chart}
 \end{figure}
 
-\begin{figure}[H]
-    \begin{center}
-        \includegraphics[scale=0.5]{ccp_slave_flow_chart.png}
-    \end{center}
-    \caption{CCP slave flow chart}
-    \label{fig:ccp_slave_flow_chart}
-\end{figure}
+% \begin{figure}
+%     \begin{subfigure}[b]{0.45\textwidth}
+%         \begin{center}
+%         \includegraphics[scale=0.25]{ccp_master_reqt_flow_chart.png}
+%     \end{center}
+%         \caption{CCP master request flow chart}
+%         \label{fig:ccp_master_reqt_flow_chart}
+%     \end{subfigure}
+%     %
+%     \begin{subfigure}[b]{0.45\textwidth}
+%         \begin{center}
+%     \includegraphics[scale=0.3]{ccp_master_flow_chart.png}
+% \end{center}
+%     \caption{CCP master flow chart}
+%     \label{fig:ccp_master_flow_chart}
+%     \end{subfigure}
+%   \end{figure}
 
 \subsection{CCP implementation}
 
