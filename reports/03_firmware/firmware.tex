@@ -26,9 +26,10 @@ The implemented UWB ranging system consists of one host and one device.
 \end{figure}
 
 \subsection{Timing system}
+\label{subsec:timing_system_subsection}
 Since there are two running systems: \textbf{host} and \textbf{device}, there are two timing systems. Unfortunately, these two timing systems do not have an agreement in the smallest unit of time. A host can use a $1\mu s$ -resolution timer due to the number of redundancy timers it has. A device, on the other hand, may not have as many timers and clock source as a host has, so the device timing system is limited. In the case of DW1000 radio IC, $1\mu s$ is approximately 512 counts of the fundamental 499.2 MHz UWB clock which is actually \textbf{$\sim 1.026\mu s$}. 
 
-For precise timing, the implementation does not make any assumption about the equality of $1\mu s$ in host and device. Timestamp in the device must be converted to host reference for processing, upon completion, the result must be converted back to device reference before writing to that device. 
+For precise timing, the implementation does not make any assumption about the equality of $1\mu s$ in host and device. Timestamp in the device must be converted to host reference for further processing, upon completion, the result must be converted back to the device reference before writing to that device. 
 \subsection{RMarker}
 Because of the limited transmission speed, the interval between the begin of preamble and the end of PHY data unit is relatively large compared with the propagation interval. For the ultimate purpose of ranging using time of flight, a point should be considered to be marker for timestamping packet. As defined in the context of the IEEE 802.15.4-2015 standard \cite{IEEE_Std_802_15_4_2015}, RMarker is the first chip after the SFD, it also means that: RMarker defines the start of the PHR in either transmitter or receiver. 
 
@@ -167,7 +168,7 @@ To deal with SPOFs, in my implementation, there is no pre-configured node to be 
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.2]{ccp_state_diagram.png}
+        \includegraphics[scale=0.35]{ccp_state_diagram.png}
     \end{center}
     \caption{CCP state transition diagram}
     \label{fig:CCP_state_diagram}
@@ -177,25 +178,34 @@ As shown in figure \ref{fig:CCP_state_diagram}, all node will start with ccp sla
 
 Figure \ref{fig:ccp_slave_flow_chart}, \ref{fig:ccp_master_reqt_flow_chart} and \ref{fig:ccp_master_flow_chart} are simplified flowcharts used for implementing each state.
 
+Figure \ref{fig:ccp_slave_flow_chart} is the flow chart for CCP\_SLAVE state. In this state, rx\_timeout\_counter variable is used to timeout the slave and turn it into the CCP\_MASTER\_REQT state.
+This variable is also checked for each RX timer callback, if it is not equal to 0, which means that there is a timeout event before, it is necessary to listen immediately to increase the chance of receiving the next ccp packet. If the variable equal to 0, the MCU will schedule the radio IC to receive the frame at a calculated moment. If a ccp packet is successfully received, MCU will schedule the next wake up to receive the next ccp packet based on the ccp packet it just received. 
+
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.3]{ccp_slave_flow_chart.png}
+        \includegraphics[scale=0.35]{ccp_slave_flow_chart.png}
     \end{center}
     \caption{CCP slave flow chart}
     \label{fig:ccp_slave_flow_chart}
 \end{figure}
 
+Figure \ref{fig:ccp_master_reqt_flow_chart} is the flow chart for
+CCP\_MASTER\_REQT state. In this state, a node will periodically send the ccp request packet. If no node protests by sending another cpp packet or ccp request packet, the variable master\_reqt\_state is used to timeout the CCP\_MASTER\_REQT state and turn the node into the master state.
+
+Figure \ref{fig:ccp_master_flow_chart} is the flow chart for CCP\_MASTER state. A node enters this state by scheduling a TX timer and waiting for its timeout. This timer will wake up the CPU to schedule the radio IC for transmitting ccp packet at a calculated moment. The listen stage here is for the demonstration purpose only. In fact, the ccp packet does not listen in the master state. Instead, the ccp implementation act as an observer to analyze any packet received in the superframe internal interval. Packets must be received by listen commands of higher layers.
+
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.3]{ccp_master_reqt_flow_chart.png}
+        \includegraphics[scale=0.35]{ccp_master_reqt_flow_chart.png}
     \end{center}
     \caption{CCP master request flow chart}
     \label{fig:ccp_master_reqt_flow_chart}
 \end{figure}
 
+
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.3]{ccp_master_flow_chart.png}
+        \includegraphics[scale=0.35]{ccp_master_flow_chart.png}
     \end{center}
     \caption{CCP master flow chart}
     \label{fig:ccp_master_flow_chart}
@@ -220,25 +230,19 @@ Figure \ref{fig:ccp_slave_flow_chart}, \ref{fig:ccp_master_reqt_flow_chart} and 
 %   \end{figure}
 
 \subsection{CCP implementation}
-
-\subsubsection{Os interupt for CCP packet}
-\begin{figure}[H]
-    \begin{center}
-        \includegraphics[scale=0.35]{interupt_latency_master.png}
-    \end{center}
-    \caption{interrupt latency master}
-    \label{fig:interupt_latency_master}
-\end{figure}
-
-\begin{figure}[H]
-    \begin{center}
-        \includegraphics[scale=0.35]{interupt_latency_listener.png}
-    \end{center}
-    \caption{interrupt latency listener}
-    \label{fig:interupt_latency_listener}
-\end{figure}
-
-\subsubsection{Precise CCP packet sending and receiving}
+This section discusses detailed timing problems related to CCP. Before starting, some fundamental concepts should be defined and accepted:
+\begin{itemize}
+    \item Master epoch $ep_m$: Packet timestamp referenced to CCP master device timing system.
+    \item Local epoch $ep_l$: Packet timestamp referenced to CCP slave device timing system.
+    \item Os epoch $ep_o$: Packet timestamp referenced to CCP master or slave host timing system.
+    \item Period $\tau$: The interval of a superframe.
+    \item $T_{er}$: The interval between an epoch and a RMarker as shown in figure \ref{fig:ccp_epoch_and_rmarker}.
+    \item $t_k$: Timestamp for $k$th frame in device timing system.
+    \item $t_h$: Current host time (in host timing system).
+    \item $t_d$: Current device time (in device timing system).
+    \item $f_{d2h}$: A linear function for converting the device time to host time as explained in \ref{subsec:timing_system_subsection}
+    \item $T_{latency}$: OS latency is the interval for OS to process before sending.
+\end{itemize}
 \begin{figure}[H]
     \begin{center}
         \includegraphics[scale=0.35]{ccp_epoch_and_rmarker.png}
@@ -247,11 +251,43 @@ Figure \ref{fig:ccp_slave_flow_chart}, \ref{fig:ccp_master_reqt_flow_chart} and 
     \label{fig:ccp_epoch_and_rmarker}
 \end{figure}
 
-\begin{itemize}
-    \item Master epoch $e_m$: Packet timestamp referenced CCP master device timing system
-    \item Local epoch $e_l$: Packet timestamp referenced CCP slave device timing system
-    \item Os epoch $e_o$: Packet timestamp referenced CCP master and slave host timing system
-\end{itemize}
+\subsubsection{CCP timing for master node}
+
+The CCP packet is sent with timestamp calculated from previous frame:
+\begin{equation}
+    t_k = t_{k-1} + \tau
+\end{equation}
+
+Each time the CCP master node complete to send a CCP packet, a TX event is called for re-calculating $ep_m$, $ep_l$ and $ep_o$ using the following formulas.
+\begin{equation}
+    ep_m = ep_l = t_k - T_{er}
+\end{equation}
+
+\begin{equation}
+    ep_o = t_h - f_{d2h}(t_d - t_k) - T_{er}
+\end{equation}
+
+After sending the CCP packet, the MCU will schedule for the next wake up at:
+\begin{equation}
+    t_{wake up} = ep_o + \tau - T_{latency}
+\end{equation}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.30]{ccp_timing_for_master_node.png}
+    \end{center}
+    \caption{CCP master timing}
+    \label{fig:interupt_latency_master}
+\end{figure}
+
+\subsubsection{CCP calculation for slave node}
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.35]{interupt_latency_listener.png}
+    \end{center}
+    \caption{interrupt latency listener}
+    \label{fig:interupt_latency_listener}
+\end{figure}
 
 \subsubsection{Repeat CCP packet}
 \begin{figure}[H]
@@ -423,6 +459,8 @@ By using TWR, the need of synchronized clocks is eliminated since both the round
     \caption{TWR responder flow chart}
     \label{fig:twr_responder}
 \end{figure}
+
+\subsection{Wireshark extension for capturing packets}
 
 \bib
 \end{document}
