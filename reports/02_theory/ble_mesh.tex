@@ -125,5 +125,16 @@ In network security, a replay attack is a technique whereby an eavesdropper inte
 
 Bluetooth mesh networking protects against replay attacks by using two network PDU fields called the Sequence Number (SEQ) and IV Index. Elements increment the SEQ value every time they publish a message. A node which receives a message from an element containing an SEQ value less than or equal to that of the last valid message will discard it since it likely relates to a replay attack. Similarly, IV Index is a separate field considered alongside SEQ. IV Index values within messages from a given element must always be equal to or greater than the last valid message from that element.
 
+\section{Using Bluetooth mesh for best-effort broadcast service}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.4]{ble_mesh_comunication.png}
+    \end{center}
+    \caption{ble mesh communication}
+    \label{fig:ble_mesh_comunication}
+\end{figure}
+
+\section{Custom nRF Mesh Android application}
 \bib
 \end{document}
