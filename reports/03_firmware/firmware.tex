@@ -236,12 +236,13 @@ This section discusses detailed timing problems related to CCP. Before starting,
     \item Local epoch $ep_l$: Packet timestamp referenced to CCP slave device timing system.
     \item Os epoch $ep_o$: Packet timestamp referenced to CCP master or slave host timing system.
     \item Period $\tau$: The interval of a superframe.
-    \item $T_{er}$: The interval between an epoch and a RMarker as shown in figure \ref{fig:ccp_epoch_and_rmarker}.
     \item $t_k$: Timestamp for $k$th frame in device timing system.
     \item $t_h$: Current host time (in host timing system).
     \item $t_d$: Current device time (in device timing system).
     \item $f_{d2h}$: A linear function for converting the device time to host time as explained in \ref{subsec:timing_system_subsection}
     \item $T_{latency}$: OS latency is the interval for OS to process before sending.
+    \item $T_{SHR}$: The interval between an epoch and a RMarker which is also the duration of SHR as shown in figure \ref{fig:ccp_epoch_and_rmarker}.
+    \item $T_{PHY}$: Total duration of PHY Header and PHY data unit.
 \end{itemize}
 \begin{figure}[H]
     \begin{center}
@@ -251,6 +252,40 @@ This section discusses detailed timing problems related to CCP. Before starting,
     \label{fig:ccp_epoch_and_rmarker}
 \end{figure}
 
+\subsubsection{Calculate the SHR (Preamble + SFD) duration $T_{SHR}$}
+\begin{equation}
+    T_{SHR} = T_{psym}(n_{sync} + n_{sfd})
+\end{equation}
+With:
+\begin{itemize}
+    \item $T_{psym} = 1.0176282 \mu s$: Preamble symbols duration for mean PRF (Pulse Repetition Frequency) of 62.89Mhz
+    \item $n_{sync} = 128 $: Number of symbols in preamble sequence
+    \item $n_{sfd}$ = 8: Number of symbols in start of frame delimiter
+\end{itemize}
+All of these parameters can be taken from IEEE 802.15.4-2015 standard \cite{IEEE_Std_802_15_4_2015}, table 16-5.
+
+\subsubsection{Calculate the PHY duration $T_{PHY}$}
+Since it is necessary to add 48 parity bits for every 330 bits in the data payload (including CRC), the total number of parity bits is:
+\begin{equation}
+    n_{parity} = 48 + 48\frac{8(n_{len}+2)}{330}
+\end{equation}
+With $n_{len}$ is size of PHY payload in byte.
+The total number of PHY payload is:
+\begin{equation}
+    n_{phy-payload} = 8*(n_{len}+2) + n_{parity}
+\end{equation}
+Finally, the duration for PHY is:
+\begin{equation}
+    T_{PHY} = T_{bsym} * n_{phy-header} + T_{dsym} * n_{phy-payload}
+\end{equation}
+With:
+\begin{itemize}
+    \item $T_{bsym} = 1.0256410 \mu s$: Baserate symbols duration 850khz
+    \item $T_{dsym} = 0.1282051 \mu s$: Datarate symbols duration (usec) 6.81Mhz
+    \item $n_{phy-header} = 21$: Number of symbols in phy header
+\end{itemize}
+These parameters can be taken from IEEE 802.15.4-2015 standard \cite{IEEE_Std_802_15_4_2015}, table 16-3.
+
 \subsubsection{CCP timing for master node}
 
 The CCP packet is sent with timestamp calculated from previous frame:
@@ -258,13 +293,14 @@ The CCP packet is sent with timestamp calculated from previous frame:
     t_k = t_{k-1} + \tau
 \end{equation}
 
-Each time the CCP master node complete to send a CCP packet, a TX event is called for re-calculating $ep_m$, $ep_l$ and $ep_o$ using the following formulas.
+Each time the CCP master node complete to send a CCP packet, a TX event is called for re-calculating $ep_m$, $ep_l$ and $ep_o$ using the following formulas:
 \begin{equation}
-    ep_m = ep_l = t_k - T_{er}
+    ep_m = ep_l = t_k - T_{SHR}
 \end{equation}
 
+$ep_o$ is calculated form current host time:
 \begin{equation}
-    ep_o = t_h - f_{d2h}(t_d - t_k) - T_{er}
+    ep_o = t_h - f_{d2h}(t_d - t_k) - T_{SHR}
 \end{equation}
 
 After sending the CCP packet, the MCU will schedule for the next wake up at:
@@ -280,24 +316,55 @@ After sending the CCP packet, the MCU will schedule for the next wake up at:
     \label{fig:interupt_latency_master}
 \end{figure}
 
-\subsubsection{CCP calculation for slave node}
+\subsubsection{CCP timing for slave node}
+
+Each time the CCP slave node complete to receive a CCP packet, a RX event is called for re-calculating $ep_m$, $ep_l$ and $ep_o$ using the following formulas:
+
+$ep_m$ is calculated from timestamp field $t_{k-master}$ of received frame:
+\begin{equation}
+    ep_m = t_{k-master} - T_{SHR}
+\end{equation}
+
+$ep_l$ is calculated from current device time:
+\begin{equation}
+ep_l = t_k - T_{SHR}
+\end{equation}
+
+$ep_o$ is calculated form current host time:
+\begin{equation}
+    ep_o = t_h - f_{d2h}(t_d - t_k) - T_{SHR}
+\end{equation}
+
+After processing the CCP packet, the MCU will schedule for the next wake up at:
+\begin{equation}
+    t_{wake up} = ep_o + \tau - T_{latency}
+\end{equation}
+% To make it easier for calibrating $T_{latency}$, the cpp frame duration and rx stable interval is taken into account:
+% \begin{equation}
+%     t_{wake up} -= t_{ccp-frame} + t_{wake up}
+% \end{equation}
+% With:
+% \begin{itemize}
+%     \item $t_{ccp-frame} = T_{SHR} + T_{PHY}$: The duration of physical ccp frame.
+%     \item $t_{rx-stable} = 6 \mu s$: The interval for a frame  to be stable.
+% \end{itemize}
+
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.35]{interupt_latency_listener.png}
+        \includegraphics[scale=0.35]{ccp_timing_for_slave_node.png}
     \end{center}
-    \caption{interrupt latency listener}
-    \label{fig:interupt_latency_listener}
+    \caption{CCP master timing}
+    \label{fig:ccp_timing_for_slave_node}
 \end{figure}
 
-\subsubsection{Repeat CCP packet}
-\begin{figure}[H]
-    \begin{center}
-        \includegraphics[scale=0.35]{ccp_repeat.png}
-    \end{center}
-    \caption{CCP Repeat}
-    \label{fig:ccp_repeat}
-\end{figure}
-
+% \subsubsection{Repeat CCP packet}
+% \begin{figure}[H]
+%     \begin{center}
+%         \includegraphics[scale=0.35]{ccp_repeat.png}
+%     \end{center}
+%     \caption{CCP Repeat}
+%     \label{fig:ccp_repeat}
+% \end{figure}
 
 \section{Time Division Multiple Access (TDMA)}
 The fundamental role of the TDMA layer is to give a notification to its upper layer when it is the time to run the service. To archive this, a node must firstly ask for getting an appropriate and available slot from jointed nodes.
@@ -323,27 +390,28 @@ The superframe is divided into multiple slots as shown in figure \ref{fig:tdma_s
 In the SYNC slot interval, a master node produces and transmits the clock calibration packet. Relay nodes also repeat the clock calibration packet in this interval too.
 \subsubsection{Beacon slot (BCN slot)}
 An anchor node will broadcast its location and slot map information in its BCN slot. It is allowed for a jointed anchor to skip some superframes as long as it does not exceed a certain value. Other anchor nodes consider a node has left the network when they do not see any BCN message from such node for a number of superframes. The implementation uses the value of 10 for this purpose.
-\subsubsection{SVC slot}
+\subsubsection{SVC slot (Service slots)}
 When a node wants to joint the network as a tag or anchor, it has to send its joint request in an SVC slot. The request is broadcasted and responded by all jointed anchors in their next assigned BCN slot.
 \subsubsection{Ranging slot}
 A jointed tag initiates the range request in its assigned ranging slot. During the remaining interval, it also listens for the response from anchors to calculate to ToF (Time of Flight).
 
 \subsection{TDMA packet format}
-The message include two parts: IEEE frame header and payload:
+All TDMA packets include two parts: IEEE frame header and payload:
 \begin{itemize}
-    \item IEEE fame header conforms the 802.15.4-2016 standard
-    \item Payload field may contain more than one message. Each message have TLV (type-length-value) format as shown in figure \ref{fig:tdma_frame_payload}. Currently, three message types are defined: \textbf{Slot request/response}, \textbf{Location}, \textbf{Slot map}. The value of these message type are illustrated in figure \ref{fig:slot_request_response_message}, \ref{fig:location_value}, \ref{fig:slot_map_message}.
+    \item IEEE fame header conforms the 802.15.4-2015 standard
+    \item Payload field may contain more than one message. Each message have TLV (type-length-value) format as shown in figure \ref{fig:tdma_frame_payload}.
 \end{itemize}
+
 \begin{figure}[H]
     \centering
     \begin{bytefield}[bitwidth=1.1em]{32}
         \bitheader{0-31} \\
         \begin{rightwordgroup}{IEEE \\ frame \\ header}
-            \bitbox{16}{fctrl} & 
-            \bitbox{8}{seq num} & \\ 
-            \bitbox{16}{PANID} \\ 
+            \bitbox{16}{frame control} & 
+            \bitbox{8}{sequence number} \\ 
+            \bitbox{16}{pand id} \\
             \bitbox{16}{dst address} &
-            \bitbox{16}{src address}
+            \bitbox{16}{src address} 
         \end{rightwordgroup} \\
         \wordbox[tlr]{1}{payload} \\
         \wordbox[blr]{1}{$\cdots$}
@@ -352,18 +420,30 @@ The message include two parts: IEEE frame header and payload:
     \label{fig:tdma_frame}
 \end{figure}
 
+\subsubsection{Frame Control}
+\subsubsection{Sequenct Number}
+\subsubsection{Pan ID}
+\subsubsection{Dst Address}
+\subsubsection{Src Address}
+\subsubsection{Payload}
+
+TLV format, the Type-Length-Value encoding, is used for data exchanging between nodes. Data in TLV format always begins with the type byte, followed by the length byte, and then followed by a variable number of value bytes [0 to 253] as specified by the length byte.
+
 \begin{figure}[ht]
     \centering
     \begin{bytefield}[bitwidth=1.1em]{32}
         \bitheader{0-15}\\
         \bitbox{8}{type} & 
-        \bitbox{8}{len} & 
+        \bitbox{8}{length} & 
         \bitbox{16}{value}
     \end{bytefield}
     \caption{TDMA frame payload}
     \label{fig:tdma_frame_payload}
 \end{figure}
 
+Currently, three message types are defined: \textbf{Slot request/response}, \textbf{Location}, \textbf{Slot map}. The value of these message type are illustrated in figure \ref{fig:slot_request_response_message}, \ref{fig:location_value}, \ref{fig:slot_map_message}.
+
+\subsubsection{Slot request/response message}
 \begin{figure}[H]
     \centering
     \begin{bytefield}[bitwidth=2em]{16}
@@ -375,6 +455,7 @@ The message include two parts: IEEE frame header and payload:
     \label{fig:slot_request_response_message}
 \end{figure}
 
+\subsubsection{Location message}
 \begin{figure}[H]
     \centering
     \begin{bytefield}[bitwidth=1.1em]{32}
@@ -388,6 +469,7 @@ The message include two parts: IEEE frame header and payload:
     \label{fig:location_value}
 \end{figure}
 
+\subsubsection{Slot map message}
 \begin{figure}[H]
     \centering
     \begin{bytefield}[bitwidth=1.1em]{32}
@@ -418,7 +500,7 @@ The master node is the initiator of the network. It has to be an anchor and occu
 The REQT state implementation is illustrated in the follow chart \ref{fig:REQT_state_diagram}.
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.33]{REQT_flow_chart.png}
+        \includegraphics[scale=0.3]{REQT_flow_chart.png}
     \end{center}
     \caption{REQT state diagram}
     \label{fig:REQT_state_diagram}
