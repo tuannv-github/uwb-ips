@@ -181,6 +181,11 @@ Figure \ref{fig:ccp_slave_flow_chart}, \ref{fig:ccp_master_reqt_flow_chart} and 
 Figure \ref{fig:ccp_slave_flow_chart} is the flow chart for CCP\_SLAVE state. In this state, rx\_timeout\_counter variable is used to timeout the slave and turn it into the CCP\_MASTER\_REQT state.
 This variable is also checked for each RX timer callback, if it is not equal to 0, which means that there is a timeout event before, it is necessary to listen immediately to increase the chance of receiving the next ccp packet. If the variable equal to 0, the MCU will schedule the radio IC to receive the frame at a calculated moment. If a ccp packet is successfully received, MCU will schedule the next wake up to receive the next ccp packet based on the ccp packet it just received. 
 
+Figure \ref{fig:ccp_master_reqt_flow_chart} is the flow chart for
+CCP\_MASTER\_REQT state. In this state, a node will periodically send the ccp request packet. If no node protests by sending another cpp packet or ccp request packet, the variable master\_reqt\_state is used to timeout the CCP\_MASTER\_REQT state and turn the node into the master state.
+
+Figure \ref{fig:ccp_master_flow_chart} is the flow chart for CCP\_MASTER state. A node enters this state by scheduling a TX timer and waiting for its timeout. This timer will wake up the CPU to schedule the radio IC for transmitting ccp packet at a calculated moment. The listen stage here is for the demonstration purpose only. In fact, the ccp packet does not listen in the master state. Instead, the ccp implementation act as an observer to analyze any packet received in the superframe internal interval. Packets must be received by listen commands of higher layers.
+
 \begin{figure}[H]
     \begin{center}
         \includegraphics[scale=0.35]{ccp_slave_flow_chart.png}
@@ -189,26 +194,40 @@ This variable is also checked for each RX timer callback, if it is not equal to 
     \label{fig:ccp_slave_flow_chart}
 \end{figure}
 
-Figure \ref{fig:ccp_master_reqt_flow_chart} is the flow chart for
-CCP\_MASTER\_REQT state. In this state, a node will periodically send the ccp request packet. If no node protests by sending another cpp packet or ccp request packet, the variable master\_reqt\_state is used to timeout the CCP\_MASTER\_REQT state and turn the node into the master state.
+% \begin{figure}[H]
+%     \begin{center}
+%         \includegraphics[scale=0.35]{ccp_master_reqt_flow_chart.png}
+%     \end{center}
+%     \caption{CCP master request flow chart}
+%     \label{fig:ccp_master_reqt_flow_chart}
+% \end{figure}
 
-Figure \ref{fig:ccp_master_flow_chart} is the flow chart for CCP\_MASTER state. A node enters this state by scheduling a TX timer and waiting for its timeout. This timer will wake up the CPU to schedule the radio IC for transmitting ccp packet at a calculated moment. The listen stage here is for the demonstration purpose only. In fact, the ccp packet does not listen in the master state. Instead, the ccp implementation act as an observer to analyze any packet received in the superframe internal interval. Packets must be received by listen commands of higher layers.
+% \begin{figure}[H]
+%     \begin{center}
+%         \includegraphics[scale=0.35]{ccp_master_flow_chart.png}
+%     \end{center}
+%     \caption{CCP master flow chart}
+%     \label{fig:ccp_master_flow_chart}
+% \end{figure}
 
-\begin{figure}[H]
-    \begin{center}
-        \includegraphics[scale=0.35]{ccp_master_reqt_flow_chart.png}
-    \end{center}
-    \caption{CCP master request flow chart}
-    \label{fig:ccp_master_reqt_flow_chart}
-\end{figure}
-
-
-\begin{figure}[H]
-    \begin{center}
-        \includegraphics[scale=0.35]{ccp_master_flow_chart.png}
-    \end{center}
-    \caption{CCP master flow chart}
-    \label{fig:ccp_master_flow_chart}
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.47\textwidth}
+        \begin{center}
+            \includegraphics[scale=0.3]{ccp_master_reqt_flow_chart.png}
+        \end{center}
+        \caption{CCP master request flow chart}
+        \label{fig:ccp_master_reqt_flow_chart}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.47\textwidth}
+        \begin{center}
+            \includegraphics[scale=0.3]{ccp_master_flow_chart.png}
+        \end{center}
+        \caption{CCP master flow chart}
+        \label{fig:ccp_master_flow_chart}
+    \end{subfigure}
+    \caption{CCP master and master request flow chart}
 \end{figure}
 
 % \begin{figure}
@@ -395,11 +414,11 @@ When a node wants to joint the network as a tag or anchor, it has to send its jo
 \subsubsection{Ranging slot}
 A jointed tag initiates the range request in its assigned ranging slot. During the remaining interval, it also listens for the response from anchors to calculate to ToF (Time of Flight).
 
-\subsection{TDMA packet format}
-All TDMA packets include two parts: IEEE frame header and payload:
+\subsection{TDMA frame format}
+All TDMA frames consist two fields:
 \begin{itemize}
-    \item IEEE fame header conforms the 802.15.4-2015 standard
-    \item Payload field may contain more than one message. Each message have TLV (type-length-value) format as shown in figure \ref{fig:tdma_frame_payload}.
+    \item IEEE fame header which conforms the 802.15.4-2015 standard.
+    \item Payload field which may contain more than one message. 
 \end{itemize}
 
 \begin{figure}[H]
@@ -421,13 +440,48 @@ All TDMA packets include two parts: IEEE frame header and payload:
 \end{figure}
 
 \subsubsection{Frame Control}
-\subsubsection{Sequenct Number}
-\subsubsection{Pan ID}
-\subsubsection{Dst Address}
-\subsubsection{Src Address}
-\subsubsection{Payload}
+The Frame Control field for the standard Data frame are specified in figure \ref{fig:function_control_for_standard_data_frame}.
 
-TLV format, the Type-Length-Value encoding, is used for data exchanging between nodes. Data in TLV format always begins with the type byte, followed by the length byte, and then followed by a variable number of value bytes [0 to 253] as specified by the length byte.
+\begin{figure}[H]
+    \centering
+    \begin{bytefield}[bitwidth=3.0em, bitheight=6em]{16}
+        \bitheader{0-15} \\
+        \bitbox{3}{Frame Type} &
+        \bitbox{3}{} &
+        \bitbox{1}{PAN ID Compression} &
+        \bitbox{3}{} &
+        \bitbox{2}{Destination Addressing Mode} &
+        \bitbox{2}{} &
+        \bitbox{2}{Source Addressing Mode}
+    \end{bytefield}
+    \caption{Function Control for stand Data Frame}
+    \label{fig:function_control_for_standard_data_frame}
+\end{figure}
+The Frame Type field shall be set as $b_2 b_1 b_0 = 001$ for data frame.
+
+The PAN ID Compression field is used to indicate the presence of the PAN ID field. As both destination and source addressing information is present, the MAC sub-layer shall compare the destination and source PAN identifiers and see the PAN IDs are identical, the PAN ID Compression field should be set to 1 and the Source PAN ID field is omitted from the transmitted frame. 
+
+The Destination Addressing Mode field shall be set to  $b_1 b_0 = 10$ as the destination address field contains a short address (16 bit).
+
+The Source Addressing Mode field shall be set to  $b_1 b_0 = 10$ as the source address field contains a short address (16 bit).
+
+The final value for the frame control field is: \textbf{0x8841}
+\subsubsection{Sequence Number}
+The Sequence Number field specifies the sequence identifier for the frame
+
+\subsubsection{Pan ID}
+The Destination PAN ID field is an unsigned integer that specifies the unique PAN ID of the intended recipient of the frame. 
+
+\subsubsection{Dst Address}
+The Destination Address field with a length specified in the Destination Addressing Mode field of the Frame Control field specifies the address of the intended recipient of the frame.
+
+\subsubsection{Src Address}
+The Source Address field specifies the address of the originator of the frame. As the Source Addressing Mode field is nonzero, this field is included in the MAC frame.
+
+\subsubsection{Payload}
+The Frame Payload field contains information specific to individual frame types. Each message in payload have TLV (type-length-value) format as shown in figure \ref{fig:tdma_frame_payload}.
+
+TLV format, the Type-Length-Value encoding, is used for data exchanging between nodes. Data in TLV format always begins with the type byte, followed by the length byte, and then followed by a variable number of value bytes as specified by the length byte.
 
 \begin{figure}[ht]
     \centering
@@ -497,27 +551,43 @@ The master node is the initiator of the network. It has to be an anchor and occu
 \end{figure}
 
 \subsubsection{REQT state flow chart}
-The REQT state implementation is illustrated in the follow chart \ref{fig:REQT_state_diagram}.
+The REQT state implementation is illustrated in the flow chart \ref{fig:REQT_state_flowchart}. The system is likely to be an  organization that a new member can only joint if all jointed members accept it. As all jointed anchors have a list of occupied slots, this joint mechanism makes sure that one anchor will never see more than one anchor in a time slot. It also makes a slot re-usable at different regions.
+
+In a BCN slot, a node listens for a BCN message, if it sees a new anchor, it will add that node to its anchor list and process the BCN message. If it received a slot-accept message, it will check if all node in its anchor list has accepted for its slot, if it is true, that node will enter the JOINT state.
+
+In an SVC slot, a node sends a joint-request message to all nodes in its anchor list.
+
+
+\subsubsection{JOINTED state flow chart}
+The JOINTED state implementation is illustrated in the follow chart \ref{fig:JOINTED_state_flowchart}.
+
+The SYNC slot is used to timeout and remove a node from the node list.
+
+In its BCN slot, a jointed anchor sends a beacon message to broadcast its state. If it is its BCN slot, such node will listen for BCN message to reset the timeout timer of each anchor and update anchor information based on the message received. An anchor also responds to slot request message in its slot.
+
+In the SVC slot, jointed anchors will listen for a joint-request message.
+
+In a Ranging slot, jointed anchors will listen for a range-request message.
+
 \begin{figure}[H]
     \begin{center}
         \includegraphics[scale=0.3]{REQT_flow_chart.png}
     \end{center}
-    \caption{REQT state diagram}
-    \label{fig:REQT_state_diagram}
+    \caption{REQT state flowchart}
+    \label{fig:REQT_state_flowchart}
 \end{figure}
 
-\subsubsection{JOINTED state flow chart}
-The JOINTED state implementation is illustrated in the follow chart \ref{fig:JOINTED_state_diagram}
 \begin{figure}[H]
     \begin{center}
         \includegraphics[scale=0.32]{JOINTED_state_flow_chart.png}
     \end{center}
-    \caption{JOINTED state diagram}
-    \label{fig:JOINTED_state_diagram}
+    \caption{JOINTED state flowchart}
+    \label{fig:JOINTED_state_flowchart}
 \end{figure}
 
 \section{Two way ranging (TWR)}
-By using TWR, the need of synchronized clocks is eliminated since both the round-trip time(s) and the reply time(s) can be calculated separately using timestamps derived from each device.
+By using TWR, the need of synchronized clocks is eliminated since both the round-trip time(s) and the reply time(s) can be calculated separately using timestamps derived from each device. TWR service runs on Ranging slots of TDMA service.
+
 \begin{figure}[H]
     \begin{center}
         \includegraphics[scale=0.5]{single_sided_two_way_ranging.png}
@@ -526,23 +596,154 @@ By using TWR, the need of synchronized clocks is eliminated since both the round
     \label{fig:single_sided_two_way_ranging}
 \end{figure}
 
+\subsection{TWR role}
+\begin{itemize}
+    \item TWR initiator: The tag node who sends range-request message.
+    \item TWR responder: The anchor node who waits for range-request message and responses with range-response message.
+\end{itemize}
+\subsection{TWR frame format}
 \begin{figure}[H]
-    \begin{center}
-        \includegraphics[scale=0.5]{twr_initiator.png}
-    \end{center}
-    \caption{TWR initiator flow chart}
-    \label{fig:twr_initiator}
+    \centering
+    \begin{bytefield}[bitwidth=1.1em]{32}
+        \bitheader{0-31} \\
+        \begin{rightwordgroup}{IEEE \\ frame \\ header}
+            \bitbox{16}{frame control} & 
+            \bitbox{8}{sequence number} \\ 
+            \bitbox{16}{pand id} \\
+            \bitbox{16}{dst address} &
+            \bitbox{16}{src address}
+        \end{rightwordgroup} \\
+        \bitbox{16}{code} \\
+        \wordbox{1}{payload}
+    \end{bytefield}
+    \caption{TWR frame}
+    \label{fig:twr_frame}
 \end{figure}
 
+\subsubsection{Frame Control}
+The Frame Control field for the standard Data frame are specified in figure \ref{fig:function_control_for_standard_data_frame}.
 \begin{figure}[H]
-    \begin{center}
-        \includegraphics[scale=0.5]{twr_responder.png}
-    \end{center}
-    \caption{TWR responder flow chart}
-    \label{fig:twr_responder}
+    \centering
+    \begin{bytefield}[bitwidth=3.0em, bitheight=6em]{16}
+        \bitheader{0-15} \\
+        \bitbox{3}{Frame Type} &
+        \bitbox{3}{} &
+        \bitbox{1}{PAN ID Compression} &
+        \bitbox{3}{} &
+        \bitbox{2}{Destination Addressing Mode} &
+        \bitbox{2}{} &
+        \bitbox{2}{Source Addressing Mode}
+    \end{bytefield}
+    \caption{Function Control for stand Data Frame}
+    \label{fig:function_control_for_standard_data_frame}
+\end{figure}
+The Frame Type field shall be set as $b_2 b_1 b_0 = 001$ for data frame.
+
+The PAN ID Compression field is used to indicate the presence of the PAN ID field. As both destination and source addressing information is present, the MAC sub-layer shall compare the destination and source PAN identifiers and see the PAN IDs are identical, the PAN ID Compression field is set to 1 and the Source PAN ID field is omitted from the transmitted frame. 
+
+The Destination Addressing Mode field shall be set to  $b_1 b_0 = 10$ as the destination address field contains a short address (16 bit).
+
+The Source Addressing Mode field shall be set to  $b_1 b_0 = 10$ as the source address field contains a short address (16 bit).
+
+The final value for the frame control field is: \textbf{0x8841}
+\subsubsection{Sequence Number}
+The Sequence Number field specifies the sequence identifier for the frame
+
+\subsubsection{Pan ID}
+The Destination PAN ID field is an unsigned integer that specifies the unique PAN ID of the intended recipient of the frame. 
+
+\subsubsection{Dst Address}
+The Destination Address field with a length specified in the Destination Addressing Mode field of the Frame Control field specifies the address of the intended recipient of the frame.
+
+\subsubsection{Src Address}
+The Source Address field specifies the address of the originator of the frame. As the Source Addressing Mode field is nonzero, this field is included in the MAC frame.
+
+\subsubsection{Code}
+Code is a self-defined state variable for a TWR process. For single-sided TWR, the Code field shall be set to one of the values listed in table \ref{tab:TWR_code}.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{ |p{6cm}|c|p{8cm}| } 
+    \hline
+    UWB\_DATA\_CODE\_TWR\_INVALID & 0x0100 & Invalid TWR CODE \\\hline
+    UWB\_DATA\_CODE\_SS\_TWR & 0x0110 & Single sided TWR \\\hline
+    UWB\_DATA\_CODE\_SS\_TWR\_T1 & 0x0111 & Response for single sided TWR \\\hline
+    UWB\_DATA\_CODE\_SS\_TWR\_FINAL & 0x0112 & Final response of single  sided TWR \\\hline
+    UWB\_DATA\_CODE\_SS\_TWR\_END & 0x0113 & End of single sided TWR \\\hline
+\end{tabular}
+\caption{TWR code}
+\label{tab:TWR_code}
+\end{table}
+
+\subsubsection{Payload}
+The Frame Payload field contains information specific to individual frame types.
+
+For the range-request frame type, the payload shall be formatted as illustrated in figure \ref{fig:twr_slot_payload}.
+\begin{figure}[H]
+    \centering
+    \begin{bytefield}[bitwidth=1.5em]{32}
+        \bitheader{0-31} \\
+        \bitbox{2}{ptype} &
+        \bitbox{14}{start slot id} &
+        \bitbox{16}{end slot id} &
+    \end{bytefield}
+    \caption{TWR slot payload}
+    \label{fig:twr_slot_payload}
 \end{figure}
 
-\subsection{Wireshark extension for capturing packets}
+For the range-response frame type, the payload shall be formatted as illustrated in figure \ref{fig:twr_response_payload}.
+\begin{figure}[H]
+    \centering
+    \begin{bytefield}[bitwidth=1.5em]{32}
+        \bitheader{0-31} \\
+        \bitbox{16}{reception timestamp} &
+        \bitbox{16}{transmissiontimestamp} &
+    \end{bytefield}
+    \caption{TWR response payload}
+    \label{fig:twr_response_payload}
+\end{figure}
+
+\subsection{TWR flowchart}
+Flowcharts for TWR initiator and responder is shown is figure \ref{fig:twr_initiator} and \ref{fig:twr_responder}.
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.47\textwidth}
+        \begin{center}
+            \includegraphics[scale=0.3]{twr_initiator.png}
+        \end{center}
+        \caption{TWR initiator flow chart}
+        \label{fig:twr_initiator}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.47\textwidth}
+        \begin{center}
+            \includegraphics[scale=0.3]{twr_responder.png}
+        \end{center}
+        \caption{TWR responder flow chart}
+        \label{fig:twr_responder}
+    \end{subfigure}
+    \caption{TWR flowchart}
+\end{figure}
+
+\subsection{TWR implementation}
+
+% \begin{figure}[H]
+%     \begin{center}
+%         \includegraphics[scale=0.5]{twr_initiator.png}
+%     \end{center}
+%     \caption{TWR initiator flow chart}
+%     \label{fig:twr_initiator}
+% \end{figure}
+
+% \begin{figure}[H]
+%     \begin{center}
+%         \includegraphics[scale=0.5]{twr_responder.png}
+%     \end{center}
+%     \caption{TWR responder flow chart}
+%     \label{fig:twr_responder}
+% \end{figure}
+
+\section{Wireshark extension for packets capturing}
 
 \bib
 \end{document}
