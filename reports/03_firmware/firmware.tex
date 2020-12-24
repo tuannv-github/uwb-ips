@@ -414,6 +414,28 @@ When a node wants to joint the network as a tag or anchor, it has to send its jo
 \subsubsection{Ranging slot}
 A jointed tag initiates the range request in its assigned ranging slot. During the remaining interval, it also listens for the response from anchors to calculate to ToF (Time of Flight).
 
+\subsubsection{TDMA timing}
+Each software timer is assigned for each tdma slot. Such timers will expire and raise an event to the upper layer as a service. Timer duration is calculated using the equation \ref{eqn:tdma_timing} as shown in figure \ref{fig:tdma_timing}.
+\begin{equation}
+    t = ep_o + d_{slot}*i_{slot} - T_{latency}
+    \label{eqn:tdma_timing}
+\end{equation}
+With: 
+\begin{itemize}
+    \item $t$: The moment at which the timer expire referred to the host timing system.
+    \item $d_{slot} = \frac{\tau}{n_{slot}}$: The duration of a slot which is equal to the duration of a superframe divide by the total number of slots.
+    \item $T_{latency}$: The OS latency
+\end{itemize}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.3]{tdma_timing.png}
+    \end{center}
+    \caption{TDMA timing}
+    \label{fig:tdma_timing}
+\end{figure}
+
+
 \subsection{TDMA frame format}
 All TDMA frames consist two fields:
 \begin{itemize}
@@ -590,7 +612,7 @@ By using TWR, the need of synchronized clocks is eliminated since both the round
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.5]{single_sided_two_way_ranging.png}
+        \includegraphics[scale=0.2]{single_sided_two_way_ranging.png}
     \end{center}
     \caption{Single-sided two-way ranging}
     \label{fig:single_sided_two_way_ranging}
@@ -705,6 +727,8 @@ For the range-response frame type, the payload shall be formatted as illustrated
 
 \subsection{TWR flowchart}
 Flowcharts for TWR initiator and responder is shown is figure \ref{fig:twr_initiator} and \ref{fig:twr_responder}.
+The initiator sends a range-request message in its slot and waits for range-response messages from responders. If a response is successfully received, it will calculate the time of light using. In the other hand, responders wait for a range-request message and respond after a fixed interval.
+
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.47\textwidth}
@@ -726,6 +750,26 @@ Flowcharts for TWR initiator and responder is shown is figure \ref{fig:twr_initi
 \end{figure}
 
 \subsection{TWR implementation}
+Timestamping for each event in TWR process is precisely done by the radio IC. The host, on the other hand, calculate TOF by using equation \ref{eqn:twr_tof} as proved in figure \ref{fig:twr_timing}.
+\begin{equation}
+    tof = \frac{1}{2} \frac{t_{resp} - t_{reqt}}{t_{trans} - t_{recp}}
+    \label{eqn:twr_tof}
+\end{equation}
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.3]{twr_timing.png}
+    \end{center}
+    \caption{Two way ranging timing}
+    \label{fig:twr_timing}
+\end{figure}
+
+$T_{hold-off-conf}$ is a configured value for holding the range-request message before send the range-response message.
+As many anchors will response for a range-request, all anchors should respond at different time to not corrupt each other. To archive this, time slot index of anchor ($i_{slot}$) is used together with the duration of range-response frame ($T_{response-frame}$). The final hold-off time ($T_{hold-off}$) is produced using equation \ref{eqn:tdma_hold_off}.
+\begin{equation}
+   T_{hold-off} = T_{hold-off-conf} + i_{slot}(T_{guard} + T_{response-frame})
+   \label{eqn:tdma_hold_off}
+\end{equation}
+With $T_{guard}$ is used for the purpose of making response more distinct from each other.
 
 % \begin{figure}[H]
 %     \begin{center}
@@ -743,7 +787,40 @@ Flowcharts for TWR initiator and responder is shown is figure \ref{fig:twr_initi
 %     \label{fig:twr_responder}
 % \end{figure}
 
-\section{Wireshark extension for packets capturing}
+\section{Wireshark extcap for packets capturing}
+While developing the whole system, Wireshark is an important tool to analyze network traffic and troubleshoot issues on the network. Wireshark has been pre-implemented for parsing 802.15.4 packet. Nevertheless, it can only capture packets from standard interfaces. The extcap interface, however, is a versatile plugin interface that allows external binaries to act as capture interfaces directly in Wireshark.
+
+Without extcap, a capture can always be achieved by directly writing to a capture file, but the extcap interface allows for such a connection to be easily established and configured using the Wireshark GUI. The extcap subsystem is made of multiple extcap binaries that are automatically called by the GUI in a row. Extcaps may be any binary or script within the extcap directory.
+
+How extcap make interfaces available to Wireshark? Figure \ref{fig:extcap_802_15_4} shows the principle. Wireshark creates a FIFO and pass it to the extcap program as an argument. The extcap program, on the other hand, send the received frame to the FIFO with the protocol defined by Wireshark. How the extcap program gets the frame is not important to the Wireshark. In this case, the radio module acts as a sniffer and gives its received frame to the extcap over an UART connection.
+
+Figure \ref{fig:extcap_802_15_4} shows the interface created by a extcap program for capturing 802.15.4 frame of a UWB system.
+
+Figure \ref{fig:wireshark_802_15_5_packet} is an example of a 802.15.4 frame analyzed by Wireshark.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.4]{extcap_802_15_4.png}
+    \end{center}
+    \caption{Wireshark for debugging the network}
+    \label{fig:extcap_802_15_4}
+\end{figure}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.6]{wireshark_interface.png}
+    \end{center}
+    \caption{UWB Wireshark interface}
+    \label{fig:wireshark_interface}
+\end{figure}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.5]{wireshark_802_15_5_packet.png}
+    \end{center}
+    \caption{UWB 802.15.4 packet parsing}
+    \label{fig:wireshark_802_15_5_packet}
+\end{figure}
 
 \bib
 \end{document}

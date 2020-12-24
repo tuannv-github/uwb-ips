@@ -12,10 +12,12 @@
 			"carrierless",
 			"marker",
 			"r",
+			"recp",
 			"spof",
 			"spofs",
 			"superframes",
 			"sync",
+			"timestamping",
 			"unilateration"
 		],
 		"restructuredtext.languageServer.disabled": true
