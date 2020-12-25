@@ -42,7 +42,7 @@ syscfg.vals:
     RTT_TERMINAL_BUFFER_SIZE_DOWN: 256
     CONSOLE_ECHO: false
 
-    LOG_LEVEL: 1
+    LOG_LEVEL: 5
     OS_MAIN_STACK_SIZE: 1024
     OS_CRASH_STACKTRACE: 1
 
@@ -68,7 +68,7 @@ syscfg.vals:
     STATS_NAMES: 1
     STATS_CLI: 1
 
-    BLE_MESH_RELAY: 1
+    BLE_MESH_RELAY: 0
     # BLE_MESH_DEBUG: 1
     # BLE_MESH_DEBUG_NET: 1
 

@@ -3,53 +3,59 @@
 	<version>3</version>
 
 	<enums>
-		<enum name="type_t">
-			<entry name="GET"></entry>
-			<entry name="SET"></entry>
-            <entry name="SET_UNACK"></entry>
-            <entry name="STATUS"></entry>
-		</enum>
-		<enum name="node_t">
+		<enum name="role_t">
 			<entry name="ANCHOR"></entry>
 			<entry name="TAG"></entry>
 		</enum>
 	</enums>
 
 	<messages>
-		<message id="0" name="LOCATION">
+		<message id="0" name="BLINK">
 			<description>Location message</description>
-			<field type="uint16_t" name="mesh_address"/>
 			<field type="uint16_t" name="uwb_address"/>
-			<field type="uint8_t" name="type" enum="type_t"/>
-			<field type="uint8_t" name="node" enum="node_t"/>
+			<field type="uint8_t" enum="role_t" name="role"/>
+		</message>
+		<message id="1" name="BLE_MESH">
+			<description>BLE mesh message</description>
+			<field type="uint16_t" name="uwb_address"/>
+			<field type="uint16_t" name="mesh_address"/>
+		</message>
+		<message id="2" name="ONOFF">
+			<description>On off message</description>
+			<field type="uint16_t" name="uwb_address"/>
+			<field type="uint8_t" name="value"/>
+		</message>
+		<message id="3" name="LOCATION">
+			<description>Location message</description>
+			<field type="uint16_t" name="uwb_address"/>
 			<field type="float" name="location_x"/>
 			<field type="float" name="location_y"/>
 			<field type="float" name="location_z"/>
 		</message>
-		<message id="1" name="ONOFF">
-			<description>On off message</description>
-			<field type="uint16_t" name="mesh_address"/>
+		<message id="4" name="LOCATION_REDUCED">
+			<description>Location message</description>
 			<field type="uint16_t" name="uwb_address"/>
-			<field type="uint8_t" name="type" enum="type_t"/>
-			<field type="uint8_t" name="value"/>
+			<field type="float" name="location_x"/>
+			<field type="float" name="location_y"/>
 		</message>
-		<message id="2" name="DISTANCE">
-			<description>Distnace message</description>
-			<field type="uint16_t" name="mesh_address"/>
-			<field type="uint8_t" name="type" enum="type_t"/>
-			<field type="uint16_t" name="tag"/>
+		<message id="5" name="DISTANCE">
+			<description>Distance message</description>
+			<field type="uint16_t" name="uwb_address"/>
 			<field type="uint16_t" name="anchor"/>
 			<field type="float" name="distance"/>
 		</message>
-		<message id="3" name="TOF">
-			<description>Distnace message</description>
-			<field type="uint16_t" name="mesh_address"/>
-			<field type="uint8_t" name="type" enum="type_t"/>
-			<field type="uint16_t" name="tag"/>
+		<message id="6" name="TOF">
+			<description>TOF message</description>
+			<field type="uint16_t" name="uwb_address"/>
 			<field type="uint16_t" name="anchor"/>
 			<field type="uint32_t" name="tof"/>
 		</message>
-		<message id="4" name="TAG">
+		<message id="7" name="SLOT">
+			<description>Slot message</description>
+			<field type="uint16_t" name="uwb_address"/>
+			<field type="uint8_t" name="slot"/>
+		</message>
+		<message id="8" name="TAG">
 			<description>Tag message</description>
 			<field type="uint16_t" name="a0"/>
 			<field type="float" name="a0x"/>
@@ -75,13 +81,6 @@
 			<field type="float" name="t0x"/>
 			<field type="float" name="t0y"/>
 			<field type="float" name="t0z"/>
-		</message>
-		<message id="5" name="SLOT">
-			<description>Slot message</description>
-			<field type="uint16_t" name="mesh_address"/>
-			<field type="uint16_t" name="uwb_address"/>
-			<field type="uint8_t" name="type" enum="type_t"/>
-			<field type="uint8_t" name="slot"/>
 		</message>
 	</messages>
 </mavlink>

@@ -262,74 +262,92 @@ class EnumEntry(object):
 
 enums = {}
 
-# type_t
-enums['type_t'] = {}
-GET = 1 # 
-enums['type_t'][1] = EnumEntry('GET', '''''')
-SET = 2 # 
-enums['type_t'][2] = EnumEntry('SET', '''''')
-SET_UNACK = 3 # 
-enums['type_t'][3] = EnumEntry('SET_UNACK', '''''')
-STATUS = 4 # 
-enums['type_t'][4] = EnumEntry('STATUS', '''''')
-type_t_ENUM_END = 5 # 
-enums['type_t'][5] = EnumEntry('type_t_ENUM_END', '''''')
-
-# node_t
-enums['node_t'] = {}
+# role_t
+enums['role_t'] = {}
 ANCHOR = 1 # 
-enums['node_t'][1] = EnumEntry('ANCHOR', '''''')
+enums['role_t'][1] = EnumEntry('ANCHOR', '''''')
 TAG = 2 # 
-enums['node_t'][2] = EnumEntry('TAG', '''''')
-node_t_ENUM_END = 3 # 
-enums['node_t'][3] = EnumEntry('node_t_ENUM_END', '''''')
+enums['role_t'][2] = EnumEntry('TAG', '''''')
+role_t_ENUM_END = 3 # 
+enums['role_t'][3] = EnumEntry('role_t_ENUM_END', '''''')
 
 # message IDs
 MAVLINK_MSG_ID_BAD_DATA = -1
-MAVLINK_MSG_ID_LOCATION = 0
-MAVLINK_MSG_ID_ONOFF = 1
-MAVLINK_MSG_ID_DISTANCE = 2
-MAVLINK_MSG_ID_TOF = 3
-MAVLINK_MSG_ID_TAG = 4
-MAVLINK_MSG_ID_SLOT = 5
+MAVLINK_MSG_ID_BLINK = 0
+MAVLINK_MSG_ID_BLE_MESH = 1
+MAVLINK_MSG_ID_ONOFF = 2
+MAVLINK_MSG_ID_LOCATION = 3
+MAVLINK_MSG_ID_LOCATION_REDUCED = 4
+MAVLINK_MSG_ID_DISTANCE = 5
+MAVLINK_MSG_ID_TOF = 6
+MAVLINK_MSG_ID_SLOT = 7
+MAVLINK_MSG_ID_TAG = 8
 
-class MAVLink_location_message(MAVLink_message):
+class MAVLink_blink_message(MAVLink_message):
         '''
         Location message
         '''
-        id = MAVLINK_MSG_ID_LOCATION
-        name = 'LOCATION'
-        fieldnames = ['mesh_address', 'uwb_address', 'type', 'node', 'location_x', 'location_y', 'location_z']
-        ordered_fieldnames = ['location_x', 'location_y', 'location_z', 'mesh_address', 'uwb_address', 'type', 'node']
-        fieldtypes = ['uint16_t', 'uint16_t', 'uint8_t', 'uint8_t', 'float', 'float', 'float']
+        id = MAVLINK_MSG_ID_BLINK
+        name = 'BLINK'
+        fieldnames = ['uwb_address', 'role']
+        ordered_fieldnames = ['uwb_address', 'role']
+        fieldtypes = ['uint16_t', 'uint8_t']
         fielddisplays_by_name = {}
-        fieldenums_by_name = {"type": "type_t", "node": "node_t"}
+        fieldenums_by_name = {"role": "role_t"}
         fieldunits_by_name = {}
-        format = '<fffHHBB'
-        native_format = bytearray('<fffHHBB', 'ascii')
-        orders = [3, 4, 5, 6, 0, 1, 2]
-        lengths = [1, 1, 1, 1, 1, 1, 1]
-        array_lengths = [0, 0, 0, 0, 0, 0, 0]
-        crc_extra = 11
-        unpacker = struct.Struct('<fffHHBB')
+        format = '<HB'
+        native_format = bytearray('<HB', 'ascii')
+        orders = [0, 1]
+        lengths = [1, 1]
+        array_lengths = [0, 0]
+        crc_extra = 92
+        unpacker = struct.Struct('<HB')
         instance_field = None
         instance_offset = -1
 
-        def __init__(self, mesh_address, uwb_address, type, node, location_x, location_y, location_z):
-                MAVLink_message.__init__(self, MAVLink_location_message.id, MAVLink_location_message.name)
-                self._fieldnames = MAVLink_location_message.fieldnames
-                self._instance_field = MAVLink_location_message.instance_field
-                self._instance_offset = MAVLink_location_message.instance_offset
-                self.mesh_address = mesh_address
+        def __init__(self, uwb_address, role):
+                MAVLink_message.__init__(self, MAVLink_blink_message.id, MAVLink_blink_message.name)
+                self._fieldnames = MAVLink_blink_message.fieldnames
+                self._instance_field = MAVLink_blink_message.instance_field
+                self._instance_offset = MAVLink_blink_message.instance_offset
                 self.uwb_address = uwb_address
-                self.type = type
-                self.node = node
-                self.location_x = location_x
-                self.location_y = location_y
-                self.location_z = location_z
+                self.role = role
 
         def pack(self, mav, force_mavlink1=False):
-                return MAVLink_message.pack(self, mav, 11, struct.pack('<fffHHBB', self.location_x, self.location_y, self.location_z, self.mesh_address, self.uwb_address, self.type, self.node), force_mavlink1=force_mavlink1)
+                return MAVLink_message.pack(self, mav, 92, struct.pack('<HB', self.uwb_address, self.role), force_mavlink1=force_mavlink1)
+
+class MAVLink_ble_mesh_message(MAVLink_message):
+        '''
+        BLE mesh message
+        '''
+        id = MAVLINK_MSG_ID_BLE_MESH
+        name = 'BLE_MESH'
+        fieldnames = ['uwb_address', 'mesh_address']
+        ordered_fieldnames = ['uwb_address', 'mesh_address']
+        fieldtypes = ['uint16_t', 'uint16_t']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {}
+        fieldunits_by_name = {}
+        format = '<HH'
+        native_format = bytearray('<HH', 'ascii')
+        orders = [0, 1]
+        lengths = [1, 1]
+        array_lengths = [0, 0]
+        crc_extra = 91
+        unpacker = struct.Struct('<HH')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, uwb_address, mesh_address):
+                MAVLink_message.__init__(self, MAVLink_ble_mesh_message.id, MAVLink_ble_mesh_message.name)
+                self._fieldnames = MAVLink_ble_mesh_message.fieldnames
+                self._instance_field = MAVLink_ble_mesh_message.instance_field
+                self._instance_offset = MAVLink_ble_mesh_message.instance_offset
+                self.uwb_address = uwb_address
+                self.mesh_address = mesh_address
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 91, struct.pack('<HH', self.uwb_address, self.mesh_address), force_mavlink1=force_mavlink1)
 
 class MAVLink_onoff_message(MAVLink_message):
         '''
@@ -337,106 +355,202 @@ class MAVLink_onoff_message(MAVLink_message):
         '''
         id = MAVLINK_MSG_ID_ONOFF
         name = 'ONOFF'
-        fieldnames = ['mesh_address', 'uwb_address', 'type', 'value']
-        ordered_fieldnames = ['mesh_address', 'uwb_address', 'type', 'value']
-        fieldtypes = ['uint16_t', 'uint16_t', 'uint8_t', 'uint8_t']
+        fieldnames = ['uwb_address', 'value']
+        ordered_fieldnames = ['uwb_address', 'value']
+        fieldtypes = ['uint16_t', 'uint8_t']
         fielddisplays_by_name = {}
-        fieldenums_by_name = {"type": "type_t"}
+        fieldenums_by_name = {}
         fieldunits_by_name = {}
-        format = '<HHBB'
-        native_format = bytearray('<HHBB', 'ascii')
-        orders = [0, 1, 2, 3]
-        lengths = [1, 1, 1, 1]
-        array_lengths = [0, 0, 0, 0]
-        crc_extra = 179
-        unpacker = struct.Struct('<HHBB')
+        format = '<HB'
+        native_format = bytearray('<HB', 'ascii')
+        orders = [0, 1]
+        lengths = [1, 1]
+        array_lengths = [0, 0]
+        crc_extra = 35
+        unpacker = struct.Struct('<HB')
         instance_field = None
         instance_offset = -1
 
-        def __init__(self, mesh_address, uwb_address, type, value):
+        def __init__(self, uwb_address, value):
                 MAVLink_message.__init__(self, MAVLink_onoff_message.id, MAVLink_onoff_message.name)
                 self._fieldnames = MAVLink_onoff_message.fieldnames
                 self._instance_field = MAVLink_onoff_message.instance_field
                 self._instance_offset = MAVLink_onoff_message.instance_offset
-                self.mesh_address = mesh_address
                 self.uwb_address = uwb_address
-                self.type = type
                 self.value = value
 
         def pack(self, mav, force_mavlink1=False):
-                return MAVLink_message.pack(self, mav, 179, struct.pack('<HHBB', self.mesh_address, self.uwb_address, self.type, self.value), force_mavlink1=force_mavlink1)
+                return MAVLink_message.pack(self, mav, 35, struct.pack('<HB', self.uwb_address, self.value), force_mavlink1=force_mavlink1)
 
-class MAVLink_distance_message(MAVLink_message):
+class MAVLink_location_message(MAVLink_message):
         '''
-        Distnace message
+        Location message
         '''
-        id = MAVLINK_MSG_ID_DISTANCE
-        name = 'DISTANCE'
-        fieldnames = ['mesh_address', 'type', 'tag', 'anchor', 'distance']
-        ordered_fieldnames = ['distance', 'mesh_address', 'tag', 'anchor', 'type']
-        fieldtypes = ['uint16_t', 'uint8_t', 'uint16_t', 'uint16_t', 'float']
+        id = MAVLINK_MSG_ID_LOCATION
+        name = 'LOCATION'
+        fieldnames = ['uwb_address', 'location_x', 'location_y', 'location_z']
+        ordered_fieldnames = ['location_x', 'location_y', 'location_z', 'uwb_address']
+        fieldtypes = ['uint16_t', 'float', 'float', 'float']
         fielddisplays_by_name = {}
-        fieldenums_by_name = {"type": "type_t"}
+        fieldenums_by_name = {}
         fieldunits_by_name = {}
-        format = '<fHHHB'
-        native_format = bytearray('<fHHHB', 'ascii')
-        orders = [1, 4, 2, 3, 0]
-        lengths = [1, 1, 1, 1, 1]
-        array_lengths = [0, 0, 0, 0, 0]
-        crc_extra = 13
-        unpacker = struct.Struct('<fHHHB')
+        format = '<fffH'
+        native_format = bytearray('<fffH', 'ascii')
+        orders = [3, 0, 1, 2]
+        lengths = [1, 1, 1, 1]
+        array_lengths = [0, 0, 0, 0]
+        crc_extra = 170
+        unpacker = struct.Struct('<fffH')
         instance_field = None
         instance_offset = -1
 
-        def __init__(self, mesh_address, type, tag, anchor, distance):
+        def __init__(self, uwb_address, location_x, location_y, location_z):
+                MAVLink_message.__init__(self, MAVLink_location_message.id, MAVLink_location_message.name)
+                self._fieldnames = MAVLink_location_message.fieldnames
+                self._instance_field = MAVLink_location_message.instance_field
+                self._instance_offset = MAVLink_location_message.instance_offset
+                self.uwb_address = uwb_address
+                self.location_x = location_x
+                self.location_y = location_y
+                self.location_z = location_z
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 170, struct.pack('<fffH', self.location_x, self.location_y, self.location_z, self.uwb_address), force_mavlink1=force_mavlink1)
+
+class MAVLink_location_reduced_message(MAVLink_message):
+        '''
+        Location message
+        '''
+        id = MAVLINK_MSG_ID_LOCATION_REDUCED
+        name = 'LOCATION_REDUCED'
+        fieldnames = ['uwb_address', 'location_x', 'location_y']
+        ordered_fieldnames = ['location_x', 'location_y', 'uwb_address']
+        fieldtypes = ['uint16_t', 'float', 'float']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {}
+        fieldunits_by_name = {}
+        format = '<ffH'
+        native_format = bytearray('<ffH', 'ascii')
+        orders = [2, 0, 1]
+        lengths = [1, 1, 1]
+        array_lengths = [0, 0, 0]
+        crc_extra = 120
+        unpacker = struct.Struct('<ffH')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, uwb_address, location_x, location_y):
+                MAVLink_message.__init__(self, MAVLink_location_reduced_message.id, MAVLink_location_reduced_message.name)
+                self._fieldnames = MAVLink_location_reduced_message.fieldnames
+                self._instance_field = MAVLink_location_reduced_message.instance_field
+                self._instance_offset = MAVLink_location_reduced_message.instance_offset
+                self.uwb_address = uwb_address
+                self.location_x = location_x
+                self.location_y = location_y
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 120, struct.pack('<ffH', self.location_x, self.location_y, self.uwb_address), force_mavlink1=force_mavlink1)
+
+class MAVLink_distance_message(MAVLink_message):
+        '''
+        Distance message
+        '''
+        id = MAVLINK_MSG_ID_DISTANCE
+        name = 'DISTANCE'
+        fieldnames = ['uwb_address', 'anchor', 'distance']
+        ordered_fieldnames = ['distance', 'uwb_address', 'anchor']
+        fieldtypes = ['uint16_t', 'uint16_t', 'float']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {}
+        fieldunits_by_name = {}
+        format = '<fHH'
+        native_format = bytearray('<fHH', 'ascii')
+        orders = [1, 2, 0]
+        lengths = [1, 1, 1]
+        array_lengths = [0, 0, 0]
+        crc_extra = 33
+        unpacker = struct.Struct('<fHH')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, uwb_address, anchor, distance):
                 MAVLink_message.__init__(self, MAVLink_distance_message.id, MAVLink_distance_message.name)
                 self._fieldnames = MAVLink_distance_message.fieldnames
                 self._instance_field = MAVLink_distance_message.instance_field
                 self._instance_offset = MAVLink_distance_message.instance_offset
-                self.mesh_address = mesh_address
-                self.type = type
-                self.tag = tag
+                self.uwb_address = uwb_address
                 self.anchor = anchor
                 self.distance = distance
 
         def pack(self, mav, force_mavlink1=False):
-                return MAVLink_message.pack(self, mav, 13, struct.pack('<fHHHB', self.distance, self.mesh_address, self.tag, self.anchor, self.type), force_mavlink1=force_mavlink1)
+                return MAVLink_message.pack(self, mav, 33, struct.pack('<fHH', self.distance, self.uwb_address, self.anchor), force_mavlink1=force_mavlink1)
 
 class MAVLink_tof_message(MAVLink_message):
         '''
-        Distnace message
+        TOF message
         '''
         id = MAVLINK_MSG_ID_TOF
         name = 'TOF'
-        fieldnames = ['mesh_address', 'type', 'tag', 'anchor', 'tof']
-        ordered_fieldnames = ['tof', 'mesh_address', 'tag', 'anchor', 'type']
-        fieldtypes = ['uint16_t', 'uint8_t', 'uint16_t', 'uint16_t', 'uint32_t']
+        fieldnames = ['uwb_address', 'anchor', 'tof']
+        ordered_fieldnames = ['tof', 'uwb_address', 'anchor']
+        fieldtypes = ['uint16_t', 'uint16_t', 'uint32_t']
         fielddisplays_by_name = {}
-        fieldenums_by_name = {"type": "type_t"}
+        fieldenums_by_name = {}
         fieldunits_by_name = {}
-        format = '<IHHHB'
-        native_format = bytearray('<IHHHB', 'ascii')
-        orders = [1, 4, 2, 3, 0]
-        lengths = [1, 1, 1, 1, 1]
-        array_lengths = [0, 0, 0, 0, 0]
-        crc_extra = 149
-        unpacker = struct.Struct('<IHHHB')
+        format = '<IHH'
+        native_format = bytearray('<IHH', 'ascii')
+        orders = [1, 2, 0]
+        lengths = [1, 1, 1]
+        array_lengths = [0, 0, 0]
+        crc_extra = 4
+        unpacker = struct.Struct('<IHH')
         instance_field = None
         instance_offset = -1
 
-        def __init__(self, mesh_address, type, tag, anchor, tof):
+        def __init__(self, uwb_address, anchor, tof):
                 MAVLink_message.__init__(self, MAVLink_tof_message.id, MAVLink_tof_message.name)
                 self._fieldnames = MAVLink_tof_message.fieldnames
                 self._instance_field = MAVLink_tof_message.instance_field
                 self._instance_offset = MAVLink_tof_message.instance_offset
-                self.mesh_address = mesh_address
-                self.type = type
-                self.tag = tag
+                self.uwb_address = uwb_address
                 self.anchor = anchor
                 self.tof = tof
 
         def pack(self, mav, force_mavlink1=False):
-                return MAVLink_message.pack(self, mav, 149, struct.pack('<IHHHB', self.tof, self.mesh_address, self.tag, self.anchor, self.type), force_mavlink1=force_mavlink1)
+                return MAVLink_message.pack(self, mav, 4, struct.pack('<IHH', self.tof, self.uwb_address, self.anchor), force_mavlink1=force_mavlink1)
+
+class MAVLink_slot_message(MAVLink_message):
+        '''
+        Slot message
+        '''
+        id = MAVLINK_MSG_ID_SLOT
+        name = 'SLOT'
+        fieldnames = ['uwb_address', 'slot']
+        ordered_fieldnames = ['uwb_address', 'slot']
+        fieldtypes = ['uint16_t', 'uint8_t']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {}
+        fieldunits_by_name = {}
+        format = '<HB'
+        native_format = bytearray('<HB', 'ascii')
+        orders = [0, 1]
+        lengths = [1, 1]
+        array_lengths = [0, 0]
+        crc_extra = 177
+        unpacker = struct.Struct('<HB')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, uwb_address, slot):
+                MAVLink_message.__init__(self, MAVLink_slot_message.id, MAVLink_slot_message.name)
+                self._fieldnames = MAVLink_slot_message.fieldnames
+                self._instance_field = MAVLink_slot_message.instance_field
+                self._instance_offset = MAVLink_slot_message.instance_offset
+                self.uwb_address = uwb_address
+                self.slot = slot
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 177, struct.pack('<HB', self.uwb_address, self.slot), force_mavlink1=force_mavlink1)
 
 class MAVLink_tag_message(MAVLink_message):
         '''
@@ -493,49 +607,17 @@ class MAVLink_tag_message(MAVLink_message):
         def pack(self, mav, force_mavlink1=False):
                 return MAVLink_message.pack(self, mav, 71, struct.pack('<fffffffffffffffffffHHHHH', self.a0x, self.a0y, self.a0z, self.a0r, self.a1x, self.a1y, self.a1z, self.a1r, self.a2x, self.a2y, self.a2z, self.a2r, self.a3x, self.a3y, self.a3z, self.a3r, self.t0x, self.t0y, self.t0z, self.a0, self.a1, self.a2, self.a3, self.t0), force_mavlink1=force_mavlink1)
 
-class MAVLink_slot_message(MAVLink_message):
-        '''
-        Slot message
-        '''
-        id = MAVLINK_MSG_ID_SLOT
-        name = 'SLOT'
-        fieldnames = ['mesh_address', 'uwb_address', 'type', 'slot']
-        ordered_fieldnames = ['mesh_address', 'uwb_address', 'type', 'slot']
-        fieldtypes = ['uint16_t', 'uint16_t', 'uint8_t', 'uint8_t']
-        fielddisplays_by_name = {}
-        fieldenums_by_name = {"type": "type_t"}
-        fieldunits_by_name = {}
-        format = '<HHBB'
-        native_format = bytearray('<HHBB', 'ascii')
-        orders = [0, 1, 2, 3]
-        lengths = [1, 1, 1, 1]
-        array_lengths = [0, 0, 0, 0]
-        crc_extra = 15
-        unpacker = struct.Struct('<HHBB')
-        instance_field = None
-        instance_offset = -1
-
-        def __init__(self, mesh_address, uwb_address, type, slot):
-                MAVLink_message.__init__(self, MAVLink_slot_message.id, MAVLink_slot_message.name)
-                self._fieldnames = MAVLink_slot_message.fieldnames
-                self._instance_field = MAVLink_slot_message.instance_field
-                self._instance_offset = MAVLink_slot_message.instance_offset
-                self.mesh_address = mesh_address
-                self.uwb_address = uwb_address
-                self.type = type
-                self.slot = slot
-
-        def pack(self, mav, force_mavlink1=False):
-                return MAVLink_message.pack(self, mav, 15, struct.pack('<HHBB', self.mesh_address, self.uwb_address, self.type, self.slot), force_mavlink1=force_mavlink1)
-
 
 mavlink_map = {
-        MAVLINK_MSG_ID_LOCATION : MAVLink_location_message,
+        MAVLINK_MSG_ID_BLINK : MAVLink_blink_message,
+        MAVLINK_MSG_ID_BLE_MESH : MAVLink_ble_mesh_message,
         MAVLINK_MSG_ID_ONOFF : MAVLink_onoff_message,
+        MAVLINK_MSG_ID_LOCATION : MAVLink_location_message,
+        MAVLINK_MSG_ID_LOCATION_REDUCED : MAVLink_location_reduced_message,
         MAVLINK_MSG_ID_DISTANCE : MAVLink_distance_message,
         MAVLINK_MSG_ID_TOF : MAVLink_tof_message,
-        MAVLINK_MSG_ID_TAG : MAVLink_tag_message,
         MAVLINK_MSG_ID_SLOT : MAVLink_slot_message,
+        MAVLINK_MSG_ID_TAG : MAVLink_tag_message,
 }
 
 class MAVError(Exception):
@@ -967,111 +1049,175 @@ class MAVLink(object):
                 m._crc = crc
                 m._header = MAVLink_header(msgId, incompat_flags, compat_flags, mlen, seq, srcSystem, srcComponent)
                 return m
-        def location_encode(self, mesh_address, uwb_address, type, node, location_x, location_y, location_z):
+        def blink_encode(self, uwb_address, role):
                 '''
                 Location message
 
-                mesh_address              :  (type:uint16_t)
                 uwb_address               :  (type:uint16_t)
-                type                      :  (type:uint8_t, values:type_t)
-                node                      :  (type:uint8_t, values:node_t)
+                role                      :  (type:uint8_t, values:role_t)
+
+                '''
+                return MAVLink_blink_message(uwb_address, role)
+
+        def blink_send(self, uwb_address, role, force_mavlink1=False):
+                '''
+                Location message
+
+                uwb_address               :  (type:uint16_t)
+                role                      :  (type:uint8_t, values:role_t)
+
+                '''
+                return self.send(self.blink_encode(uwb_address, role), force_mavlink1=force_mavlink1)
+
+        def ble_mesh_encode(self, uwb_address, mesh_address):
+                '''
+                BLE mesh message
+
+                uwb_address               :  (type:uint16_t)
+                mesh_address              :  (type:uint16_t)
+
+                '''
+                return MAVLink_ble_mesh_message(uwb_address, mesh_address)
+
+        def ble_mesh_send(self, uwb_address, mesh_address, force_mavlink1=False):
+                '''
+                BLE mesh message
+
+                uwb_address               :  (type:uint16_t)
+                mesh_address              :  (type:uint16_t)
+
+                '''
+                return self.send(self.ble_mesh_encode(uwb_address, mesh_address), force_mavlink1=force_mavlink1)
+
+        def onoff_encode(self, uwb_address, value):
+                '''
+                On off message
+
+                uwb_address               :  (type:uint16_t)
+                value                     :  (type:uint8_t)
+
+                '''
+                return MAVLink_onoff_message(uwb_address, value)
+
+        def onoff_send(self, uwb_address, value, force_mavlink1=False):
+                '''
+                On off message
+
+                uwb_address               :  (type:uint16_t)
+                value                     :  (type:uint8_t)
+
+                '''
+                return self.send(self.onoff_encode(uwb_address, value), force_mavlink1=force_mavlink1)
+
+        def location_encode(self, uwb_address, location_x, location_y, location_z):
+                '''
+                Location message
+
+                uwb_address               :  (type:uint16_t)
                 location_x                :  (type:float)
                 location_y                :  (type:float)
                 location_z                :  (type:float)
 
                 '''
-                return MAVLink_location_message(mesh_address, uwb_address, type, node, location_x, location_y, location_z)
+                return MAVLink_location_message(uwb_address, location_x, location_y, location_z)
 
-        def location_send(self, mesh_address, uwb_address, type, node, location_x, location_y, location_z, force_mavlink1=False):
+        def location_send(self, uwb_address, location_x, location_y, location_z, force_mavlink1=False):
                 '''
                 Location message
 
-                mesh_address              :  (type:uint16_t)
                 uwb_address               :  (type:uint16_t)
-                type                      :  (type:uint8_t, values:type_t)
-                node                      :  (type:uint8_t, values:node_t)
                 location_x                :  (type:float)
                 location_y                :  (type:float)
                 location_z                :  (type:float)
 
                 '''
-                return self.send(self.location_encode(mesh_address, uwb_address, type, node, location_x, location_y, location_z), force_mavlink1=force_mavlink1)
+                return self.send(self.location_encode(uwb_address, location_x, location_y, location_z), force_mavlink1=force_mavlink1)
 
-        def onoff_encode(self, mesh_address, uwb_address, type, value):
+        def location_reduced_encode(self, uwb_address, location_x, location_y):
                 '''
-                On off message
+                Location message
 
-                mesh_address              :  (type:uint16_t)
                 uwb_address               :  (type:uint16_t)
-                type                      :  (type:uint8_t, values:type_t)
-                value                     :  (type:uint8_t)
+                location_x                :  (type:float)
+                location_y                :  (type:float)
 
                 '''
-                return MAVLink_onoff_message(mesh_address, uwb_address, type, value)
+                return MAVLink_location_reduced_message(uwb_address, location_x, location_y)
 
-        def onoff_send(self, mesh_address, uwb_address, type, value, force_mavlink1=False):
+        def location_reduced_send(self, uwb_address, location_x, location_y, force_mavlink1=False):
                 '''
-                On off message
+                Location message
 
-                mesh_address              :  (type:uint16_t)
                 uwb_address               :  (type:uint16_t)
-                type                      :  (type:uint8_t, values:type_t)
-                value                     :  (type:uint8_t)
+                location_x                :  (type:float)
+                location_y                :  (type:float)
 
                 '''
-                return self.send(self.onoff_encode(mesh_address, uwb_address, type, value), force_mavlink1=force_mavlink1)
+                return self.send(self.location_reduced_encode(uwb_address, location_x, location_y), force_mavlink1=force_mavlink1)
 
-        def distance_encode(self, mesh_address, type, tag, anchor, distance):
+        def distance_encode(self, uwb_address, anchor, distance):
                 '''
-                Distnace message
+                Distance message
 
-                mesh_address              :  (type:uint16_t)
-                type                      :  (type:uint8_t, values:type_t)
-                tag                       :  (type:uint16_t)
+                uwb_address               :  (type:uint16_t)
                 anchor                    :  (type:uint16_t)
                 distance                  :  (type:float)
 
                 '''
-                return MAVLink_distance_message(mesh_address, type, tag, anchor, distance)
+                return MAVLink_distance_message(uwb_address, anchor, distance)
 
-        def distance_send(self, mesh_address, type, tag, anchor, distance, force_mavlink1=False):
+        def distance_send(self, uwb_address, anchor, distance, force_mavlink1=False):
                 '''
-                Distnace message
+                Distance message
 
-                mesh_address              :  (type:uint16_t)
-                type                      :  (type:uint8_t, values:type_t)
-                tag                       :  (type:uint16_t)
+                uwb_address               :  (type:uint16_t)
                 anchor                    :  (type:uint16_t)
                 distance                  :  (type:float)
 
                 '''
-                return self.send(self.distance_encode(mesh_address, type, tag, anchor, distance), force_mavlink1=force_mavlink1)
+                return self.send(self.distance_encode(uwb_address, anchor, distance), force_mavlink1=force_mavlink1)
 
-        def tof_encode(self, mesh_address, type, tag, anchor, tof):
+        def tof_encode(self, uwb_address, anchor, tof):
                 '''
-                Distnace message
+                TOF message
 
-                mesh_address              :  (type:uint16_t)
-                type                      :  (type:uint8_t, values:type_t)
-                tag                       :  (type:uint16_t)
+                uwb_address               :  (type:uint16_t)
                 anchor                    :  (type:uint16_t)
                 tof                       :  (type:uint32_t)
 
                 '''
-                return MAVLink_tof_message(mesh_address, type, tag, anchor, tof)
+                return MAVLink_tof_message(uwb_address, anchor, tof)
 
-        def tof_send(self, mesh_address, type, tag, anchor, tof, force_mavlink1=False):
+        def tof_send(self, uwb_address, anchor, tof, force_mavlink1=False):
                 '''
-                Distnace message
+                TOF message
 
-                mesh_address              :  (type:uint16_t)
-                type                      :  (type:uint8_t, values:type_t)
-                tag                       :  (type:uint16_t)
+                uwb_address               :  (type:uint16_t)
                 anchor                    :  (type:uint16_t)
                 tof                       :  (type:uint32_t)
 
                 '''
-                return self.send(self.tof_encode(mesh_address, type, tag, anchor, tof), force_mavlink1=force_mavlink1)
+                return self.send(self.tof_encode(uwb_address, anchor, tof), force_mavlink1=force_mavlink1)
+
+        def slot_encode(self, uwb_address, slot):
+                '''
+                Slot message
+
+                uwb_address               :  (type:uint16_t)
+                slot                      :  (type:uint8_t)
+
+                '''
+                return MAVLink_slot_message(uwb_address, slot)
+
+        def slot_send(self, uwb_address, slot, force_mavlink1=False):
+                '''
+                Slot message
+
+                uwb_address               :  (type:uint16_t)
+                slot                      :  (type:uint8_t)
+
+                '''
+                return self.send(self.slot_encode(uwb_address, slot), force_mavlink1=force_mavlink1)
 
         def tag_encode(self, a0, a0x, a0y, a0z, a0r, a1, a1x, a1y, a1z, a1r, a2, a2x, a2y, a2z, a2r, a3, a3x, a3y, a3z, a3r, t0, t0x, t0y, t0z):
                 '''
@@ -1136,28 +1282,4 @@ class MAVLink(object):
 
                 '''
                 return self.send(self.tag_encode(a0, a0x, a0y, a0z, a0r, a1, a1x, a1y, a1z, a1r, a2, a2x, a2y, a2z, a2r, a3, a3x, a3y, a3z, a3r, t0, t0x, t0y, t0z), force_mavlink1=force_mavlink1)
-
-        def slot_encode(self, mesh_address, uwb_address, type, slot):
-                '''
-                Slot message
-
-                mesh_address              :  (type:uint16_t)
-                uwb_address               :  (type:uint16_t)
-                type                      :  (type:uint8_t, values:type_t)
-                slot                      :  (type:uint8_t)
-
-                '''
-                return MAVLink_slot_message(mesh_address, uwb_address, type, slot)
-
-        def slot_send(self, mesh_address, uwb_address, type, slot, force_mavlink1=False):
-                '''
-                Slot message
-
-                mesh_address              :  (type:uint16_t)
-                uwb_address               :  (type:uint16_t)
-                type                      :  (type:uint8_t, values:type_t)
-                slot                      :  (type:uint8_t)
-
-                '''
-                return self.send(self.slot_encode(mesh_address, uwb_address, type, slot), force_mavlink1=force_mavlink1)
 

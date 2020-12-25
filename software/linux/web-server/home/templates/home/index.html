@@ -79,29 +79,26 @@ client.onMessageArrived = onMessageArrived;
 client.connect({onSuccess:onConnect});
 
 class Node{
-	constructor(address, type, locationX, locationY, locationZ) {
-		this.address = address;
-		this.type = type;
-		this.locationX = locationX;
-		this.locationY = locationY;
-		this.locationZ = locationZ;
+	constructor(uwb_address, role){
+		this.uwb_address = uwb_address;
+		this.role = role;
+
+		this.locationX = 0;
+		this.locationY = 0;
+		this.locationZ = 0;
+
 		this.editing = false;
 		this.identifying = false;
 		this.lighting = false;
-		this.anchors = new Array();
 	}
-	valueOf(){
-    	return this.address;
-	};
+
 	equal(node){
-		return this.address == node.address;
+		return this.uwb_address == node.uwb_address;
 	}
-	some(node){
-		return this.address == node.address;
-	}
+
 	toString(){
-		let address = "Node: " + this.address.toString() + " ";
-		let type = "type: " + this.type.toString() + " ";
+		let address = "Node: " + this.uwb_address.toString() + " ";
+		let type = "type: " + this.role.toString() + " ";
 		let location = "location: " + this.locationX.toString() + ", " +  this.locationY.toString() + ", " +  this.locationZ.toString();
 		return  address + type + location;
 	}
@@ -131,18 +128,19 @@ function dec2hexString(dec) {
    return '0x' + (dec+0x10000).toString(16).substr(-4).toUpperCase();
 }
 
-function handler_location(msg){
-	console.log(msg);
-	node = new Node(msg.uwb_address, msg.node, msg.location_x, msg.location_y, msg.location_z);
-	let added = false;
-	let i = 0;
+function find_node(nodeList, address){
 	for(i=0; i<nodeList.length; i++){
-		if(node.equal(nodeList[i])) {
-			added = true;
-			break;
+		if(nodeList[i].uwb_address == address) {
+			return nodeList[i];
 		}
 	}
-	if(added){
+	return null;
+}
+
+function handler_blink(msg){
+	node = find_node(nodeList, msg.uwb_address);
+
+	if(node){
 		if(!nodeList[i].editing){
 			nodeUpdate(i, node);
 			plot(nodeList);
@@ -150,34 +148,40 @@ function handler_location(msg){
 		}
 	}
 	else{
+		node = new Node(msg.uwb_address, msg.role);
 		nodeList.push(node);
 		plot(nodeList);
 
 		console.log("Add: "+ node.toString());
 		$('#idNodeList').append(
 			[
-				{address: node.address, uwbAddressHex: dec2hexString(parseInt(node.address)), type: node.type, 
+				{address: node.uwb_address, uwbAddressHex: dec2hexString(parseInt(node.uwb_address)), nodeRole: node.role, 
 					locationX: node.locationX.toString(), locationY: node.locationY.toString(), locationZ: node.locationZ.toString()},
 			].map(nodeTemplate).join(''));
-		$('#node'+ node.address +'Card').show(300);
-		switch(node.type){
+		$('#node'+ node.uwb_address +'Card').show(300);
+		switch(node.role){
 			case "ANCHOR":
-				$('#node' + node.address + 'Select').children("option")[0].selected = true;
-				$('#node' + node.address + 'Select').children("option")[0].disabled = true;
-				$('#node' + node.address + 'Select').children("option")[1].disabled = true;
+				$('#node' + node.uwb_address + 'Select').children("option")[0].selected = true;
+				$('#node' + node.uwb_address + 'Select').children("option")[0].disabled = true;
+				$('#node' + node.uwb_address + 'Select').children("option")[1].disabled = true;
 				break;
 			case "TAG":
-				$('#node' + node.address + 'Select').children("option")[1].selected = true;
-				$('#node' + node.address + 'Select').children("option")[0].disabled = true;
-				$('#node' + node.address + 'Select').children("option")[1].disabled = true;
+				$('#node' + node.uwb_address + 'Select').children("option")[1].selected = true;
+				$('#node' + node.uwb_address + 'Select').children("option")[0].disabled = true;
+				$('#node' + node.uwb_address + 'Select').children("option")[1].disabled = true;
 				break;
 		}
 	}
 }
 
-function handler_onoff(msg){
-	console.log("handler_onoff: " + JSON.stringify(msg));
+function handler_location(msg){
+	node = find_node(nodeList, msg.uwb_address);
+	if(node){
+		// node.locationX = msg.
+	}
+}
 
+function handler_onoff(msg){
 	$('#node' + msg.uwb_address + 'LightBulbIdentify').css("color", "#6c757d");
 	$('#node' + msg.uwb_address + 'LightBulb0').css("color", "#6c757d");
 	$('#node' + msg.uwb_address + 'LightBulb1').css("color", "#6c757d");
@@ -571,8 +575,12 @@ function guiUpdateNodes(address, role, x, y, z){
 function onMessageArrived(message) {
 	try{
 		msg = JSON.parse(message.payloadString);
+		console.log(msg);
 		if(document.getElementById("modeSelect").value == "Bluetooth Mesh"){
 			switch(msg.mavpackettype){
+			case "BLINK":
+				handler_blink(msg);
+				break;
 			case "LOCATION":
 				value = parseInt($('#node' + msg.uwb_address + 'CounterLoc').text());
 				if(!isNaN(value)){
@@ -619,10 +627,10 @@ function onMessageArrived(message) {
 	}
 }
 
-const nodeTemplate = ({ address, uwbAddressHex, type, locationX, locationY, locationZ}) => 
+const nodeTemplate = ({ address, uwbAddressHex, nodeRole, locationX, locationY, locationZ}) => 
 `
 <div class="card m-1" style="display: none;" id="node${address}Card">
-    <div class="card-heading p-1 node-title-${type}" role="button" data-toggle="collapse" href="#node${address}Toggle">
+    <div class="card-heading p-1 node-title-${nodeRole}" role="button" data-toggle="collapse" href="#node${address}Toggle">
 		<h5 class="card-title m-1 node-title">
 			<span class="float-left" > Node ${uwbAddressHex} </span>
 			<span class="float-left ml-2 mr-2" id="node${address}meshAddressHex">0</span>
@@ -697,28 +705,25 @@ function nodeUpdate(idx, node){
 function onEditBtnClick(address){
 	console.log("onEditBtnClick: " + address);
 
-	let idx = 0;
-	for(idx=0; idx<nodeList.length; idx++){
-		if(address == nodeList[idx].address) break;
-	}
-	let node = nodeList[idx];
-
-	if(node.editing){
-		node.editing = false;
-		$('#node' + address + 'BtnEdit').text('Edit').button("refresh");
-		$('#node' + address + 'Select').children("option")[0].disabled = true;
-		$('#node' + address + 'Select').children("option")[1].disabled = true;
-		$('#node' + address + 'LocationX').attr('readonly', true);
-		$('#node' + address + 'LocationY').attr('readonly', true);
-		$('#node' + address + 'LocationZ').attr('readonly', true);
-	}else{
-		node.editing = true;
-		$('#node' + address + 'BtnEdit').text('Editing...').button("refresh");
-		$('#node' + address + 'Select').children("option")[0].disabled = false;
-		$('#node' + address + 'Select').children("option")[1].disabled = false;
-		$('#node' + address + 'LocationX').attr('readonly', false);
-		$('#node' + address + 'LocationY').attr('readonly', false);
-		$('#node' + address + 'LocationZ').attr('readonly', false);
+	node = find_node(nodeList, address);
+	if(node){
+		if(node.editing){
+			node.editing = false;
+			$('#node' + address + 'BtnEdit').text('Edit').button("refresh");
+			$('#node' + address + 'Select').children("option")[0].disabled = true;
+			$('#node' + address + 'Select').children("option")[1].disabled = true;
+			$('#node' + address + 'LocationX').attr('readonly', true);
+			$('#node' + address + 'LocationY').attr('readonly', true);
+			$('#node' + address + 'LocationZ').attr('readonly', true);
+		}else{
+			node.editing = true;
+			$('#node' + address + 'BtnEdit').text('Edit...').button("refresh");
+			$('#node' + address + 'Select').children("option")[0].disabled = false;
+			$('#node' + address + 'Select').children("option")[1].disabled = false;
+			$('#node' + address + 'LocationX').attr('readonly', false);
+			$('#node' + address + 'LocationY').attr('readonly', false);
+			$('#node' + address + 'LocationZ').attr('readonly', false);
+		}
 	}
 }
 
@@ -731,97 +736,82 @@ function publish(topic, msg){
 
 function onUpdateBtnClick(address){
 	console.log("onUpdateBtnClick: " + address);
-	let idx = 0;
-	for(idx=0; idx<nodeList.length; idx++){
-		if(address == nodeList[idx].address) break;
-	}
-	let node = nodeList[idx];
 
-	if(!node.editing){
-		toastError("Enter editing mode first");
-		return;
-	}
+	node = find_node(nodeList, address);
+	if(node){
+		if(!node.editing) {
+			toastError("Enter editing mode first");
+			return;
+		}
+		locationX = parseFloat($('#node' + node.uwb_address + 'LocationX').val());
+		locationY = parseFloat($('#node' + node.uwb_address + 'LocationY').val());
+		locationZ = parseFloat($('#node' + node.uwb_address + 'LocationZ').val());
+		address = parseInt(address);
+		if(isNaN(locationX) || isNaN(locationY) || isNaN(locationZ)){
+			toastError("Invalid location");
+			return
+		}
+		if(isNaN(address)){
+			toastError("Invalid node address");
+			return;
+		}
 
-	locationX = parseFloat($('#node' + node.address + 'LocationX').val());
-	locationY = parseFloat($('#node' + node.address + 'LocationY').val());
-	locationZ = parseFloat($('#node' + node.address + 'LocationZ').val());
-	address = parseInt(address);
-	if(isNaN(locationX) || isNaN(locationY) || isNaN(locationZ)){
-		toastError("Invalid location");
-		return;
-	}
-	if(isNaN(address)){
-		toastError("Invalid node address");
-		return;
-	}
-	
-	if($('#node' + node.address + 'Select').children("option")[0].selected)
-		node = "ANCHOR"
-	else
-		node = "TAG"
-	cmd = '{"mavpackettype": "LOCATION", "uwb_address": ' + address + ', "node": "' + node + '", "type": "SET", "location_x": ' + locationX +', "location_y": ' + locationY + ', "location_z": ' + locationZ + '}'
+		if($('#node' + node.uwb_address + 'Select').children("option")[0].selected)
+			node = "ANCHOR";
+		else
+			node = "TAG";
+		cmd = '{"mavpackettype": "LOCATION", "uwb_address": ' + address + ', "node": "' + node + '", "type": "SET", "location_x": ' + locationX +', "location_y": ' + locationY + ', "location_z": ' + locationZ + '}';
 
-	publish("{{topic_publish}}", cmd)
+		publish("{{topic_publish}}", cmd);
+	}
 }
 
 function onIdentifyBtnClick(address){
 	console.log("onIdentifyBtnClick: " + address);
 
-	let idx = 0;
-	for(idx=0; idx<nodeList.length; idx++){
-		if(address == nodeList[idx].address) break;
+	node = find_node(nodeList, address);
+	if(node){
+		if(node.identifying){
+			node.identifying = false;
+			$('#node' + address + 'BtnIdentify').text('Identify').button("refresh");
+			// $('#node' + address + 'Identifying').hide();
+			cmd = '{"mavpackettype": "ONOFF", "uwb_address": '+ address +', "value": 0}'
+		}
+		else{
+			node.identifying = true;
+			$('#node' + address + 'BtnIdentify').text('Buzzing').button("refresh");
+			// $('#node' + address + 'Identifying').show();
+			cmd = '{"mavpackettype": "ONOFF", "uwb_address": '+ address +', "value": 1}'
+		}
+		publish("{{topic_publish}}", cmd);
 	}
-	let node = nodeList[idx];
-
-	address = parseInt(address);
-	if(isNaN(address)){
-		toastError("Invalid node address");
-		return;
-	}
-
-	if(node.identifying){
-		node.identifying = false;
-		$('#node' + address + 'BtnIdentify').text('Identify').button("refresh");
-		// $('#node' + address + 'Identifying').hide();
-		cmd = '{"mavpackettype": "ONOFF", "uwb_address": '+ address +', "type": "SET", "value": 0}'
-	}
-	else{
-		node.identifying = true;
-		$('#node' + address + 'BtnIdentify').text('Buzzing').button("refresh");
-		// $('#node' + address + 'Identifying').show();
-		cmd = '{"mavpackettype": "ONOFF", "uwb_address": '+ address +', "type": "SET", "value": 1}'
-	}
-	publish("{{topic_publish}}", cmd);
 }
 
 function onBulbBtnClick(address){
 	console.log("onBulbBtnClick: " + address);
 
-	let idx = 0;
-	for(idx=0; idx<nodeList.length; idx++){
-		if(address == nodeList[idx].address) break;
-	}
-	let node = nodeList[idx];
+	node = find_node(nodeList, address);
+	if(node){
+		address = parseInt(address);
+		if(isNaN(address)){
+			toastError("Invalid node address");
+			return;
+		}
 
-	address = parseInt(address);
-	if(isNaN(address)){
-		toastError("Invalid node address");
-		return;
+		if(node.lighting){
+			node.lighting = false;
+			$('#node' + address + 'BtnBulb').text('OFF').button("refresh");
+			// $('#node' + address + 'Identifying').hide();
+			cmd = '{"mavpackettype": "ONOFF", "uwb_address": '+ address +', "value": 0}'
+		}
+		else{
+			node.lighting = true;
+			$('#node' + address + 'BtnBulb').text('ON').button("refresh");
+			// $('#node' + address + 'Identifying').show();
+			cmd = '{"mavpackettype": "ONOFF", "uwb_address": '+ address +', "value": 6}'
+		}
+		publish("{{topic_publish}}", cmd)
 	}
-
-	if(node.lighting){
-		node.lighting = false;
-		$('#node' + address + 'BtnBulb').text('OFF').button("refresh");
-		// $('#node' + address + 'Identifying').hide();
-		cmd = '{"mavpackettype": "ONOFF", "uwb_address": '+ address +', "type": "SET", "value": 0}'
-	}
-	else{
-		node.lighting = true;
-		$('#node' + address + 'BtnBulb').text('ON').button("refresh");
-		// $('#node' + address + 'Identifying').show();
-		cmd = '{"mavpackettype": "ONOFF", "uwb_address": '+ address +', "type": "SET", "value": 6}'
-	}
-	publish("{{topic_publish}}", cmd)
 }
 
 </script>

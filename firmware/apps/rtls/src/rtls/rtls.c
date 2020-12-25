@@ -41,7 +41,7 @@ static rtls_tdma_instance_t g_rtls_tdma_instance = {
 };
 
 static struct os_task g_rtls_gateway_task;
-static os_stack_t g_task_rtls_gatway_stack[MYNEWT_VAL(APP_RTLS_GATEWAY_TASK_STACK_SIZE)];
+static os_stack_t g_task_rtls_gatway_stack[MYNEWT_VAL(TASK_GATEWAY_STACK_SIZE)];
 
 static char *
 rtls_get(int argc, char **argv, char *val, int val_len_max)
@@ -360,8 +360,8 @@ void rtls_init(){
     os_task_init(&g_rtls_gateway_task, "gw",
         task_rtls_gateway_func,
         NULL,
-        MYNEWT_VAL(APP_RTLS_GATEWAY_TASK_PRIORITY), 
+        MYNEWT_VAL(TASK_GATEWAY_PRIORITY), 
         OS_WAIT_FOREVER,
         g_task_rtls_gatway_stack,
-        MYNEWT_VAL(APP_RTLS_GATEWAY_TASK_STACK_SIZE));
+        MYNEWT_VAL(TASK_GATEWAY_STACK_SIZE));
 }
