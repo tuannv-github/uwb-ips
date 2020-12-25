@@ -73,7 +73,7 @@ task_downlink_func(void *arg)
                     mavlink_msg_location_decode(&g_mavlink_msg, &mavlink_location);
                     msg_rtls = (msg_rtls_t){
                         .type = MAVLINK_MSG_ID_LOCATION,
-                        .dstsrc = mavlink_location.dstsrc,
+                        .uwb_address = mavlink_location.uwb_address,
                         .node_type = mavlink_location.node,
                         .location_x = mavlink_location.location_x,
                         .location_y = mavlink_location.location_y,
@@ -105,7 +105,7 @@ task_downlink_func(void *arg)
                     mavlink_msg_onoff_decode(&g_mavlink_msg, &mavlink_onoff);
                     msg_rtls = (msg_rtls_t){
                         .type = MAVLINK_MSG_ID_ONOFF,
-                        .dstsrc = mavlink_onoff.dstsrc,
+                        .uwb_address = mavlink_onoff.uwb_address,
                         .opcode = BT_MESH_MODEL_OP_SET,
                         .value = mavlink_onoff.value
                     };
@@ -162,16 +162,19 @@ process_ble_to_net_queue(struct os_event *ev)
         msg_print_rtls(&msg_rtls);
         switch(msg_rtls.type){
             case MAVLINK_MSG_ID_LOCATION:
-                mavlink_msg_location_pack(0, 0, &mavlink_msg, msg_rtls.dstsrc, msg_rtls.opcode, msg_rtls.node_type, msg_rtls.location_x, msg_rtls.location_y, msg_rtls.location_z);
+                mavlink_msg_location_pack(0, 0, &mavlink_msg, msg_rtls.mesh_address, msg_rtls.uwb_address, msg_rtls.opcode, msg_rtls.node_type, msg_rtls.location_x, msg_rtls.location_y, msg_rtls.location_z);
                 break;
             case MAVLINK_MSG_ID_ONOFF:
-                mavlink_msg_onoff_pack(0, 0, &mavlink_msg, msg_rtls.dstsrc, msg_rtls.opcode, msg_rtls.value);
+                mavlink_msg_onoff_pack(0, 0, &mavlink_msg, msg_rtls.mesh_address, msg_rtls.uwb_address, msg_rtls.opcode, msg_rtls.value);
                 break;
             case MAVLINK_MSG_ID_DISTANCE:
-                mavlink_msg_distance_pack(0,0, &mavlink_msg, msg_rtls.opcode, msg_rtls.dstsrc, msg_rtls.anchor, msg_rtls.distance);
+                mavlink_msg_distance_pack(0,0, &mavlink_msg, msg_rtls.mesh_address, msg_rtls.opcode, msg_rtls.uwb_address, msg_rtls.anchor, msg_rtls.distance);
                 break;
             case MAVLINK_MSG_ID_TOF:
-                mavlink_msg_tof_pack(0,0, &mavlink_msg, msg_rtls.opcode, msg_rtls.dstsrc, msg_rtls.anchor, msg_rtls.tof);
+                mavlink_msg_tof_pack(0,0, &mavlink_msg, msg_rtls.mesh_address, msg_rtls.opcode, msg_rtls.uwb_address, msg_rtls.anchor, msg_rtls.tof);
+                break;
+            case MAVLINK_MSG_ID_SLOT:
+                mavlink_msg_slot_pack(0, 0, &mavlink_msg, msg_rtls.mesh_address, msg_rtls.uwb_address, msg_rtls.opcode, msg_rtls.slot);
                 break;
             default:
                 continue;

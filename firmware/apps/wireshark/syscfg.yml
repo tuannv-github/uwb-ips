@@ -8,7 +8,7 @@ syscfg.defs:
 
     TASK_WIRESHARK_STACK_SIZE:
         description: 'Size of task stack'
-        value: 512
+        value: 1024
     TASK_WIRESHARK_PRIORITY:
         description: 'Priority of task'
         value: 200
@@ -43,5 +43,8 @@ syscfg.vals:
     UWB_CLI:  1
     UWB_CLI_BACKTRACE: 0
 
-    MSYS_1_BLOCK_COUNT: 24
-    MSYS_1_BLOCK_SIZE: 512
+    MSYS_1_BLOCK_COUNT: 16
+    MSYS_1_BLOCK_SIZE: 64
+
+    SERIAL_RX_RBUF_SIZE: 8192
+    SERIAL_TX_RBUF_SIZE: 8192

@@ -28,14 +28,14 @@ syscfg.defs:
         description: 'Priority of task'
         value: 203
 
-    NODE_START_SLOT_ID:
-        description: >
-            Slot ID from which the nodes should respond
-        value: 0
-    NODE_END_SLOT_ID:
-        description: >
-            Slot ID till which the nodes should respond
-        value: 10
+    # NODE_START_SLOT_ID:
+    #     description: >
+    #         Slot ID from which the nodes should respond
+    #     value: 0
+    # NODE_END_SLOT_ID:
+    #     description: >
+    #         Slot ID till which the nodes should respond
+    #     value: 10
 
 syscfg.vals:
     LOG_LEVEL: 5
@@ -73,7 +73,7 @@ syscfg.vals:
     UWB_CLI_BACKTRACE: 0
 
     UWB_CCP_ENABLED: 1
-    UWB_CCP_PERIOD: ((uint32_t)100000)
+    UWB_CCP_PERIOD: ((uint32_t)0x20000)
     UWB_CCP_MAX_CASCADE_RPTS: 2
     
     ## Where to store config
@@ -87,13 +87,14 @@ syscfg.vals:
     MSYS_2_BLOCK_COUNT: 20
     MSYS_2_BLOCK_SIZE: 256
 
-    UWB_PKG_INIT_LOG: 0
+    UWB_PKG_INIT_LOG: 1
 
     BLE_MESH: 1
     OS_MAIN_STACK_SIZE: 512
 
-    BLE_MESH_ADV_BUF_COUNT: 15
-    BLE_MESH_TX_SEG_MAX: 10
+    BLE_MESH_ADV_BUF_COUNT: 10
+    BLE_MESH_TX_SEG_MAX: 5
+    BLE_MESH_TX_SEG_MSG_COUNT: 4
 
     TDMA_NSLOTS: 20
     TDMA_TASK_STACK_SZ: 1024
@@ -105,3 +106,8 @@ syscfg.vals:
     UWBCFG_DEF_FRAME_FILTER: '"0xF"'
 
     CELL_ENABLED: 0
+    # OS_LATENCY: 1000
+    GPIO_AS_PIN_RESET: 1
+    RTLS_CPP_VERBOSE: 1
+
+    BLE_MESH_CRPL: 0

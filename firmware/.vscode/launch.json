@@ -13,7 +13,7 @@
           "args": [
             "--capture",
             "--extcap-interface",
-            "/dev/pts/4",
+            "/dev/ttyACM0",
             "--fifo",
             "/tmp/fifo",
             "--channel",
@@ -26,6 +26,32 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal"
+        },
+        {
+          "type": "gnu-debugger",
+          "request": "launch",
+          "name": "Debug: relay",
+          "program": "/home/tuannv/thesis/firmware/bin/targets/relay/app/apps/relay/relay.elf",
+          "toolchain": "/usr/local/bin/",
+          "client": "arm-none-eabi-gdb",
+          "server": "JLinkGDBServer",
+          "windows": {
+            "server": "JLinkGDBServerCL",
+          },
+          "serverArgs": [
+            "-device", "nrf52",
+            "-if", "SWD",
+            "-speed", "4000"
+          ],
+          "serverPort": 2331,
+          "serverHost": "localhost",
+          "customVariables": [
+            "port0",
+            "port1",
+            "port2",
+          ],
+          "autoRun": false,
+          "debugOutput": false,
         },
         {
             "type": "gnu-debugger",
@@ -52,6 +78,32 @@
             ],
             "autoRun": false,
             "debugOutput": false,
+        },
+        {
+          "type": "gnu-debugger",
+          "request": "launch",
+          "name": "Debug: demo_ccp",
+          "program": "/home/tuannv/thesis/firmware/bin/targets/demo_ccp/app/apps/demo_ccp/demo_ccp.elf",
+          "toolchain": "/usr/local/bin/",
+          "client": "arm-none-eabi-gdb",
+          "server": "JLinkGDBServer",
+          "windows": {
+            "server": "JLinkGDBServerCL",
+          },
+          "serverArgs": [
+            "-device", "nrf52",
+            "-if", "SWD",
+            "-speed", "4000"
+          ],
+          "serverPort": 2331,
+          "serverHost": "localhost",
+          "customVariables": [
+            "port0",
+            "port1",
+            "port2",
+          ],
+          "autoRun": false,
+          "debugOutput": false,
         },
         {
           "type": "gnu-debugger",
@@ -84,6 +136,32 @@
         "request": "launch",
         "name": "Debug: ble_mesh",
         "program": "/home/tuannv/thesis/firmware/bin/targets/ble_mesh/app/apps/ble_mesh/ble_mesh.elf",
+        "toolchain": "/usr/local/bin/",
+        "client": "arm-none-eabi-gdb",
+        "server": "JLinkGDBServer",
+        "windows": {
+          "server": "JLinkGDBServerCL",
+        },
+        "serverArgs": [
+          "-device", "nrf52",
+          "-if", "SWD",
+          "-speed", "4000"
+        ],
+        "serverPort": 2331,
+        "serverHost": "localhost",
+        "customVariables": [
+          "port0",
+          "port1",
+          "port2",
+        ],
+        "autoRun": false,
+        "debugOutput": false,
+      },
+      {
+        "type": "gnu-debugger",
+        "request": "launch",
+        "name": "Debug: wireshark",
+        "program": "/home/tuannv/thesis/firmware/bin/targets/wireshark/app/apps/wireshark/wireshark.elf",
         "toolchain": "/usr/local/bin/",
         "client": "arm-none-eabi-gdb",
         "server": "JLinkGDBServer",

@@ -6,9 +6,6 @@ syscfg.defs:
         value: 1
         restrictions: UWB_CCP_PERIOD
         restrictions: XTALT_GUARD
-    UWB_CCP_VERBOSE:
-        description: 'Show debug output from postprocess'
-        value: 0
     UWB_CCP_VALID_THRESHOLD:
         description: 'Consider CCP valid once this many packets have been received (>=1)'
         value: 2
@@ -42,21 +39,15 @@ syscfg.defs:
     UWB_CCP_TASK_STACK_SZ:
         description: 'Size of interrupt task stack'
         value: 2048
-    UWB_CCP_TOLERATE_MISSED_FRAMES:
-        description: >
-          The number of missed ccp frames we can tolerate before
-          stopping tdma.
-        value: 0
     UWB_CCP_JSON_BUFSIZE:
         description: 'JSON buffer size'
         value: 128
     UWB_RX_TIMEOUT_THRESH:
         description: 'Number of rx timeout events in slave mode before turning into master mode'
-        value: 10
-    CCP_MASTER_REQUEST:
-        description: 'Number master request blink before the node really change to master mode'
-        value: 100
+        value: 37
 
+    RTLS_CPP_VERBOSE:
+        value: 0
     RTLS_CPP_USE_LED:
         description: 'Use led to indicate master or slave role'
         value: 1

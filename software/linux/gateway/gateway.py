@@ -44,7 +44,11 @@ class Gateway:
         pass
 
     def on_connect(self, client, userdata, flags, rc):
+        print("MQTT Broker connected.")
         self.client.subscribe(config.CMD_TOPIC)
+
+    def on_disconnect(self, client, userdata, rc):
+        print("MQTT Broker disconnected.")
 
     def on_message(self, client, userdata, msg):
         print("NET->BLE: %s" % (msg.payload.decode("utf-8")))
@@ -71,12 +75,12 @@ class Gateway:
             elif(msg["node"] == "TAG"):
                 msg["node"] = TAG
             try:
-                self.mav.location_send(msg["dstsrc"], msg["type"], msg["node"], msg["location_x"], msg["location_y"], msg["location_z"])
+                self.mav.location_send(0, msg["uwb_address"], msg["type"], msg["node"], msg["location_x"], msg["location_y"], msg["location_z"])
             except:
                 print("Unable to send downlink msg")
         elif(msg["mavpackettype"] == "ONOFF"):
             try:
-                self.mav.onoff_send(msg["dstsrc"], msg["type"], msg["value"])
+                self.mav.onoff_send(0, msg["uwb_address"], msg["type"], msg["value"])
             except:
                 print("Unable to send downlink msg")
 
@@ -84,6 +88,7 @@ class Gateway:
         self.client = mqtt.Client()
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
+        self.client.on_disconnect = self.on_disconnect
         self.client.connect("127.0.0.1", 1883, 60)
         self.client.loop_forever()
 
@@ -108,6 +113,9 @@ class Gateway:
                     print("Serial connection error: Retrying... " + str(retry_count))
                     retry_count+=1
                     serial = Serial(port, baud)
+                    mav = MAVLink(serial)
+                    if (port == "/dev/ttyGateway"):
+                        self.mav = mav
                 except:
                     print("Unable to open port: " + port)
 
@@ -169,9 +177,9 @@ class Gateway:
 if __name__ == "__main__":
     gateway = Gateway()
     gateway.run()
-    with open("logo.txt") as f:
-        for line in f.readlines():
-            print(line)
+    # with open("logo.txt") as f:
+    #     for line in f.readlines():
+    #         print(line)
     def signal_int(sig, frame):
         print(" Ctrl+C ---> Stop")
         gateway.signal_int(sig, frame)

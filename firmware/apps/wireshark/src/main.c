@@ -30,6 +30,7 @@ static struct os_mempool g_mempool;
 static struct os_mbuf_pool g_mbuf_pool;
 static struct os_task g_wireshark_task;
 static os_stack_t g_wireshark_task_stack[MYNEWT_VAL(TASK_WIRESHARK_STACK_SIZE)];
+static bool g_running = false;
 
 bool rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs);
 static struct uwb_mac_interface 
@@ -102,23 +103,25 @@ process_rx_data_queue(struct os_event *ev)
     static char sbuff[32];
 
     while((om = os_mqueue_get(&g_rx_pkt_q)) != NULL) {
-        int payload_len = OS_MBUF_PKTLEN(om);
-        payload_len = (payload_len > sizeof(buff)) ? sizeof(buff) : payload_len;
-        struct uwb_msg_hdr *hdr = (struct uwb_msg_hdr*)(OS_MBUF_USRHDR(om));
-        int rc = os_mbuf_copydata(om, 0, payload_len, buff);
-        if (!rc) {
-            serial_write_str("received: ");
-            for (int i=0; i<sizeof(buff) && i<hdr->dlen; i++)
-            {
-                sprintf(sbuff, "%02X", buff[i]);
+        if(g_running){
+            int payload_len = OS_MBUF_PKTLEN(om);
+            payload_len = (payload_len > sizeof(buff)) ? sizeof(buff) : payload_len;
+            struct uwb_msg_hdr *hdr = (struct uwb_msg_hdr*)(OS_MBUF_USRHDR(om));
+            int rc = os_mbuf_copydata(om, 0, payload_len, buff);
+            if (!rc) {
+                serial_write_str("received: ");
+                for (int i=0; i<sizeof(buff) && i<hdr->dlen; i++)
+                {
+                    sprintf(sbuff, "%02X", buff[i]);
+                    serial_write_str(sbuff);
+                }
+
+                struct uwb_dev_rxdiag *diag = (struct uwb_dev_rxdiag *)(buff + hdr->diag_offset);
+                float rssi = uwb_calc_rssi(udev, diag);
+
+                sprintf(sbuff, " power: %d lqi: 0 time: %lld\r\n", (int)rssi, hdr->utime);
                 serial_write_str(sbuff);
             }
-
-            struct uwb_dev_rxdiag *diag = (struct uwb_dev_rxdiag *)(buff + hdr->diag_offset);
-            float rssi = uwb_calc_rssi(udev, diag);
-
-            sprintf(sbuff, " power: %d lqi: 0 time: %lld\r\n", (int)rssi, hdr->utime);
-            serial_write_str(sbuff);
         }
         os_mbuf_free_chain(om);
     }
@@ -138,8 +141,16 @@ task_wireshark_func(void *arg){
             dpl_callout_reset(&g_rx_enable_callout, 0);
             serial_write_line("OK");
         }
+        else if(!strcmp(line, "start")){
+            g_running = true;
+            serial_write_line("OK");
+        }
+        else if(!strcmp(line, "stop")){
+            g_running = false;
+            serial_write_line("");
+            serial_write_line("OK");
+        }
     }
-    
 }
 
 static void 

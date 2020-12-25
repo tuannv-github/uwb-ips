@@ -27,7 +27,6 @@ pkg.keywords:
 
 pkg.deps:
     - "@decawave-uwb-core/hw/drivers/uwb"
-    - "@decawave-uwb-core/lib/json"
 
 pkg.cflags:
     - "-std=gnu99"

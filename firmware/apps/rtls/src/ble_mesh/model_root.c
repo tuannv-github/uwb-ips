@@ -17,14 +17,19 @@
 #include <rtls/rtls/rtls.h>
 
 #include <stats/stats.h>
+#include <rtls_tdma/rtls_tdma.h>
 
-#define LED_DELAY_MS   200
+#define LED_DELAY_MS    200
+#define LIGHT_BULB_0    9
+#define LIGHT_BULB_1    10
 
 STATS_SECT_START(model_root_stat_t)
     STATS_SECT_ENTRY(send_loca_succed)
     STATS_SECT_ENTRY(send_loca_failed)
     STATS_SECT_ENTRY(send_dist_succed)
     STATS_SECT_ENTRY(send_dist_failed)
+    STATS_SECT_ENTRY(send_slot_succed)
+    STATS_SECT_ENTRY(send_slot_failed)
     STATS_SECT_ENTRY(recv_setmsg)
     STATS_SECT_ENTRY(recv_sttmsg)
 STATS_SECT_END
@@ -36,6 +41,8 @@ STATS_NAME_START(model_root_stat_t)
     STATS_NAME(model_root_stat_t, send_loca_failed)
     STATS_NAME(model_root_stat_t, send_dist_succed)
     STATS_NAME(model_root_stat_t, send_dist_failed)
+    STATS_NAME(model_root_stat_t, send_slot_succed)
+    STATS_NAME(model_root_stat_t, send_slot_failed)
     STATS_NAME(model_root_stat_t, recv_setmsg)
     STATS_NAME(model_root_stat_t, recv_sttmsg)
 STATS_NAME_END(model_root_stat_t)
@@ -59,10 +66,10 @@ rtls_model_set(struct bt_mesh_model *model,
 {  
     STATS_INC(g_model_root_stat, recv_setmsg);
     msg_rtls_t msg_rtls;
-    uint16_t dstsrc;
+    uint16_t uwb_address;
     msg_parse_rtls(buf, &msg_rtls);
-    rtls_get_address(&dstsrc);
-    if(msg_rtls.dstsrc != dstsrc) return;
+    rtls_get_address(&uwb_address);
+    if(msg_rtls.uwb_address != uwb_address) return;
 
     switch (msg_rtls.type)
     {
@@ -88,17 +95,17 @@ rtls_model_set(struct bt_mesh_model *model,
         }
 
         if(msg_rtls.value & 0x02){
-            hal_gpio_write(9, 0);
+            hal_gpio_write(LIGHT_BULB_0, 0);
         }
         else{
-            hal_gpio_write(9, 1);
+            hal_gpio_write(LIGHT_BULB_0, 1);
         }
 
         if(msg_rtls.value & 0x04){
-            hal_gpio_write(10, 0);
+            hal_gpio_write(LIGHT_BULB_1, 0);
         }
         else{
-            hal_gpio_write(10, 1);
+            hal_gpio_write(LIGHT_BULB_1, 1);
         }
         break;
     default:
@@ -117,8 +124,8 @@ static struct bt_mesh_cfg_srv cfg_srv = {
     .frnd = BT_MESH_FRIEND_NOT_SUPPORTED,
     .gatt_proxy = BT_MESH_GATT_PROXY_ENABLED,
     .default_ttl = 7,
-    .net_transmit = BT_MESH_TRANSMIT(1, 20),
-    .relay_retransmit = BT_MESH_TRANSMIT(1, 20),
+    .net_transmit = BT_MESH_TRANSMIT(0, 10),
+    .relay_retransmit = BT_MESH_TRANSMIT(0, 10),
 };
 static struct bt_mesh_model_pub model_pub_rtls;
 
@@ -133,28 +140,52 @@ static msg_rtls_t msg_rtls;
 
 static void
 task_rtls_location_func(void *arg){
-
+    uint8_t cnt = 0;
     while (1) {
+        dpl_time_delay(dpl_time_ms_to_ticks32(1000));
         os_mutex_pend(&g_location_distance_mutex, OS_TIMEOUT_NEVER);
 
-        dpl_time_delay(dpl_time_ms_to_ticks32(1000));
         if (pub->addr == BT_MESH_ADDR_UNASSIGNED) continue;
 
-        msg_rtls.type = MAVLINK_MSG_ID_LOCATION;
-        msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
-        rtls_get_ntype(&msg_rtls.node_type);
-        rtls_get_address(&msg_rtls.dstsrc);
-        rtls_get_location(&msg_rtls.location_x, &msg_rtls.location_y, &msg_rtls.location_z);
+        cnt++;
 
-        msg_prepr_rtls(&pub->msg, &msg_rtls);
+        switch (cnt%2)
+        {
+        case 0:{
+            msg_rtls.type = MAVLINK_MSG_ID_SLOT;
+            msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
+            rtls_get_ntype(&msg_rtls.node_type);
+            rtls_get_address(&msg_rtls.uwb_address);
+            rtls_get_slot(&msg_rtls.slot);
 
-        int err = bt_mesh_model_publish(model);
-        if (err) {
-            STATS_INC(g_model_root_stat, send_loca_failed);
+            msg_prepr_rtls(&pub->msg, &msg_rtls);
+
+            int err = bt_mesh_model_publish(model);
+            if (err) {
+                STATS_INC(g_model_root_stat, send_slot_failed);
+            }
+            else{
+                STATS_INC(g_model_root_stat, send_slot_succed);
+            }
         }
-        else{
-            STATS_INC(g_model_root_stat, send_loca_succed);
+            break;
+        case 1:{
+            msg_rtls.type = MAVLINK_MSG_ID_ONOFF;
+            msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
+            rtls_get_ntype(&msg_rtls.node_type);
+            rtls_get_address(&msg_rtls.uwb_address);
+            if(g_led_running){
+                msg_rtls.value = g_led_running;
+            }
+            else{
+                msg_rtls.value = (!hal_gpio_read(LIGHT_BULB_0) << 1) | (!hal_gpio_read(LIGHT_BULB_1) << 2);
+            }
+            msg_prepr_rtls(&pub->msg, &msg_rtls);
+            bt_mesh_model_publish(model);
         }
+            break;
+        }
+
         os_mbuf_free(pub->msg);
 
         os_mutex_release(&g_location_distance_mutex);
@@ -163,36 +194,36 @@ task_rtls_location_func(void *arg){
 
 static void
 task_rtls_distance_func(void *arg){
+
+    uint8_t node_type;
     while(1){
-        os_mutex_pend(&g_location_distance_mutex, OS_TIMEOUT_NEVER);
-        dpl_time_delay(dpl_time_ms_to_ticks32(100));
-        if (pub->addr == BT_MESH_ADDR_UNASSIGNED) continue;
-
-        distance_t *distances = get_distances();
-        for(int i=0; i<ANCHOR_NUM; i++){
-            if(distances->updated[i]){
-                distances->updated[i] = false;
-
-                msg_rtls.type = MAVLINK_MSG_ID_TOF;
-                msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
-                rtls_get_address(&msg_rtls.dstsrc);
-                msg_rtls.anchor = distances->anchors[i];
-                msg_rtls.tof = distances->tofs[i];
-
-                msg_prepr_rtls(&pub->msg, &msg_rtls);
-
-                int err = bt_mesh_model_publish(model);
-                if (err) {
-                    STATS_INC(g_model_root_stat, send_dist_failed);
-                }
-                else{
-                    STATS_INC(g_model_root_stat, send_dist_succed);
-                }
-                os_mbuf_free(pub->msg);
-                dpl_time_delay(dpl_time_ms_to_ticks32(100));
-            }
+        rtls_get_ntype(&node_type);
+        if(node_type == RTR_ANCHOR){
+            dpl_time_delay(dpl_time_ms_to_ticks32(5000));
         }
+        else if(node_type == RTR_TAG){
+            dpl_time_delay(dpl_time_ms_to_ticks32(MYNEWT_VAL(UWB_CCP_PERIOD)/1000));
+        }
+        else continue;
+        os_mutex_pend(&g_location_distance_mutex, OS_TIMEOUT_NEVER);
 
+        msg_rtls.type = MAVLINK_MSG_ID_LOCATION;
+        msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
+        rtls_get_ntype(&msg_rtls.node_type);
+        rtls_get_address(&msg_rtls.uwb_address);
+        if(rtls_get_location(&msg_rtls.location_x, &msg_rtls.location_y, &msg_rtls.location_z)){
+            msg_prepr_rtls(&pub->msg, &msg_rtls);
+
+            int err = bt_mesh_model_publish(model);
+            if (err) {
+                STATS_INC(g_model_root_stat, send_loca_failed);
+            }
+            else{
+                STATS_INC(g_model_root_stat, send_loca_succed);
+            }
+
+            os_mbuf_free(pub->msg);
+        }
         os_mutex_release(&g_location_distance_mutex);
     }
 }

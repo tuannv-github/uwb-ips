@@ -127,7 +127,7 @@ class UwbSniffer(object):
             try:
                 self.serial.reset_input_buffer()
                 self.serial.reset_output_buffer()
-                
+
                 cnt = 0
                 while self.running.is_set():
                     self.serial.write(b'channel ' + bytes(str(channel).encode()) + b'\r\n')
@@ -135,9 +135,22 @@ class UwbSniffer(object):
                     if data != b'':
                         if data.decode().rstrip() == "OK":
                             break
-                    logging.info("Config channel: %s: %d" % (channel, cnt))
+                        else:
+                            logging.info("Unknown respond: " + data.decode())
                     cnt+=1
                     time.sleep(1)
+                logging.info("Channel %s" % (channel))
+
+                cnt = 0
+                while self.running.is_set():
+                    self.serial.write(b'start\r\n')
+                    data = self.serial.readline()
+                    if data != b'':
+                        if data.decode().rstrip() == "OK":
+                            break
+                    cnt+=1
+                    time.sleep(1)
+                logging.info("Start capture")
 
                 buf = b''
                 while self.running.is_set():
@@ -285,7 +298,6 @@ class UwbSniffer(object):
             return self.first_local_timestamp - self.first_sniffer_timestamp + sniffer_timestamp + overflow_count * self.TIMER_MAX
 
     def stop_sig_handler(self, *args, **kwargs):
-        logging.info("Stop all thread")
         """
         Function responsible for stopping the sniffer firmware and closing all threads.
         """
@@ -297,19 +309,38 @@ class UwbSniffer(object):
                 try:
                     thread.join(timeout=10)
                     if thread.is_alive() is True:
-                        self.logger.error("Failed to stop thread {}".format(thread.name))
+                        logging.error("Failed to stop thread {}".format(thread.name))
                         alive_threads.append(thread)
                 except RuntimeError:
                     pass
 
+            logging.info("Stop all thread")
             self.threads = alive_threads
-        else:
-           logging.warning("Asked to stop {} while it was already stopped".format(self))
 
-        if self.serial is not None:
-            if self.serial.is_open is True:
-                self.serial.close()
-            self.serial = None
+            self.serial.reset_input_buffer()
+            self.serial.reset_output_buffer()
+            cnt = 0
+            while True:
+                self.serial.write(b'stop\r\n')
+                data = self.serial.readline()
+                if data != b'':
+                    if data.decode().rstrip() == "OK":
+                        break
+                logging.info("Stop capturing: %d" % (cnt))
+                cnt+=1
+                if cnt > 2:
+                    logging.warning("Unable to stop capture")
+                    break
+                time.sleep(1)
+
+            if self.serial is not None:
+                if self.serial.is_open is True:
+                    self.serial.close()
+                self.serial = None
+            logging.info("Stopped")
+        else:
+        #    logging.warning("Asked to stop {} while it was already stopped".format(self))
+            pass
     
     def __str__(self):
         return "{} ({}) channel {}".format(type(self).__name__, self.dev, self.channel)

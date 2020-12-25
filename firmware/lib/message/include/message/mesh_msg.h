@@ -28,8 +28,9 @@ typedef struct _msg_rtls_t
 {
     struct _msg_rtls_header_t
     {
+        uint16_t mesh_address;
+        uint16_t uwb_address;
         uint8_t type;
-        uint16_t dstsrc;
         uint32_t opcode;
     };
     union{
@@ -50,6 +51,10 @@ typedef struct _msg_rtls_t
                 float distance;
                 uint32_t tof;
             };
+        };
+        struct _msg_rtls_slot_t
+        {
+            uint8_t slot;
         };
     };
 }__attribute__((__packed__, aligned(1))) msg_rtls_t;
