@@ -42,7 +42,6 @@ static rtls_tdma_instance_t g_rtls_tdma_instance = {
 
 static struct os_task g_rtls_gateway_task;
 static os_stack_t g_task_rtls_gatway_stack[MYNEWT_VAL(APP_RTLS_GATEWAY_TASK_STACK_SIZE)];
-struct os_mutex g_gateway_mutex;
 
 static char *
 rtls_get(int argc, char **argv, char *val, int val_len_max)
@@ -125,16 +124,31 @@ static struct conf_handler rtls_handler = {
 };
 
 struct uwb_dev *udev;
-void rtls_get_location(float *x, float *y, float *z){
-    *x = rtls_conf.location_x;
-    *y = rtls_conf.location_y;
-    *z = rtls_conf.location_z;
+static location_t location_result;
+static bool location_updated_ble;
+static bool location_updated;
+bool rtls_get_location(float *x, float *y, float *z){
+    if(rtls_conf.node_type == ANCHOR){
+        *x = rtls_conf.location_x;
+        *y = rtls_conf.location_y;
+        *z = rtls_conf.location_z;
+        return true;
+    }
+    else{
+        if(location_updated_ble){
+            location_updated_ble = false;
+            *x = location_result.x;
+            *y = location_result.y;
+            *z = location_result.z;
+            return true;
+        }
+        else return false;
+    }
 }
 
 void rtls_get_slot(uint8_t *slot){
     *slot = udev->slot_id;
 }
-
 
 void rtls_set_location(float x, float y, float z){
     rtls_conf.location_x = x;
@@ -224,9 +238,7 @@ distance_t *get_distances(){
 
 static sphere_t g_spheres[4];
 static uint16_t anchor_addrs[4];
-static location_t location_result;
 static trilateration_result_t g_tr;
-static bool location_updated = false;
 
 static bool
 complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
@@ -282,10 +294,8 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
                 (int)location_result.x, (int)(1000*(location_result.x - (int)location_result.x)),
                 (int)location_result.y, (int)(1000*(location_result.y - (int)location_result.y)),
                 (int)location_result.z, (int)(1000*(location_result.z - (int)location_result.z)));
-
-        os_mutex_pend(&g_gateway_mutex, OS_TIMEOUT_NEVER);
         location_updated = true;
-        os_mutex_release(&g_gateway_mutex);
+        location_updated_ble = true;
     }
 
     for(int j=0; j<ANCHOR_NUM; j++){
@@ -302,7 +312,6 @@ static void
 task_rtls_gateway_func(void *arg){
     uint16_t len;
     while(1){
-        os_mutex_pend(&g_gateway_mutex, OS_TIMEOUT_NEVER);
         dpl_time_delay(dpl_time_ms_to_ticks32(MYNEWT_VAL(UWB_CCP_PERIOD)/1000));
 
         if(location_updated){
@@ -316,17 +325,6 @@ task_rtls_gateway_func(void *arg){
                 len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
                 serial_write(mav_send_buf, len);
         }
-
-        // mavlink_msg_tag_pack(0,0,&mavlink_msg,
-        // 0x00, 0, 0, 1, 5.311632844683143,
-        // 0x01, 5, 0, 2, 3.33704088063755,
-        // 0x02, 5, 5, 3, 3.999118684674722,
-        // 0x03, 0, 5, 5, 7.180278010403454,
-        // 0x00, 4.5, 2.5, 0);
-        // len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
-        // serial_write(mav_send_buf, len);
-
-        os_mutex_release(&g_gateway_mutex);
     }
 }
 
@@ -359,7 +357,6 @@ void rtls_init(){
     printf("Role: %d\n", rtls_conf.node_type);
     rtls_tdma_start(&g_rtls_tdma_instance, udev);
 
-    os_mutex_init(&g_gateway_mutex);
     os_task_init(&g_rtls_gateway_task, "gw",
         task_rtls_gateway_func,
         NULL,

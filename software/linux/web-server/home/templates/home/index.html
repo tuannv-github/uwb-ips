@@ -132,6 +132,7 @@ function dec2hexString(dec) {
 }
 
 function handler_location(msg){
+	console.log(msg);
 	node = new Node(msg.uwb_address, msg.node, msg.location_x, msg.location_y, msg.location_z);
 	let added = false;
 	let i = 0;
@@ -171,7 +172,6 @@ function handler_location(msg){
 				$('#node' + node.address + 'Select').children("option")[1].disabled = true;
 				break;
 		}
-		// $('#node' + node.address + 'meshAddressHex').text(dec2hexString(parseInt(msg.mesh_address)));
 	}
 }
 
@@ -676,11 +676,9 @@ const nodeTemplate = ({ address, uwbAddressHex, type, locationX, locationY, loca
 
 function nodeUpdate(idx, node){
 	nodeList[idx].type = node.type;
-	if(node.type == "ANCHOR"){
-		nodeList[idx].locationX = node.locationX;
-		nodeList[idx].locationY = node.locationY;
-		nodeList[idx].locationZ = node.locationZ;
-	}
+	nodeList[idx].locationX = node.locationX;
+	nodeList[idx].locationY = node.locationY;
+	nodeList[idx].locationZ = node.locationZ;
 
 	switch(node.type){
 		case "ANCHOR":
