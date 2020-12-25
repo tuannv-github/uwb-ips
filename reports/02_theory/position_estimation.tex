@@ -81,7 +81,7 @@ In figure \ref{fig:limits_for_distance_estimation_based_on_rss_measurements}, th
     \label{fig:limits_for_distance_estimation_based_on_rss_measurements}
 \end{figure}
 
-\subsection{Time of arrival (TOA)}
+\section{Time of arrival (TOA)}
 
 The time of arrival (TOA) method gives us information about the distance between the target node and the source for which the position is known. The target node's position is on a circle of radius $d=c\tau$, for $c$ equal speed of light and $\tau$ equal time of arrival. The prerequisite of this information is a synchronization between the source and target node. The received signal at the source node is represented by:
 \begin{equation}
@@ -93,7 +93,7 @@ where $\tau$ is the TOA, $\alpha$ is the channel coefficient and $n(t)$ is white
 \end{equation}
 where $\tau$ is the estimation of TOA, $SNR = \alpha^2 E / \mathcal{N}_0$ is the signal to noise ratio, $\beta$ is the effective signal bandwidth and $E$ is the signal energy. One important property of TOA is that, unlike RSS, its accuracy heavily depend on the bandwidth of the signal. Consequently, UWB systems can reach very precise ranging on he order of a few centimeters. Figure \ref{fig:toa_minimum_standard_deviation_versus_bw_snr} shows the effects of $SNR$ and band width on the accuracy of TOA estimation.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{toa_minimum_standard_deviation_versus_bw_snr}
     \caption{The minimum standard deviation versus SNR for various pulse widths}
@@ -175,20 +175,30 @@ and $d$ is the distance between the target node and the center of the antenna ar
 \end{equation}
 We observe that the accuracy of the AOA method is dependent on $SNR$, $\beta$, $N_a$, $l$ and $\psi$. Our main interest is the effect of bandwidth on the accuracy since we use signals width very small pulse in time in the UWB systems. Figure \ref{fig:aoa_crlb_ for_angle_of_arrival_versus_snr} depicts the effect of the pulse width and SNR on CRLB for angle of arrival. In this case, other parameters are assume to be fixed.
 
-\begin{figure}[!htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{aoa_crlb_for_angle_of_arrival_versus_snr}
     \caption{CRLB for the angle of arrival versus SNR for several pulse-widths}
     \label{fig:aoa_crlb_ for_angle_of_arrival_versus_snr}
 \end{figure}
-We observe that increasing bandwidth (decreasing pulse-width) has a significant effect on the accuracy. In other words, with high bandwidth, we can gain high accuracy even with low SNR. Consequently, UWB is a very good candidate for the AOA approach.
+% We observe that increasing bandwidth (decreasing pulse-width) has a significant effect on the accuracy. In other words, with high bandwidth, we can gain high accuracy even with low SNR. Consequently, UWB is a very good candidate for the AOA approach.
 
-In figure \ref{fig:aoa_crlb_versus_psi_for_various_pulse_widths}, the effect of AOA on its estimation accuracy is depicted. We observe that even for wide-band signals, the accuracy will be decrease dramatically for angles bigger than 1 rad (57 degrees) or smaller than 1 rad. As a suggestion, we can use several antenna arrays and weight the estimation of each array by the inverse of estimated angle.
-\begin{figure}[!htbp]
-    \centering
-    \includegraphics[width=0.8\textwidth]{aoa_crlb_versus_psi_for_various_pulse_widths}
-    \caption{CRLB for the angle of arrival versus SNR for several pulse-widths}
-    \label{fig:aoa_crlb_versus_psi_for_various_pulse_widths}
-\end{figure}
+% In figure \ref{fig:aoa_crlb_versus_psi_for_various_pulse_widths}, the effect of AOA on its estimation accuracy is depicted. We observe that even for wide-band signals, the accuracy will be decrease dramatically for angles bigger than 1 rad (57 degrees) or smaller than 1 rad. As a suggestion, we can use several antenna arrays and weight the estimation of each array by the inverse of estimated angle.
+% \begin{figure}[!htbp]
+%     \centering
+%     \includegraphics[width=0.8\textwidth]{aoa_crlb_versus_psi_for_various_pulse_widths}
+%     \caption{CRLB for the angle of arrival versus SNR for several pulse-widths}
+%     \label{fig:aoa_crlb_versus_psi_for_various_pulse_widths}
+% \end{figure}
+
+\section{Trilateration}
+True-range multilateration is a method to determine the location of a movable vehicle or stationary point in space using multiple ranges (distances) between the vehicle/point and multiple spatially-separated known locations (often termed 'stations'). The name is derived from trilateration, the geometrical problem of determining an unknown position on a plane based on the distance to other two known vertices of a triangle (the length of two sides). True range multilateration is both a mathematical topic and an applied technique used in several fields. A practical application involving a fixed location is the trilateration method of surveying. Applications involving vehicle location are termed navigation when on-board persons/equipment are informed of its location, and are termed surveillance when off-vehicle entities are informed of the vehicle's location.
+
+Three Cartesian dimensions, three measured slant ranges
+There are multiple algorithms that solve the 3-D Cartesian true range multilateration problem directly (i.e., in closed-form) – e.g., Fang.[11] Moreover, one can adopt closed-form algorithms developed for pseudo range multilateration.[12][8] Bancroft's algorithm[13] (adapted) employs vectors, which is an advantage in some situations.
+
+
+Fig. 2 3-D True Range Multilateration Scenario. C1, C2 and C3 are known centers of spheres in the x,y plane. P is point whose (x,y,z) coordinates are desired based on its ranges to C1, C2 and C3.
+The simplest algorithm corresponds to the sphere centers in Fig. 2. The figure  is the plane containing C1, C2 and C3. 
 
 \end{document}
