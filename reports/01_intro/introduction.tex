@@ -1,6 +1,8 @@
-\documentclass[./main.tex]{subfiles}
+\providecommand{\main}{..}
+\documentclass[\main/main.tex]{subfiles}
 
 \begin{document}
+\graphicspath{{img/}{01_intro/img/}}
 
 \chapter{Introduction}
 
@@ -13,10 +15,10 @@ To facilitate the robot to work in dynamic environments or cooperate with humans
 
 With many advantages mentioned in the previous paragraph, elastic actuators gradually become popular in robotics, particularly in flexible joint robotic manipulators. However, controlling this type of robot manipulator has some challenges. First of all, the oscillation caused by the elastic component can lead to the instability of the whole system. Diminishing the elastic element oscillation is essential. This will facilitate the position and force/torque control mechanism to function well. Secondly, elastic actuators have low force bandwidth, which means that they slowly respond to the control signal. This is a trade-off between response time and shock load tolerance. Thirdly, controlling the position of an elastic actuator is not an easy task. An elastic actuator can be considered as a cascade of two subsystems: load side subsystem and motor side subsystem. These two parts are connected to each other through an elastic component. This means that the load position cannot be directly controlled but has to be driven through the compression/tension force of the elastic element. As a result, the characteristics of the elastic element, e.g. oscillation and low force bandwidth, directly affect the position control mechanism.
 
-In general, there are two types of controllers in robotics: centralised and decentralised. This categorisation is based on the ways of arranging the controller. In the centralised robotic controller, one main controller is used to acquire data from the sensors and control the robot. The centralised controller reduces the hardware cost of the robot. However, it also introduces communication latency, increases the complexity of system connection as well as requires a powerful computing unit. In addition, the centralised controller reduces scalability. In the decentralised controller, multiple controllers are used, each one for a specific task. The decentralised controller has numerous benefits compared to the centralised controller. First, a distributed control system reduces the complexity of system connection. As a result, the overall communication latency is reduced because of the reduced number of signals required by the multi-joint controller.  Second, the decentralised control mechanism increases scalability. It is much easier to assemble a module to the system than redesign the whole system. Third, powerful embedded control elements can be utilised in each control unit. This facilitates highly effective dynamic-model-based control algorithms to be utilised in a control unit.
+% In general, there are two types of controllers in robotics: centralised and decentralised. This categorisation is based on the ways of arranging the controller. In the centralised robotic controller, one main controller is used to acquire data from the sensors and control the robot. The centralised controller reduces the hardware cost of the robot. However, it also introduces communication latency, increases the complexity of system connection as well as requires a powerful computing unit. In addition, the centralised controller reduces scalability. In the decentralised controller, multiple controllers are used, each one for a specific task. The decentralised controller has numerous benefits compared to the centralised controller. First, a distributed control system reduces the complexity of system connection. As a result, the overall communication latency is reduced because of the reduced number of signals required by the multi-joint controller.  Second, the decentralised control mechanism increases scalability. It is much easier to assemble a module to the system than redesign the whole system. Third, powerful embedded control elements can be utilised in each control unit. This facilitates highly effective dynamic-model-based control algorithms to be utilised in a control unit.
 
 % However, to the best of the author's knowledge, there is not much attention to this topic.
-According to the discussion above, controlling the load position of elastic actuators is a fascinating topic, due to not only its promising potential but also its novelty and challenges. The elastic joint is widely adopted in cobots, especially in flexible joint robotic manipulators. This thesis targets on designing a position controller for elastic actuators. In addition, a 2 DOFs robot arm is also designed to illustrate the effectiveness of the idea.
+% According to the discussion above, controlling the load position of elastic actuators is a fascinating topic, due to not only its promising potential but also its novelty and challenges. The elastic joint is widely adopted in cobots, especially in flexible joint robotic manipulators. This thesis targets on designing a position controller for elastic actuators. In addition, a 2 DOFs robot arm is also designed to illustrate the effectiveness of the idea.
 
 \section{Thesis Objective}
 In this thesis, the objective is to design a controller for a flexible robot manipulator. A centralised and decentralised controller are going to be designed. We are going to compare the effectiveness of both approaches. Besides, the mechanical parts are designed and 3D printed. The mechanical design is built with reference to the previous work of Filippo Sanfilippo et al. As a summary, there are four research objectives arisen in this thesis:\par
@@ -24,5 +26,13 @@ In this thesis, the objective is to design a controller for a flexible robot man
 2/ Design a 2-loop controller for a single joint, including an MRAC and a fuzzy PI controller.\par
 3/ Design a robust nonlinear $H_\infty$ controller.\par
 4/ Conduct empirical experiments, then evaluate, compare and conclude the effectiveness of the controllers.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[scale=0.3]{fonctionnement-technologie-mesh-wirepas.jpg}
+    \end{center}
+    \caption{Indoor location}
+    \label{fig:indoor_location}
+\end{figure}
 
 \end{document}

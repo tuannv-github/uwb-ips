@@ -1,14 +1,17 @@
-\documentclass[oneside]{book}
+\documentclass[oneside, 12pt]{book}
 
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 
+\usepackage{url}
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usepackage{float}
+\usepackage{ifthen}
 \usepackage{siunitx}
 \usepackage{lmodern}
 \usepackage{amsmath}
+\usepackage{listings}
 \usepackage{graphicx}
 \usepackage{subfiles}
 \usepackage{biblatex}
@@ -21,11 +24,23 @@
 \usepackage{bytefield}
 \usepackage{microtype}
 \usepackage{alphabeta}
+\usepackage{subcaption}
 \usepackage{xcolor,colortbl}
+% \usepackage[Lenny]{fncychap}
 \usepackage[titletoc]{appendix}
 \usepackage[hidelinks]{hyperref}
 
-\bibliography{references.bib}
+\providecommand{\main}{.}
+\addbibresource{\main/references.bib}   
+
+\usepackage{\main/sty/slashbox}
+
+\newboolean{printBibInSubfiles}
+\setboolean{printBibInSubfiles}{true} 
+\def\bib{\ifthenelse{\boolean{printBibInSubfiles}}
+        {\printbibliography}
+        {}
+    }
 
 \definecolor{Gray}{gray}{0.85}
 \definecolor{LightCyan}{rgb}{0.2,0.7,1}
@@ -51,7 +66,10 @@
     heightrounded
 }
 
+\setlength\parindent{0pt}
+
 \begin{document}
+\setboolean{printBibInSubfiles}{false}
 
 \subfile{00_misc/cover.tex}
 \subfile{00_misc/ack.tex}
@@ -62,29 +80,32 @@
 
 \subfile{01_intro/introduction.tex}
 \subfile{02_theory/ultra_wideband.tex}
-\subfile{02_theory/position_estimation.tex}
-\subfile{02_theory/ble_mesh.tex}
+\subfile{position_estimation/position_estimation.tex}
 
 \subfile{03_firmware/firmware.tex}
 
-\subfile{04_harware/hardware.tex}
+\subfile{ble_mesh/ble_mesh.tex}
+
+\subfile{04_hardware/hardware.tex}
 \subfile{05_software/software.tex}
 \subfile{06_result/result.tex}
 
 \begin{appendices}
-    \includepdf[pages=1,pagecommand=\chapter{RTLS anchor Altium design},width=\textwidth, offset=0 -1cm]{RTLS-2020-11-09--04-03.PDF}
+    \includepdf[pages=1,pagecommand=\chapter{RTLS Anchor Board (Altium Designer)},width=\textwidth, offset=0 -1cm]{RTLS-2020-11-09--04-03.PDF}
     \includepdf[pages=2-,pagecommand={},width=\textwidth]{RTLS-2020-11-09--04-03.PDF}
 \end{appendices}
 
 \begin{appendices}
-    \chapter{RTLS SolidWork Design}
+    \chapter{RTLS Anchor House (SolidWorks)}
     \begin{figure}[H]
         \begin{center}
-            \includegraphics[scale=0.5]{Assem.JPG}
+            \includegraphics[scale=0.4]{Assem.JPG}
         \end{center}
-        \caption{RTLS SolidWork Design}
+        \caption{RTLS SolidWorks Design}
         \label{fig:RTLS_SolidWork_Design}
     \end{figure}
 \end{appendices}
+
+\printbibliography[heading=bibintoc,title={References}]
 
 \end{document}
