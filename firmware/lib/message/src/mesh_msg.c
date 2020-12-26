@@ -7,7 +7,7 @@ void msg_prepr_rtls(struct os_mbuf **mbuf, msg_rtls_t *msg){
     uint8_t header;
     if (msg->opcode < 0x100) header = 1;
 	else if (msg->opcode < 0x10000) header = 2;
-    else header = 3; 
+    else header = 3;
 
     switch (msg->msg_id)
     {
@@ -26,6 +26,13 @@ void msg_prepr_rtls(struct os_mbuf **mbuf, msg_rtls_t *msg){
         net_buf_simple_add_be32(*mbuf, *((uint32_t *)(&msg->location_x)));
         net_buf_simple_add_be32(*mbuf, *((uint32_t *)(&msg->location_y)));
         net_buf_simple_add_be32(*mbuf, *((uint32_t *)(&msg->location_z)));
+        break;
+    case MAVLINK_MSG_ID_LOCATION_REDUCED:
+        *mbuf = NET_BUF_SIMPLE(header + 9);
+        bt_mesh_model_msg_init(*mbuf, msg->opcode);
+        net_buf_simple_add_u8(*mbuf, msg->msg_id);
+        net_buf_simple_add_be32(*mbuf, *((uint32_t *)(&msg->location_x)));
+        net_buf_simple_add_be32(*mbuf, *((uint32_t *)(&msg->location_y)));
         break;
     case MAVLINK_MSG_ID_ONOFF:
         *mbuf = NET_BUF_SIMPLE(header + 4);
@@ -78,6 +85,10 @@ void msg_prepr_rtls_pipe(struct os_mbuf *mbuf, msg_rtls_t *msg){
         net_buf_simple_add_be32(mbuf, *((uint32_t *)(&msg->location_y)));
         net_buf_simple_add_be32(mbuf, *((uint32_t *)(&msg->location_z)));
         break;
+    case MAVLINK_MSG_ID_LOCATION_REDUCED:
+        net_buf_simple_add_be32(mbuf, *((uint32_t *)(&msg->location_x)));
+        net_buf_simple_add_be32(mbuf, *((uint32_t *)(&msg->location_y)));
+        break;
     case MAVLINK_MSG_ID_ONOFF:
         net_buf_simple_add_u8(mbuf, msg->value);
         break;
@@ -99,30 +110,39 @@ void msg_prepr_rtls_pipe(struct os_mbuf *mbuf, msg_rtls_t *msg){
 
 void msg_parse_rtls(struct os_mbuf *mbuf, msg_rtls_t *msg){
     msg->msg_id = net_buf_simple_pull_u8(mbuf);
-    msg->uwb_address = net_buf_simple_pull_be16(mbuf);
 
     switch (msg->msg_id)
     {
     case MAVLINK_MSG_ID_BLINK:
+        msg->uwb_address = net_buf_simple_pull_be16(mbuf);
         msg->role = net_buf_simple_pull_u8(mbuf);
         break;
     case MAVLINK_MSG_ID_LOCATION:
+        msg->uwb_address = net_buf_simple_pull_be16(mbuf);
         *((uint32_t *)(&msg->location_x)) = net_buf_simple_pull_be32(mbuf);
         *((uint32_t *)(&msg->location_y)) = net_buf_simple_pull_be32(mbuf);
         *((uint32_t *)(&msg->location_z)) = net_buf_simple_pull_be32(mbuf);
         break;
+    case MAVLINK_MSG_ID_LOCATION_REDUCED:
+        *((uint32_t *)(&msg->location_x)) = net_buf_simple_pull_be32(mbuf);
+        *((uint32_t *)(&msg->location_y)) = net_buf_simple_pull_be32(mbuf);
+        break;
     case MAVLINK_MSG_ID_ONOFF:
+        msg->uwb_address = net_buf_simple_pull_be16(mbuf);
         msg->value = net_buf_simple_pull_u8(mbuf);
         break;
     case MAVLINK_MSG_ID_DISTANCE:
+        msg->uwb_address = net_buf_simple_pull_be16(mbuf);
         msg->anchor = net_buf_simple_pull_be16(mbuf);
         *((uint32_t *)(&msg->distance)) = net_buf_simple_pull_be32(mbuf);
         break;
     case MAVLINK_MSG_ID_TOF:
+        msg->uwb_address = net_buf_simple_pull_be16(mbuf);
         msg->anchor = net_buf_simple_pull_be16(mbuf);
         msg->tof = net_buf_simple_pull_be32(mbuf);
         break;
     case MAVLINK_MSG_ID_SLOT:
+        msg->uwb_address = net_buf_simple_pull_be16(mbuf);
         msg->slot = net_buf_simple_pull_u8(mbuf);
         break;
     default:
@@ -145,6 +165,10 @@ void msg_parse_rtls_pipe(struct os_mbuf *mbuf, msg_rtls_t *msg){
         *((uint32_t *)(&msg->location_x)) = net_buf_simple_pull_be32(mbuf);
         *((uint32_t *)(&msg->location_y)) = net_buf_simple_pull_be32(mbuf);
         *((uint32_t *)(&msg->location_z)) = net_buf_simple_pull_be32(mbuf);
+        break;
+    case MAVLINK_MSG_ID_LOCATION_REDUCED:
+        *((uint32_t *)(&msg->location_x)) = net_buf_simple_pull_be32(mbuf);
+        *((uint32_t *)(&msg->location_y)) = net_buf_simple_pull_be32(mbuf);
         break;
     case MAVLINK_MSG_ID_ONOFF:
         msg->value = net_buf_simple_pull_u8(mbuf);
@@ -169,11 +193,17 @@ void msg_print_rtls(msg_rtls_t *msg){
     switch (msg->msg_id)
     {
     case MAVLINK_MSG_ID_LOCATION:
-        printf("{opcode: %ld, msg_id: %d, uwb_address: 0x%04x, role: %d, location: [%d.%d, %d.%d, %d.%d]}\n", 
-                msg->opcode, msg->msg_id, msg->uwb_address, msg->role, 
+        printf("{opcode: %ld, msg_id: %d, uwb_address: 0x%04x, location: [%d.%d, %d.%d, %d.%d]}\n", 
+                msg->opcode, msg->msg_id, msg->uwb_address, 
                 (int)msg->location_x, (int)(1000*(msg->location_x - (int)msg->location_x)),
                 (int)msg->location_y, (int)(1000*(msg->location_y - (int)msg->location_y)),
                 (int)msg->location_z, (int)(1000*(msg->location_z - (int)msg->location_z)));
+        break;
+    case MAVLINK_MSG_ID_LOCATION_REDUCED:
+        printf("{opcode: %ld, msg_id: %d, mesh_address: 0x%04x, location: [%d.%d, %d.%d]}\n", 
+                msg->opcode, msg->msg_id, msg->mesh_address, 
+                (int)msg->location_x, (int)(1000*(msg->location_x - (int)msg->location_x)),
+                (int)msg->location_y, (int)(1000*(msg->location_y - (int)msg->location_y)));
         break;
     case MAVLINK_MSG_ID_ONOFF:
         printf("{opcode: %ld, msg_id: %d, uwb_address: 0x%02x, value: %d}\n", 

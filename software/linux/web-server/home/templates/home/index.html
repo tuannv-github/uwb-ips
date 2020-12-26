@@ -81,6 +81,7 @@ client.connect({onSuccess:onConnect});
 class Node{
 	constructor(uwb_address, role){
 		this.uwb_address = uwb_address;
+		this.mesh_address = 0;
 		this.role = role;
 
 		this.locationX = 0;
@@ -90,10 +91,6 @@ class Node{
 		this.editing = false;
 		this.identifying = false;
 		this.lighting = false;
-	}
-
-	equal(node){
-		return this.uwb_address == node.uwb_address;
 	}
 
 	toString(){
@@ -128,9 +125,18 @@ function dec2hexString(dec) {
    return '0x' + (dec+0x10000).toString(16).substr(-4).toUpperCase();
 }
 
-function find_node(nodeList, address){
+function find_node(nodeList, uwb_address){
 	for(i=0; i<nodeList.length; i++){
-		if(nodeList[i].uwb_address == address) {
+		if(nodeList[i].uwb_address == uwb_address) {
+			return nodeList[i];
+		}
+	}
+	return null;
+}
+
+function find_node_mesh(nodeList, mesh_address){
+	for(i=0; i<nodeList.length; i++){
+		if(nodeList[i].mesh_address == mesh_address) {
 			return nodeList[i];
 		}
 	}
@@ -167,9 +173,26 @@ function handler_blink(msg){
 }
 
 function handler_location(msg){
+	value = parseInt($('#node' + msg.uwb_address + 'CounterLoc').text());
+	if(!isNaN(value)){
+		value += 1;
+		$('#node' + msg.uwb_address + 'CounterLoc').text(value);
+	}
 	node = find_node(nodeList, msg.uwb_address);
 	if(node){
 		nodeLocationUpdate(node, msg.location_x, msg.location_y, msg.location_z);
+	}
+}
+
+function handler_location_reduced(msg){
+	node = find_node_mesh(nodeList, msg.mesh_address);
+	if(node){
+		value = parseInt($('#node' + node.uwb_address + 'CounterLoc').text());
+		if(!isNaN(value)){
+			value += 1;
+			$('#node' + node.uwb_address + 'CounterLoc').text(value);
+		}
+		nodeLocationUpdate(node, msg.location_x, msg.location_y, 0);
 	}
 }
 
@@ -532,6 +555,10 @@ function handler_tag(msg){
 
 function handler_ble_mesh(msg){
 	$('#node' + msg.uwb_address + 'meshAddressHex').text(dec2hexString(parseInt(msg.mesh_address)));
+	node = find_node(nodeList, msg.uwb_address);
+	if(node){
+		node.mesh_address = msg.mesh_address;
+	}
 }
 
 function guiAddNodes(address, role, x, y, z){
@@ -576,13 +603,14 @@ function onMessageArrived(message) {
 			case "BLINK":
 				handler_blink(msg);
 				break;
+			case "BLE_MESH":
+				handler_ble_mesh(msg);
+				break;
 			case "LOCATION":
-				value = parseInt($('#node' + msg.uwb_address + 'CounterLoc').text());
-				if(!isNaN(value)){
-					value += 1;
-					$('#node' + msg.uwb_address + 'CounterLoc').text(value);
-				}
 				handler_location(msg);
+				break;
+			case "LOCATION_REDUCED":
+				handler_location_reduced(msg);
 				break;
 			case "ONOFF":
 				handler_onoff(msg);
@@ -605,9 +633,6 @@ function onMessageArrived(message) {
 				break;
 			case "SLOT":
 				handler_slot(msg);
-				break;
-			case "BLE_MESH":
-				handler_ble_mesh(msg);
 				break;
 			}
 		}

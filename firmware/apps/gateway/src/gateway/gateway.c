@@ -131,7 +131,7 @@ process_ble_to_net_queue(struct os_event *ev)
                 mavlink_msg_blink_pack(0,0,             &mavlink_msg, msg_rtls.uwb_address, msg_rtls.role);
                 break;
             case MAVLINK_MSG_ID_LOCATION_REDUCED:
-                mavlink_msg_location_reduced_pack(0, 0, &mavlink_msg, msg_rtls.uwb_address, msg_rtls.location_x, msg_rtls.location_y);
+                mavlink_msg_location_reduced_pack(0, 0, &mavlink_msg, msg_rtls.mesh_address, msg_rtls.location_x, msg_rtls.location_y);
                 break;
             case MAVLINK_MSG_ID_LOCATION:
                 mavlink_msg_location_pack(0, 0,         &mavlink_msg, msg_rtls.uwb_address, msg_rtls.location_x, msg_rtls.location_y, msg_rtls.location_z);

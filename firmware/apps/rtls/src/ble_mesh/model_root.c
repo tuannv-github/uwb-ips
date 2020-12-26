@@ -208,7 +208,7 @@ task_location_func(void *arg){
 
             os_mutex_pend(&g_model_mutex, OS_TIMEOUT_NEVER);
             msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
-            msg_rtls.msg_id = MAVLINK_MSG_ID_LOCATION;
+            msg_rtls.msg_id = MAVLINK_MSG_ID_LOCATION_REDUCED;
             rtls_get_address(&msg_rtls.uwb_address);
         }
 

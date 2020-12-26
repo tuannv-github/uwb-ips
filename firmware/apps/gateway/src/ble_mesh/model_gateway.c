@@ -53,7 +53,6 @@ rtls_model_status(struct bt_mesh_model *model,
         msg_parse_rtls(buf, &msg_rtls);
         msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
         msg_rtls.mesh_address = ctx->addr;
-        printf("ctx->addr: %x\n",  ctx->addr);
         msg_prepr_rtls_pipe(om, &msg_rtls);
         get_ble_to_net_mqueue_eventq(&mqueue, &event);
         rc = os_mqueue_put(mqueue, event, om);

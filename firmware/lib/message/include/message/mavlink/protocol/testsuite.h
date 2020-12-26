@@ -265,7 +265,7 @@ static void mavlink_test_location_reduced(uint8_t system_id, uint8_t component_i
         memset(&packet1, 0, sizeof(packet1));
         packet1.location_x = packet_in.location_x;
         packet1.location_y = packet_in.location_y;
-        packet1.uwb_address = packet_in.uwb_address;
+        packet1.mesh_address = packet_in.mesh_address;
         
         
 #ifdef MAVLINK_STATUS_FLAG_OUT_MAVLINK1
@@ -280,12 +280,12 @@ static void mavlink_test_location_reduced(uint8_t system_id, uint8_t component_i
         MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
 
         memset(&packet2, 0, sizeof(packet2));
-    mavlink_msg_location_reduced_pack(system_id, component_id, &msg , packet1.uwb_address , packet1.location_x , packet1.location_y );
+    mavlink_msg_location_reduced_pack(system_id, component_id, &msg , packet1.mesh_address , packet1.location_x , packet1.location_y );
     mavlink_msg_location_reduced_decode(&msg, &packet2);
         MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
 
         memset(&packet2, 0, sizeof(packet2));
-    mavlink_msg_location_reduced_pack_chan(system_id, component_id, MAVLINK_COMM_0, &msg , packet1.uwb_address , packet1.location_x , packet1.location_y );
+    mavlink_msg_location_reduced_pack_chan(system_id, component_id, MAVLINK_COMM_0, &msg , packet1.mesh_address , packet1.location_x , packet1.location_y );
     mavlink_msg_location_reduced_decode(&msg, &packet2);
         MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
 
@@ -298,7 +298,7 @@ static void mavlink_test_location_reduced(uint8_t system_id, uint8_t component_i
         MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
         
         memset(&packet2, 0, sizeof(packet2));
-    mavlink_msg_location_reduced_send(MAVLINK_COMM_1 , packet1.uwb_address , packet1.location_x , packet1.location_y );
+    mavlink_msg_location_reduced_send(MAVLINK_COMM_1 , packet1.mesh_address , packet1.location_x , packet1.location_y );
     mavlink_msg_location_reduced_decode(last_msg, &packet2);
         MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
 }

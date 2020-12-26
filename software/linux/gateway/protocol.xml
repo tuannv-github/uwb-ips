@@ -34,7 +34,7 @@
 		</message>
 		<message id="4" name="LOCATION_REDUCED">
 			<description>Location message</description>
-			<field type="uint16_t" name="uwb_address"/>
+			<field type="uint16_t" name="mesh_address"/>
 			<field type="float" name="location_x"/>
 			<field type="float" name="location_y"/>
 		</message>

@@ -423,8 +423,8 @@ class MAVLink_location_reduced_message(MAVLink_message):
         '''
         id = MAVLINK_MSG_ID_LOCATION_REDUCED
         name = 'LOCATION_REDUCED'
-        fieldnames = ['uwb_address', 'location_x', 'location_y']
-        ordered_fieldnames = ['location_x', 'location_y', 'uwb_address']
+        fieldnames = ['mesh_address', 'location_x', 'location_y']
+        ordered_fieldnames = ['location_x', 'location_y', 'mesh_address']
         fieldtypes = ['uint16_t', 'float', 'float']
         fielddisplays_by_name = {}
         fieldenums_by_name = {}
@@ -434,22 +434,22 @@ class MAVLink_location_reduced_message(MAVLink_message):
         orders = [2, 0, 1]
         lengths = [1, 1, 1]
         array_lengths = [0, 0, 0]
-        crc_extra = 120
+        crc_extra = 244
         unpacker = struct.Struct('<ffH')
         instance_field = None
         instance_offset = -1
 
-        def __init__(self, uwb_address, location_x, location_y):
+        def __init__(self, mesh_address, location_x, location_y):
                 MAVLink_message.__init__(self, MAVLink_location_reduced_message.id, MAVLink_location_reduced_message.name)
                 self._fieldnames = MAVLink_location_reduced_message.fieldnames
                 self._instance_field = MAVLink_location_reduced_message.instance_field
                 self._instance_offset = MAVLink_location_reduced_message.instance_offset
-                self.uwb_address = uwb_address
+                self.mesh_address = mesh_address
                 self.location_x = location_x
                 self.location_y = location_y
 
         def pack(self, mav, force_mavlink1=False):
-                return MAVLink_message.pack(self, mav, 120, struct.pack('<ffH', self.location_x, self.location_y, self.uwb_address), force_mavlink1=force_mavlink1)
+                return MAVLink_message.pack(self, mav, 244, struct.pack('<ffH', self.location_x, self.location_y, self.mesh_address), force_mavlink1=force_mavlink1)
 
 class MAVLink_distance_message(MAVLink_message):
         '''
@@ -1133,27 +1133,27 @@ class MAVLink(object):
                 '''
                 return self.send(self.location_encode(uwb_address, location_x, location_y, location_z), force_mavlink1=force_mavlink1)
 
-        def location_reduced_encode(self, uwb_address, location_x, location_y):
+        def location_reduced_encode(self, mesh_address, location_x, location_y):
                 '''
                 Location message
 
-                uwb_address               :  (type:uint16_t)
+                mesh_address              :  (type:uint16_t)
                 location_x                :  (type:float)
                 location_y                :  (type:float)
 
                 '''
-                return MAVLink_location_reduced_message(uwb_address, location_x, location_y)
+                return MAVLink_location_reduced_message(mesh_address, location_x, location_y)
 
-        def location_reduced_send(self, uwb_address, location_x, location_y, force_mavlink1=False):
+        def location_reduced_send(self, mesh_address, location_x, location_y, force_mavlink1=False):
                 '''
                 Location message
 
-                uwb_address               :  (type:uint16_t)
+                mesh_address              :  (type:uint16_t)
                 location_x                :  (type:float)
                 location_y                :  (type:float)
 
                 '''
-                return self.send(self.location_reduced_encode(uwb_address, location_x, location_y), force_mavlink1=force_mavlink1)
+                return self.send(self.location_reduced_encode(mesh_address, location_x, location_y), force_mavlink1=force_mavlink1)
 
         def distance_encode(self, uwb_address, anchor, distance):
                 '''
