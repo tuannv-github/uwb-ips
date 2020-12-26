@@ -1,32 +1,32 @@
 
 syscfg.defs:
-    APP_RTLS_GATEWAY_TASK_STACK_SIZE:
+    TASK_LOCATION_STACK_SIZE:
         description: 'Size of task stack'
         value: 256
-    APP_RTLS_GATEWAY_TASK_PRIORITY:
-        description: 'Priority of task'
-        value: 200
-
-    APP_RTLS_LOCATION_TASK_STACK_SIZE:
-        description: 'Size of task stack'
-        value: 256
-    APP_RTLS_LOCATION_TASK_PRIORITY:
+    TASK_LOCATION_PRIORITY:
         description: 'Priority of task'
         value: 201
 
-    APP_RTLS_DISTANCE_TASK_STACK_SIZE:
+    TASK_BLINK_STACK_SIZE:
         description: 'Size of task stack'
         value: 256
-    APP_RTLS_DISTANCE_TASK_PRIORITY:
+    TASK_BLINK_PRIORITY:
         description: 'Priority of task'
         value: 202
 
-    TASK_LED_TASK_STACK_SIZE:
+    TASK_LED_STACK_SIZE:
         description: 'Size of task stack'
         value: 32
-    TASK_LED_TASK_PRIORITY:
+    TASK_LED_PRIORITY:
         description: 'Priority of task'
         value: 203
+
+    TASK_GATEWAY_STACK_SIZE:
+        description: 'Size of task stack'
+        value: 128
+    TASK_GATEWAY_PRIORITY:
+        description: 'Priority of task'
+        value: 204
 
     # NODE_START_SLOT_ID:
     #     description: >
@@ -97,7 +97,7 @@ syscfg.vals:
     BLE_MESH_TX_SEG_MSG_COUNT: 4
 
     TDMA_NSLOTS: 20
-    TDMA_TASK_STACK_SZ: 1024
+    TDMA_TASK_STACK_SZ: 512
 
     RNG_VERBOSE: 0
     # NRNG_VERBOSE: 1

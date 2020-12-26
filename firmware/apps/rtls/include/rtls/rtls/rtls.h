@@ -14,7 +14,7 @@ typedef struct{
     };
 }distance_t;
 
-void rtls_get_location(float *x, float *y, float *z);
+bool rtls_get_location(float *x, float *y, float *z);
 void rtls_set_location(float x, float y, float z);
 
 void rtls_get_address(uint16_t *address);

@@ -28,18 +28,26 @@ typedef struct _msg_rtls_t
 {
     struct _msg_rtls_header_t
     {
-        uint16_t mesh_address;
-        uint16_t uwb_address;
-        uint8_t type;
         uint32_t opcode;
+        uint8_t  msg_id;
+        uint16_t uwb_address;
+        uint16_t mesh_address;
     };
     union{
+        struct _msg_blink_t
+        {
+            uint8_t role;
+        };
         struct _msg_rtls_location_t
         {
-            uint8_t node_type;
             float location_x;
             float location_y;
             float location_z;
+        };
+        struct _msg_rtls_location_reduced_t
+        {
+            float loca_reduced_x;
+            float loca_reduced_y;
         };
         struct _msg_rtls_onoff_t
         {

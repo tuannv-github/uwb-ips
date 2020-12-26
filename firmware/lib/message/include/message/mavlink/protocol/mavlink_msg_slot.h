@@ -1,45 +1,39 @@
 #pragma once
 // MESSAGE SLOT PACKING
 
-#define MAVLINK_MSG_ID_SLOT 5
+#define MAVLINK_MSG_ID_SLOT 7
 
 
 typedef struct __mavlink_slot_t {
- uint16_t mesh_address; /*<  */
  uint16_t uwb_address; /*<  */
- uint8_t type; /*<  */
  uint8_t slot; /*<  */
 } mavlink_slot_t;
 
-#define MAVLINK_MSG_ID_SLOT_LEN 6
-#define MAVLINK_MSG_ID_SLOT_MIN_LEN 6
-#define MAVLINK_MSG_ID_5_LEN 6
-#define MAVLINK_MSG_ID_5_MIN_LEN 6
+#define MAVLINK_MSG_ID_SLOT_LEN 3
+#define MAVLINK_MSG_ID_SLOT_MIN_LEN 3
+#define MAVLINK_MSG_ID_7_LEN 3
+#define MAVLINK_MSG_ID_7_MIN_LEN 3
 
-#define MAVLINK_MSG_ID_SLOT_CRC 15
-#define MAVLINK_MSG_ID_5_CRC 15
+#define MAVLINK_MSG_ID_SLOT_CRC 177
+#define MAVLINK_MSG_ID_7_CRC 177
 
 
 
 #if MAVLINK_COMMAND_24BIT
 #define MAVLINK_MESSAGE_INFO_SLOT { \
-    5, \
+    7, \
     "SLOT", \
-    4, \
-    {  { "mesh_address", NULL, MAVLINK_TYPE_UINT16_T, 0, 0, offsetof(mavlink_slot_t, mesh_address) }, \
-         { "uwb_address", NULL, MAVLINK_TYPE_UINT16_T, 0, 2, offsetof(mavlink_slot_t, uwb_address) }, \
-         { "type", NULL, MAVLINK_TYPE_UINT8_T, 0, 4, offsetof(mavlink_slot_t, type) }, \
-         { "slot", NULL, MAVLINK_TYPE_UINT8_T, 0, 5, offsetof(mavlink_slot_t, slot) }, \
+    2, \
+    {  { "uwb_address", NULL, MAVLINK_TYPE_UINT16_T, 0, 0, offsetof(mavlink_slot_t, uwb_address) }, \
+         { "slot", NULL, MAVLINK_TYPE_UINT8_T, 0, 2, offsetof(mavlink_slot_t, slot) }, \
          } \
 }
 #else
 #define MAVLINK_MESSAGE_INFO_SLOT { \
     "SLOT", \
-    4, \
-    {  { "mesh_address", NULL, MAVLINK_TYPE_UINT16_T, 0, 0, offsetof(mavlink_slot_t, mesh_address) }, \
-         { "uwb_address", NULL, MAVLINK_TYPE_UINT16_T, 0, 2, offsetof(mavlink_slot_t, uwb_address) }, \
-         { "type", NULL, MAVLINK_TYPE_UINT8_T, 0, 4, offsetof(mavlink_slot_t, type) }, \
-         { "slot", NULL, MAVLINK_TYPE_UINT8_T, 0, 5, offsetof(mavlink_slot_t, slot) }, \
+    2, \
+    {  { "uwb_address", NULL, MAVLINK_TYPE_UINT16_T, 0, 0, offsetof(mavlink_slot_t, uwb_address) }, \
+         { "slot", NULL, MAVLINK_TYPE_UINT8_T, 0, 2, offsetof(mavlink_slot_t, slot) }, \
          } \
 }
 #endif
@@ -50,28 +44,22 @@ typedef struct __mavlink_slot_t {
  * @param component_id ID of this component (e.g. 200 for IMU)
  * @param msg The MAVLink message to compress the data into
  *
- * @param mesh_address  
  * @param uwb_address  
- * @param type  
  * @param slot  
  * @return length of the message in bytes (excluding serial stream start sign)
  */
 static inline uint16_t mavlink_msg_slot_pack(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg,
-                               uint16_t mesh_address, uint16_t uwb_address, uint8_t type, uint8_t slot)
+                               uint16_t uwb_address, uint8_t slot)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char buf[MAVLINK_MSG_ID_SLOT_LEN];
-    _mav_put_uint16_t(buf, 0, mesh_address);
-    _mav_put_uint16_t(buf, 2, uwb_address);
-    _mav_put_uint8_t(buf, 4, type);
-    _mav_put_uint8_t(buf, 5, slot);
+    _mav_put_uint16_t(buf, 0, uwb_address);
+    _mav_put_uint8_t(buf, 2, slot);
 
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), buf, MAVLINK_MSG_ID_SLOT_LEN);
 #else
     mavlink_slot_t packet;
-    packet.mesh_address = mesh_address;
     packet.uwb_address = uwb_address;
-    packet.type = type;
     packet.slot = slot;
 
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), &packet, MAVLINK_MSG_ID_SLOT_LEN);
@@ -87,29 +75,23 @@ static inline uint16_t mavlink_msg_slot_pack(uint8_t system_id, uint8_t componen
  * @param component_id ID of this component (e.g. 200 for IMU)
  * @param chan The MAVLink channel this message will be sent over
  * @param msg The MAVLink message to compress the data into
- * @param mesh_address  
  * @param uwb_address  
- * @param type  
  * @param slot  
  * @return length of the message in bytes (excluding serial stream start sign)
  */
 static inline uint16_t mavlink_msg_slot_pack_chan(uint8_t system_id, uint8_t component_id, uint8_t chan,
                                mavlink_message_t* msg,
-                                   uint16_t mesh_address,uint16_t uwb_address,uint8_t type,uint8_t slot)
+                                   uint16_t uwb_address,uint8_t slot)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char buf[MAVLINK_MSG_ID_SLOT_LEN];
-    _mav_put_uint16_t(buf, 0, mesh_address);
-    _mav_put_uint16_t(buf, 2, uwb_address);
-    _mav_put_uint8_t(buf, 4, type);
-    _mav_put_uint8_t(buf, 5, slot);
+    _mav_put_uint16_t(buf, 0, uwb_address);
+    _mav_put_uint8_t(buf, 2, slot);
 
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), buf, MAVLINK_MSG_ID_SLOT_LEN);
 #else
     mavlink_slot_t packet;
-    packet.mesh_address = mesh_address;
     packet.uwb_address = uwb_address;
-    packet.type = type;
     packet.slot = slot;
 
         memcpy(_MAV_PAYLOAD_NON_CONST(msg), &packet, MAVLINK_MSG_ID_SLOT_LEN);
@@ -129,7 +111,7 @@ static inline uint16_t mavlink_msg_slot_pack_chan(uint8_t system_id, uint8_t com
  */
 static inline uint16_t mavlink_msg_slot_encode(uint8_t system_id, uint8_t component_id, mavlink_message_t* msg, const mavlink_slot_t* slot)
 {
-    return mavlink_msg_slot_pack(system_id, component_id, msg, slot->mesh_address, slot->uwb_address, slot->type, slot->slot);
+    return mavlink_msg_slot_pack(system_id, component_id, msg, slot->uwb_address, slot->slot);
 }
 
 /**
@@ -143,35 +125,29 @@ static inline uint16_t mavlink_msg_slot_encode(uint8_t system_id, uint8_t compon
  */
 static inline uint16_t mavlink_msg_slot_encode_chan(uint8_t system_id, uint8_t component_id, uint8_t chan, mavlink_message_t* msg, const mavlink_slot_t* slot)
 {
-    return mavlink_msg_slot_pack_chan(system_id, component_id, chan, msg, slot->mesh_address, slot->uwb_address, slot->type, slot->slot);
+    return mavlink_msg_slot_pack_chan(system_id, component_id, chan, msg, slot->uwb_address, slot->slot);
 }
 
 /**
  * @brief Send a slot message
  * @param chan MAVLink channel to send the message
  *
- * @param mesh_address  
  * @param uwb_address  
- * @param type  
  * @param slot  
  */
 #ifdef MAVLINK_USE_CONVENIENCE_FUNCTIONS
 
-static inline void mavlink_msg_slot_send(mavlink_channel_t chan, uint16_t mesh_address, uint16_t uwb_address, uint8_t type, uint8_t slot)
+static inline void mavlink_msg_slot_send(mavlink_channel_t chan, uint16_t uwb_address, uint8_t slot)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char buf[MAVLINK_MSG_ID_SLOT_LEN];
-    _mav_put_uint16_t(buf, 0, mesh_address);
-    _mav_put_uint16_t(buf, 2, uwb_address);
-    _mav_put_uint8_t(buf, 4, type);
-    _mav_put_uint8_t(buf, 5, slot);
+    _mav_put_uint16_t(buf, 0, uwb_address);
+    _mav_put_uint8_t(buf, 2, slot);
 
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_SLOT, buf, MAVLINK_MSG_ID_SLOT_MIN_LEN, MAVLINK_MSG_ID_SLOT_LEN, MAVLINK_MSG_ID_SLOT_CRC);
 #else
     mavlink_slot_t packet;
-    packet.mesh_address = mesh_address;
     packet.uwb_address = uwb_address;
-    packet.type = type;
     packet.slot = slot;
 
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_SLOT, (const char *)&packet, MAVLINK_MSG_ID_SLOT_MIN_LEN, MAVLINK_MSG_ID_SLOT_LEN, MAVLINK_MSG_ID_SLOT_CRC);
@@ -186,7 +162,7 @@ static inline void mavlink_msg_slot_send(mavlink_channel_t chan, uint16_t mesh_a
 static inline void mavlink_msg_slot_send_struct(mavlink_channel_t chan, const mavlink_slot_t* slot)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
-    mavlink_msg_slot_send(chan, slot->mesh_address, slot->uwb_address, slot->type, slot->slot);
+    mavlink_msg_slot_send(chan, slot->uwb_address, slot->slot);
 #else
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_SLOT, (const char *)slot, MAVLINK_MSG_ID_SLOT_MIN_LEN, MAVLINK_MSG_ID_SLOT_LEN, MAVLINK_MSG_ID_SLOT_CRC);
 #endif
@@ -200,21 +176,17 @@ static inline void mavlink_msg_slot_send_struct(mavlink_channel_t chan, const ma
   is usually the receive buffer for the channel, and allows a reply to an
   incoming message with minimum stack space usage.
  */
-static inline void mavlink_msg_slot_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  uint16_t mesh_address, uint16_t uwb_address, uint8_t type, uint8_t slot)
+static inline void mavlink_msg_slot_send_buf(mavlink_message_t *msgbuf, mavlink_channel_t chan,  uint16_t uwb_address, uint8_t slot)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
     char *buf = (char *)msgbuf;
-    _mav_put_uint16_t(buf, 0, mesh_address);
-    _mav_put_uint16_t(buf, 2, uwb_address);
-    _mav_put_uint8_t(buf, 4, type);
-    _mav_put_uint8_t(buf, 5, slot);
+    _mav_put_uint16_t(buf, 0, uwb_address);
+    _mav_put_uint8_t(buf, 2, slot);
 
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_SLOT, buf, MAVLINK_MSG_ID_SLOT_MIN_LEN, MAVLINK_MSG_ID_SLOT_LEN, MAVLINK_MSG_ID_SLOT_CRC);
 #else
     mavlink_slot_t *packet = (mavlink_slot_t *)msgbuf;
-    packet->mesh_address = mesh_address;
     packet->uwb_address = uwb_address;
-    packet->type = type;
     packet->slot = slot;
 
     _mav_finalize_message_chan_send(chan, MAVLINK_MSG_ID_SLOT, (const char *)packet, MAVLINK_MSG_ID_SLOT_MIN_LEN, MAVLINK_MSG_ID_SLOT_LEN, MAVLINK_MSG_ID_SLOT_CRC);
@@ -228,33 +200,13 @@ static inline void mavlink_msg_slot_send_buf(mavlink_message_t *msgbuf, mavlink_
 
 
 /**
- * @brief Get field mesh_address from slot message
- *
- * @return  
- */
-static inline uint16_t mavlink_msg_slot_get_mesh_address(const mavlink_message_t* msg)
-{
-    return _MAV_RETURN_uint16_t(msg,  0);
-}
-
-/**
  * @brief Get field uwb_address from slot message
  *
  * @return  
  */
 static inline uint16_t mavlink_msg_slot_get_uwb_address(const mavlink_message_t* msg)
 {
-    return _MAV_RETURN_uint16_t(msg,  2);
-}
-
-/**
- * @brief Get field type from slot message
- *
- * @return  
- */
-static inline uint8_t mavlink_msg_slot_get_type(const mavlink_message_t* msg)
-{
-    return _MAV_RETURN_uint8_t(msg,  4);
+    return _MAV_RETURN_uint16_t(msg,  0);
 }
 
 /**
@@ -264,7 +216,7 @@ static inline uint8_t mavlink_msg_slot_get_type(const mavlink_message_t* msg)
  */
 static inline uint8_t mavlink_msg_slot_get_slot(const mavlink_message_t* msg)
 {
-    return _MAV_RETURN_uint8_t(msg,  5);
+    return _MAV_RETURN_uint8_t(msg,  2);
 }
 
 /**
@@ -276,9 +228,7 @@ static inline uint8_t mavlink_msg_slot_get_slot(const mavlink_message_t* msg)
 static inline void mavlink_msg_slot_decode(const mavlink_message_t* msg, mavlink_slot_t* slot)
 {
 #if MAVLINK_NEED_BYTE_SWAP || !MAVLINK_ALIGNED_FIELDS
-    slot->mesh_address = mavlink_msg_slot_get_mesh_address(msg);
     slot->uwb_address = mavlink_msg_slot_get_uwb_address(msg);
-    slot->type = mavlink_msg_slot_get_type(msg);
     slot->slot = mavlink_msg_slot_get_slot(msg);
 #else
         uint8_t len = msg->len < MAVLINK_MSG_ID_SLOT_LEN? msg->len : MAVLINK_MSG_ID_SLOT_LEN;

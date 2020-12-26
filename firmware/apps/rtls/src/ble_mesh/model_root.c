@@ -17,18 +17,15 @@
 #include <rtls/rtls/rtls.h>
 
 #include <stats/stats.h>
+#include <rtls_tdma/rtls_tdma.h>
 
 #define LED_DELAY_MS    200
 #define LIGHT_BULB_0    9
 #define LIGHT_BULB_1    10
 
 STATS_SECT_START(model_root_stat_t)
-    STATS_SECT_ENTRY(send_loca_succed)
-    STATS_SECT_ENTRY(send_loca_failed)
-    STATS_SECT_ENTRY(send_dist_succed)
-    STATS_SECT_ENTRY(send_dist_failed)
-    STATS_SECT_ENTRY(send_slot_succed)
-    STATS_SECT_ENTRY(send_slot_failed)
+    STATS_SECT_ENTRY(publish_succed)
+    STATS_SECT_ENTRY(publish_failed)
     STATS_SECT_ENTRY(recv_setmsg)
     STATS_SECT_ENTRY(recv_sttmsg)
 STATS_SECT_END
@@ -36,49 +33,41 @@ STATS_SECT_END
 STATS_SECT_DECL(model_root_stat_t) g_model_root_stat;
 
 STATS_NAME_START(model_root_stat_t)
-    STATS_NAME(model_root_stat_t, send_loca_succed)
-    STATS_NAME(model_root_stat_t, send_loca_failed)
-    STATS_NAME(model_root_stat_t, send_dist_succed)
-    STATS_NAME(model_root_stat_t, send_dist_failed)
-    STATS_NAME(model_root_stat_t, send_slot_succed)
-    STATS_NAME(model_root_stat_t, send_slot_failed)
+    STATS_NAME(model_root_stat_t, publish_succed)
+    STATS_NAME(model_root_stat_t, publish_failed)
     STATS_NAME(model_root_stat_t, recv_setmsg)
     STATS_NAME(model_root_stat_t, recv_sttmsg)
 STATS_NAME_END(model_root_stat_t)
 
-static struct os_task g_rtls_location_task;
-static os_stack_t g_task_rtls_location_stack[MYNEWT_VAL(APP_RTLS_LOCATION_TASK_STACK_SIZE)];
+static struct os_task g_task_blink;
+static os_stack_t g_task_blink_stack[MYNEWT_VAL(TASK_BLINK_STACK_SIZE)];
 
-static struct os_task g_rtls_distance_task;
-static os_stack_t g_task_rtls_distance_stack[MYNEWT_VAL(APP_RTLS_DISTANCE_TASK_STACK_SIZE)];
+static struct os_task g_task_location;
+static os_stack_t g_task_location_stack[MYNEWT_VAL(TASK_LOCATION_STACK_SIZE)];
 
-struct os_mutex g_location_distance_mutex;
+struct os_mutex g_model_mutex;
 
 static struct os_task g_led_task;
-static os_stack_t g_task_led_stack[MYNEWT_VAL(TASK_LED_TASK_STACK_SIZE)];
+static os_stack_t g_task_led_stack[MYNEWT_VAL(TASK_LED_STACK_SIZE)];
 static bool g_led_running = false;
 
 static void
 rtls_model_set(struct bt_mesh_model *model,
               struct bt_mesh_msg_ctx *ctx,
               struct os_mbuf *buf)
-{  
+{
     STATS_INC(g_model_root_stat, recv_setmsg);
     msg_rtls_t msg_rtls;
     uint16_t uwb_address;
     msg_parse_rtls(buf, &msg_rtls);
     rtls_get_address(&uwb_address);
     if(msg_rtls.uwb_address != uwb_address) return;
+    msg_rtls.opcode = BT_MESH_MODEL_OP_SET;
 
-    switch (msg_rtls.type)
+    switch (msg_rtls.msg_id)
     {
     case MAVLINK_MSG_ID_LOCATION:
     {
-        uint8_t ntype;
-        rtls_get_ntype(&ntype);
-        if(ntype != msg_rtls.node_type){
-            rtls_set_ntype(msg_rtls.node_type);
-        }
         rtls_set_location(msg_rtls.location_x, msg_rtls.location_y, msg_rtls.location_z);
         msg_print_rtls(&msg_rtls);
     }
@@ -138,110 +127,104 @@ static struct bt_mesh_model_pub *pub;
 static msg_rtls_t msg_rtls;
 
 static void
-task_rtls_location_func(void *arg){
+task_blink_func(void *arg){
     uint8_t cnt = 0;
     while (1) {
-        os_mutex_pend(&g_location_distance_mutex, OS_TIMEOUT_NEVER);
-
         dpl_time_delay(dpl_time_ms_to_ticks32(1000));
         if (pub->addr == BT_MESH_ADDR_UNASSIGNED) continue;
+        os_mutex_pend(&g_model_mutex, OS_TIMEOUT_NEVER);
 
         cnt++;
-
         switch (cnt%3)
         {
-        case 0: {
-            msg_rtls.type = MAVLINK_MSG_ID_LOCATION;
-            msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
-            rtls_get_ntype(&msg_rtls.node_type);
-            rtls_get_address(&msg_rtls.uwb_address);
-            rtls_get_location(&msg_rtls.location_x, &msg_rtls.location_y, &msg_rtls.location_z);
+        case 0:{
+                msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
+                msg_rtls.msg_id = MAVLINK_MSG_ID_BLINK;
+                rtls_get_address(&msg_rtls.uwb_address);
 
-            msg_prepr_rtls(&pub->msg, &msg_rtls);
+                rtls_get_ntype(&msg_rtls.role);
 
-            int err = bt_mesh_model_publish(model);
-            if (err) {
-                STATS_INC(g_model_root_stat, send_loca_failed);
+                msg_prepr_rtls(&pub->msg, &msg_rtls);
             }
-            else{
-                STATS_INC(g_model_root_stat, send_loca_succed);
-            }
-        }
             break;
-        case 1:{
-            msg_rtls.type = MAVLINK_MSG_ID_SLOT;
-            msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
-            rtls_get_ntype(&msg_rtls.node_type);
-            rtls_get_address(&msg_rtls.uwb_address);
-            rtls_get_slot(&msg_rtls.slot);
+        case 1:
+            {
+                msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
+                msg_rtls.msg_id = MAVLINK_MSG_ID_SLOT;
+                rtls_get_address(&msg_rtls.uwb_address);
 
-            msg_prepr_rtls(&pub->msg, &msg_rtls);
+                rtls_get_slot(&msg_rtls.slot);
 
-            int err = bt_mesh_model_publish(model);
-            if (err) {
-                STATS_INC(g_model_root_stat, send_slot_failed);
+                msg_prepr_rtls(&pub->msg, &msg_rtls);
             }
-            else{
-                STATS_INC(g_model_root_stat, send_slot_succed);
-            }
-        }
             break;
-        case 2:{
-            msg_rtls.type = MAVLINK_MSG_ID_ONOFF;
-            msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
-            rtls_get_ntype(&msg_rtls.node_type);
-            rtls_get_address(&msg_rtls.uwb_address);
-            if(g_led_running){
-                msg_rtls.value = g_led_running;
+        case 2:
+            {
+                msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
+                msg_rtls.msg_id = MAVLINK_MSG_ID_ONOFF;
+                rtls_get_address(&msg_rtls.uwb_address);
+                
+                if(g_led_running){
+                    msg_rtls.value = g_led_running;
+                }
+                else{
+                    msg_rtls.value = (!hal_gpio_read(LIGHT_BULB_0) << 1) | (!hal_gpio_read(LIGHT_BULB_1) << 2);
+                }
+                msg_prepr_rtls(&pub->msg, &msg_rtls);
             }
-            else{
-                msg_rtls.value = (!hal_gpio_read(LIGHT_BULB_0) << 1) | (!hal_gpio_read(LIGHT_BULB_1) << 2);
-            }
-            msg_prepr_rtls(&pub->msg, &msg_rtls);
-            bt_mesh_model_publish(model);
-        }
             break;
         }
 
+        if (bt_mesh_model_publish(model)) {
+            STATS_INC(g_model_root_stat, publish_failed);
+        }
+        else{
+            STATS_INC(g_model_root_stat, publish_succed);
+        }
         os_mbuf_free(pub->msg);
 
-        os_mutex_release(&g_location_distance_mutex);
+        os_mutex_release(&g_model_mutex);
     }
 }
 
 static void
-task_rtls_distance_func(void *arg){
+task_location_func(void *arg){
+
+    uint8_t node_type;
     while(1){
-        os_mutex_pend(&g_location_distance_mutex, OS_TIMEOUT_NEVER);
-        dpl_time_delay(dpl_time_ms_to_ticks32(100));
-        if (pub->addr == BT_MESH_ADDR_UNASSIGNED) continue;
+        rtls_get_ntype(&node_type);
+        if(node_type == RTR_ANCHOR){
+            dpl_time_delay(dpl_time_ms_to_ticks32(5000));
+            if (pub->addr == BT_MESH_ADDR_UNASSIGNED) continue;
 
-        distance_t *distances = get_distances();
-        for(int i=0; i<ANCHOR_NUM; i++){
-            if(distances->updated[i]){
-                distances->updated[i] = false;
+            os_mutex_pend(&g_model_mutex, OS_TIMEOUT_NEVER);
+            msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
+            msg_rtls.msg_id = MAVLINK_MSG_ID_LOCATION;
+            rtls_get_address(&msg_rtls.uwb_address);
+        }
+        else{
+            dpl_time_delay(dpl_time_ms_to_ticks32(MYNEWT_VAL(UWB_CCP_PERIOD)/1000));
+            if (pub->addr == BT_MESH_ADDR_UNASSIGNED) continue;
 
-                msg_rtls.type = MAVLINK_MSG_ID_TOF;
-                msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
-                rtls_get_address(&msg_rtls.uwb_address);
-                msg_rtls.anchor = distances->anchors[i];
-                msg_rtls.tof = distances->tofs[i];
-
-                msg_prepr_rtls(&pub->msg, &msg_rtls);
-
-                int err = bt_mesh_model_publish(model);
-                if (err) {
-                    STATS_INC(g_model_root_stat, send_dist_failed);
-                }
-                else{
-                    STATS_INC(g_model_root_stat, send_dist_succed);
-                }
-                os_mbuf_free(pub->msg);
-                dpl_time_delay(dpl_time_ms_to_ticks32(100));
-            }
+            os_mutex_pend(&g_model_mutex, OS_TIMEOUT_NEVER);
+            msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
+            msg_rtls.msg_id = MAVLINK_MSG_ID_LOCATION_REDUCED;
+            rtls_get_address(&msg_rtls.uwb_address);
         }
 
-        os_mutex_release(&g_location_distance_mutex);
+        if(rtls_get_location(&msg_rtls.location_x, &msg_rtls.location_y, &msg_rtls.location_z)){
+            msg_prepr_rtls(&pub->msg, &msg_rtls);
+
+            if (bt_mesh_model_publish(model)) {
+                STATS_INC(g_model_root_stat, publish_failed);
+            }
+            else{
+                STATS_INC(g_model_root_stat, publish_succed);
+            }
+            os_mbuf_free(pub->msg);
+        }
+
+        os_mutex_release(&g_model_mutex);
     }
 }
 
@@ -296,31 +279,31 @@ void model_gateway_init(){
     hal_gpio_init_out(9, 1);
     hal_gpio_init_out(10, 1);
 
-    os_mutex_init(&g_location_distance_mutex);
+    os_mutex_init(&g_model_mutex);
 
     os_task_init(&g_led_task, "led",
                 task_led_func,
                 NULL,
-                MYNEWT_VAL(TASK_LED_TASK_PRIORITY), 
+                MYNEWT_VAL(TASK_LED_PRIORITY), 
                 OS_WAIT_FOREVER,
                 g_task_led_stack,
-                MYNEWT_VAL(TASK_LED_TASK_STACK_SIZE));
+                MYNEWT_VAL(TASK_LED_STACK_SIZE));
     
-    os_task_init(&g_rtls_location_task, "location",
-                task_rtls_location_func,
+    os_task_init(&g_task_blink, "blink",
+                task_blink_func,
                 NULL,
-                MYNEWT_VAL(APP_RTLS_LOCATION_TASK_PRIORITY), 
+                MYNEWT_VAL(TASK_BLINK_PRIORITY), 
                 OS_WAIT_FOREVER,
-                g_task_rtls_location_stack,
-                MYNEWT_VAL(APP_RTLS_LOCATION_TASK_STACK_SIZE));
+                g_task_blink_stack,
+                MYNEWT_VAL(TASK_BLINK_STACK_SIZE));
 
-    os_task_init(&g_rtls_distance_task, "distance",
-                task_rtls_distance_func,
+    os_task_init(&g_task_location, "location",
+                task_location_func,
                 NULL,
-                MYNEWT_VAL(APP_RTLS_DISTANCE_TASK_PRIORITY), 
+                MYNEWT_VAL(TASK_LOCATION_PRIORITY), 
                 OS_WAIT_FOREVER,
-                g_task_rtls_distance_stack,
-                MYNEWT_VAL(APP_RTLS_DISTANCE_TASK_STACK_SIZE));
+                g_task_location_stack,
+                MYNEWT_VAL(TASK_LOCATION_STACK_SIZE));
 
     rc = stats_init(
         STATS_HDR(g_model_root_stat),
