@@ -154,6 +154,13 @@ process_ble_to_net_queue(struct os_event *ev)
         
         len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
         serial_write(mav_send_buf, len);
+
+        if(msg_rtls.msg_id == MAVLINK_MSG_ID_BLINK){
+            mavlink_msg_ble_mesh_pack(0, 0, &mavlink_msg, msg_rtls.uwb_address, msg_rtls.mesh_address);
+            len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
+            serial_write(mav_send_buf, len);
+        }
+
         os_mbuf_free_chain(om);
         hal_gpio_write(LED_UPLINK_1, LED_OFF);
     }

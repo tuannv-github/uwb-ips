@@ -55,23 +55,19 @@ static void
 rtls_model_set(struct bt_mesh_model *model,
               struct bt_mesh_msg_ctx *ctx,
               struct os_mbuf *buf)
-{  
+{
     STATS_INC(g_model_root_stat, recv_setmsg);
     msg_rtls_t msg_rtls;
     uint16_t uwb_address;
     msg_parse_rtls(buf, &msg_rtls);
     rtls_get_address(&uwb_address);
     if(msg_rtls.uwb_address != uwb_address) return;
+    msg_rtls.opcode = BT_MESH_MODEL_OP_SET;
 
     switch (msg_rtls.msg_id)
     {
     case MAVLINK_MSG_ID_LOCATION:
     {
-        uint8_t ntype;
-        rtls_get_ntype(&ntype);
-        if(ntype != msg_rtls.role){
-            rtls_set_ntype(msg_rtls.role);
-        }
         rtls_set_location(msg_rtls.location_x, msg_rtls.location_y, msg_rtls.location_z);
         msg_print_rtls(&msg_rtls);
     }
@@ -134,7 +130,7 @@ static void
 task_blink_func(void *arg){
     uint8_t cnt = 0;
     while (1) {
-        dpl_time_delay(dpl_time_ms_to_ticks32(500));
+        dpl_time_delay(dpl_time_ms_to_ticks32(1000));
         if (pub->addr == BT_MESH_ADDR_UNASSIGNED) continue;
         os_mutex_pend(&g_model_mutex, OS_TIMEOUT_NEVER);
 
@@ -201,23 +197,25 @@ task_location_func(void *arg){
             dpl_time_delay(dpl_time_ms_to_ticks32(5000));
             if (pub->addr == BT_MESH_ADDR_UNASSIGNED) continue;
 
-            // os_mutex_pend(&g_model_mutex, OS_TIMEOUT_NEVER);
-            // msg_rtls.type = MAVLINK_MSG_ID_LOCATION;
-            // msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
-            // rtls_get_ntype(&msg_rtls.node_type);
-            // rtls_get_address(&msg_rtls.uwb_address);
-            // if(rtls_get_location(&msg_rtls.location_x, &msg_rtls.location_y, &msg_rtls.location_z)){
-            //     msg_prepr_rtls(&pub->msg, &msg_rtls);
+            os_mutex_pend(&g_model_mutex, OS_TIMEOUT_NEVER);
+            
+            msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
+            msg_rtls.msg_id = MAVLINK_MSG_ID_LOCATION;
+            rtls_get_address(&msg_rtls.uwb_address);
 
-            //     if (bt_mesh_model_publish(model)) {
-            //         STATS_INC(g_model_root_stat, publish_failed);
-            //     }
-            //     else{
-            //         STATS_INC(g_model_root_stat, publish_succed);
-            //     }
-            //     os_mbuf_free(pub->msg);
-            // }
-            // os_mutex_release(&g_model_mutex);
+            if(rtls_get_location(&msg_rtls.location_x, &msg_rtls.location_y, &msg_rtls.location_z)){
+                msg_prepr_rtls(&pub->msg, &msg_rtls);
+
+                if (bt_mesh_model_publish(model)) {
+                    STATS_INC(g_model_root_stat, publish_failed);
+                }
+                else{
+                    STATS_INC(g_model_root_stat, publish_succed);
+                }
+                os_mbuf_free(pub->msg);
+            }
+
+            os_mutex_release(&g_model_mutex);
         }
         else if(node_type == RTR_TAG){
             dpl_time_delay(dpl_time_ms_to_ticks32(MYNEWT_VAL(UWB_CCP_PERIOD)/1000));

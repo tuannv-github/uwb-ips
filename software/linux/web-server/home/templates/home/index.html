@@ -140,17 +140,9 @@ function find_node(nodeList, address){
 function handler_blink(msg){
 	node = find_node(nodeList, msg.uwb_address);
 
-	if(node){
-		if(!nodeList[i].editing){
-			nodeUpdate(i, node);
-			plot(nodeList);
-			$('#node' + msg.uwb_address + 'meshAddressHex').text(dec2hexString(parseInt(msg.mesh_address)));
-		}
-	}
-	else{
+	if(!node){
 		node = new Node(msg.uwb_address, msg.role);
 		nodeList.push(node);
-		plot(nodeList);
 
 		console.log("Add: "+ node.toString());
 		$('#idNodeList').append(
@@ -177,7 +169,7 @@ function handler_blink(msg){
 function handler_location(msg){
 	node = find_node(nodeList, msg.uwb_address);
 	if(node){
-		// node.locationX = msg.
+		nodeLocationUpdate(node, msg.location_x, msg.location_y, msg.location_z);
 	}
 }
 
@@ -315,7 +307,6 @@ function localization(tag){
 		tag.locationX = P[0];
 		tag.locationY = P[1];
 		tag.locationZ = P[2];
-		plot(nodeList);
 	}
 }
 
@@ -492,7 +483,7 @@ function handler_distance(msg){
 	localization(tag);
 }
 
-myNodeList = new Object();
+myNodeList = new Object()
 
 function dataUpdateNode(address, role, x, y, z){
 	if(address in myNodeList){
@@ -537,6 +528,10 @@ function handler_tag(msg){
 	dataUpdateNode(msg.t0, "TAG", 	 msg.t0x, msg.t0y, msg.t0z);
 	plotNodes(myNodeList);
 	plotCircle(myNodeList);
+}
+
+function handler_ble_mesh(msg){
+	$('#node' + msg.uwb_address + 'meshAddressHex').text(dec2hexString(parseInt(msg.mesh_address)));
 }
 
 function guiAddNodes(address, role, x, y, z){
@@ -611,6 +606,9 @@ function onMessageArrived(message) {
 			case "SLOT":
 				handler_slot(msg);
 				break;
+			case "BLE_MESH":
+				handler_ble_mesh(msg);
+				break;
 			}
 		}
 		else if(document.getElementById("modeSelect").value == "Wi-Fi"){
@@ -682,24 +680,18 @@ const nodeTemplate = ({ address, uwbAddressHex, nodeRole, locationX, locationY, 
 </div>
 `;
 
-function nodeUpdate(idx, node){
-	nodeList[idx].type = node.type;
-	nodeList[idx].locationX = node.locationX;
-	nodeList[idx].locationY = node.locationY;
-	nodeList[idx].locationZ = node.locationZ;
+function nodeLocationUpdate(node, locationX, locationY, locationZ){
+	node.locationX = locationX;
+	node.locationY = locationY;
+	node.locationZ = locationZ;
 
-	switch(node.type){
-		case "ANCHOR":
-			$('#node' + node.address + 'Select').children("option")[0].selected = true;
-			break;
-		case "TAG":
-			$('#node' + node.address + 'Select').children("option")[1].selected = true;
-			break;
+	if(!node.editing){
+		$('#node' + node.uwb_address + "LocationX").val(node.locationX)
+		$('#node' + node.uwb_address + "LocationY").val(node.locationY)
+		$('#node' + node.uwb_address + "LocationZ").val(node.locationZ)
 	}
 
-	$('#node' + node.address + "LocationX").val(node.locationX)
-	$('#node' + node.address + "LocationY").val(node.locationY)
-	$('#node' + node.address + "LocationZ").val(node.locationZ)
+	plot(nodeList);
 }
 
 function onEditBtnClick(address){
@@ -749,7 +741,7 @@ function onUpdateBtnClick(address){
 		address = parseInt(address);
 		if(isNaN(locationX) || isNaN(locationY) || isNaN(locationZ)){
 			toastError("Invalid location");
-			return
+			return;
 		}
 		if(isNaN(address)){
 			toastError("Invalid node address");
@@ -760,7 +752,7 @@ function onUpdateBtnClick(address){
 			node = "ANCHOR";
 		else
 			node = "TAG";
-		cmd = '{"mavpackettype": "LOCATION", "uwb_address": ' + address + ', "node": "' + node + '", "type": "SET", "location_x": ' + locationX +', "location_y": ' + locationY + ', "location_z": ' + locationZ + '}';
+		cmd = '{"mavpackettype": "LOCATION", "uwb_address": ' + address + ', "location_x": ' + locationX +', "location_y": ' + locationY + ', "location_z": ' + locationZ + '}';
 
 		publish("{{topic_publish}}", cmd);
 	}
@@ -879,11 +871,11 @@ function onBulbBtnClick(address){
 		updateLayout = {};
 		for(i=0; i<nodeList.length; i++){
 			node = nodeList[i];
-			if(node.type == "ANCHOR"){
+			if(node.role == "ANCHOR"){
 				updateNode.x[0].push(node.locationX);
 				updateNode.y[0].push(node.locationY);
 			}
-			else if(node.type == "TAG"){
+			else if(node.role == "TAG"){
 				updateNode.x[1].push(node.locationX);
 				updateNode.y[1].push(node.locationY);
 			}

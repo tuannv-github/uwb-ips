@@ -66,6 +66,7 @@ void msg_prepr_rtls_pipe(struct os_mbuf *mbuf, msg_rtls_t *msg){
     net_buf_simple_add_be32(mbuf, msg->opcode);
     net_buf_simple_add_u8(mbuf, msg->msg_id);
     net_buf_simple_add_be16(mbuf, msg->uwb_address);
+    net_buf_simple_add_be16(mbuf, msg->mesh_address);
 
     switch (msg->msg_id)
     {
@@ -133,6 +134,7 @@ void msg_parse_rtls_pipe(struct os_mbuf *mbuf, msg_rtls_t *msg){
     msg->opcode = net_buf_simple_pull_be32(mbuf);
     msg->msg_id = net_buf_simple_pull_u8(mbuf);
     msg->uwb_address = net_buf_simple_pull_be16(mbuf);
+    msg->mesh_address = net_buf_simple_pull_be16(mbuf);
 
     switch (msg->msg_id)
     {
