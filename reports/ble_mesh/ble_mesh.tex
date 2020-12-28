@@ -199,6 +199,7 @@ All messages are encrypted and authenticated using two types of keys. One key ty
 \textbf{Initialization vector index}: A Network PDU contains a 24-bit sequence number that allows an element to transmit 16,777,216 Network PDUs. The sequence number is used in the security nonce to provide uniqueness; therefore the sequence number must not wrap. If an element is transmitting a new message at 2 Hz, then these sequence numbers would be exhausted after 97 days. To enable a mesh network to operate for longer periods of time than the sequence number space allows, an additional 4-octet value called the IV Index is defined that is included in the security nonce. For example, using the same 2 Hz message frequency would measure the lifetime of the network using the IV Index in billions of years.
 
 \section{Bluetooth mesh-based application with NimBLE}
+\label{sec:bluetooth_mesh_based_application_with_nimble}
 Apache NimBLE is an open-source Bluetooth 5.1 stack (both Host and Controller) that completely replaces the proprietary SoftDevice on Nordic chipsets. It is part of the Apache Mynewt project.
 
 The following are some highlighted features of NimBLE:
@@ -427,35 +428,58 @@ static const struct bt_mesh_model_op rtls_op[] = {
 \label{fig:mesh_model_operation_example}
 \end{figure}
 
+\section{Using Bluetooth mesh for best-effort broadcast service}
+\label{sec:using_bluetooth_mesh_for_best_effort_broadcast_service}
+In this thesis, all nodes subscribe and publish to a group address which is 0xC000. Anchors and tags subscribe to the SET operation and publish STATUS operation while gateways subscribe to STATUS operation and publish SET operation. This makes a SET message from a gateway broadcasted to all tags and anchors in the network and a STATUS message from an anchor or tag shall be transmitted to a gateway. Figure \ref{fig:ble_mesh_comunication} illustrates the idea of broadcast service over a publish-subscribe paradigm. Since the message sent to a group address is not acknowledged, the service provided by the network is the best-effort service. This means that there is no guarantee that the packet will be delivered to the final destination. 
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.7\textwidth]{ble_mesh_comunication.png}
+    \end{center}
+    \caption{ble mesh communication}
+    \label{fig:ble_mesh_comunication}
+\end{figure}
+
+In section \ref{sec:bluetooth_mesh_based_application_with_nimble}, the process of defining a Bluetooth mesh-based device has been introduced. In the next section, an Android application manipulated to make such devices communicate as discussed in this section will be described.
 \section{nRF Mesh Android application}
-The nRF Mesh application is a provisioner making an unprovisioned device become a node in the Bluetooth mesh network.
+The nRF Mesh application is a provisioner making an unprovisioned device become a node in the Bluetooth mesh network. 
+
+Figure \ref{fig:bluetooth_mesh_device_scan} shows that there is one mesh capable device around the provisioner. The address of the device in the network after being provisioned is configured as shown in figure \ref{fig:config_device_address}. This is the address of the primary element, all other elements of the node are addressed by increasing this value by 1 after each element.
 
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.4\linewidth}
         \centering
-        \includegraphics[width=0.9\linewidth]{nRF_Mesh_00.jpg}
+        \includegraphics[width=0.7\linewidth]{nRF_Mesh_00.jpg}
         \caption{Bluetooth mesh device scan}
+        \label{fig:bluetooth_mesh_device_scan}
     \end{subfigure}
     \begin{subfigure}[b]{0.4\linewidth}
         \centering
-        \includegraphics[width=0.9\linewidth]{nRF_Mesh_01.jpg}
+        \includegraphics[width=0.7\linewidth]{nRF_Mesh_01.jpg}
         \caption{Config device address}
+        \label{fig:config_device_address}
     \end{subfigure}
     \caption{Device provision with nRF Mesh}
     \label{fig:device_provision_with_nrf_mesh_00}
 \end{figure}
 
+Figure \ref{fig:device_provision_with_nrf_mesh_01} illustrates the provisioning process done automatically by the Android app and the mesh-capable device.
+
+After a device is successfully provision, a new node appears in the node list as shown in figure \ref{fig:bluetooth_mesh_node_list}. As given in figure \ref{fig:node_element}, the provisioner finds that the node has only one element consisting of two models. The model which has the ID 0x1000 is the custom model built in section \ref{sec:bluetooth_mesh_based_application_with_nimble}. 
+
+The final step is to assign an application key, publish and subscribe address for the model as illustrated in figure \ref{fig:element_configuration}. The publish and subscribe address is 0xC000 as discussed in section \ref{sec:using_bluetooth_mesh_for_best_effort_broadcast_service}.
+
 \begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.4\linewidth}
         \centering
-        \includegraphics[width=0.9\linewidth]{nRF_Mesh_02.jpg}
+        \includegraphics[width=0.65\linewidth]{nRF_Mesh_02.jpg}
         \caption{Bluetooth mesh provisioning}
     \end{subfigure}
     \begin{subfigure}[b]{0.4\linewidth}
         \centering
-        \includegraphics[width=0.9\linewidth]{nRF_Mesh_03.jpg}
+        \includegraphics[width=0.65\linewidth]{nRF_Mesh_03.jpg}
         \caption{Device provision complete}
     \end{subfigure}
     \caption{Device provision with nRF Mesh}
@@ -466,13 +490,15 @@ The nRF Mesh application is a provisioner making an unprovisioned device become 
     \centering
     \begin{subfigure}[b]{0.4\linewidth}
         \centering
-        \includegraphics[width=0.9\linewidth]{nRF_Mesh_04.jpg}
+        \includegraphics[width=0.65\linewidth]{nRF_Mesh_04.jpg}
         \caption{Bluetooth mesh node list}
+        \label{fig:bluetooth_mesh_node_list}
     \end{subfigure}
     \begin{subfigure}[b]{0.4\linewidth}
         \centering
-        \includegraphics[width=0.9\linewidth]{nRF_Mesh_05.jpg}
+        \includegraphics[width=0.65\linewidth]{nRF_Mesh_05.jpg}
         \caption{Node information tab}
+        \label{fig:node_element}
     \end{subfigure}
     \caption{Node information}
     \label{fig:node_information}
@@ -482,27 +508,16 @@ The nRF Mesh application is a provisioner making an unprovisioned device become 
     \centering
     \begin{subfigure}[b]{0.4\linewidth}
         \centering
-        \includegraphics[width=0.9\linewidth]{nRF_Mesh_06.jpg}
+        \includegraphics[width=0.7\linewidth]{nRF_Mesh_06.jpg}
         \caption{Element before configuration}
     \end{subfigure}
     \begin{subfigure}[b]{0.4\linewidth}
         \centering
-        \includegraphics[width=0.9\linewidth]{nRF_Mesh_07.jpg}
+        \includegraphics[width=0.7\linewidth]{nRF_Mesh_07.jpg}
         \caption{Element after configuration}
     \end{subfigure}
     \caption{Element configuration}
     \label{fig:element_configuration}
-\end{figure}
-
-\section{Using Bluetooth mesh for best-effort broadcast service}
-In this thesis, all nodes subscribe and publish to a group address which is 0xC000. Anchors and tags subscribe to the SET operation and publish STATUS operation while gateways subscribe to STATUS operation and publish SET operation. This makes a SET message from a gateway broadcasted to all tags and anchors in the network and a STATUS message from an anchor or tag may be transmitted to a gateway.
-
-\begin{figure}[H]
-    \begin{center}
-        \includegraphics[width=0.6\textwidth]{ble_mesh_comunication.png}
-    \end{center}
-    \caption{ble mesh communication}
-    \label{fig:ble_mesh_comunication}
 \end{figure}
 
 \bib
