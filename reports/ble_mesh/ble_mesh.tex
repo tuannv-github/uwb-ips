@@ -28,7 +28,7 @@ The Mesh Profile specification is defined as a layered architecture as shown in 
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.25]{ble_mesh_layered_architecture.png}
+        \includegraphics[width=0.4\textwidth]{ble_mesh_layered_architecture.png}
     \end{center}
     \caption{Mesh system architecture}
     \label{fig:ble_mesh_layered_architecture}
@@ -60,25 +60,24 @@ The bearer layer defines how network messages are transported between nodes. The
 defined, the advertising bearer and the GATT bearer. Additional bearers may be defined in the future.
 
 \subsection{Overview of mesh operation}
-The mesh network operation defined by this specification is designed to:
+The Bluetooth mesh network operation is designed to:
 \begin{itemize}
-    \item Enable messages to be sent from one element to one or more elements;
-    \item Allow messages to be relayed via other nodes to extend the range of communication;
+    \item Enable messages to be sent from one element to one or more elements
+    \item Allow messages to be relayed via other nodes to extend the range of communication
     \item Secure messages against known security attacks, including eavesdropping attacks, man-in-themiddle attacks, replay attacks, trash-can attacks, brute-force key attacks, and possible additional security attacks not documented here;
-    \item Work on existing devices in the market today;
-    \item Deliver messages in a timely manner;
-    \item Continue to work when one or more devices are moved or stop operating;
+    \item Work on existing devices in the market today
+    \item Deliver messages in a timely manner
+    \item Continue to work when one or more devices are moved or stop operating
     \item Have built-in forward compatibility to support future versions of the Mesh Profile specification
 \end{itemize}
 
-This specification defines a managed-flood-based mesh network, which uses broadcast channels to transmit messages so that other nodes can receive messages and relay these messages; thus extending the range of the original message. Any device in a managed-flood mesh network can send a message at any time as long as there is a sufficient density of devices that are listening and relaying messages. Enhancements to add routing functionality and define a routing-based mesh network may be considered for a future revision of this specification.
+Bluetooth mesh is a managed-flood-based network, which uses  broadcast channels to transmit messages so that other nodes can receive messages and relay these messages. Thus extending the range of the original message. Any device in a managed-flood mesh network can send a message at any time. As long as there is a sufficient density of devices that are listening and relaying, messages shall be delivered to the destination. 
 \newline\newline
-There are a number of methods used by this specification to restrict the unlimited relaying of messages in a managed-flood mesh network. The two main methods used are the network message cache method and the time to live method.
+There are a number of methods to restrict the unlimited relaying of messages in a managed-flood mesh network. The two main methods used are the \textbf{network message cache} method and the \textbf{time to live} method.
 \newline\newline
-The network message cache is designed to prevent devices from relaying previously received messages by adding all messages to a cached list. When a message is received, it is checked against the list and ignored if already present. If not already received, then it is added to the cache so that it can be ignored in
-the future. To prevent this list from becoming too long, the number of messages that are cached is limited by implementation.
+The \textbf{network message cache} is designed to prevent devices from relaying previously received messages by adding all messages to a cached list. When a message is received, it is checked against the list and ignored if already present. If not already received, then it is added to the cache so that it can be ignored in the future. To prevent this list from becoming too long, the number of messages that are cached is limited by implementation.
 \newline\newline
-Each message includes a Time to Live (TTL) value that limits the number of times a message can be relayed. Each time a message is received and then relayed (up to a maximum of 126 times) by a device, the TTL value is decremented by 1.
+Each message includes a \textbf{Time to Live} (TTL) value that limits the number of times a message can be relayed. Each time a message is received and then relayed (up to a maximum of 126 times) by a device, the TTL value is decremented by 1.
 
 \subsubsection{Network and subnets}
 A mesh network consists of nodes sharing four common resources:
@@ -89,11 +88,11 @@ A mesh network consists of nodes sharing four common resources:
     \item An IV Index used to extend the lifetime of the network
 \end{itemize}
 
-A network can have one or more subnets that facilitate ”area” isolation (e.g., isolated hotel room subnets within a hotel network). A subnet is a group of nodes that can communicate with each other at a network layer because they share a network key. A node may belong to one or more subnets by knowing one or more network keys. At the time of provisioning, a device is provisioned to one subnet and may be added to more subnets using the Configuration Model.
+A network can have one or more subnets that facilitate "area" isolation (e.g., isolated hotel room subnets within a hotel network). A subnet is a group of nodes that can communicate with each other at a network layer because they share a network key. A node may belong to one or more subnets by knowing one or more network keys. At the time of provisioning, a device is provisioned to one subnet and may be added to more subnets using the Configuration Model.
 \newline\newline
-There is one special subnet called the primary subnet, which is based on the primary NetKey. Nodes on the primary subnet participate in the IV Update procedure (see Section 3.10.5), and propagate IV updates to other subnets, while nodes on other subnets only propagate the IV Index updates to those subnets
+There is one special subnet called the primary subnet, which is based on the primary NetKey. Nodes on the primary subnet participate in the IV Update procedure, and propagate IV updates to other subnets, while nodes on other subnets only propagate the IV Index updates to those subnets
 \newline\newline
-The network resources are managed by a node that implements the Configuration Client model, known as the Configuration Client, (typically a smart phone or other mobile computing device) and are allocated to nodes at the time of configuration (see Section 5) using the Configuration Server model (see Section 4.4.1). In particular, a Provisioner manages allocation of addresses to make sure no duplicate unicast addresses are allocated, whereas a Configuration Client generates and distributes network and Mesh Profile / Specification Bluetooth SIG Proprietary Page 20 of 333 application keys and makes sure that devices that need to communicate with each other share proper keys for both network and access layers. The Configuration Client also knows device keys (see Section 3.8.6.1), which are used to secure communication with each individual node, including distributing updated network and application keys.
+The network resources are managed by a node that implements the Configuration Client model, known as the Configuration Client (typically a smartphone or other mobile computing devices) and are allocated to nodes at the time of configuration using the Configuration Server model. In particular, a Provisioner manages allocation of addresses to make sure no duplicate unicast addresses are allocated, whereas a Configuration Client generates and distributes network and application keys and makes sure that devices that need to communicate with each other share proper keys for both network and access layers. The Configuration Client also knows device keys, which are used to secure communication with each individual node, including distributing updated network and application keys.
 
 \subsubsection{Devices and nodes}
 A device that is not a member of a mesh network is known as an unprovisioned device. A device that is a member of a mesh network is known as a node. A Provisioner is used to manage the transitions between an unprovisioned device and a node.
@@ -105,30 +104,28 @@ A node can send or receive mesh messages and is managed by a Configuration Clien
 A device may support multiple instances of a node by offering itself to be provisioned to another mesh network after already being provisioned to a mesh network. Each instance of a mesh network is determined by addresses and a device key obtained by the device during provisioning.
 
 \subsubsection{Adding devices to a mesh network}
-Devices are added to a mesh network by a Provisioner, at which point they become nodes. The provisioning of devices into a mesh network differs from the point-to-point bonding and pairing that is typically used in Bluetooth wireless technology. Provisioning of devices is enabled using either a simple advertising bearer or a point-to-point GATT-based bearer. A single provisioning protocol is used over both bearers. Provisioning over an advertising-based bearer is implemented by all devices. Provisioning over a GATT-based bearer allows devices such as legacy phones (i.e., devices that do not support provisioning over an advertising bearer natively) to be Provisioners.
+\textbf{Devices} are added to a mesh network by a Provisioner, at which point they become \textbf{nodes}. The provisioning of devices into a mesh network differs from the point-to-point bonding and pairing that is typically used in Bluetooth wireless technology. Provisioning of devices is enabled using either a simple advertising bearer or a point-to-point GATT-based bearer. A single provisioning protocol is used over both bearers. Provisioning over an advertising-based bearer is implemented by all devices. Provisioning over a GATT-based bearer allows devices such as legacy phones (i.e., devices that do not support provisioning over an advertising bearer natively) to be Provisioners.
 \newline\newline
-To assist with provisioning of multiple devices, a device has an attention timer that can be set by a Provisioner. When set to a non-zero value, the device identifies itself using any means it can. For example, the device may flash a light, make a sound, or vibrate. When the attention timer expires, the device stops identifying itself. This allows a Provisioner to send a single message to a device to cause it to identify itself and the device automatically stops identifying itself after a given time.
+To assist with \textbf{provisioning of multiple devices}, a device has an attention timer that can be set by a Provisioner. When set to a non-zero value, the device \textbf{identifies itself} using any means it can. For example, the device may flash a light, make a sound, or vibrate. When the attention timer expires, the device stops identifying itself. This allows a Provisioner to send a single message to a device to cause it to identify itself and the device automatically stops identifying itself after a given time.
 \newline\newline
-The protocol to run over these two bearers is a derivative of the Security Manager protocol of v4.2 of the Bluetooth Core Specification to introduce the ability to authenticate devices that have a very limited user interface, such as a light or a switch. The Security Manager protocol requires a reliable bearer, something that cannot be guaranteed by the advertising provisioning bearer; therefore the protocol used in this specification is designed to enable reliable delivery of messages independent of the bearer. The similarity to the Security Manager protocol enables significant reuse of existing code on devices that have implemented such functionality.
-
-\subsubsection{Communications support}
-Many current devices are unable to advertise or comprehend mesh messages without being updated. To enable these devices to communicate with a node in a mesh network without the need for an operating system update or similar hardware/software update, the specification enables the use of GATT connectivity for all existing devices.
+The protocol to run over these two bearers is a derivative of the Security Manager protocol of v4.2 of the Bluetooth Core Specification to introduce the ability to authenticate devices that have a very limited user interface, such as a light or a switch. The Security Manager protocol requires a reliable bearer, something that cannot be guaranteed by the advertising provisioning bearer; therefore the protocol is designed to enable reliable delivery of messages independent of the bearer. The similarity to the Security Manager protocol enables significant reuse of existing code on devices that have implemented such functionality.
 
 \subsection{Architectural concepts}
-The mesh networking architecture uses several different concepts: states, messages, bindings, elements, addressing, models, publish-subscribe, mesh keys, and associations.
+The Bluetooth mesh networking architecture uses several different concepts: states, messages, elements, addressing, models, publish-subscribe, mesh keys, etc.
 \subsubsection{States}
 A state is a value representing a condition of an element.
 \newline\newline
 An element exposing a state is referred to as a server. For example, the simplest server is a Generic OnOff Server, representing that it is either on or off.
+\newline\newline
 An element accessing a state is referred to as a client. For example, the simplest client is a Generic OnOff Client (a binary switch) that is able to control a Generic OnOff Server via messages defined by the Generic OnOff Model.
 \newline\newline
-States that are composed of two of more values are known as composite states. For example, a colorchanging lamp can control color hue separately from color saturation and brightness.
+States that are composed of two of more values are known as composite states. For example, a color-changing lamp can control color hue separately from color saturation and brightness.
 \subsubsection{Messages}
 All communication within a mesh network is accomplished by sending messages. Messages operate on states. For each state, there is a defined set of messages that a server supports and a client may use to request a value of a state or to change a state. A server may also transmit unsolicited messages carrying information about states and/or changing states.
 \newline\newline
 A message is defined as having an opcode, associated parameters, and behavior. An opcode may be a single octet (for special messages that require maximum possible payload for parameters), 2 octets (for standard messages), or 3 octets (for vendor-specific messages).
 \newline\newline
-A total message size, including an opcode, is determined by the underlying transport layer, which may use a Segmentation and Reassembly (SAR) mechanism. To maximize performance and avoid the overhead of SAR, a design goal is to fit messages in a single segment. The transport layer provides up to 11 octets for a non-segmented message, leaving up to 10 octets that are available for parameters when using a 1-octet opcode, up to 9 octets available for parameters when using a 2-octet opcode, and up to 8 octets available for parameters when using a vendor-specific 3-octet opcode.
+A total message size, including an opcode, is determined by the underlying transport layer, which may use a Segmentation and Reassembly (SAR) mechanism. To maximize performance and avoid the overhead of SAR, a design goal is to fit messages in a single segment. The transport layer provides up to \textbf{11 octets} for a non-segmented message, leaving up to \textbf{10 octets} that are available for parameters when using a \textbf{1-octet opcode}, up to \textbf{9 octets} available for parameters when using a \textbf{2-octet opcode}, and up to \textbf{8 octets} available for parameters when using a vendor-specific \textbf{3-octet opcode}.
 \newline\newline
 The transport layer provides a mechanism of SAR capable of transporting up to 32 segments. The maximum message size when using the SAR is 384 octets. This means (excluding an Application MIC) up to 379 octets are available for parameters when using a 1-octet opcode, up to 378 octets are available for parameters when using a 2-octet opcode, and up to 377 octets are available for parameters when using a vendor-specific 3-octet opcode
 \newline\newline
@@ -139,11 +136,11 @@ Message definitions contain tables of parameters. In a message payload, paramete
 Messages are defined as acknowledged or unacknowledged. An acknowledged message requires a response whereas an unacknowledged message does not require a response
 
 \subsubsection{Elements}
-An element is an addressable entity within a node. Each node has at least one element, the primary element, and may have one or more additional secondary elements. The number and structure of elements is static and does not change throughout the lifetime of a node (that is, as long as the node is part of a network).
+An element is an addressable entity within a node. \textbf{Each node has at least one element, the primary element, and may have one or more additional secondary elements}. The number and structure of elements is static and does not change throughout the lifetime of a node (that is, as long as the node is part of a network).
 \newline\newline
 The primary element is addressed using the first unicast address assigned to the node during provisioning. Each additional secondary element is addressed using the subsequent addresses. These unicast element addresses allow nodes to identify which element within a node is transmitting or receiving a message.
 \newline\newline
-If the number and structure of elements changes, for example due to a firmware update, the node must be reprovisioned. The Node Removal procedure (see Section 3.10.7) is used when a firmware update is performed that changes the number or structure of elements.
+If the number and structure of elements changes, for example due to a firmware update, the node must be re-provisioned. The Node Removal procedure is used when a firmware update is performed that changes the number or structure of elements.
 \newline\newline
 Messages are dispatched within models based on opcodes and element addresses.
 \newline\newline
@@ -155,26 +152,26 @@ address of the element to identify which instance of the Generic Power OnOff Ser
 In another example, a dual-socket power strip contains two independent energy measurement sensors that can measure power consumed by an appliance connected to a socket. This would require that the node have two Sensor Data states, each in a separate element. The first element, the primary element,
 would be identified using the unicast address for the node and would include a state for the first energy sensor as well as states representing the configuration of the node. The second element, a secondary element, would be identified using a unicast element address and would include the state for the second energy sensor.
 \newline\newline
-Each element has a GATT Bluetooth Namespace Descriptor [5] value that helps identify which part of the node this element represents. These namespace descriptor values use the same definitions as GATT. For example, the elements of the temperature sensor would use the values “inside” and “outside".
+Each element has a GATT Bluetooth Namespace Descriptor value that helps identify which part of the node this element represents. These namespace descriptor values use the same definitions as GATT. For example, the elements of the temperature sensor would use the values “inside” and “outside".
 
 \subsubsection{Addresses}
 An address may be a unicast address, a virtual address, or a group address. There is also a special value to represent an unassigned address that is not used in messages.
 \newline\newline
-A unicast address is allocated to an element and always represents a single element of a node. There are 32767 unicast addresses per mesh network.
+A \textbf{unicast address} is allocated to an element and always represents a single element of a node. There are 32767 unicast addresses per mesh network.
 \newline\newline
-A virtual address is a multicast address and can represent multiple elements on one or more nodes. Each virtual address logically represents a Label UUID, which is a 128-bit value that does not have to be managed centrally. Each message sent to a Label UUID includes the full Label UUID in the message integrity check value that is used to authenticate the message. To reduce the overhead of checking every known Label UUID, a hash of the Label UUID is used. There are 16384 hash values, each of which codifies a set of virtual addresses. While there are only 16384 hash values used in a virtual address, each hash value can represent millions of possible Label UUIDs; therefore, the number of virtual addresses is considered very large.
+A \textbf{virtual address} is a multicast address and can represent multiple elements on one or more nodes. Each virtual address logically represents a Label UUID, which is a 128-bit value that does not have to be managed centrally. Each message sent to a Label UUID includes the full Label UUID in the message integrity check value that is used to authenticate the message. To reduce the overhead of checking every known Label UUID, a hash of the Label UUID is used. There are 16384 hash values, each of which codifies a set of virtual addresses. While there are only 16384 hash values used in a virtual address, each hash value can represent millions of possible Label UUIDs; therefore, the number of virtual addresses is considered very large.
 \newline\newline
-A group address is a multicast address and can represent multiple elements on one or more nodes. There are 16384 group addresses per mesh network. There are a set of fixed group addresses that are used to address a subset of all primary elements of nodes based on the functionality of those nodes. All other group addresses are known as dynamically assigned group addresses. There are 256 fixed group addresses and 16128 dynamically assigned group addresses.
+A \textbf{group address} is a multicast address and can represent multiple elements on one or more nodes. There are 16384 group addresses per mesh network. There are a set of fixed group addresses that are used to address a subset of all primary elements of nodes based on the functionality of those nodes. All other group addresses are known as dynamically assigned group addresses. There are 256 fixed group addresses and 16128 dynamically assigned group addresses.
 \subsubsection{Models}
-A model defines the basic functionality of a node. A node may include multiple models. A model defines the required states (as described in Section 2.3.1), the messages that act upon those states (as described in Section 2.3.3), and any associated behavior. 
+\textbf{A model defines the basic functionality of a element. A element may include multiple models}. A model defines the required states, the messages that act upon those states, and any associated behavior. 
 \newline\newline
 A mesh application is specified using a client-server architecture communicating with a publish-subscribe paradigm. Due to the nature of mesh networks and the recognition that the configuration of behavior is performed by a Configuration Client, an application is not defined in a single end-to-end specification such as a profile. Instead, an application is defined in a client model, a server model, and a control model.
 \newline\newline
-This specification defines three types of model: server models, client models, and control models:
+There are three types of model: server models, client models, and control models:
 \begin{itemize}
-    \item Server model: A server model is composed of one or more states spanning one or more elements. The server model defines a set of mandatory messages that it can transmit or receive, the behavior required of the element when it transmits and receives such messages, and any additional behavior that occurs after messages are transmitted or received.
-    \item Client model: A client model defines a set of messages (both mandatory and optional) that a client uses to request, change, or consume corresponding server states, as defined by a server model. The client model does not have state.
-    \item Control model: A control model may contain client model functionality to communicate with other server models and server model functionality to communicate with other client models. A control model may also contain control logic, which is a set of rules and behaviors that coordinate the interactions between other models that the control model connects to.
+    \item \textbf{Server model}: A server model is composed of one or more states spanning one or more elements. The server model defines a set of mandatory messages that it can transmit or receive, the behavior required of the element when it transmits and receives such messages, and any additional behavior that occurs after messages are transmitted or received.
+    \item \textbf{Client model}: A client model defines a set of messages (both mandatory and optional) that a client uses to request, change, or consume corresponding server states, as defined by a server model. The client model does not have state.
+    \item \textbf{Control model}: A control model may contain client model functionality to communicate with other server models and server model functionality to communicate with other client models. A control model may also contain control logic, which is a set of rules and behaviors that coordinate the interactions between other models that the control model connects to.
 \end{itemize}
 A single device may include server, client, and control models.
 \subsubsection{Publish-subscribe and message exchange}
@@ -193,24 +190,13 @@ Each message is sent from a single unicast address (an element address) and sequ
 \subsubsection{Security}
 All messages are encrypted and authenticated using two types of keys. One key type is for the network layer communication, such that all communication within a mesh network would use the same network key. The other key type is for application data. Separating the keys for networking and applications allows sensitive access messages (e.g., for access control to a building) to be separated from non-sensitive access messages (e.g., for lighting). There are no unencrypted or unauthenticated messages within a mesh network.
 \newline\newline
-Application and network security
-
-Encrypting and authenticating messages at the upper transport layer and network layer is designed to secure communications within the mesh network against eavesdroppers and malicious attacks. Each layer maintains distinct keys to allow separation between application and network entities.
+\textbf{Application and network security}: Encrypting and authenticating messages at the upper transport layer and network layer is designed to secure communications within the mesh network against eavesdroppers and malicious attacks. Each layer maintains distinct keys to allow separation between application and network entities.
 \newline\newline
-Obfuscation
-
-The network security model utilizes a privacy mechanism called obfuscation that utilizes AES to encrypt the source address, sequence numbers, and other header information using a privacy key. The intent for obfuscation is to make tracking nodes more difficult.
+\textbf{Obfuscation}: The network security model utilizes a privacy mechanism called obfuscation that utilizes AES to encrypt the source address, sequence numbers, and other header information using a privacy key. The intent for obfuscation is to make tracking nodes more difficult.
 \newline\newline
-Network and application key identifiers
-
-A node may have multiple network or application keys. By using a key identifier, it is possible to identify which subset of keys are used to secure the message. For example, instead of checking 20 keys, a node may only need to check two keys that have the same least significant bits of the key identifier. If a message is received with a key identifier that is not known, then the node can immediately discard it.
+\textbf{Network and application key identifiers}: A node may have multiple network or application keys. By using a key identifier, it is possible to identify which subset of keys are used to secure the message. For example, instead of checking 20 keys, a node may only need to check two keys that have the same least significant bits of the key identifier. If a message is received with a key identifier that is not known, then the node can immediately discard it. The key identifier is generated from the network or application key using a key derivation function.
 \newline\newline
-Initialization vector index
-
-A Network PDU contains a 24-bit sequence number that allows an element to transmit 16,777,216 Network PDUs. The sequence number is used in the security nonce to provide uniqueness; therefore the
-sequence number must not wrap. If an element is transmitting a new message at 2 Hz, then these sequence numbers would be exhausted after 97 days. To enable a mesh network to operate for longer periods of time than the sequence number space allows, an additional 4-octet value called the IV Index is defined that is included in the security nonce. For example, using the same 2 Hz message frequency would measure the lifetime of the network using the IV Index in billions of years.
-
-To enable a gradual transition from one IV Index to the next, each Network PDU includes the least significant bit of the IV Index that was used to transmit the message. A node can also use an IV Update procedure to signal to peer nodes that it is updating the IV Index. This procedure takes a minimum of eight days to transition from the old IV Index to the new IV Index, thereby limiting the frequency that a node can transmit messages to 24 Hz. However, a node should not send more than 100 Network PDUs in any 10 second window, so this would typically take approximately 19 days to exhaust.
+\textbf{Initialization vector index}: A Network PDU contains a 24-bit sequence number that allows an element to transmit 16,777,216 Network PDUs. The sequence number is used in the security nonce to provide uniqueness; therefore the sequence number must not wrap. If an element is transmitting a new message at 2 Hz, then these sequence numbers would be exhausted after 97 days. To enable a mesh network to operate for longer periods of time than the sequence number space allows, an additional 4-octet value called the IV Index is defined that is included in the security nonce. For example, using the same 2 Hz message frequency would measure the lifetime of the network using the IV Index in billions of years.
 
 \section{Bluetooth mesh-based application with NimBLE}
 Apache NimBLE is an open-source Bluetooth 5.1 stack (both Host and Controller) that completely replaces the proprietary SoftDevice on Nordic chipsets. It is part of the Apache Mynewt project.
@@ -226,8 +212,7 @@ The following are some highlighted features of NimBLE:
     \item Bluetooth Mesh supported
 \end{itemize}
 
-This subsection introduces the process of defining a Bluetooth mesh-based application with NimBLE. 
-Such procedure includes 3 steps:
+This subsection introduces the process of defining a Bluetooth mesh-based application with NimBLE which includes 3 steps:
 \begin{itemize}
     \item Define a node
     \item Define elements in the node
@@ -443,14 +428,14 @@ static const struct bt_mesh_model_op rtls_op[] = {
 \end{figure}
 
 \section{nRF Mesh Android application}
-The nRF Mesh application is a provisioner which makes a unprovisioned device become a node in the mesh network.
+The nRF Mesh application is a provisioner making a unprovisioned device become a node in the Bluetooth mesh network.
 
 \section{Using Bluetooth mesh for best-effort broadcast service}
 In this thesis, all nodes subscribe and publish to a group address which is 0xC000. Anchors and tags subscribe to the SET operation and publish STATUS operation while gateways subscribe to STATUS operation and publish SET operation. This makes a SET message from a gateway broadcasted to all tags and anchors in the network and a STATUS message from an anchor or tag may be transmitted to a gateway.
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.5\textwidth]{ble_mesh_comunication.png}
+        \includegraphics[width=0.4\textwidth]{ble_mesh_comunication.png}
     \end{center}
     \caption{ble mesh communication}
     \label{fig:ble_mesh_comunication}
