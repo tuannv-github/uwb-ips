@@ -4,58 +4,133 @@
 \begin{document}
 \graphicspath{{img/}{05_software/img/}}
 
-\chapter{Software}
+\chapter{Software architecture}
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.6]{software_architecture.png}
+        \includegraphics[width=0.9\textwidth]{software_architecture.png}
     \end{center}
     \caption{Software architecture}
     \label{fig:software_architecture}
 \end{figure}
+A system of software application is built to manage and control both the Bluetooth mesh network and the UWB ranging network. As represented in figure \ref{fig:software_architecture}, a gateway is built of two parts: a firmware application running in a microcontroller (e.g. nRF52832) written in C language and a software application running in an embedded computer (e.g. BeagleBone Green Wireless) written in Python language. There is an  MQTT-Broker (e.g. Eclipse Mosquitto) and a Django-based server running in the embedded computer too. This chapter provides a brief introduction to the structure of each component together with  the protocol manipulated to communicate between such components.
 
-To make location related data available.
+\section{Gateway firmware}
+The main role of gateway firmware is to convert Bluetooth mesh messages to MAVLink messages and vice versa. As illustrated in figure \ref{fig:gateway_firmware}, four threads run in the gateway firmware. The net receiver thread listens for MAVLink messages and puts them into the mav2mesh\_mqueue message queue. The OS notifies the mesh sender thread when messages are available in the message queue. The mesh sender thread then sends it to the mesh network. The process is reserved for the message from the mesh network. As each message put to the message queue is a struct, threads must convert from theirs received message type to an application well-known struct before giving it to the message queue.
 
-\section{UARTE}
-The Universal asynchronous receiver/transmitter with EasyDMA (UARTE) offers fast, full-duplex, asynchronous serial communication with built-in flow control (CTS, RTS) support in hardware at a rate up to 1 Mbps, and EasyDMA data transfer from/to RAM.
-\cite{nordic_semiconductor:nRF52832_PS_v1.4}
-
-\section{MAVLink protocol}
-
-\subsection*{What is MAVLink}
-MAVLink is a very lightweight messaging protocol for communicating with drones (and between onboard drone components). \cite{web_mavlink}
-
-\subsection*{MAVLink packet format}
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=1.2]{packet_mavlink_v1.jpg}
+        \includegraphics[width=0.8\textwidth]{gateway_firmware.png}
+    \end{center}
+    \caption{Gateway firmware component}
+    \label{fig:gateway_firmware}
+\end{figure}
+
+The firmware part and software part of the gateway exchange messages using MAVLink/UART communication model as shown in figure \ref{fig:software_architecture}. The detailed description for this is provided in the following section.
+
+\section{MAVLink over UART}
+The layered architecture for the MAVLink/UART communication model is illustrated in figure \ref{fig:mavlink_uart_stack}.
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.4\textwidth]{MAVLink_over_UART.png}
+    \end{center}
+    \caption{MAVLink/UART stack}
+    \label{fig:mavlink_uart_stack}
+\end{figure}
+
+\subsection{What is MAVLink?}
+MAVLink is a very lightweight messaging protocol for communicating with drones and between onboard drone components \cite{web_mavlink}.
+
+\subsection{MAVLink packet format}
+
+Figure \ref{fig:packet_mavlink_v1} is the over-the-wire format for a MAVLink 1 packet, the in-memory representation might differ.
+
+The minimum packet length is 8 bytes for acknowledgment packets without payload.
+
+The maximum packet length is 263 bytes for full payload.
+
+Explanation for each field in the MAVLink V1 frame is given in table \ref{tab:mavlink_v1_frame_explanation}.
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{packet_mavlink_v1.jpg}
     \end{center}
     \caption{MAVLink packet v1}
     \label{fig:packet_mavlink_v1}
 \end{figure}
 
-\subsection*{Pymavlink}
+\begin{table}[H]
+    \begin{tabular}{ | p{1.3cm} | p{1.8cm} | p{2cm} | l | p{9cm} |}
+    \hline
+    Byte Index & C version & Content & Value & Explanation \\\hline
+    0 & uint8\_t magic & Packet start marker	& 0xFD & Protocol-specific start-of-text (STX) marker used to indicate the beginning of a new packet. Any system that does not understand protocol version will skip the packet. \\\hline
+    1 & uint8\_t len & Payload length & 0 - 255	& Indicates length of the following payload section. This may be affected by payload truncation. \\\hline
+    2 & uint8\_t seq	& Packet sequence number & 0 - 255 & Used to detect packet loss. Components increment value for each message sent. \\\hline
+    3 & uint8\_t sysid & System ID & 1 - 255 & ID of system  sending the message. Used to differentiate systems on network.\\\hline
+    4 & uint8\_t compid	& Component ID & 1 - 255 & ID of component sending the message. Used to differentiate components in a system. \\\hline
+    5 & uint8\_t msgid & Message ID & 0 - 255 & ID of message type in payload. Used to decode data back into message object.\\\hline
+    \end{tabular}
+    \caption{MAVLink V1 frame explanation}
+    \label{tab:mavlink_v1_frame_explanation}
+\end{table}
 
-This is a Python implementation of the MAVLink protocol. It includes a source code generator (generator/mavgen.py) to create MAVLink protocol implementations for other programming languages as well. Also contains tools for analyzing flight logs.
+\subsection{Pymavlink}
 
-\lstinputlisting[language=xml,
-tabsize=3,
-frame=lines,
-caption=protocol.xml,
-label=code:sample,
-% frame=tlrb,
-xleftmargin=20pt,
-framexleftmargin=15pt,
-keywordstyle=\color{blue}\bf,
-commentstyle=\color{OliveGreen},
-stringstyle=\color{red},
-numbers=left,
-numberstyle=\tiny,
-numbersep=5pt,
-breaklines=true,
-showstringspaces=false,
-basicstyle=\footnotesize,
-emph={messages, enums},emphstyle={\color{magenta}}]{../../software/linux/gateway/protocol.xml}
+This is a Python implementation of the MAVLink protocol. It includes a source code generator (generator/mavgen.py) to create MAVLink protocol implementations for other programming languages as well. 
 
+Figure \ref{net_mesh_mavlink_protocol} shows an example definition for message exchanged between gateway firmware and software. The \textbf{mavgen.py} script is used to generate C and Python implementation for the protocol from the XML file given in figure \ref{net_mesh_mavlink_protocol}. The C implementation is used in firmware while the Python one is used in software.
+
+\section{Gateway software}
+Similar to the gateway firmware, the main role of gateway software is to convert from MAVLink messages to JSON format strings, publish them to an MQTT topic and vice versa. As represented in figure \ref{fig:gateway_software}, two threads run in the software application play the opposite role.
+
+
+\begin{figure}[H]
+    \begin{lstlisting}[style=XMLStyle, emph={messages, message, enums, enum, mavlink}]
+<?xml version="1.0"?>
+<mavlink>
+    <version>3</version>
+
+    <enums>
+        <enum name="role_t">
+            <entry name="ANCHOR"></entry>
+            <entry name="TAG"></entry>
+        </enum>
+    </enums>
+
+    <messages>
+        <message id="0" name="BLINK">
+            <description>Location message</description>
+            <field type="uint16_t" name="uwb_address"/>
+            <field type="uint8_t" enum="role_t" name="role"/>
+        </message>
+        <message id="2" name="ONOFF">
+            <description>On off message</description>
+            <field type="uint16_t" name="uwb_address"/>
+            <field type="uint8_t" name="value"/>
+        </message>
+        <message id="4" name="LOCATION_REDUCED">
+            <description>Location message</description>
+            <field type="uint16_t" name="mesh_address"/>
+            <field type="float" name="location_x"/>
+            <field type="float" name="location_y"/>
+        </message>
+        <message id="7" name="SLOT">
+            <description>Slot message</description>
+            <field type="uint16_t" name="uwb_address"/>
+            <field type="uint8_t" name="slot"/>
+        </message>
+    </messages>
+</mavlink>
+    \end{lstlisting}
+    \caption{XML definition for message exchanged between firmware and software}
+    \label{net_mesh_mavlink_protocol}
+\end{figure}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{gateway_software.png}
+    \end{center}
+    \caption{Gateway software component}
+    \label{fig:gateway_software}
+\end{figure}
 
 \section{MQTT}
 MQTT is an OASIS standard messaging protocol for the Internet of Things (IoT). It is designed as an extremely lightweight publish/subscribe messaging transport that is ideal for connecting remote devices with a small code footprint and minimal network bandwidth. MQTT today is used in a wide variety of industries, such as automotive, manufacturing, telecommunications, oil and gas, etc. \cite{web_mqtt_org}
