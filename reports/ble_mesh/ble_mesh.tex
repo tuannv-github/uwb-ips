@@ -428,14 +428,78 @@ static const struct bt_mesh_model_op rtls_op[] = {
 \end{figure}
 
 \section{nRF Mesh Android application}
-The nRF Mesh application is a provisioner making a unprovisioned device become a node in the Bluetooth mesh network.
+The nRF Mesh application is a provisioner making an unprovisioned device become a node in the Bluetooth mesh network.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.4\linewidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{nRF_Mesh_00.jpg}
+        \caption{Bluetooth mesh device scan}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.4\linewidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{nRF_Mesh_01.jpg}
+        \caption{Config device address}
+    \end{subfigure}
+    \caption{Device provision with nRF Mesh}
+    \label{fig:device_provision_with_nrf_mesh_00}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.4\linewidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{nRF_Mesh_02.jpg}
+        \caption{Bluetooth mesh provisioning}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.4\linewidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{nRF_Mesh_03.jpg}
+        \caption{Device provision complete}
+    \end{subfigure}
+    \caption{Device provision with nRF Mesh}
+    \label{fig:device_provision_with_nrf_mesh_01}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.4\linewidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{nRF_Mesh_04.jpg}
+        \caption{Bluetooth mesh node list}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.4\linewidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{nRF_Mesh_05.jpg}
+        \caption{Node information tab}
+    \end{subfigure}
+    \caption{Node information}
+    \label{fig:node_information}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.4\linewidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{nRF_Mesh_06.jpg}
+        \caption{Element before configuration}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.4\linewidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{nRF_Mesh_07.jpg}
+        \caption{Element after configuration}
+    \end{subfigure}
+    \caption{Element configuration}
+    \label{fig:element_configuration}
+\end{figure}
 
 \section{Using Bluetooth mesh for best-effort broadcast service}
 In this thesis, all nodes subscribe and publish to a group address which is 0xC000. Anchors and tags subscribe to the SET operation and publish STATUS operation while gateways subscribe to STATUS operation and publish SET operation. This makes a SET message from a gateway broadcasted to all tags and anchors in the network and a STATUS message from an anchor or tag may be transmitted to a gateway.
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.4\textwidth]{ble_mesh_comunication.png}
+        \includegraphics[width=0.6\textwidth]{ble_mesh_comunication.png}
     \end{center}
     \caption{ble mesh communication}
     \label{fig:ble_mesh_comunication}
