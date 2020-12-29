@@ -102,7 +102,7 @@ The Frame Control field for the Multipurpose frame are specified in figure \ref{
 
 \begin{figure}[H]
     \centering
-    \begin{bytefield}[bitwidth=6em, bitheight=3em]{8}
+    \begin{bytefield}[bitwidth=5em, bitheight=4em]{8}
         \bitheader{0-7} \\
         \bitbox{3}{Frame Type} &
         \bitbox{1}{Long Frame Control} &
@@ -466,7 +466,7 @@ The Frame Control field for the standard Data frame are specified in figure \ref
 
 \begin{figure}[H]
     \centering
-    \begin{bytefield}[bitwidth=3.0em, bitheight=6em]{16}
+    \begin{bytefield}[bitwidth=2.6em, bitheight=6em]{16}
         \bitheader{0-15} \\
         \bitbox{3}{Frame Type} &
         \bitbox{3}{} &
@@ -646,7 +646,7 @@ By using TWR, the need of synchronized clocks is eliminated since both the round
 The Frame Control field for the standard Data frame are specified in figure \ref{fig:function_control_for_standard_data_frame}.
 \begin{figure}[H]
     \centering
-    \begin{bytefield}[bitwidth=3.0em, bitheight=6em]{16}
+    \begin{bytefield}[bitwidth=2.7em, bitheight=6em]{16}
         \bitheader{0-15} \\
         \bitbox{3}{Frame Type} &
         \bitbox{3}{} &
@@ -685,7 +685,7 @@ Code is a self-defined state variable for a TWR process. For single-sided TWR, t
 
 \begin{table}[H]
 \centering
-\begin{tabular}{ |p{6cm}|c|p{8cm}| } 
+\begin{tabular}{ |p{7.5cm}|c|p{7.5cm}| } 
     \hline
     UWB\_DATA\_CODE\_TWR\_INVALID & 0x0100 & Invalid TWR CODE \\\hline
     UWB\_DATA\_CODE\_SS\_TWR & 0x0110 & Single sided TWR \\\hline
@@ -703,7 +703,7 @@ The Frame Payload field contains information specific to individual frame types.
 For the range-request frame type, the payload shall be formatted as illustrated in figure \ref{fig:twr_slot_payload}.
 \begin{figure}[H]
     \centering
-    \begin{bytefield}[bitwidth=1.5em]{32}
+    \begin{bytefield}[bitwidth=1.3em]{32}
         \bitheader{0-31} \\
         \bitbox{2}{ptype} &
         \bitbox{14}{start slot id} &
@@ -716,7 +716,7 @@ For the range-request frame type, the payload shall be formatted as illustrated 
 For the range-response frame type, the payload shall be formatted as illustrated in figure \ref{fig:twr_response_payload}.
 \begin{figure}[H]
     \centering
-    \begin{bytefield}[bitwidth=1.5em]{32}
+    \begin{bytefield}[bitwidth=1em]{32}
         \bitheader{0-31} \\
         \bitbox{16}{reception timestamp} &
         \bitbox{16}{transmissiontimestamp} &
