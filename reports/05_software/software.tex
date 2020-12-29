@@ -79,8 +79,7 @@ This is a Python implementation of the MAVLink protocol. It includes a source co
 Figure \ref{net_mesh_mavlink_protocol} shows an example definition for message exchanged between gateway firmware and software. The \textbf{mavgen.py} script is used to generate C and Python implementation for the protocol from the XML file given in figure \ref{net_mesh_mavlink_protocol}. The C implementation is used in firmware while the Python one is used in software.
 
 \section{Gateway software}
-Similar to the gateway firmware, the main role of gateway software is to convert from MAVLink messages to JSON format strings, publish them to an MQTT topic and vice versa. As represented in figure \ref{fig:gateway_software}, two threads run in the software application play the opposite role.
-
+Similar to the gateway firmware, the main role of gateway software is to convert from MAVLink messages to JSON format strings, publish them to an MQTT topic and vice versa. Fortunately, the generated Python implementation provides APIs to easily convert a MAVLink message to a JSON string. As represented in figure \ref{fig:gateway_software}, two threads run in the software application play the opposite role. 
 
 \begin{figure}[H]
     \begin{lstlisting}[style=XMLStyle, emph={messages, message, enums, enum, mavlink}]
@@ -133,9 +132,18 @@ Similar to the gateway firmware, the main role of gateway software is to convert
 \end{figure}
 
 \section{MQTT}
-MQTT is an OASIS standard messaging protocol for the Internet of Things (IoT). It is designed as an extremely lightweight publish/subscribe messaging transport that is ideal for connecting remote devices with a small code footprint and minimal network bandwidth. MQTT today is used in a wide variety of industries, such as automotive, manufacturing, telecommunications, oil and gas, etc. \cite{web_mqtt_org}
+MQTT is an OASIS standard messaging protocol for the Internet of Things (IoT). It is designed as an extremely lightweight publish/subscribe messaging transport that is ideal for connecting remote devices with a small code footprint and minimal network bandwidth. MQTT today is used in a wide variety of industries, such as automotive, manufacturing, telecommunications, oil and gas, etc \cite{web_mqtt_org}.
 
-\subsection*{Why MQTT?}
+MQTT protocol works on top of TCP/IP protocol and uses port 1883 (8883 if connecting through SSL) as default.
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.6\textwidth]{mqtt_tcp.png}
+    \end{center}
+    \caption{MQTT layer in OSI model}
+    \label{fig:mqtt_tcp}
+\end{figure}
+
+\subsection{Why MQTT?}
 
 There are a number of reasons answering the question: Why MQTT is widely used in IOT? 
 \begin{itemize}
@@ -147,7 +155,8 @@ There are a number of reasons answering the question: Why MQTT is widely used in
     \item \textbf{Security enabled}: MQTT makes it easy to encrypt messages using TLS and authenticate clients using modern authentication protocols, such as OAuth.
 \end{itemize}
 
-\subsection*{MQTT publish/subscribe architecture}
+\subsection{MQTT publish/subscribe architecture}
+The Publisher sends data on the MQTT Broker specifying a definite topic in a message. The Subscribers can receive various data from multiple Publishers depending on subscription to correspondent topics.
 \begin{figure}[H]
     \begin{center}
         \includegraphics[scale=0.4]{mqtt-publish-subscribe.png}
@@ -156,17 +165,85 @@ There are a number of reasons answering the question: Why MQTT is widely used in
     \label{fig:mqtt_publish_subscribe.}
 \end{figure}
 
-\subsection*{MQTT application message definition}
+Here are the main types of messages for a MQTT device to communication with the Broker:
 
-\section{Plotly}
-Plotly JavaScript Open Source Graphing Library.
+\begin{itemize}
+    \item Connect: establish the connection to the message Broker
+    \item Disconnect: break the connection to the message Broker
+    \item Publish: publish data on a topic within the message Broker
+    \item Subscribe: subscribe to a topic on the message Broker
+    \item Unsubscribe: unsubscribe the topic
+\end{itemize}
 
-Built on top of d3.js and stack.gl, Plotly.js is a high-level, declarative charting library. plotly.js ships with over 40 chart types, including 3D charts, statistical graphs, and SVG maps.
-plotly.js is free and open source and you can view the source, report issues or contribute on GitHub. \cite{web_plotly}
 
-\subsection{Scatter plot}
+Figure \ref{fig:mqtt_schema} illustrates a scheme of simple communication between subscriber, publisher and broker: 
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{mqtt_schema.jpg}
+    \end{center}
+    \caption{MQTT simple scheme}
+    \label{fig:mqtt_schema}
+\end{figure}
 
-\subsection{Circle plot}
+\subsection{Quality of service in MQTT protocol (QoS)}
+
+MQTT supports three levels of Quality of Service (QoS) when sending messages.
+
+\subsubsection{QoS 0: At most once}
+This service level guarantees a best-effort delivery. There is no guarantee of delivery. The recipient does not acknowledge receipt of the message and the message is not stored and re-transmitted by the sender. QoS level 0 is often called “fire and forget” and provides the same guarantee as the underlying TCP protocol.
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.5\textwidth]{mqtt_qos_0.jpg}
+    \end{center}
+    \caption{QoS 0: At most once}
+    \label{fig:mqtt_qos_0}
+\end{figure}
+
+\subsubsection{QoS 1: At least once}
+This level guarantees the message delivery to the broker, however, the duplication of messages from the publisher is possible. Once a duplicate copy is received, the broker sends out this message to the subscribers again, and forwards the message receipt acknowledgment to the publisher. If the publisher does not get PUBACK message from the broker, it will attempt to re-deliver this packet.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.5\textwidth]{mqtt_qos_1.jpg}
+    \end{center}
+    \caption{QoS 1: At least once}
+    \label{fig:mqtt_qos_1}
+\end{figure}
+
+\subsubsection{QoS 2: Exactly once}
+On this level the message delivery to a Client is guaranteed, with no duplication copies possible.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.5\textwidth]{mqtt_qos_2.jpg}
+    \end{center}
+    \caption{QoS 2: Exactly once}
+    \label{fig:mqtt_qos_2}
+\end{figure}
+The publisher sends a message to the broker. The message contains the unique packet ID, QoS=2 and DUP=0. The publisher stores the message unacknowledged unless it gets a PUBREC response from the broker. The broker replies with the PUBREC message containing the same packet ID. After receiving this message, the publisher sends PUBREL with the same packet ID. The broker must store the message copy until it gets PUBREL. Once the broker receives PUBREL, it deletes the message copy and sends to the publisher the PUBCOMP message about the completed transaction.
+
+\subsection{MQTT application message definition}
+The application message transferred over an MQTT connection is derived from the protocol XML file as illustrated in figure \ref{fig:gateway_software}. The generated Python implementation automatically provides APIs for converting MAVLink messages to JSON strings.  These JSON strings are then published to an MQTT topic as shown in figure \ref{fig:mqtt_json_string}.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.95\textwidth]{mqtt_json_string.png}
+    \end{center}
+    \caption{MQTT json string}
+    \label{fig:mqtt_json_string}
+\end{figure}
+
+% \section{Plotly}
+% Plotly JavaScript Open Source Graphing Library.
+
+% Built on top of d3.js and stack.gl, Plotly.js is a high-level, declarative charting library. plotly.js ships with over 40 chart types, including 3D charts, statistical graphs, and SVG maps.
+
+% plotly.js is free and open source and you can view the source, report issues or contribute on GitHub\cite{web_plotly}.
+
+% \subsection{Scatter plot}
+
+% \subsection{Circle plot}
+
 \bib
 
 \end{document}

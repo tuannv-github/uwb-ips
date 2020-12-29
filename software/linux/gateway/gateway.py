@@ -51,7 +51,7 @@ class Gateway:
         print("MQTT Broker disconnected.")
 
     def on_message(self, client, userdata, msg):
-        print("------NET->BLE: %s" % (msg.payload.decode("utf-8")))
+        print("NET->MESH: %s" % (msg.payload.decode("utf-8")))
         try:
             msg = json.loads(msg.payload.decode("utf-8"))
         except ValueError as e:
@@ -114,7 +114,7 @@ class Gateway:
         if(msg is not None):
             try:
                 msg = json.loads(msg.to_json())
-                print("BLE->NET: %s" % msg + "------")
+                print("MESH->NET: %s" % msg)
             except ValueError as e:
                 print(e)
                 return False
