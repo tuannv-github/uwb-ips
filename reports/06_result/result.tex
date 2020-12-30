@@ -14,14 +14,6 @@
     \label{fig:system_overview}
 \end{figure}
 
-\section{CCP}
-
-\section{TDMA}
-
-\section{Ranging}
-
-\section{BLE mesh}
-
 \section{Localization}
 
 Error formula:
@@ -55,15 +47,28 @@ Error formula:
 
 \subsubsection*{One cell localization}
 
-\begin{figure}[ht]
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{|c|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{2cm}|}
+    \hline
+    \backslashbox{y(m)}{x(m)}  &  1.2 & 4.8 & 9.6 & 10.8 \\ \hline
+    0.6 &  0.10 & 0.28&  0.13 &  0.12  \\ \hline
+    1.2 &  0.13 & 0.18&  0.17 &  0.16  \\ \hline
+    2.4 &  0.09 & 0.10&  0.11 &  0.22  \\ \hline
+    \end{tabular}
+    \caption{vendor system error}
+    \label{table:vendor_rms_error}
+\end{table}
+
+
+\begin{figure}[H]
     \begin{minipage}[t]{\textwidth}       
         \centering
         \includegraphics[width=1\textwidth]{result.png}
     \end{minipage}
-    \caption{Error map}
-    \label{fig:rms_error}
+    \caption{Proposed system error}
+    \label{fig:proposed_rms_error}
 \end{figure}
 
-\subsubsection*{Multi-cell localization}
 
 \end{document}
