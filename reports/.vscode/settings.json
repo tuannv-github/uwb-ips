@@ -1,5 +1,10 @@
 {
-    "latex-workshop.latex.autoBuild.run": "never",
-    "latex-workshop.latex.rootFile.useSubFile": true,
-    "latex-workshop.latex.rootFile.doNotPrompt": true,
+    "grammarly.userWords": [
+        "RMARKER",
+        "RMarker",
+        "ccp",
+        "multilateration",
+        "rx",
+        "tdma"
+    ],
 }

@@ -1,11 +1,11 @@
-\documentclass[../../main.tex]{subfiles}
+\providecommand{\main}{..}
+\documentclass[\main/main.tex]{subfiles}
 
 \begin{document}
 \graphicspath{{imgs/}{00_misc/imgs/}}
 
-
     \pagestyle{empty}
-    \begin{minipage}[b][3cm][t]{16cm}
+    \begin{minipage}[b][3cm][t]{17.5cm}
         % Draw border
         \begin{tikzpicture}[remember picture, overlay]
             % Thin line
@@ -23,33 +23,33 @@
         \begin{center}
             \begin{large}
                     {VIETNAM NATIONAL UNIVERSITY HO CHI MINH CITY\\
-                     HO CHI MINH CITY UNIVERSITY OF TECHNOLOGY}\\
+                     HO CHI MINH CITY UNIVERSITY OF TECHNOLOGY\\
+                     FACULTY OF ELECTRICAL \& ELECTRONICS  ENGINEERING\\
+                     DEPARTMENT OF ELECTRONICS AND TELECOMMUNICATIONS}\\[0.2cm]
             \end{large}
-            \textbf{*******************************************************}\\[2cm]
+            \textbf{*******************************************************}\\[1.5cm]
             \includegraphics[scale=0.5]{logoBK.png}\\[1.5cm]
-                {\fontsize{15}{1}\selectfont Graduation Thesis }\\[2cm]
-                {\fontsize{20}{24}\selectfont \textbf{\parbox[c][3cm]{15cm}{\centering DESIGN AND IMPLEMENTATION OF INDOOR LOCALIZATION SYSTEM USING UWB AND MESH NETWORK}} }\\[3.2cm]
+                {\fontsize{20}{1}\selectfont Graduation Thesis }\\[1.5cm]
+                {\fontsize{20}{24}\selectfont \textbf{\parbox[c][3cm]{15cm}{\centering DESIGN AND IMPLEMENTATION OF INDOOR LOCALIZATION SYSTEM USING UWB AND MESH NETWORK}} }\\[2.5cm]
         \end{center}
 
         {
             \fontsize{15}{1}\selectfont
             \begin{flushright}
-            \parbox[t][4cm]{8cm}
+            \parbox[t][4.5cm]{8cm}
             {
                 Supervisor: Dr. Vo Que Son\\[4pt]
-                Reviewer: Dr. Vo Que Son\\[4pt]
+                % Reviewer: Dr. Vo Que Son\\[4pt]
                 Student: Ngo Van Tuan - 1613861
             }
             \end{flushright}
         }
         
-        \vspace{0.6cm}
+        % \vspace{0.6cm}
         \begin{center}
             {\fontsize{14}{1}\selectfont Ho Chi Minh City, \today }
         \end{center}
 
     \end{minipage}
-
-\tableofcontents
-
+    \newpage
 \end{document}

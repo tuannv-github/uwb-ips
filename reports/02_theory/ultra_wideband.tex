@@ -1,7 +1,8 @@
-\documentclass[../../main.tex]{subfiles}
+\providecommand{\main}{..}
+\documentclass[\main/main.tex]{subfiles}
 
 \begin{document}
-\graphicspath{{imgs/}{02_theory/imgs/}}
+\graphicspath{{img/}{02_theory/img/}}
 
 % \chapterimage{chapter_head_1.pdf}
 \chapter{Ultra wide-band communication}
@@ -32,7 +33,7 @@ Impulse radio communication systems and impulse radars both utilize very short p
 One result of the large bandwidth of UWB is that due to the inverse relationship of
 time and frequency. Figure \ref{fig:uwb_versus_other_radio_communication_systems} shows the differences between UWB and other radio systems in the frequency band and power spectral density.
 
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{uwb_versus_other_radio_communication_systems.png}
     \caption{UWB versus other radio communication systems}
@@ -63,7 +64,7 @@ The very narrow time domain pulses means that UWB radios are potentially able to
 
 One important feature of a radar and communications transmitter is called the effective isotropic radiated power (EIRP) which can be defined as the product of its gain and input power. Figure \ref{fig:fcc_spectral_mask_for_indoor_uwb_systems} shows the FCC spectral mask of the indoor UWB EIRP emission level. It can be seen that the maximum signal power is limited to -41.3 dBm per MHz throughout the whole UWB frequency range from 3.1 to 10.6 GHz. All the UWB systems and devices must work within this spectral mask for legal operation in order to comply with the FCC standards and regulations.
 
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{fcc_spectral_mask_for_indoor_uwb_systems}
     \caption{FCC spectral mask for indoor UWB systems}
@@ -76,7 +77,7 @@ As indicated by the Shannon-Harley theorem, there is a direct relationship betwe
     C=B\log_2(1+\frac{S}{N})
 \end{equation} where $C$ is the capacity ($bits/second$), $B$ is the bandwidth, $S$ is the average received signal power over $B$ and $N$ is the average noise over $B$. We observe that for a specific capacity we consume less power with a larger bandwidth. Secondly, because $\frac{S}{N}$ is under a logarithm, it is easier to increase the capacity by increasing of the bandwidth instead of $\frac{S}{N}$. It is common to refer to $\frac{S}{N}$ as SNR, the Signal to Noise Ratio. Figure shoes the relationship between the bandwidth and the capacity for five different SNRs.
 
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{capacity_versus_bandwidth_curves_for_uwb_systems_over_awgn_channels}
     \caption{Capacity versus bandwidth curves for UWB systems over AWGN channels}
@@ -86,11 +87,13 @@ As indicated by the Shannon-Harley theorem, there is a direct relationship betwe
 \section{Impulse Radio}
 In this method, data is transmitted by low duty UWB signals information of the symbol is conveyed by position and/or polarity if the signal. Each symbol correspond to one or more signals. In the following example, two consecutive IR signals represent one symbol. The IR signal can occupy one of the chip-intervals($T\textsubscript{$c$}$) within a frame ($T\textsubscript{$f$}$). A time-hoping (TH) code is used for determining the accurate position of a signal in a dedicated time frame to decrease the chance of interference between UWB systems. In the following example, the TH codes for the symbols are {2,1}, {2,3} and {1,0} respectively, so the first and the second signals are shifts by two and one chip-interval respectively and so on. In this example, the information corresponds to the polarity of the signals, so the IR stream represents the binary data `101'. This technique is commonly known as Binary Phase Shifts Keying (BPSK).
 
-\begin{figure}[!htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{an_ir_uwb_signal}
-    \caption{An IR UWB signal, in which two pulses are transmitted per information symbol, and information is conveyed by the polarities of the pulses (BPSK). Hence, +1, -1 and +1 are being transmitted in this example. Note that each pulse resides in an interval of $T\textsubscript{$f$}$ seconds, called a “frame’’, and the positions of the pulses in different frames are determined by a TH code, which is {2, 1, 2, 3, 1, 0} in this example}
+    \caption{An IR UWB signal}
     \label{fig:an_ir_uwb_signal}
 \end{figure}
+
+An IR UWB signal, in which two pulses are transmitted per information symbol, and information is conveyed by the polarities of the pulses (BPSK). Hence, +1, -1 and +1 are being transmitted in this example. Note that each pulse resides in an interval of $T\textsubscript{$f$}$ seconds, called a “frame’’, and the positions of the pulses in different frames are determined by a TH code, which is {2, 1, 2, 3, 1, 0} in this example
 
 \end{document}

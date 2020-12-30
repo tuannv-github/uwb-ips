@@ -51,38 +51,23 @@ class Gateway:
         print("MQTT Broker disconnected.")
 
     def on_message(self, client, userdata, msg):
-        print("NET->BLE: %s" % (msg.payload.decode("utf-8")))
+        print("NET->MESH: %s" % (msg.payload.decode("utf-8")))
         try:
             msg = json.loads(msg.payload.decode("utf-8"))
         except ValueError as e:
             print(e)
             return
 
-        if(msg["type"] == "GET"): 
-            msg["type"] = GET
-        elif(msg["type"] == "SET"):
-            msg["type"] = SET
-        elif(msg["type"] == "SET_UNACK"):
-            msg["type"] = SET_UNACK
-        elif(msg["type"] == "STATUS"):
-            msg["type"] = STATUS
-        else:
-            return
-
         if(msg["mavpackettype"] == "LOCATION"):
-            if(msg["node"] == "ANCHOR"): 
-                msg["node"] = ANCHOR
-            elif(msg["node"] == "TAG"):
-                msg["node"] = TAG
             try:
-                self.mav.location_send(0, msg["uwb_address"], msg["type"], msg["node"], msg["location_x"], msg["location_y"], msg["location_z"])
-            except:
-                print("Unable to send downlink msg")
+                self.mav.location_send(msg["uwb_address"], msg["location_x"], msg["location_y"], msg["location_z"])
+            except Exception as e:
+                print("Unable to send downlink msg: %s" % str(e))
         elif(msg["mavpackettype"] == "ONOFF"):
             try:
-                self.mav.onoff_send(0, msg["uwb_address"], msg["type"], msg["value"])
-            except:
-                print("Unable to send downlink msg")
+                self.mav.onoff_send(msg["uwb_address"], msg["value"])
+            except Exception as e:
+                print("Unable to send downlink msg: %s" % str(e))
 
     def thread_mqtt_func(self):
         self.client = mqtt.Client()
@@ -97,15 +82,15 @@ class Gateway:
         while True:
             try:
                 serial = Serial(port, baud)
-                mav = MAVLink(serial)
                 if (port == "/dev/ttyGateway"):
+                    mav = MAVLink(serial)
                     self.mav = mav
                 break
             except:
                 time.sleep(1)
         while True:
             try:
-                if loop(serial, mav):
+                if loop(serial, self.mav):
                     retry_count = 0
             except:
                 time.sleep(0.5)
@@ -113,8 +98,8 @@ class Gateway:
                     print("Serial connection error: Retrying... " + str(retry_count))
                     retry_count+=1
                     serial = Serial(port, baud)
-                    mav = MAVLink(serial)
                     if (port == "/dev/ttyGateway"):
+                        mav = MAVLink(serial)
                         self.mav = mav
                 except:
                     print("Unable to open port: " + port)
@@ -129,25 +114,16 @@ class Gateway:
         if(msg is not None):
             try:
                 msg = json.loads(msg.to_json())
-                print("BLE->NET: %s" % msg)
+                print("MESH->NET: %s" % msg)
             except ValueError as e:
                 print(e)
                 return False
-                    
-            if(msg["type"] == GET): 
-                msg["type"] = "GET"
-            elif(msg["type"] == SET):
-                msg["type"] = "SET"
-            elif(msg["type"] == SET_UNACK):
-                msg["type"] = "SET_UNACK"
-            elif(msg["type"] == STATUS):
-                msg["type"] = "STATUS"
  
             try:
-                if(msg["node"] == ANCHOR):
-                    msg["node"] = "ANCHOR"
-                elif(msg["node"] == TAG):
-                    msg["node"] = "TAG"
+                if(msg["role"] == ANCHOR):
+                    msg["role"] = "ANCHOR"
+                elif(msg["role"] == TAG):
+                    msg["role"] = "TAG"
             except:
                 pass
 

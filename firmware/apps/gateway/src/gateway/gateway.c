@@ -72,30 +72,13 @@ task_downlink_func(void *arg)
                     mavlink_location_t mavlink_location;
                     mavlink_msg_location_decode(&g_mavlink_msg, &mavlink_location);
                     msg_rtls = (msg_rtls_t){
-                        .type = MAVLINK_MSG_ID_LOCATION,
+                        .msg_id = MAVLINK_MSG_ID_LOCATION,
                         .uwb_address = mavlink_location.uwb_address,
-                        .node_type = mavlink_location.node,
                         .location_x = mavlink_location.location_x,
                         .location_y = mavlink_location.location_y,
                         .location_z = mavlink_location.location_z,
                     };
-                    switch (mavlink_location.type)
-                    {
-                    case GET:
-                        msg_rtls.opcode = BT_MESH_MODEL_OP_GET;
-                        break;
-                    case SET:
-                        msg_rtls.opcode = BT_MESH_MODEL_OP_SET;
-                        break;
-                    case SET_UNACK:
-                        msg_rtls.opcode = BT_MESH_MODEL_OP_SET_UNACK;
-                        break;
-                    case STATUS:
-                        msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
-                        break;
-                    default:
-                        continue;
-                    }
+
                 }
                 break;
             case MAVLINK_MSG_ID_ONOFF:
@@ -104,34 +87,18 @@ task_downlink_func(void *arg)
                     mavlink_onoff_t mavlink_onoff;
                     mavlink_msg_onoff_decode(&g_mavlink_msg, &mavlink_onoff);
                     msg_rtls = (msg_rtls_t){
-                        .type = MAVLINK_MSG_ID_ONOFF,
+                        .msg_id = MAVLINK_MSG_ID_ONOFF,
                         .uwb_address = mavlink_onoff.uwb_address,
                         .opcode = BT_MESH_MODEL_OP_SET,
                         .value = mavlink_onoff.value
                     };
-                    switch (mavlink_onoff.type)
-                    {
-                    case GET:
-                        msg_rtls.opcode = BT_MESH_MODEL_OP_GET;
-                        break;
-                    case SET:
-                        msg_rtls.opcode = BT_MESH_MODEL_OP_SET;
-                        break;
-                    case SET_UNACK:
-                        msg_rtls.opcode = BT_MESH_MODEL_OP_SET_UNACK;
-                        break;
-                    case STATUS:
-                        msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
-                        break;
-                    default:
-                        continue;
-                    }
                 }
                 break;
             default:
                 continue;
             }
             
+            msg_rtls.opcode = BT_MESH_MODEL_OP_SET;
             msg_prepr_rtls_pipe(om, &msg_rtls);
             rc = os_mqueue_put(mqueue, eventq, om);
             if (rc) {
@@ -143,7 +110,6 @@ task_downlink_func(void *arg)
     }
     return;
 }
-
 
 static void
 process_ble_to_net_queue(struct os_event *ev)
@@ -160,21 +126,27 @@ process_ble_to_net_queue(struct os_event *ev)
         msg_parse_rtls_pipe(om, &msg_rtls);
         printf("BLE->NET: ");
         msg_print_rtls(&msg_rtls);
-        switch(msg_rtls.type){
+        switch(msg_rtls.msg_id){
+            case MAVLINK_MSG_ID_BLINK:
+                mavlink_msg_blink_pack(0,0,             &mavlink_msg, msg_rtls.uwb_address, msg_rtls.role);
+                break;
+            case MAVLINK_MSG_ID_LOCATION_REDUCED:
+                mavlink_msg_location_reduced_pack(0, 0, &mavlink_msg, msg_rtls.mesh_address, msg_rtls.location_x, msg_rtls.location_y);
+                break;
             case MAVLINK_MSG_ID_LOCATION:
-                mavlink_msg_location_pack(0, 0, &mavlink_msg, msg_rtls.mesh_address, msg_rtls.uwb_address, msg_rtls.opcode, msg_rtls.node_type, msg_rtls.location_x, msg_rtls.location_y, msg_rtls.location_z);
+                mavlink_msg_location_pack(0, 0,         &mavlink_msg, msg_rtls.uwb_address, msg_rtls.location_x, msg_rtls.location_y, msg_rtls.location_z);
                 break;
             case MAVLINK_MSG_ID_ONOFF:
-                mavlink_msg_onoff_pack(0, 0, &mavlink_msg, msg_rtls.mesh_address, msg_rtls.uwb_address, msg_rtls.opcode, msg_rtls.value);
+                mavlink_msg_onoff_pack(0, 0,            &mavlink_msg, msg_rtls.uwb_address, msg_rtls.value);
                 break;
             case MAVLINK_MSG_ID_DISTANCE:
-                mavlink_msg_distance_pack(0,0, &mavlink_msg, msg_rtls.mesh_address, msg_rtls.opcode, msg_rtls.uwb_address, msg_rtls.anchor, msg_rtls.distance);
+                mavlink_msg_distance_pack(0, 0,         &mavlink_msg, msg_rtls.uwb_address, msg_rtls.anchor, msg_rtls.distance);
                 break;
             case MAVLINK_MSG_ID_TOF:
-                mavlink_msg_tof_pack(0,0, &mavlink_msg, msg_rtls.mesh_address, msg_rtls.opcode, msg_rtls.uwb_address, msg_rtls.anchor, msg_rtls.tof);
+                mavlink_msg_tof_pack(0, 0,              &mavlink_msg, msg_rtls.uwb_address, msg_rtls.anchor, msg_rtls.tof);
                 break;
             case MAVLINK_MSG_ID_SLOT:
-                mavlink_msg_slot_pack(0, 0, &mavlink_msg, msg_rtls.mesh_address, msg_rtls.uwb_address, msg_rtls.opcode, msg_rtls.slot);
+                mavlink_msg_slot_pack(0, 0,             &mavlink_msg, msg_rtls.uwb_address, msg_rtls.slot);
                 break;
             default:
                 continue;
@@ -182,6 +154,13 @@ process_ble_to_net_queue(struct os_event *ev)
         
         len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
         serial_write(mav_send_buf, len);
+
+        if(msg_rtls.msg_id == MAVLINK_MSG_ID_BLINK){
+            mavlink_msg_ble_mesh_pack(0, 0, &mavlink_msg, msg_rtls.uwb_address, msg_rtls.mesh_address);
+            len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
+            serial_write(mav_send_buf, len);
+        }
+
         os_mbuf_free_chain(om);
         hal_gpio_write(LED_UPLINK_1, LED_OFF);
     }

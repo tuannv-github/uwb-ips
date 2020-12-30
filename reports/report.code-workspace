@@ -9,9 +9,17 @@
 		"latex-workshop.latex.rootFile.useSubFile": true,
 		"latex-workshop.latex.rootFile.doNotPrompt": true,
 		"cSpell.words": [
+			"carrierless",
+			"marker",
+			"r",
+			"recp",
+			"spof",
+			"spofs",
 			"superframes",
 			"sync",
+			"timestamping",
 			"unilateration"
-		]
+		],
+		"restructuredtext.languageServer.disabled": true,
 	}
 }
