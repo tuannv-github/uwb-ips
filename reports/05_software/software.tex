@@ -233,16 +233,37 @@ The application message transferred over the MQTT connection is derived from the
     \label{fig:mqtt_json_string}
 \end{figure}
 
-% \section{Plotly}
-% Plotly JavaScript Open Source Graphing Library.
+\section{System control and management application}
+Figure \ref{fig:system_control_and_manage_application} provides an overview for the GUI used control and manage the ranging network.
+\begin{figure}[H]   
+    \centering
+    \includegraphics[width=1\textwidth]{system_control_and_manage_application.png}
+    \caption{System control and manage application}
+    \label{fig:system_control_and_manage_application}
+\end{figure}
+As shown in figure \ref{fig:system_control_and_manage_application}, there are two main part in the GUI. The left part is a simple map which give a quick illustration for the location of tags and anchors. The right part is a list of nodes available in the system. Detailed information of each items in the list is given in figure \ref{fig:control_and_manage_pannel}
 
-% Built on top of d3.js and stack.gl, Plotly.js is a high-level, declarative charting library. plotly.js ships with over 40 chart types, including 3D charts, statistical graphs, and SVG maps.
+\begin{figure}[H]   
+    \centering
+    \includegraphics[width=0.5\textwidth]{control_and_manage_pannel.png}
+    \caption{Node panel}
+    \label{fig:control_and_manage_pannel}
+\end{figure}
 
-% plotly.js is free and open source and you can view the source, report issues or contribute on GitHub\cite{web_plotly}.
-
-% \subsection{Scatter plot}
-
-% \subsection{Circle plot}
+Below are the descriptions for each field:
+\begin{itemize}
+    \item The field with value of 0x03B8: The address of node in UWB network
+    \item The field with value of 0x0015: The address of node in Bluetooth mesh network
+    \item The field with value of 1: The slot index of the node in the TDMA network
+    \item The field with value of 5: The number of location messages received by the application.
+    \item The field with value of 0: The number of distance messages received by the application.
+    \item Type: The type of the node: ANCHOR or TAG
+    \item Location: The location of the node
+    \item Identify button: Turn on/off the self identification process of the node
+    \item Bulb button: Turn on/off light bulb on the anchor
+    \item Edit button: Enter the editing mode to change node type and location (location edit is only available for anchor)
+    \item Update button: Update the configuration (node type and location) to the node, only available in editing mode
+\end{itemize}
 
 \bib
 
