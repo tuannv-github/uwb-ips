@@ -223,7 +223,7 @@ On this level the message delivery to a Client is guaranteed, with no duplicatio
 The publisher sends a message to the broker. The message contains the unique packet ID, QoS=2 and DUP=0. The publisher stores the message unacknowledged unless it gets a PUBREC response from the broker. The broker replies with the PUBREC message containing the same packet ID. After receiving this message, the publisher sends PUBREL with the same packet ID. The broker must store the message copy until it gets PUBREL. Once the broker receives PUBREL, it deletes the message copy and sends to the publisher the PUBCOMP message about the completed transaction.
 
 \subsection{MQTT application message definition}
-The application message transferred over an MQTT connection is derived from the protocol XML file as illustrated in figure \ref{fig:gateway_software}. The generated Python implementation automatically provides APIs for converting MAVLink messages to JSON strings.  These JSON strings are then published to an MQTT topic as shown in figure \ref{fig:mqtt_json_string}.
+The application message transferred over the MQTT connection is derived from the protocol XML file as illustrated in figure \ref{fig:gateway_software}. The generated Python implementation automatically provides APIs for converting MAVLink messages to JSON strings.  These JSON strings are then published to an MQTT topic as shown in figure \ref{fig:mqtt_json_string}.
 
 \begin{figure}[H]
     \begin{center}
