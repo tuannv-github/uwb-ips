@@ -252,6 +252,17 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     struct nrng_instance *nrng = (struct nrng_instance *)cbs->inst_ptr;
     nrng_get_tofs_addresses( nrng, g_distance.tofs, g_distance.anchors, g_distance.updated, ANCHOR_NUM, nrng->idx);
 
+    printf("-------------\n");
+    uint16_t updated_counter = 0;
+    for(int j=0; j<ANCHOR_NUM; j++){
+        if(g_distance.updated[j]){
+            updated_counter++;
+            printf("0x%04X: %5ld\n", g_distance.anchors[j], g_distance.tofs[j]); 
+        }
+    }
+    printf("updated_counter: %d\n", updated_counter);
+    printf("-------\n");
+
     uint32_t max_tof = 0;
     for(int i=0; i<4; i++){
         g_distance4.updated[i] = false;
