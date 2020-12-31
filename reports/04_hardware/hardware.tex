@@ -7,7 +7,7 @@
 \setlength{\belowcaptionskip}{0pt}
 
 \chapter{Anchor hardware implementation}
-In this chapter, the hardware problems relating to the anchor are discussed. The chapter starts by a brief introduction to the DWM1001 module - the main hardware for this thesis. The following sections analyze some important blocks of the circuitry for an anchor proposed by this thesis. A full Altium design for the anchor is provided in appendix.
+In this chapter, the hardware problems relating to the anchor are discussed. The chapter starts by a brief introduction to the DWM1001 module - the main hardware for this thesis. The following sections analyze some important blocks of the circuitry for an anchor proposed by this thesis. A full Altium design for the anchor is provided in appendix \ref{appendix:rtls_anchor_board}.
 
 \section{Introduction to DWM1001 module}
 \begin{figure}[H]
@@ -197,5 +197,23 @@ For adjustable voltage mode, the output voltage is set by an external resistive 
     \label{eqn:rt8049_voltage_devider}
 \end{equation}
 where $V_{REF} = 0.6V$ (typ.) is the internal reference voltage.
+
+\section{Result}
+Figure \ref{fig:rtls_anchor_hw_upper} and \ref{fig:rtls_anchor_hw_lower} show the RTLS board designed with Altium Designer. The PDF exported from Altium for hardware design of RTLS anchor board is provided in appendix \ref{appendix:rtls_anchor_board}. In addition, the Solidwork-based design for the enclosure of the RTLS anchor is also given in appendix \ref{appendix:rtls_anchor_enclosure}.
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{rtls_anchor_hw_upper.jpg}
+    \end{center}
+    \caption{RTLS anchor board upper face}
+    \label{fig:rtls_anchor_hw_upper}
+\end{figure}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{rtls_anchor_hw_lower.jpg}
+    \end{center}
+    \caption{RTLS anchor board lower face}
+    \label{fig:rtls_anchor_hw_lower}
+\end{figure}
 
 \end{document}

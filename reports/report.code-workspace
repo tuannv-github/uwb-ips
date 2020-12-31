@@ -10,9 +10,11 @@
 		"latex-workshop.latex.rootFile.doNotPrompt": true,
 		"cSpell.words": [
 			"carrierless",
+			"eirp",
 			"marker",
 			"r",
 			"recp",
+			"snrs",
 			"spof",
 			"spofs",
 			"superframes",
