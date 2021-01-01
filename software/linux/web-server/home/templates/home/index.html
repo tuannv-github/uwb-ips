@@ -597,8 +597,8 @@ function guiUpdateNodes(address, role, x, y, z){
 function onMessageArrived(message) {
 	try{
 		msg = JSON.parse(message.payloadString);
-		console.log(msg);
 		if(document.getElementById("modeSelect").value == "Bluetooth Mesh"){
+			console.log(msg);
 			switch(msg.mavpackettype){
 			case "BLINK":
 				handler_blink(msg);
@@ -639,7 +639,7 @@ function onMessageArrived(message) {
 		else if(document.getElementById("modeSelect").value == "Wi-Fi"){
 			switch(msg.mavpackettype){
 			case "TAG":
-				// console.log(msg);
+				console.log(msg);
 				handler_tag(msg);
 				break;
 			}
@@ -929,19 +929,22 @@ function onBulbBtnClick(address){
 		for (const [address, node] of Object.entries(nodeList)) {
 			if(node.type == "TAG"){
 				for (const [address, range] of Object.entries(node.ranges)){
-					r = Math.sqrt(Math.abs(range.r**2 - (range.anchor.z-node.z)**2));
-					shapes.push({
-						"x0": range.anchor.x - r,
-						"y0": range.anchor.y - r,
-						"x1": range.anchor.x + r,
-						"y1": range.anchor.y + r,
-						type: 'circle',
-						xref: 'x',
-						yref: 'y',
-						line: {
-							color: 'rgba(50, 171, 96, 1)'
-						},
-					});
+					if(range.update == true){
+						r = Math.sqrt(Math.abs(range.r**2 - (range.anchor.z-node.z)**2));
+						shapes.push({
+							"x0": range.anchor.x - r,
+							"y0": range.anchor.y - r,
+							"x1": range.anchor.x + r,
+							"y1": range.anchor.y + r,
+							type: 'circle',
+							xref: 'x',
+							yref: 'y',
+							line: {
+								color: 'rgba(50, 171, 96, 1)'
+							},
+						});
+					}
+					range.update = false;
 				}
 			}
 		}
