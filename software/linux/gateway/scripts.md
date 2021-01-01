@@ -47,8 +47,11 @@ sudo make install
 sudo cp mosquitto.conf /etc/mosquitto
 ```
 
-/etc/mosquitto/mosquitto.conf
+sudo subl /etc/mosquitto/conf.d/websocket.conf 
 ```
+per_listener_settings false
+allow_anonymous true
+
 listener 1883
 protocol mqtt
 
@@ -70,5 +73,12 @@ Protocol generator
 ```
 cd mavlink-1.0.13
 python -m pymavlink.tools.mavgen --lang=Python --wire-protocol=1.0 --output=../mavlink.py ../protocol.xml
-python -m pymavlink.tools.mavgen --lang=C --wire-protocol=1.0 --output=../mavlink/ ../protocol.xml
+python -m pymavlink.tools.mavgen --lang=C --wire-protocol=1.0 --output=../../../../firmware/lib/message/include/message/mavlink   ../protocol.xml
+```
+
+Udev rule file `/etc/udev/rules.d/`:
+```
+udevadm info -a -n /dev/ttyUSB1 | grep '{serial}'
+systemctl restart systemd-udevd.service
+sudo udevadm control --reload-rules && udevadm trigger
 ```

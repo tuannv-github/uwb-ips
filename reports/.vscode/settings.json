@@ -1,6 +1,10 @@
 {
-    "latex-workshop.latex.autoBuild.run": "never",
-    "latex-workshop.latex.rootFile.useSubFile": true,
-    "latex-workshop.latex.rootFile.doNotPrompt": true,
-    "python.pythonPath": "E:\\Python\\3.8.5\\python.exe",
+    "grammarly.userWords": [
+        "RMARKER",
+        "RMarker",
+        "ccp",
+        "multilateration",
+        "rx",
+        "tdma"
+    ],
 }

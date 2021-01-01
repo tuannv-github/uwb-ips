@@ -1,26 +1,35 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
+
 <head>
 	<title>RTLS</title>
 	<link rel="stylesheet" href="{% static '/home/bootstrap-4.5.3-dist/css/bootstrap.min.css' %}"/>
+	<link rel="stylesheet" href="{% static '/home/fontawesome-free-5.15.1-web/css/all.min.css' %}"/>
 	<script src="{% static '/home/jquery/jquery-3.5.1.min.js' %}"></script>
 	<script src="{% static '/home/bootstrap-4.5.3-dist/js/bootstrap.min.js' %}"></script>
 
 	<script src="{% static '/home/paho.javascript-1.1.0/paho-mqtt-min.js' %}"></script>
 	<script src="{% static '/home/plotjs-1.57.1/plotly.min.js' %}"></script>
 </head>
+
 <body>
     <nav class="navbar navbar-light bg-light">
-        <span class="navbar-brand h1 m-1">RTLS</span>
+		<span class="navbar-brand h1 m-1">RTLS</span>
 	</nav>
 	<div class="row m-1">
 		<div class="col-sm-9">
 			<div id="map"></div>
 		</div>
 		<div class="col-sm-3" >
-				<div class="overflow-auto" style="max-height: calc(100vh - 80px);" id="idNodeList">
-				</div>
+			<div class="m-2">
+				<select class="form-control" id="modeSelect">
+					<option>Bluetooth Mesh</option>
+					<option>Wi-Fi</option>
+				</select>
+			</div>
+			<div class="overflow-auto" style="max-height: calc(100vh - 80px);" id="idNodeList">
+			</div>
 		</div>
 	</div>
 
@@ -46,6 +55,7 @@
 	</script>
 
 </body>
+
 <style>
 	.node-title-TAG{
 		background-color: rgb(83, 158, 255);
@@ -69,27 +79,23 @@ client.onMessageArrived = onMessageArrived;
 client.connect({onSuccess:onConnect});
 
 class Node{
-	constructor(address, type, locationX, locationY, locationZ) {
-		this.address = address;
-		this.type = type;
-		this.locationX = locationX;
-		this.locationY = locationY;
-		this.locationZ = locationZ;
+	constructor(uwb_address, role){
+		this.uwb_address = uwb_address;
+		this.mesh_address = 0;
+		this.role = role;
+
+		this.locationX = 0;
+		this.locationY = 0;
+		this.locationZ = 0;
+
 		this.editing = false;
 		this.identifying = false;
+		this.lighting = false;
 	}
-	valueOf(){
-    	return this.address;
-	};
-	equal(node){
-		return this.address == node.address;
-	}
-	some(node){
-		return this.address == node.address;
-	}
+
 	toString(){
-		let address = "Node: " + this.address.toString() + " ";
-		let type = "type: " + this.type.toString() + " ";
+		let address = "Node: " + this.uwb_address.toString() + " ";
+		let type = "type: " + this.role.toString() + " ";
 		let location = "location: " + this.locationX.toString() + ", " +  this.locationY.toString() + ", " +  this.locationZ.toString();
 		return  address + type + location;
 	}
@@ -119,65 +125,524 @@ function dec2hexString(dec) {
    return '0x' + (dec+0x10000).toString(16).substr(-4).toUpperCase();
 }
 
-function handler_location(msg_location){
-	node = new Node(msg.dstsrc, msg.node, msg.location_x, msg.location_y, msg.location_z);
-	let added = false;
-	let i = 0;
+function find_node(nodeList, uwb_address){
 	for(i=0; i<nodeList.length; i++){
-		if(node.equal(nodeList[i])) {
-			added = true;
-			break;
+		if(nodeList[i].uwb_address == uwb_address) {
+			return nodeList[i];
 		}
 	}
-	if(added){
-		if(!nodeList[i].editing){
-			nodeUpdate(i, node);
-			plot(nodeList);
+	return null;
+}
+
+function find_node_mesh(nodeList, mesh_address){
+	for(i=0; i<nodeList.length; i++){
+		if(nodeList[i].mesh_address == mesh_address) {
+			return nodeList[i];
 		}
 	}
-	else{
+	return null;
+}
+
+function handler_blink(msg){
+	node = find_node(nodeList, msg.uwb_address);
+
+	if(!node){
+		node = new Node(msg.uwb_address, msg.role);
 		nodeList.push(node);
-		plot(nodeList);
 
 		console.log("Add: "+ node.toString());
 		$('#idNodeList').append(
 			[
-				{address: node.address, addressHex: dec2hexString(parseInt(node.address)), type: node.type, 
+				{address: node.uwb_address, uwbAddressHex: dec2hexString(parseInt(node.uwb_address)), nodeRole: node.role, 
 					locationX: node.locationX.toString(), locationY: node.locationY.toString(), locationZ: node.locationZ.toString()},
 			].map(nodeTemplate).join(''));
-		$('#node'+ node.address +'Card').show(300);
-		switch(node.type){
+		$('#node'+ node.uwb_address +'Card').show(300);
+		switch(node.role){
 			case "ANCHOR":
-				$('#node' + node.address + 'Select').children("option")[0].selected = true;
-				$('#node' + node.address + 'Select').children("option")[0].disabled = true;
-				$('#node' + node.address + 'Select').children("option")[1].disabled = true;
+				$('#node' + node.uwb_address + 'Select').children("option")[0].selected = true;
+				$('#node' + node.uwb_address + 'Select').children("option")[0].disabled = true;
+				$('#node' + node.uwb_address + 'Select').children("option")[1].disabled = true;
 				break;
 			case "TAG":
-				$('#node' + node.address + 'Select').children("option")[1].selected = true;
-				$('#node' + node.address + 'Select').children("option")[0].disabled = true;
-				$('#node' + node.address + 'Select').children("option")[1].disabled = true;
+				$('#node' + node.uwb_address + 'Select').children("option")[1].selected = true;
+				$('#node' + node.uwb_address + 'Select').children("option")[0].disabled = true;
+				$('#node' + node.uwb_address + 'Select').children("option")[1].disabled = true;
 				break;
 		}
 	}
 }
 
-function handler_onoff(msg_onoff){
-	console.log("handler_onoff: " + JSON.stringify(msg_onoff));
+function handler_location(msg){
+	value = parseInt($('#node' + msg.uwb_address + 'CounterLoc').text());
+	if(!isNaN(value)){
+		value += 1;
+		$('#node' + msg.uwb_address + 'CounterLoc').text(value);
+	}
+	node = find_node(nodeList, msg.uwb_address);
+	if(node){
+		nodeLocationUpdate(node, msg.location_x, msg.location_y, msg.location_z);
+	}
+}
+
+function handler_location_reduced(msg){
+	node = find_node_mesh(nodeList, msg.mesh_address);
+	if(node){
+		value = parseInt($('#node' + node.uwb_address + 'CounterLoc').text());
+		if(!isNaN(value)){
+			value += 1;
+			$('#node' + node.uwb_address + 'CounterLoc').text(value);
+		}
+		nodeLocationUpdate(node, msg.location_x, msg.location_y, 0);
+	}
+}
+
+function handler_onoff(msg){
+	$('#node' + msg.uwb_address + 'LightBulbIdentify').css("color", "#6c757d");
+	$('#node' + msg.uwb_address + 'LightBulb0').css("color", "#6c757d");
+	$('#node' + msg.uwb_address + 'LightBulb1').css("color", "#6c757d");
+	if(msg.value & 1){
+		$('#node' + msg.uwb_address + 'LightBulbIdentify').css("color", "#007bff");
+	}
+	if(msg.value & 2){
+		$('#node' + msg.uwb_address + 'LightBulb0').css("color", "#007bff");
+	}
+	if(msg.value & 4){
+		$('#node' + msg.uwb_address + 'LightBulb1').css("color", "#007bff");
+	}
+}
+
+function handler_slot(msg){
+	$('#node' + msg.uwb_address + 'Slot').fadeOut("fast");
+	$('#node' + msg.uwb_address + 'Slot').text(msg.slot);
+	$('#node' + msg.uwb_address + 'Slot').fadeIn("fast");
+}
+
+/** Javascript implementation for trilateration
+ * 
+ * @param {*} ranges range data with format: [[x,y,z,d],[x,y,z,d],[x,y,z,d]]
+ */
+function trilaterate(ranges){
+
+	/* Prepare all parameters */
+	a0x = ranges[0][0];
+	a0y = ranges[0][1];
+	a0z = ranges[0][2];
+
+	a1x = ranges[1][0];
+	a1y = ranges[1][1];
+	a1z = ranges[1][2];
+
+	a2x = ranges[2][0];
+	a2y = ranges[2][1];
+	a2z = ranges[2][2];
+
+	r0 = ranges[0][3];
+	r1 = ranges[1][3];
+	r2 = ranges[2][3];
+
+	/* Transform to standard coordinate */
+	a0tx = 0;
+	a0ty = 0;
+	a0tz = 0;
+
+	a1tx = a1x - a0x;
+	a1ty = a1y - a0y;
+	a1tz = a1z - a0z;
+
+	a2tx = a2x - a0x;
+	a2ty = a2y - a0y;
+	a2tz = a2z - a0z;
+
+	U = Math.sqrt(a1tx*a1tx + a1ty*a1ty + a1tz*a1tz);
+	exx = a1tx/U;
+	exy = a1ty/U;
+	exz = a1tz/U;
+	Vx = a2tx*exx + a2ty*exy + a2tz*exz;
+	temp_x = a2tx - Vx*exx;
+	temp_y = a2ty - Vx*exy;
+	temp_z = a2tz - Vx*exz;
+	Vy = Math.sqrt(temp_x*temp_x + temp_y*temp_y + temp_z*temp_z);
+	eyx = temp_x/Vy;
+	eyy = temp_y/Vy;
+	eyz = temp_z/Vy;
+	ezx = exy*eyz - exz*eyy;
+	ezy = exz*eyx - exx*eyz;
+	ezz = exx*eyy - exy*eyx;
+
+	/* Trilateration */
+	x  = (r0*r0 - r1*r1 + U*U) / (2*U);
+	y  = (r0*r0 - r2*r2 + Vx*Vx + Vy*Vy - 2*Vx*x) / (2*Vy);
+    z  = r0**2 - x**2 - y**2;
+	if(z < 0) z = 0;
+	z0 = Math.sqrt(z);
+	z1 = -z0;
+
+	/* Transform to original coordinate */
+	PAx = a0x + x*exx + y*eyx + z0*ezx;
+	PAy = a0y + x*exy + y*eyy + z0*ezy;
+	PAz = a0z + x*exz + y*eyz + z0*ezz;
+
+	PBx = a0x + x*exx + y*eyx + z1*ezx;
+	PBy = a0y + x*exy + y*eyy + z1*ezy;
+	PBz = a0z + x*exz + y*eyz + z1*ezz;
+
+	/* Return the result */
+	return [[PAx, PAy, PAz], [PBx, PBy, PBz]];
+}
+
+function nearest_finder(sphere, locationA, locationB){
+	distA = (locationA[0]- sphere[0])*(locationA[0]- sphere[0]) 
+			+ (locationA[1]- sphere[1])*(locationA[1]- sphere[1])
+			+ (locationA[2]- sphere[2])*(locationA[2]- sphere[2]);
+	distB = (locationB[0]- sphere[0])*(locationB[0]- sphere[0]) 
+			+ (locationB[1]- sphere[1])*(locationB[1]- sphere[1])
+			+ (locationB[2]- sphere[2])*(locationB[2]- sphere[2]);    
+	range = sphere[3]*sphere[3];
+	if(Math.abs(distA - range) < Math.abs(distB - range)){
+		return locationA;
+	}
+	else{
+		return locationB;
+	}
+}
+
+shapesList = new Array();
+
+function localization(tag){
+	ranges = Array();
+	anchorInfos = Array();
+	tag.anchors.forEach(anchorInfo =>{
+		anchor = anchorInfo.anchor;
+		if(anchorInfo.valid && anchorInfo.distance){
+			ranges.push([anchor.locationX, anchor.locationY, anchor.locationZ, anchorInfo.distance]);
+			anchorInfos.push(anchorInfo);
+		}
+	});
+	if(ranges.length >= 4){
+		anchorInfos.forEach(anchorInfo =>{
+			anchorInfo.valid = false;
+		});
+		// console.log(ranges);
+		PAB = trilaterate(ranges);
+		P = nearest_finder(ranges[3], PAB[0], PAB[1]);
+		console.log(P);
+
+		tag.locationX = P[0];
+		tag.locationY = P[1];
+		tag.locationZ = P[2];
+	}
+}
+
+function handler_tof(msg_tof){
+	idx = 0;
+	found = false
+	for(idx=0; idx<nodeList.length; idx++){
+		if(msg_tof["anchor"] == nodeList[idx].address) {
+			found = true;
+			break;
+		}
+	}
+	if(!found) return;
+	anchor = nodeList[idx];
+
+	idx = 0;
+	for(idx=0; idx<nodeList.length; idx++){
+		if(msg_tof["tag"] == nodeList[idx].address) break;
+	}
+	tag = nodeList[idx];
+
+	A = 0.004632130984819555
+	b = 0.13043560944811894
+	anchorFound = false;
+	tag.anchors.forEach(anchorInfo => {
+		if(anchorInfo.anchor.equal(anchor)){
+			anchorFound = true;
+
+			anchorInfo.valid = true;
+			clearTimeout(anchorInfo.id);
+			anchorInfo.id = anchorInfo.timeout();
+			anchorInfo.tof = msg_tof["tof"];
+			anchorInfo.distance = A*msg_tof["tof"] + b;
+
+			found = false;
+			shapesList.forEach(shape => {
+				if(shape.tag == tag.address && shape.anchor == anchorInfo.anchor.address){
+					found = true;
+					shape.x0 = anchorInfo.anchor.locationX - anchorInfo.distance;
+					shape.y0 = anchorInfo.anchor.locationY - anchorInfo.distance;
+					shape.x1 = anchorInfo.anchor.locationX + anchorInfo.distance;
+					shape.y1 = anchorInfo.anchor.locationY + anchorInfo.distance;
+				}
+			});
+			
+			if(!found){
+				anchorInfo.distance = A*msg_tof["tof"] + b;
+				shape = {
+					type: 'circle',
+					xref: 'x',
+					yref: 'y',
+					x0: anchorInfo.anchor.locationX - anchorInfo.distance,
+					y0: anchorInfo.anchor.locationY - anchorInfo.distance,
+					x1: anchorInfo.anchor.locationX + anchorInfo.distance,
+					y1: anchorInfo.anchor.locationY + anchorInfo.distance,
+					line: {
+						color: 'rgba(50, 171, 96, 1)'
+					},
+					anchor: anchor.address,
+					tag: tag.address,
+				}
+				shapesList.push(shape);
+			}
+
+			updateLayout = {
+				shapes: shapesList
+			}
+			Plotly.update('map', null, updateLayout, 0);
+		}
+	});
+
+	if(!anchorFound){
+		anchor = {
+			"anchor": anchor,
+			"tof": msg_tof["tof"],
+			"valid": true,
+			"timeout": function() {
+				var id = setTimeout(function timeout(anchor){
+					anchor.valid = false;
+				}, 5000, anchor);
+				return id;
+			},
+		}
+		tag.anchors.push(anchor);
+		anchor.id = anchor.timeout();
+	}
+
+	localization(tag);
+}
+
+function handler_distance(msg){
+	idx = 0;
+	found = false
+	for(idx=0; idx<nodeList.length; idx++){
+		if(msg["anchor"] == nodeList[idx].address) {
+			found = true;
+			break;
+		}
+	}
+	if(!found) return;
+	anchor = nodeList[idx];
+
+	idx = 0;
+	for(idx=0; idx<nodeList.length; idx++){
+		if(msg["tag"] == nodeList[idx].address) break;
+	}
+	tag = nodeList[idx];
+
+	anchorFound = false;
+	tag.anchors.forEach(anchorInfo => {
+		if(anchorInfo.anchor.equal(anchor)){
+			anchorFound = true;
+
+			anchorInfo.valid = true;
+			clearTimeout(anchorInfo.id);
+			anchorInfo.id = anchorInfo.timeout();
+			
+			anchorInfo.tof = msg["tof"];
+			anchorInfo.distance = msg["distance"];
+
+			found = false;
+			shapesList.forEach(shape => {
+				if(shape.tag == tag.address && shape.anchor == anchorInfo.anchor.address){
+					found = true;
+					shape.x0 = anchorInfo.anchor.locationX - anchorInfo.distance;
+					shape.y0 = anchorInfo.anchor.locationY - anchorInfo.distance;
+					shape.x1 = anchorInfo.anchor.locationX + anchorInfo.distance;
+					shape.y1 = anchorInfo.anchor.locationY + anchorInfo.distance;
+				}
+			});
+
+			if(!found){
+				anchorInfo.distance = msg["distance"];
+				shape = {
+					type: 'circle',
+					xref: 'x',
+					yref: 'y',
+					x0: anchorInfo.anchor.locationX - anchorInfo.distance,
+					y0: anchorInfo.anchor.locationY - anchorInfo.distance,
+					x1: anchorInfo.anchor.locationX + anchorInfo.distance,
+					y1: anchorInfo.anchor.locationY + anchorInfo.distance,
+					line: {
+						color: 'rgba(50, 171, 96, 1)'
+					},
+					anchor: anchor.address,
+					tag: tag.address,
+				}
+				shapesList.push(shape);
+			}
+
+			updateLayout = {
+				shapes: shapesList
+			}
+			Plotly.update('map', null, updateLayout, 0);
+		}
+	});
+
+	if(!anchorFound){
+		anchor = {
+			"anchor": anchor,
+			"tof": msg["tof"],
+			"valid": true,
+			"timeout": function() {
+				var id = setTimeout(function timeout(anchor){
+					anchor.valid = false;
+				}, 5000, anchor);
+				return id;
+			},
+		}
+		tag.anchors.push(anchor);
+		anchor.id = anchor.timeout();
+	}
+
+	localization(tag);
+}
+
+myNodeList = new Object()
+
+function dataUpdateNode(address, role, x, y, z){
+	if(address in myNodeList){
+		guiUpdateNodes(address, role, x, y, z);
+		myNodeList[address].x = x;
+		myNodeList[address].y = y;
+		myNodeList[address].z = z;
+		myNodeList[address].type = role;
+	}
+	else{
+		myNodeList[address] = {
+			"x" 		: x,
+			"y" 		: y,
+			"z" 		: z,
+			"type"		: role,
+			"msg"		: 0,
+			"ranges"	: Object(),
+		};
+		guiAddNodes(address, role, x, y, z);
+	}
+}
+
+function dataUpdateDistance(anchor, tag, distance){
+	if(tag in myNodeList){
+		myNodeList[tag].ranges[anchor.toString()] = {
+			"r": distance,
+			"update": true,
+			"anchor": myNodeList[anchor],
+		}
+	}
+}
+
+function handler_tag(msg){
+	dataUpdateNode(msg.a0, "ANCHOR", msg.a0x, msg.a0y, msg.a0z);
+	dataUpdateDistance(msg.a0, msg.t0, msg.a0r);
+	dataUpdateNode(msg.a1, "ANCHOR", msg.a1x, msg.a1y, msg.a1z);
+	dataUpdateDistance(msg.a1, msg.t0, msg.a1r);
+	dataUpdateNode(msg.a2, "ANCHOR", msg.a2x, msg.a2y, msg.a2z);
+	dataUpdateDistance(msg.a2, msg.t0, msg.a2r);
+	dataUpdateNode(msg.a3, "ANCHOR", msg.a3x, msg.a3y, msg.a3z);
+	dataUpdateDistance(msg.a3, msg.t0, msg.a3r);
+	dataUpdateNode(msg.t0, "TAG", 	 msg.t0x, msg.t0y, msg.t0z);
+	plotNodes(myNodeList);
+	plotCircle(myNodeList);
+}
+
+function handler_ble_mesh(msg){
+	$('#node' + msg.uwb_address + 'meshAddressHex').text(dec2hexString(parseInt(msg.mesh_address)));
+	node = find_node(nodeList, msg.uwb_address);
+	if(node){
+		node.mesh_address = msg.mesh_address;
+	}
+}
+
+function guiAddNodes(address, role, x, y, z){
+	console.log("Add: "+ address);
+	$('#idNodeList').append(
+		[
+			{address: address, uwbAddressHex: dec2hexString(parseInt(address)), type: role, 
+				locationX: x, locationY: y, locationZ:z},
+		].map(nodeTemplate).join(''));
+	$('#node'+ address +'Card').show(300);
+	switch(role){
+		case "ANCHOR":
+			$('#node' + address + 'Select').children("option")[0].selected = true;
+			$('#node' + address + 'Select').children("option")[0].disabled = true;
+			$('#node' + address + 'Select').children("option")[1].disabled = true;
+			break;
+		case "TAG":
+			$('#node' + address + 'Select').children("option")[1].selected = true;
+			$('#node' + address + 'Select').children("option")[0].disabled = true;
+			$('#node' + address + 'Select').children("option")[1].disabled = true;
+			break;
+		default:
+			console.error("Unknown role: " + role);
+			break;
+	}
+}
+
+function guiUpdateNodes(address, role, x, y, z){
+	myNodeList[address].msg += 1;
+	$('#node' + address + 'CounterLoc').text(myNodeList[address].msg);
+	$('#node' + address + "LocationX").val(x);
+	$('#node' + address + "LocationY").val(y);
+	$('#node' + address + "LocationZ").val(z);
 }
 
 function onMessageArrived(message) {
 	try{
 		msg = JSON.parse(message.payloadString);
-		switch(msg.mavpackettype){
+		console.log(msg);
+		if(document.getElementById("modeSelect").value == "Bluetooth Mesh"){
+			switch(msg.mavpackettype){
+			case "BLINK":
+				handler_blink(msg);
+				break;
+			case "BLE_MESH":
+				handler_ble_mesh(msg);
+				break;
 			case "LOCATION":
-				handler_location(msg)
+				handler_location(msg);
+				break;
+			case "LOCATION_REDUCED":
+				handler_location_reduced(msg);
 				break;
 			case "ONOFF":
-				handler_onoff(msg)
+				handler_onoff(msg);
 				break;
-			default:
-				console.error("UNKNOWN MSG: "+message.payloadString);
+			case "DISTANCE":
+				value = parseInt($('#node' + msg.tag + 'TofDistanceCounter').text());
+				if(!isNaN(value)){
+					value += 1;
+					$('#node' + msg.tag + 'TofDistanceCounter').text(value);
+				}
+				handler_distance(msg);
 				break;
+			case "TOF":
+				value = parseInt($('#node' + msg.tag + 'TofDistanceCounter').text());
+				if(!isNaN(value)){
+					value += 1;
+					$('#node' + msg.tag + 'TofDistanceCounter').text(value);
+				}
+				handler_tof(msg);
+				break;
+			case "SLOT":
+				handler_slot(msg);
+				break;
+			}
+		}
+		else if(document.getElementById("modeSelect").value == "Wi-Fi"){
+			switch(msg.mavpackettype){
+			case "TAG":
+				// console.log(msg);
+				handler_tag(msg);
+				break;
+			}
 		}
 	}
 	catch(error){
@@ -185,13 +650,17 @@ function onMessageArrived(message) {
 	}
 }
 
-const nodeTemplate = ({ address, addressHex, type, locationX, locationY, locationZ}) => 
+const nodeTemplate = ({ address, uwbAddressHex, nodeRole, locationX, locationY, locationZ}) => 
 `
 <div class="card m-1" style="display: none;" id="node${address}Card">
-    <div class="card-heading p-1 node-title-${type}" role="button" data-toggle="collapse" href="#node${address}Toggle">
-        <h5 class="row card-title m-1 node-title">
-            Node <span style='margin-left:0.25em'>${addressHex}</span>
-        </h5>
+    <div class="card-heading p-1 node-title-${nodeRole}" role="button" data-toggle="collapse" href="#node${address}Toggle">
+		<h5 class="card-title m-1 node-title">
+			<span class="float-left" > Node ${uwbAddressHex} </span>
+			<span class="float-left ml-2 mr-2" id="node${address}meshAddressHex">0</span>
+			<span class="float-right ml-2 mr-2" id="node${address}TofDistanceCounter" style="text-align:right; ">0</span>
+			<span class="float-right ml-2 mr-2" id="node${address}CounterLoc" style="text-align:right;">0</span>
+			<span class="float-right ml-2 mr-2" id="node${address}Slot" style="text-align:right; ">0</span>
+		</h5>
     </div>
     <div class="collapse" id="node${address}Toggle">
         <div class="card-body p-2">
@@ -203,9 +672,11 @@ const nodeTemplate = ({ address, addressHex, type, locationX, locationY, locatio
                 </select>
             </div>
 			<div class="row col-sm-12 no-gutters pt-1">
-				<div class="col-sm-3 no-gutters col-form-label">
+				<div class="col-sm-3">
 					<div><label>Location</label></div>
-					<div class="spinner-grow spinner-grow-sm text-info p-1" role="status" style="display: none;" id="node${address}Identifying"></div>
+					<div class="fas fa-lightbulb" style="color:#6c757d; " id="node${address}LightBulbIdentify"></div>
+					<div class="fas fa-lightbulb" style="color:#6c757d; " id="node${address}LightBulb0"></div>
+					<div class="fas fa-lightbulb" style="color:#6c757d; " id="node${address}LightBulb1"></div>
 				</div>
                 <div class="col-sm-9 no-gutters">
                     <div class="row col-sm-12 no-gutters pt-1 pb-1">
@@ -221,64 +692,55 @@ const nodeTemplate = ({ address, addressHex, type, locationX, locationY, locatio
                         <input type="text" class="col-sm-10 form-control p-1" value="${locationZ}" readonly id="node${address}LocationZ">
                     </div>
                 </div>
-            </div>
+			</div>
 			<div class="row col-sm-12 no-gutters pt-1">
-				<div class="col-sm-4 p-2">
-					<button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}BtnIdentify" onclick="onIdentifyBtnClick('${address}')">Identify</button>
-				</div>
-                <div class="col-sm-4 p-2"><button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}BtnEdit" onclick="onEditBtnClick('${address}')">Edit</button></div>
-				<div class="col-sm-4 p-2"><button type="button" class="btn btn-outline-primary col-sm-12" id="node${address}Update" onclick="onUpdateBtnClick('${address}')">Update</button></div>
-            </div>
+				<div class="col-sm-3 p-1"><button type="button" class="btn btn-outline-primary btn-block" id="node${address}BtnIdentify" onclick="onIdentifyBtnClick('${address}')">Identify</button> </div>
+				<div class="col-sm-3 p-1"><button type="button" class="btn btn-outline-primary btn-block" id="node${address}BtnBulb" onclick="onBulbBtnClick('${address}')">Bulb</button></div>
+                <div class="col-sm-3 p-1"><button type="button" class="btn btn-outline-primary btn-block" id="node${address}BtnEdit" onclick="onEditBtnClick('${address}')">Edit</button></div>
+				<div class="col-sm-3 p-1"><button type="button" class="btn btn-outline-primary btn-block" id="node${address}Update" onclick="onUpdateBtnClick('${address}')">Update</button></div>
+			</div>
+			<i class="fa fa-lightbulb-o" aria-hidden="true"></i>
         </div>
     </div>
 </div>
 `;
 
-function nodeUpdate(idx, node){
-	nodeList[idx].type = node.type;
-	nodeList[idx].locationX = node.locationX;
-	nodeList[idx].locationY = node.locationY;
-	nodeList[idx].locationZ = node.locationZ;
-	
-	switch(node.type){
-		case "ANCHOR":
-			$('#node' + node.address + 'Select').children("option")[0].selected = true;
-			break;
-		case "TAG":
-			$('#node' + node.address + 'Select').children("option")[1].selected = true;
-			break;
+function nodeLocationUpdate(node, locationX, locationY, locationZ){
+	node.locationX = locationX;
+	node.locationY = locationY;
+	node.locationZ = locationZ;
+
+	if(!node.editing){
+		$('#node' + node.uwb_address + "LocationX").val(node.locationX)
+		$('#node' + node.uwb_address + "LocationY").val(node.locationY)
+		$('#node' + node.uwb_address + "LocationZ").val(node.locationZ)
 	}
 
-	$('#node' + node.address + "LocationX").val(node.locationX)
-	$('#node' + node.address + "LocationY").val(node.locationY)
-	$('#node' + node.address + "LocationZ").val(node.locationZ)
+	plot(nodeList);
 }
 
 function onEditBtnClick(address){
 	console.log("onEditBtnClick: " + address);
 
-	let idx = 0;
-	for(idx=0; idx<nodeList.length; idx++){
-		if(address == nodeList[idx].address) break;
-	}
-	let node = nodeList[idx];
-
-	if(node.editing){
-		node.editing = false;
-		$('#node' + address + 'BtnEdit').text('Edit').button("refresh");
-		$('#node' + address + 'Select').children("option")[0].disabled = true;
-		$('#node' + address + 'Select').children("option")[1].disabled = true;
-		$('#node' + address + 'LocationX').attr('readonly', true);
-		$('#node' + address + 'LocationY').attr('readonly', true);
-		$('#node' + address + 'LocationZ').attr('readonly', true);
-	}else{
-		node.editing = true;
-		$('#node' + address + 'BtnEdit').text('Editing...').button("refresh");
-		$('#node' + address + 'Select').children("option")[0].disabled = false;
-		$('#node' + address + 'Select').children("option")[1].disabled = false;
-		$('#node' + address + 'LocationX').attr('readonly', false);
-		$('#node' + address + 'LocationY').attr('readonly', false);
-		$('#node' + address + 'LocationZ').attr('readonly', false);
+	node = find_node(nodeList, address);
+	if(node){
+		if(node.editing){
+			node.editing = false;
+			$('#node' + address + 'BtnEdit').text('Edit').button("refresh");
+			$('#node' + address + 'Select').children("option")[0].disabled = true;
+			$('#node' + address + 'Select').children("option")[1].disabled = true;
+			$('#node' + address + 'LocationX').attr('readonly', true);
+			$('#node' + address + 'LocationY').attr('readonly', true);
+			$('#node' + address + 'LocationZ').attr('readonly', true);
+		}else{
+			node.editing = true;
+			$('#node' + address + 'BtnEdit').text('Edit...').button("refresh");
+			$('#node' + address + 'Select').children("option")[0].disabled = false;
+			$('#node' + address + 'Select').children("option")[1].disabled = false;
+			$('#node' + address + 'LocationX').attr('readonly', false);
+			$('#node' + address + 'LocationY').attr('readonly', false);
+			$('#node' + address + 'LocationZ').attr('readonly', false);
+		}
 	}
 }
 
@@ -291,67 +753,82 @@ function publish(topic, msg){
 
 function onUpdateBtnClick(address){
 	console.log("onUpdateBtnClick: " + address);
-	let idx = 0;
-	for(idx=0; idx<nodeList.length; idx++){
-		if(address == nodeList[idx].address) break;
-	}
-	let node = nodeList[idx];
 
-	if(!node.editing){
-		toastError("Enter editing mode first");
-		return;
-	}
+	node = find_node(nodeList, address);
+	if(node){
+		if(!node.editing) {
+			toastError("Enter editing mode first");
+			return;
+		}
+		locationX = parseFloat($('#node' + node.uwb_address + 'LocationX').val());
+		locationY = parseFloat($('#node' + node.uwb_address + 'LocationY').val());
+		locationZ = parseFloat($('#node' + node.uwb_address + 'LocationZ').val());
+		address = parseInt(address);
+		if(isNaN(locationX) || isNaN(locationY) || isNaN(locationZ)){
+			toastError("Invalid location");
+			return;
+		}
+		if(isNaN(address)){
+			toastError("Invalid node address");
+			return;
+		}
 
-	locationX = parseFloat($('#node' + node.address + 'LocationX').val());
-	locationY = parseFloat($('#node' + node.address + 'LocationY').val());
-	locationZ = parseFloat($('#node' + node.address + 'LocationZ').val());
-	address = parseInt(address);
-	if(isNaN(locationX) || isNaN(locationY) || isNaN(locationZ)){
-		toastError("Invalid location");
-		return;
-	}
-	if(isNaN(address)){
-		toastError("Invalid node address");
-		return;
-	}
-	
-	if($('#node' + node.address + 'Select').children("option")[0].selected)
-		node = "ANCHOR"
-	else
-		node = "TAG"
-	cmd = '{"mavpackettype": "LOCATION", "dstsrc": ' + address + ', "node": "' + node + '", "type": "SET", "location_x": ' + locationX +', "location_y": ' + locationY + ', "location_z": ' + locationZ + '}'
+		if($('#node' + node.uwb_address + 'Select').children("option")[0].selected)
+			node = "ANCHOR";
+		else
+			node = "TAG";
+		cmd = '{"mavpackettype": "LOCATION", "uwb_address": ' + address + ', "location_x": ' + locationX +', "location_y": ' + locationY + ', "location_z": ' + locationZ + '}';
 
-	publish("{{topic_publish}}", cmd)
+		publish("{{topic_publish}}", cmd);
+	}
 }
 
 function onIdentifyBtnClick(address){
 	console.log("onIdentifyBtnClick: " + address);
 
-	let idx = 0;
-	for(idx=0; idx<nodeList.length; idx++){
-		if(address == nodeList[idx].address) break;
+	node = find_node(nodeList, address);
+	if(node){
+		if(node.identifying){
+			node.identifying = false;
+			$('#node' + address + 'BtnIdentify').text('Identify').button("refresh");
+			// $('#node' + address + 'Identifying').hide();
+			cmd = '{"mavpackettype": "ONOFF", "uwb_address": '+ address +', "value": 0}'
+		}
+		else{
+			node.identifying = true;
+			$('#node' + address + 'BtnIdentify').text('Buzzing').button("refresh");
+			// $('#node' + address + 'Identifying').show();
+			cmd = '{"mavpackettype": "ONOFF", "uwb_address": '+ address +', "value": 1}'
+		}
+		publish("{{topic_publish}}", cmd);
 	}
-	let node = nodeList[idx];
+}
 
-	address = parseInt(address);
-	if(isNaN(address)){
-		toastError("Invalid node address");
-		return;
-	}
+function onBulbBtnClick(address){
+	console.log("onBulbBtnClick: " + address);
 
-	if(node.identifying){
-		node.identifying = false;
-		$('#node' + address + 'BtnIdentify').text('Identify').button("refresh");
-		// $('#node' + address + 'Identifying').hide();
-		cmd = '{"mavpackettype": "ONOFF", "dstsrc": '+ address +', "type": "SET", "value": 0}'
+	node = find_node(nodeList, address);
+	if(node){
+		address = parseInt(address);
+		if(isNaN(address)){
+			toastError("Invalid node address");
+			return;
+		}
+
+		if(node.lighting){
+			node.lighting = false;
+			$('#node' + address + 'BtnBulb').text('OFF').button("refresh");
+			// $('#node' + address + 'Identifying').hide();
+			cmd = '{"mavpackettype": "ONOFF", "uwb_address": '+ address +', "value": 0}'
+		}
+		else{
+			node.lighting = true;
+			$('#node' + address + 'BtnBulb').text('ON').button("refresh");
+			// $('#node' + address + 'Identifying').show();
+			cmd = '{"mavpackettype": "ONOFF", "uwb_address": '+ address +', "value": 6}'
+		}
+		publish("{{topic_publish}}", cmd)
 	}
-	else{
-		node.identifying = true;
-		$('#node' + address + 'BtnIdentify').text('Identifying').button("refresh");
-		// $('#node' + address + 'Identifying').show();
-		cmd = '{"mavpackettype": "ONOFF", "dstsrc": '+ address +', "type": "SET", "value": 1}'
-	}
-	publish("{{topic_publish}}", cmd)
 }
 
 </script>
@@ -385,17 +862,18 @@ function onIdentifyBtnClick(address){
 	var plotData = [ plotAnchors, plotTags ];
 
 	var layout = {
-		// xaxis: {
-		// 	range: [0, 5],
-		// 	// automargin: true,
-		// },
-		// yaxis: {
-		// 	range: [0, 5],
-		// 	// automargin: true,
+		xaxis: {
+			range: [-5, 5],
+			scaleanchor: "y"
+			// automargin: true,
+		},
+		yaxis: {
+			range: [-5, 5],
+			// automargin: true,
 			
-		// },
-		'xaxis.autorange': true,
-        'yaxis.autorange': true,
+		},
+		// 'xaxis.autorange': true,
+        // 'yaxis.autorange': true,
 		legend: {
 			y: 0.5,
 			yref: 'paper',
@@ -407,7 +885,8 @@ function onIdentifyBtnClick(address){
 		},
 		title:'Map',
 		autosize: true,
-		hovermode: "closest"
+		hovermode: "closest",
+		dragmode: "pan"
 	};
 
 	Plotly.newPlot('map', plotData, layout, {scrollZoom: true, responsive: true});
@@ -417,17 +896,60 @@ function onIdentifyBtnClick(address){
 		updateLayout = {};
 		for(i=0; i<nodeList.length; i++){
 			node = nodeList[i];
-			if(node.type == "ANCHOR"){
+			if(node.role == "ANCHOR"){
 				updateNode.x[0].push(node.locationX);
 				updateNode.y[0].push(node.locationY);
 			}
-			else if(node.type == "TAG"){
+			else if(node.role == "TAG"){
 				updateNode.x[1].push(node.locationX);
 				updateNode.y[1].push(node.locationY);
 			}
 		}
 		Plotly.update('map', updateNode, updateLayout, [0, 1]);
 	};
+
+	function plotNodes(nodeList){
+		updateNode = {x: [[], []], y: [[], []]};
+		updateLayout = {};
+		for (const [address, value] of Object.entries(nodeList)) {
+			if(value.type == "ANCHOR"){
+				updateNode.x[0].push(value.x);
+				updateNode.y[0].push(value.y);
+			}
+			else if(value.type == "TAG"){
+				updateNode.x[1].push(value.x);
+				updateNode.y[1].push(value.y);
+			}
+		}
+		Plotly.update('map', updateNode, updateLayout, [0, 1]);
+	};
+
+	function plotCircle(nodeList){
+		shapes = Array();
+		for (const [address, node] of Object.entries(nodeList)) {
+			if(node.type == "TAG"){
+				for (const [address, range] of Object.entries(node.ranges)){
+					r = Math.sqrt(Math.abs(range.r**2 - (range.anchor.z-node.z)**2));
+					shapes.push({
+						"x0": range.anchor.x - r,
+						"y0": range.anchor.y - r,
+						"x1": range.anchor.x + r,
+						"y1": range.anchor.y + r,
+						type: 'circle',
+						xref: 'x',
+						yref: 'y',
+						line: {
+							color: 'rgba(50, 171, 96, 1)'
+						},
+					});
+				}
+			}
+		}
+		updateLayout = {
+			shapes: shapes
+		};
+		Plotly.update('map', null, updateLayout, 0);
+	}
 
 </script>
 

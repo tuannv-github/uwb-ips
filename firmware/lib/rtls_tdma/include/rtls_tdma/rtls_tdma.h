@@ -3,7 +3,8 @@
 #define _RTLS_TDMA_H_
 
 #include <uwb/uwb.h>
-#include <tdma/tdma.h>
+#include <rtls_tdma/tdma.h>
+#include <uwb_nrng/nrng.h>
 
 typedef enum{
     RTS_JOINT_NONE,
@@ -55,6 +56,10 @@ struct _rtls_tdma_instance_t {
     uint16_t slot_reqt_addr;
     
     rtls_tdma_cb_t rtls_tdma_cb;
+
+    float x;
+    float y;
+    float z;
 
     rtls_tdma_node_t nodes[MYNEWT_VAL(TDMA_NSLOTS)]; // nodes[0] save my node info
 };
@@ -120,6 +125,7 @@ typedef struct _rt_slot_map_t rt_slot_map_t;
 typedef struct _rt_slot_map_data_t rt_slot_map_data_t;
 
 void rtls_tdma_start(rtls_tdma_instance_t *rtls_tdma_instance, struct uwb_dev* udev);
+void rtls_tdma_find_node(rtls_tdma_instance_t *rti, uint16_t addr, rtls_tdma_node_t **node);
 
 #define UWB_TX(rti, msg, msg_size, slot)                            \
     uint64_t dx_time = tdma_tx_slot_start(rti->tdma, slot);         \

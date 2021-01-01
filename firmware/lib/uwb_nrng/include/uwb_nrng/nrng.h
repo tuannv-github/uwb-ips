@@ -178,7 +178,8 @@ struct uwb_rng_config * nrng_get_config(struct nrng_instance * nrng, uwb_datafra
 struct uwb_dev_status nrng_listen(struct nrng_instance * nrng, uwb_dev_modes_t mode);
 uint32_t nrng_get_uids(struct nrng_instance * nrng, uint16_t uids[], uint16_t nranges, uint16_t base);
 uint32_t nrng_get_ranges(struct nrng_instance * nrng, dpl_float32_t ranges[], uint16_t nranges, uint16_t base);
-uint32_t nrng_get_ranges_addresses(struct nrng_instance * nrng, float ranges[], uint16_t addresses[], uint16_t nranges, uint16_t base);
+uint32_t nrng_get_ranges_addresses(struct nrng_instance * nrng, float ranges[], uint16_t addresses[], bool updated[], uint16_t nranges, uint16_t base);
+uint32_t nrng_get_tofs_addresses(struct nrng_instance * nrng, uint32_t tofs[], uint16_t addresses[], uint8_t updated[], uint16_t nranges, uint16_t base);
 uint32_t usecs_to_response(struct uwb_dev * inst, uint16_t nslots, struct uwb_rng_config * config, uint32_t duration);
 
 void nrng_append_config(struct nrng_instance * nrng, struct rng_config_list *cfgs);

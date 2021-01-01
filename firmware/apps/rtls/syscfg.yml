@@ -1,72 +1,56 @@
 
 syscfg.defs:
-    APP_SW_TASK_STACK_SZ:
+    TASK_LOCATION_STACK_SIZE:
         description: 'Size of task stack'
-        value: 512
-    APP_SW_TASK_PRIORITY:
+        value: 256
+    TASK_LOCATION_PRIORITY:
         description: 'Priority of task'
-        value: 210
+        value: 201
 
-    APP_ROOT_TASK_STACK_SZ:
+    TASK_BLINK_STACK_SIZE:
         description: 'Size of task stack'
-        value: 128
-    APP_ROOT_TASK_PRIORITY:
+        value: 256
+    TASK_BLINK_PRIORITY:
         description: 'Priority of task'
-        value: 211
+        value: 202
 
-    APP_GATEWAY_DOWNLINK_TASK_STACK_SZ:
+    TASK_LED_STACK_SIZE:
         description: 'Size of task stack'
-        value: 128
-    APP_GATEWAY_DOWNLINK_TASK_PRIORITY:
-        description: 'Priority of task'
-        value: 212
-
-    APP_GATEWAY_UPLINK_TASK_STACK_SZ:
-        description: 'Size of task stack'
-        value: 512
-    APP_GATEWAY_UPLINK_TASK_PRIORITY:
-        description: 'Priority of task'
-        value: 213
-    APP_GATEWAY_UPLINK_MAV_BUFFER_SIZE:
-        description: 'Buffer size'
         value: 32
+    TASK_LED_PRIORITY:
+        description: 'Priority of task'
+        value: 203
 
-    APP_RTLS_TASK_STACK_SIZE:
+    TASK_GATEWAY_STACK_SIZE:
         description: 'Size of task stack'
-        value: 512
-    APP_RTLS_TASK_PRIORITY:
+        value: 128
+    TASK_GATEWAY_PRIORITY:
         description: 'Priority of task'
-        value: 214
+        value: 204
 
-    RTR_ROLE:
-        description: 'Priority of task'
-        value: RTR_ANCHOR
-
-    NODE_START_SLOT_ID:
-        description: >
-            Slot ID from which the nodes should respond
-        value: 0
-    NODE_END_SLOT_ID:
-        description: >
-            Slot ID till which the nodes should respond
-        value: 10
+    # NODE_START_SLOT_ID:
+    #     description: >
+    #         Slot ID from which the nodes should respond
+    #     value: 0
+    # NODE_END_SLOT_ID:
+    #     description: >
+    #         Slot ID till which the nodes should respond
+    #     value: 10
 
 syscfg.vals:
     LOG_LEVEL: 5
 
     CONSOLE_UART: false
     CONSOLE_RTT: true
-    RTT_TERMINAL_BUFFER_SIZE_UP: 2048
+    RTT_TERMINAL_BUFFER_SIZE_UP: 128
     RTT_TERMINAL_BUFFER_SIZE_DOWN: 128
     CONSOLE_ECHO: false
 
-    # CONSOLE_UART: true
     # CONSOLE_RTT: false
+    # CONSOLE_UART: true
     # CONSOLE_UART_BAUD: 115200
     # CONSOLE_UART_TX_BUF_SIZE: 1024
     # CONSOLE_UART_RX_BUF_SIZE: 256
-    # RTT_TERMINAL_BUFFER_SIZE_UP: 1024
-    # RTT_TERMINAL_BUFFER_SIZE_DOWN: 256
 
     # Shell
     SHELL_TASK: 1
@@ -89,7 +73,7 @@ syscfg.vals:
     UWB_CLI_BACKTRACE: 0
 
     UWB_CCP_ENABLED: 1
-    UWB_CCP_PERIOD: ((uint32_t)1000000)
+    UWB_CCP_PERIOD: ((uint32_t)0x20000)
     UWB_CCP_MAX_CASCADE_RPTS: 2
     
     ## Where to store config
@@ -103,16 +87,17 @@ syscfg.vals:
     MSYS_2_BLOCK_COUNT: 20
     MSYS_2_BLOCK_SIZE: 256
 
-    UWB_PKG_INIT_LOG: 0
+    UWB_PKG_INIT_LOG: 1
 
     BLE_MESH: 1
     OS_MAIN_STACK_SIZE: 512
 
-    BLE_MESH_ADV_BUF_COUNT: 15
-    BLE_MESH_TX_SEG_MAX: 10
+    BLE_MESH_ADV_BUF_COUNT: 10
+    BLE_MESH_TX_SEG_MAX: 5
+    BLE_MESH_TX_SEG_MSG_COUNT: 4
 
     TDMA_NSLOTS: 20
-    TDMA_TASK_STACK_SZ: 1024
+    TDMA_TASK_STACK_SZ: 512
 
     RNG_VERBOSE: 0
     # NRNG_VERBOSE: 1
@@ -121,3 +106,10 @@ syscfg.vals:
     UWBCFG_DEF_FRAME_FILTER: '"0xF"'
 
     CELL_ENABLED: 0
+    # OS_LATENCY: 1000
+    GPIO_AS_PIN_RESET: 1
+    RTLS_CPP_VERBOSE: 1
+
+    BLE_MESH_CRPL: 0
+
+    BLE_MESH_DEVICE_NAME: '"rtls-mesh-node"'

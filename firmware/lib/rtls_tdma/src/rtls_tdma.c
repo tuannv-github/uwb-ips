@@ -17,9 +17,21 @@ static void bcn_slot_cb_mine(tdma_slot_t *tdma_slot);
 static void bcn_slot_cb_othr(tdma_slot_t *tdma_slot);
 static void svc_slot_cb(tdma_slot_t *tdma_slot);
 
+static uint16_t current_ranging_slot = 0;
+
 static bool
 rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs){
     rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)cbs->inst_ptr;
+
+    if(inst->fctrl == FCNTL_IEEE_RANGE_16){
+        if(current_ranging_slot != 0){
+            nrng_request_frame_t * _frame = (nrng_request_frame_t * )inst->rxbuf;
+            if(_frame->src_address == rti->nodes[current_ranging_slot].addr){
+                rti->nodes[current_ranging_slot].timeout = 0;
+            }
+        }
+    }
+
     if (dpl_sem_get_count(&rti->sem) == 0){
         dpl_error_t err = dpl_sem_release(&rti->sem);
         assert(err == DPL_OK);
@@ -91,6 +103,7 @@ static void
 node_add_me(rtls_tdma_instance_t *rti, uint16_t idx){
     /* Change my index */
     rti->slot_idx = idx;
+    rti->dev_inst->slot_id = idx;
     /* Copy slot map from temp slot 0 to new slot */ 
     rti->nodes[idx].slot_map = rti->nodes[0].slot_map | ((slot_map_t)0x01 << idx);
     /* Update address */
@@ -142,10 +155,14 @@ slot_cb(struct dpl_event * ev)
     else{
         if(rti->slot_idx != 0){
             if(rti->rtls_tdma_cb != NULL){
+                if(tdma_slot->idx == rti->slot_idx) rti->nodes[rti->slot_idx].timeout = 0;
+                current_ranging_slot = tdma_slot->idx;
                 rti->rtls_tdma_cb(rti, tdma_slot);
+                current_ranging_slot = 0;
             }
         }
     }
+    // printf("tdma_slot->idx = %d\n", tdma_slot->idx);
 }
 
 static void 
@@ -154,6 +171,7 @@ uwb_ccp_sync_cb(ccp_sync_t ccp_sync, void *arg){
 
     /* My slot idx return to 0 when sync is lost */
     rti->slot_idx = 0;
+    rti->dev_inst->slot_id = 0;
 
     /* Remove nodes from slot map */
     rti->nodes[rti->slot_idx].slot_map = 0x01;
@@ -188,7 +206,7 @@ superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
 {
     rtls_tdma_instance_t *rti = (rtls_tdma_instance_t *)cbs->inst_ptr;
     /* Check timeout and availability of ANCHOR only */
-    for(int i=1; i<=MYNEWT_VAL(UWB_BCN_SLOT_MAX); i++){
+    for(int i=1; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
         rti->nodes[i].available = false;
         if(rti->nodes[i].addr != 0){
             rti->nodes[i].timeout++;
@@ -196,6 +214,15 @@ superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
                 node_rmv(rti, i);
                 printf("Remove node: %d\n", i);
                 node_slot_map_printf(rti);
+
+                /* Anchor may down when trying to get a slot */
+                if(rti->slot_reqt != 0 && node_all_accepted(rti) && rti->role == RTR_TAG){
+                    node_add_me(rti, rti->slot_reqt);
+                    printf("All node has accepted in slot: %d\n", rti->slot_reqt);
+                    node_slot_map_printf(rti);
+                    /* Reset slot_reqt to change it purpose */
+                    // rti->slot_reqt = 0;
+                };
             }
         }
     }
@@ -206,7 +233,8 @@ superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     return false;
 }
 
-void rtls_tdma_start(rtls_tdma_instance_t *rti, struct uwb_dev* udev){
+void 
+rtls_tdma_start(rtls_tdma_instance_t *rti, struct uwb_dev* udev){
     int rc;
 
     tdma_instance_t *tdma = (tdma_instance_t*)uwb_mac_find_cb_inst_ptr(udev, UWBEXT_TDMA);
@@ -232,7 +260,7 @@ void rtls_tdma_start(rtls_tdma_instance_t *rti, struct uwb_dev* udev){
         rtls_ccp_start_role(rti->tdma->ccp, CCP_ROLE_SLAVE);
     }
     else if(rti->role == RTR_ANCHOR){
-        rtls_ccp_start_role(rti->tdma->ccp, CCP_ROLE_MASTER | CCP_ROLE_SLAVE);
+        rtls_ccp_start_role(rti->tdma->ccp, CCP_ROLE_MASTER | CCP_ROLE_SLAVE | CCP_ROLE_RELAY);
     }
     else{
         printf("Undefined RTR role\n");
@@ -303,9 +331,9 @@ bcn_slot_cb_mine(tdma_slot_t *tdma_slot){
             rt_loca->msg_type = RT_LOCA_MSG;
             rt_loca->len = sizeof(struct _rt_loca_data_t);
             rt_loca->slot = tdma_slot->idx;
-            rt_loca->location_x = rti->nodes[rti->slot_idx].location_x;
-            rt_loca->location_y = rti->nodes[rti->slot_idx].location_y;
-            rt_loca->location_z = rti->nodes[rti->slot_idx].location_z;
+            rt_loca->location_x = rti->x;
+            rt_loca->location_y = rti->y;
+            rt_loca->location_z = rti->z;
         }
         else{
             rt_msg_size = sizeof(ieee_std_frame_hdr_t) + sizeof(rt_slot_map_t);
@@ -371,17 +399,30 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                     /* I am a tag, and I see a new anchor */
                     else if(rti->role == RTR_TAG){
                         printf("I am a tag and I see new anchor!\n");
+                        rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
+                        rti->nodes[tdma_slot->idx].accepted = false;
                     }
                     /* I am a anchor */
                     else{
                         /* I has joint the network and I do not see any request from this node before */
                         /* This node take this slot without permission */
-                        printf("Unknown node: 0x%04X at slot %d\n", ieee_std_frame_hdr->src_address, tdma_slot->idx);
+                        struct uwb_dev_rxdiag *diag = (struct uwb_dev_rxdiag *)(rti->dev_inst->rxdiag);
+                        float rssi = uwb_calc_rssi(rti->dev_inst, diag);
+                        if(rssi > -85){
+                            printf("%d: 0x%04X: RSSI %d\n",tdma_slot->idx, ieee_std_frame_hdr->src_address, (int)(rssi));
+                            printf("Unknown node: 0x%04X at slot %d\n", ieee_std_frame_hdr->src_address, tdma_slot->idx);
+                            rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
+                            rti->nodes[tdma_slot->idx].accepted = true;
+                        }
                         return;
                     }
                 }
                 /* I am not a network member, just update this slot in table */
                 else{
+                    struct uwb_dev_rxdiag *diag = (struct uwb_dev_rxdiag *)(rti->dev_inst->rxdiag);
+                    float rssi = uwb_calc_rssi(rti->dev_inst, diag);
+                    printf("%d: 0x%04X: RSSI %d\n",tdma_slot->idx, ieee_std_frame_hdr->src_address, (int)(rssi));
+                    if(rssi < -90) return;
                     rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
                     node_slot_map_printf(rti);
                 }
@@ -457,7 +498,7 @@ svc_slot_cb(tdma_slot_t *tdma_slot){
         }
 
         /* I would listen for slot request */
-        if(rtls_tdma_slot_listen(rti, tdma_slot->idx)){
+        if(rtls_tdma_slot_listen(rti, tdma_slot->idx) && rti->role == RTR_ANCHOR){
             ieee_std_frame_hdr_t *ieee_std_frame_hdr = (ieee_std_frame_hdr_t *)rti->dev_inst->rxbuf;
             if(ieee_std_frame_hdr->PANID != rti->dev_inst->pan_id) return;
             if(ieee_std_frame_hdr->dst_address != RT_BROADCAST_ADDR) return;
@@ -534,5 +575,14 @@ svc_slot_cb(tdma_slot_t *tdma_slot){
         }
 
         free(rt_msg);
+    }
+}
+
+void rtls_tdma_find_node(rtls_tdma_instance_t *rti, uint16_t addr, rtls_tdma_node_t **node){
+    for(int i =0; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
+        if(rti->nodes[i].addr == addr){
+            *node= &rti->nodes[i];
+            break;
+        }
     }
 }

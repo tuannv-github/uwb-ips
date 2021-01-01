@@ -53,7 +53,24 @@ char serial_read(){
     return chr;
 }
 
-void serial_write(char *chr, size_t len){
+void serial_read_line(char *line, size_t len){
+    char chr;
+    size_t idx = 0;
+    while(1){
+        chr = serial_read();
+        if(idx==0 && (chr=='\n' || chr=='\r')) continue;
+        if(chr != '\r' && chr != '\n' && idx < len){
+            line[idx++] = chr;
+        }
+        else{
+            line[idx] = 0;
+            break;
+        }
+    }
+}
+
+void 
+serial_write(char *chr, size_t len){
     size_t idx;
     for(idx=0; idx<len; idx++){
         if(rbuf_put(&g_serial.rbuf_tx, chr[idx])){
@@ -63,12 +80,30 @@ void serial_write(char *chr, size_t len){
     uart_start_tx(g_serial.uart_dev);
 }
 
+void 
+serial_write_str(char *chr){
+    while(*chr!=0){
+        rbuf_put(&g_serial.rbuf_tx, *chr++);
+    }
+    uart_start_tx(g_serial.uart_dev);
+}
+
+void 
+serial_write_line(char *line){
+    while(*line!=0){
+        rbuf_put(&g_serial.rbuf_tx, *line++);
+    }
+    rbuf_put(&g_serial.rbuf_tx, '\r');
+    rbuf_put(&g_serial.rbuf_tx, '\n');
+    uart_start_tx(g_serial.uart_dev);
+}
+
 void
 serial_pkg_init(void)
 {
     #if MYNEWT_VAL(UWB_PKG_INIT_LOG)
-    printf("{\"utime\": %"PRIu32",\"msg\": \"button_pkg_init\"}\n",
-           (uint32_t)dpl_cputime_ticks_to_usecs(dpl_cputime_get32()));
+    printf("{\"utime\": %lu,\"msg\": \"button_pkg_init\"}\n",
+           dpl_cputime_ticks_to_usecs(dpl_cputime_get32()));
     #endif
 
     rbuf_init(&g_serial.rbuf_tx, g_serial.buffer_tx, MYNEWT_VAL(SERIAL_TX_RBUF_SIZE));
