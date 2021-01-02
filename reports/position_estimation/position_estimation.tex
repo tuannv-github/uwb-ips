@@ -105,7 +105,7 @@ For simplicity, assume that the three anchor points lie on the $xy$ plane with $
 \end{subequations}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{simplified_multilateration.png}
+    \includegraphics[width=0.8\textwidth]{simplified_multilateration.png}
     \caption{Simplified multilateration}
     \label{fig:simplified_multilateration}
 \end{figure}
@@ -148,6 +148,14 @@ There are unique solutions to the simplified multilateration problem, since the 
 To fully solve the multilateration problem in Euclidean space, $A_1$, $A_2$, $A_3$ is firstly transformed to the coordinate as the above simplified problem. Since the distances are invariant under such transformation which are the linear and rotation transformation, $T$ can be found using \ref{eqn:simplified_multilateration_x}, \ref{eqn:simplified_multilateration_y} and \ref{eqn:simplified_multilateration_z}. $T$ is then transformed to the original coordinate to get the final result.
 
 Let $S =\{\boldsymbol{e_x}, \boldsymbol{e_y}, \boldsymbol{e_z}\}$ is the basis of the new vector space. Then $A_1$, $A_2$, $A_3$ can be written uniquely as a linear combination of vectors in the basis $S$. Basis $S$ is specially chosen to make the general problem become the simplified problem. As shown in equation \ref{eqn:multilateration_ex}, $\boldsymbol{e_x}$ is a unit vector lies on $\overrightarrow{A_1A_2}$.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{multilateration.png}
+    \caption{Multilateration in Euclidean space}
+    \label{fig:multilateration}
+\end{figure}
+
 \begin{equation}
     \boldsymbol{e_x} = \frac{A_2-A_1}{\Vert A_2 - A_1\Vert}
     \label{eqn:multilateration_ex}
@@ -168,12 +176,6 @@ Finally, $\boldsymbol{e_z}$ is the cross product of the two other unit vectors.
 \begin{equation}
     \boldsymbol{e_z} = \boldsymbol{e_x} \times \boldsymbol{e_y}
 \end{equation}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{multilateration.png}
-    \caption{Multilateration in Euclidean space}
-    \label{fig:multilateration}
-\end{figure}
 
 In the basis $S$, the new set of points is:
 \begin{equation}
@@ -196,6 +198,9 @@ Suppose that the coordinates of $T$ found in the basis $S$ are $T'_1(x_t,y_t,z_t
 \end{equation}
 
 \subsection{Multilateration implementation}
+
+On a real scenario, distances to other known points are used for selecting the final location from the two locations. The chosen location should have a distance to the known point being closest to the given one. If multiple distances are available, voting may be one solution.
+
 A python implementation for multilateration in Euclidean space is shown in figure \ref{fig:multilateration_python_implementation}.
 \begin{figure}[H]
     \begin{python}
@@ -229,5 +234,5 @@ def multilateration(distances):
     \label{fig:multilateration_python_implementation}
 \end{figure}
 
-On a real scenario, distances to other known points are used for selecting the final location from the two locations. The chosen location should have a distance to the known point being closest to the given one. If multiple distances are available, voting may be one solution.
+
 \end{document}
