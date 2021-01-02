@@ -9,9 +9,12 @@
 		"latex-workshop.latex.rootFile.useSubFile": true,
 		"latex-workshop.latex.rootFile.doNotPrompt": true,
 		"cSpell.words": [
+			"a",
 			"carrierless",
+			"do",
 			"eirp",
 			"marker",
+			"p",
 			"r",
 			"recp",
 			"snrs",
