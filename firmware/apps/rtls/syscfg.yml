@@ -97,6 +97,7 @@ syscfg.vals:
     BLE_MESH_TX_SEG_MSG_COUNT: 4
 
     TDMA_NSLOTS: 20
+    NRNG_NNODES: 10
     TDMA_TASK_STACK_SZ: 512
 
     RNG_VERBOSE: 0
