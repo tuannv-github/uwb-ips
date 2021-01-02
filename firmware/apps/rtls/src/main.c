@@ -38,7 +38,7 @@ main(int argc, char **argv)
 {
     sysinit();
     conf_load();
-    
+
     rtls_init();
 
     #if MYNEWT_VAL(BLE_MESH)
