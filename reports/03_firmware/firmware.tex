@@ -19,7 +19,7 @@ The implemented UWB ranging system consists of one host and one device.
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.3]{host_device.png}
+        \includegraphics[width=0.2\textwidth]{host_device.png}
     \end{center}
     \caption{Host-device}
     \label{fig:host_device}
@@ -52,7 +52,7 @@ The ranging system is implemented follow 3 layers model as shown in figure \ref{
 Follow the bottom-up approach, detail description about each layer is provided in following sections.
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.3]{ranging_layered_architecture}
+        \includegraphics[width=0.2\textwidth]{ranging_layered_architecture}
     \end{center}
     \caption{Ranging layered architecture}
     \label{fig:ranging_layered_architecture}
@@ -329,7 +329,7 @@ After sending the CCP packet, the MCU will schedule for the next wake up at:
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.30]{ccp_timing_for_master_node.png}
+        \includegraphics[width=0.8\textwidth]{ccp_timing_for_master_node.png}
     \end{center}
     \caption{CCP master timing}
     \label{fig:interupt_latency_master}
@@ -370,7 +370,7 @@ After processing the CCP packet, the MCU will schedule for the next wake up at:
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.35]{ccp_timing_for_slave_node.png}
+        \includegraphics[width=0.8\textwidth]{ccp_timing_for_slave_node.png}
     \end{center}
     \caption{CCP master timing}
     \label{fig:ccp_timing_for_slave_node}
@@ -429,7 +429,7 @@ With:
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.3]{tdma_timing.png}
+        \includegraphics[width=0.8\textwidth]{tdma_timing.png}
     \end{center}
     \caption{TDMA timing}
     \label{fig:tdma_timing}
@@ -608,11 +608,11 @@ In a Ranging slot, jointed anchors will listen for a range-request message.
 \end{figure}
 
 \section{Two way ranging (TWR)}
-By using TWR, the need of synchronized clocks is eliminated since both the round-trip time(s) and the reply time(s) can be calculated separately using timestamps derived from each device. TWR service runs on Ranging slots of TDMA service.
+By using TWR, the need of synchronized clocks is eliminated since both the round-trip time(s) and the reply time(s) can be calculated separately using timestamps derived from each device. TWR service runs on Ranging slots of TDMA service. Figure \ref{fig:single_sided_two_way_ranging} illustrates a node sending a range request message to another node and receiving a range response message to calculate the distance.
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.2]{single_sided_two_way_ranging.png}
+        \includegraphics[width=0.8\textwidth]{single_sided_two_way_ranging.png}
     \end{center}
     \caption{Single-sided two-way ranging}
     \label{fig:single_sided_two_way_ranging}
@@ -752,16 +752,25 @@ The initiator sends a range-request message in its slot and waits for range-resp
 \subsection{TWR implementation}
 Timestamping for each event in TWR process is precisely done by the radio IC. The host, on the other hand, calculate TOF by using equation \ref{eqn:twr_tof} as proved in figure \ref{fig:twr_timing}.
 \begin{equation}
-    tof = \frac{1}{2} \frac{t_{resp} - t_{reqt}}{t_{trans} - t_{recp}}
+    tof = \frac{1}{2} ((t_{resp} - t_{reqt}) - (t_{trans} - t_{recp}))
     \label{eqn:twr_tof}
 \end{equation}
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.3]{twr_timing.png}
+        \includegraphics[width=0.8\textwidth]{twr_timing.png}
     \end{center}
     \caption{Two way ranging timing}
     \label{fig:twr_timing}
 \end{figure}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{single_sided_two_way_nranging.png}
+    \end{center}
+    \caption{Single-sided two-way n ranging}
+    \label{fig:single_sided_two_way_nranging}
+\end{figure}
+Figure \ref{fig:single_sided_two_way_nranging} illustrates a initiator sending range request and receiving response message from 4 responder as a expected situation in the actual network.
 
 $T_{hold-off-conf}$ is a configured value for holding the range-request message before send the range-response message.
 As many anchors will response for a range-request, all anchors should respond at different time to not corrupt each other. To archive this, time slot index of anchor ($i_{slot}$) is used together with the duration of range-response frame ($T_{response-frame}$). The final hold-off time ($T_{hold-off}$) is produced using equation \ref{eqn:tdma_hold_off}.
@@ -769,7 +778,7 @@ As many anchors will response for a range-request, all anchors should respond at
    T_{hold-off} = T_{hold-off-conf} + i_{slot}(T_{guard} + T_{response-frame})
    \label{eqn:tdma_hold_off}
 \end{equation}
-With $T_{guard}$ is used for the purpose of making response more distinct from each other.
+Where $T_{guard}$ is used for the purpose of making response more distinct from each other.
 
 % \begin{figure}[H]
 %     \begin{center}
@@ -800,7 +809,7 @@ Figure \ref{fig:wireshark_802_15_5_packet} is an example of a 802.15.4 frame ana
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.4]{extcap_802_15_4.png}
+        \includegraphics[width=0.15\textwidth]{extcap_802_15_4.png}
     \end{center}
     \caption{Wireshark for debugging the network}
     \label{fig:extcap_802_15_4}
@@ -808,7 +817,7 @@ Figure \ref{fig:wireshark_802_15_5_packet} is an example of a 802.15.4 frame ana
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.6]{wireshark_interface.png}
+        \includegraphics[width=0.7\textwidth]{wireshark_interface.png}
     \end{center}
     \caption{UWB Wireshark interface}
     \label{fig:wireshark_interface}
@@ -816,7 +825,7 @@ Figure \ref{fig:wireshark_802_15_5_packet} is an example of a 802.15.4 frame ana
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.5]{wireshark_802_15_5_packet.png}
+        \includegraphics[width=0.7\textwidth]{wireshark_802_15_5_packet.png}
     \end{center}
     \caption{UWB 802.15.4 packet parsing}
     \label{fig:wireshark_802_15_5_packet}

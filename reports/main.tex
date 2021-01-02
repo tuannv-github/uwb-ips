@@ -159,13 +159,18 @@
 \subfile{05_software/software.tex}
 \subfile{06_result/result.tex}
 
-\begin{appendices}
-    \includepdf[pages=1,pagecommand=\chapter{RTLS Anchor Board (Altium Designer)},width=\textwidth, offset=0 -1cm]{RTLS-2020-11-09--04-03.PDF}
-    \includepdf[pages=2-,pagecommand={},width=\textwidth]{RTLS-2020-11-09--04-03.PDF}
-\end{appendices}
+\subfile{summary/summary.tex}
 
-\begin{appendices}
-    \chapter{RTLS Anchor House (SolidWorks)}
+\begin{appendix}
+    \includepdf[pages=1, pagecommand={
+        \chapter{RTLS anchor board (Altium Designer)}
+        \label{appendix:rtls_anchor_board}
+    }, width=\textwidth, offset=0 -1cm]{RTLS-2020-11-09--04-03.PDF}
+
+    \includepdf[pages=2-,pagecommand={},width=\textwidth]{RTLS-2020-11-09--04-03.PDF}
+    
+    \chapter{RTLS anchor enclosure (SolidWorks)}
+    \label{appendix:rtls_anchor_enclosure}
     \begin{figure}[H]
         \begin{center}
             \includegraphics[scale=0.4]{Assem.JPG}
@@ -173,7 +178,7 @@
         \caption{RTLS SolidWorks Design}
         \label{fig:RTLS_SolidWork_Design}
     \end{figure}
-\end{appendices}
+\end{appendix}
 
 \printbibliography[heading=bibintoc,title={References}]
 
