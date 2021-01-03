@@ -202,6 +202,9 @@ Suppose that the coordinates of $T$ found in the basis $S$ are $T'_1(x_t,y_t,z_t
 On a real scenario, distances to other known points are used for selecting the final location from the two locations. The chosen location should have a distance to the known point being closest to the given one. If multiple distances are available, voting may be one solution.
 
 A python implementation for multilateration in Euclidean space is shown in figure \ref{fig:multilateration_python_implementation}.
+
+With the C struct given in figure \ref{fig:c_struct_for_multilateration}, a C implementation for multilateration in Euclidean space is provided in figure \ref{fig:multilateration_c_implementation}. In this thesis, the C implementation is used by the tag to solve its location itself from distances to anchors.
+
 \begin{figure}[H]
     \begin{python}
 import numpy as np
@@ -234,12 +237,16 @@ def multilateration(distances):
     \label{fig:multilateration_python_implementation}
 \end{figure}
 
-On a real scenario, distances to other known points are used for selecting the final location from the two locations. The chosen location should have a distance to the known point being closest to the given one. If multiple distances are available, voting may be one solution.
-
-With the C struct given in figure \ref{fig:c_struct_for_multilateration}, a C implementation for multilateration in Euclidean space is provided in figure \ref{fig:multilateration_c_implementation}.
-
 \begin{figure}[H]
     \begin{lstlisting}[style=CStyle]
+typedef struct sphere
+{
+    float x;
+    float y;
+    float z;
+    float r;
+}sphere_t;
+
 typedef struct location
 {
     float x;
