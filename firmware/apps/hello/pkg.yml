@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-pkg.name: apps/am2320
+pkg.name: apps/hello
 pkg.type: app
 pkg.author: "Tuan Ngo Van <tuanngo0898@gmail.com>"
 pkg.homepage: "https://github.com/tuanngo0898"
