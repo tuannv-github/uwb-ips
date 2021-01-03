@@ -18,7 +18,7 @@
  */
 
 /**
- * @file twr_ds.h
+ * @file twr_ss_nrng.h
  * @author UWB Core <uwbcore@gmail.com>
  * @date 2018
  * @brief Range
@@ -27,10 +27,10 @@
  *
  */
 
-#ifndef _DW1000_TWR_DS_NRNG_H_
-#define _DW1000_TWR_DS_NRNG_H_
+#ifndef _TWR_SS_NRNG_H_
+#define _TWR_SS_NRNG_H_
 
-#if MYNEWT_VAL(TWR_DS_NRNG_ENABLED)
+#if MYNEWT_VAL(TWR_SS_NRNG_ENABLED)
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -39,15 +39,16 @@
 extern "C" {
 #endif
 
-#include <dw1000/dw1000_dev.h>
+#include <uwb/uwb.h>
 #include <uwb/uwb_ftypes.h>
-#include <nranges/nranges.h>
-void twr_ds_nrng_pkg_init(void);
-void twr_ds_nrng_free(struct uwb_dev * inst);
+#include <nrng/nrng.h>
+
+void twr_ss_nrng_pkg_init(void);
+void twr_ss_nrng_free(struct uwb_dev * inst);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // TWR_DS_ENABLED
-#endif //_DW1000_TWR_DS_H_
+#endif // TWR_SS_NRNG_ENABLED
+#endif //_TWR_SS_NRNG_H_
