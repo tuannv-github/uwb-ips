@@ -329,7 +329,7 @@ After sending the CCP packet, the MCU will schedule for the next wake up at:
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.8\textwidth]{ccp_timing_for_master_node.png}
+        \includegraphics[width=1\textwidth]{ccp_timing_for_master_node.png}
     \end{center}
     \caption{CCP master timing}
     \label{fig:interupt_latency_master}
@@ -370,7 +370,7 @@ After processing the CCP packet, the MCU will schedule for the next wake up at:
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.8\textwidth]{ccp_timing_for_slave_node.png}
+        \includegraphics[width=1\textwidth]{ccp_timing_for_slave_node.png}
     \end{center}
     \caption{CCP master timing}
     \label{fig:ccp_timing_for_slave_node}
@@ -397,7 +397,7 @@ In the TDMA layer, a jointed node must take one of two roles: Anchor or Tag.
 
 \subsection{TDMA slot}
 The superframe is divided into multiple slots as shown in figure \ref{fig:tdma_slot}.
-\begin{figure}[H]
+\begin{figure}[ht]
     \begin{center}
         \includegraphics[scale=0.4]{tdma_slot.png}
     \end{center}
@@ -566,7 +566,7 @@ The master node is the initiator of the network. It has to be an anchor and occu
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.6]{tdma_state_diagram.png}
+        \includegraphics[width=0.4\textwidth]{tdma_state_diagram.png}
     \end{center}
     \caption{TDMA state diagram}
     \label{fig:tdma_state_diagram}
