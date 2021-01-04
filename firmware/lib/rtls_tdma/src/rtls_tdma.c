@@ -402,7 +402,7 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                         /* This node take this slot without permission */
                         struct uwb_dev_rxdiag *diag = (struct uwb_dev_rxdiag *)(rti->dev_inst->rxdiag);
                         float rssi = uwb_calc_rssi(rti->dev_inst, diag);
-                        if(rssi > -85){
+                        if(rssi > -85 && tdma_slot->idx <= MYNEWT_VAL(UWB_BCN_SLOT_MAX)){
                             printf("%d: 0x%04X: RSSI %d\n",tdma_slot->idx, ieee_std_frame_hdr->src_address, (int)(rssi));
                             printf("Unknown node: 0x%04X at slot %d\n", ieee_std_frame_hdr->src_address, tdma_slot->idx);
                             rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
@@ -472,11 +472,11 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                     {
                         printf("I am a tag and I see new anchor!\n");
                         rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
-                        // if(rt_slot->slot_map & (0x0001 << rti->slot_idx)){
-                            // rti->nodes[tdma_slot->idx].accepted = false;
-                        // }else{
+                        if(rt_slot->slot_map & (0x0001 << rti->slot_idx)){
+                            rti->nodes[tdma_slot->idx].accepted = false;
+                        }else{
                             rti->nodes[tdma_slot->idx].accepted = true;
-                        // }
+                        }
                     }
                 }
                 default:

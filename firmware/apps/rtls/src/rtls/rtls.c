@@ -11,7 +11,7 @@
 #include <message/mavlink/protocol/mavlink.h>
 
 #include <uwb/uwb.h>
-#include <uwb_nrng/nrng.h>
+#include <rtls_nrng/rtls_nrng.h>
 #include <uwb/uwb_mac.h>
 #include <serial/serial.h>
 

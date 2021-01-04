@@ -15,9 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-pkg.name: apps/rtls
+pkg.name: apps/am2320
 pkg.type: app
-pkg.description: Real localization system 
 pkg.author: "Tuan Ngo Van <tuanngo0898@gmail.com>"
 pkg.homepage: "https://github.com/tuanngo0898"
 
@@ -25,27 +24,4 @@ pkg.deps:
     - "@apache-mynewt-core/kernel/os"
     - "@apache-mynewt-core/sys/console/full"
     - "@apache-mynewt-core/sys/log/full"
-    - "@apache-mynewt-core/sys/stats/full"
     - "@apache-mynewt-core/sys/shell"
-    - "@mynewt-timescale-lib/lib/timescale"
-
-    - "@apache-mynewt-nimble/nimble/controller"
-    - "@apache-mynewt-nimble/nimble/host"
-    - "@apache-mynewt-nimble/nimble/host/services/gap"
-    - "@apache-mynewt-nimble/nimble/host/services/gatt"
-    - "@apache-mynewt-nimble/nimble/host/store/ram"
-    - "@apache-mynewt-nimble/nimble/transport/ram"
-
-    - "@decawave-uwb-core/sys/uwbcfg"
-    - "@decawave-uwb-core/hw/drivers/uwb"
-
-    - "@rtls/lib/rtls_tdma"
-    - "@rtls/lib/rtls_nrng_ss"
-    - "@rtls/lib/message"
-    - "@rtls/lib/serial"
-
-pkg.cflags:
-    - "-Waddress-of-packed-member"
-    - "-std=gnu11"
-    - "-fms-extensions"
-    - "-g"

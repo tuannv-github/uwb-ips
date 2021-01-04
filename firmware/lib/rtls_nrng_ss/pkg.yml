@@ -17,10 +17,8 @@
 # under the License.
 #
 
-pkg.name: lib/rtls_nrng
-pkg.description: TWR nrng library superset
-pkg.author: "UWB Core <uwbcore@gmail.com>"
-pkg.homepage: "http://www.decawave.com/"
+pkg.name: lib/rtls_nrng_ss
+pkg.description: Single Sided NRNG library
 pkg.keywords:
     - uwb
     - CCP
@@ -33,9 +31,8 @@ pkg.lflags:
     - "-lm"
 
 pkg.deps:
-    - "@rtls/lib/json"
-    - "@rtls/lib/euclid"
-    - "@rtls/lib/rng_math"
+    - "@rtls/lib/rtls_nrng"
+    - "@rtls/lib/dsp"
 
 pkg.init:
-    nrng_pkg_init: 411
+    twr_ss_nrng_pkg_init: 414
