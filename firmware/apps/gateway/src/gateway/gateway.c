@@ -66,6 +66,18 @@ task_downlink_func(void *arg)
 
 			switch (g_mavlink_msg.msgid)
             {
+            case MAVLINK_MSG_ID_BLINK:
+                {
+                    printf("MAVLINK_MSG_ID_BLINK\n");
+                    mavlink_blink_t mavlink_blink;
+                    mavlink_msg_blink_decode(&g_mavlink_msg, &mavlink_blink);
+                    msg_rtls = (msg_rtls_t){
+                        .msg_id = MAVLINK_MSG_ID_BLINK,
+                        .uwb_address = mavlink_blink.uwb_address,
+                        .role = mavlink_blink.role,
+                    };
+                }
+                break;
             case MAVLINK_MSG_ID_LOCATION:
                 {
                     printf("MAVLINK_MSG_ID_LOCATION\n");
