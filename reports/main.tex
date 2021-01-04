@@ -30,6 +30,8 @@
 \usepackage[titletoc]{appendix}
 \usepackage[hidelinks]{hyperref}
 
+\usepackage{pythonhighlight}
+
 \providecommand{\main}{.}
 \addbibresource{\main/references.bib}   
 
@@ -68,12 +70,79 @@
 
 \setlength\parindent{0pt}
 
+\definecolor{solarized@base03}{HTML}{002B36}
+\definecolor{solarized@base02}{HTML}{073642}
+\definecolor{solarized@base01}{HTML}{586e75}
+\definecolor{solarized@base00}{HTML}{657b83}
+\definecolor{solarized@base0}{HTML}{839496}
+\definecolor{solarized@base1}{HTML}{93a1a1}
+\definecolor{solarized@base2}{HTML}{EEE8D5}
+\definecolor{solarized@base3}{HTML}{FDF6E3}
+\definecolor{solarized@yellow}{HTML}{B58900}
+\definecolor{solarized@orange}{HTML}{CB4B16}
+\definecolor{solarized@red}{HTML}{DC322F}
+\definecolor{solarized@magenta}{HTML}{D33682}
+\definecolor{solarized@violet}{HTML}{6C71C4}
+\definecolor{solarized@blue}{HTML}{268BD2}
+\definecolor{solarized@cyan}{HTML}{2AA198}
+\definecolor{solarized@green}{HTML}{859900}
+
+\lstdefinestyle{CStyle}{
+    language=C,
+    basicstyle=\footnotesize\ttfamily,
+    numbers=left,
+    numberstyle=\footnotesize,
+    tabsize=2,
+    breaklines=true,
+    escapeinside={@}{@},
+    numberstyle=\tiny\color{solarized@base01},
+    keywordstyle=\color{solarized@green},
+    stringstyle=\color{solarized@cyan}\ttfamily,
+    identifierstyle=\color{solarized@blue},
+    commentstyle=\color{solarized@base01},
+    emphstyle=\color{solarized@red},
+    frame=single,
+    rulecolor=\color{solarized@base2},
+    rulesepcolor=\color{solarized@base2},
+    showstringspaces=false
+}
+
+\lstdefinestyle{XMLStyle}{
+    language=xml,
+    tabsize=2,
+    frame=single,
+    xleftmargin=20pt,
+    framexleftmargin=15pt,
+    keywordstyle=\color{blue}\bf,
+    commentstyle=\color{OliveGreen},
+    stringstyle=\color{red},
+    numbers=left,
+    numberstyle=\tiny\color{solarized@base01},
+    numbersep=5pt,
+    breaklines=true,
+    showstringspaces=false,
+    basicstyle=\footnotesize,
+    emphstyle={\color{magenta}},
+    rulecolor=\color{solarized@base2},
+    rulesepcolor=\color{solarized@base2},
+    basicstyle=\footnotesize\ttfamily,
+}
+
 \begin{document}
 \setboolean{printBibInSubfiles}{false}
 
 \subfile{00_misc/cover.tex}
+
+\clearpage
+\setcounter{page}{1}
+
+\subfile{00_misc/task.tex}
 \subfile{00_misc/ack.tex}
+\subfile{00_misc/assurance.tex}
 \subfile{00_misc/abs.tex}
+
+\tableofcontents
+
 \subfile{00_misc/fig.tex}
 \subfile{00_misc/tab.tex}
 \subfile{00_misc/sym.tex}
@@ -90,13 +159,18 @@
 \subfile{05_software/software.tex}
 \subfile{06_result/result.tex}
 
-\begin{appendices}
-    \includepdf[pages=1,pagecommand=\chapter{RTLS Anchor Board (Altium Designer)},width=\textwidth, offset=0 -1cm]{RTLS-2020-11-09--04-03.PDF}
-    \includepdf[pages=2-,pagecommand={},width=\textwidth]{RTLS-2020-11-09--04-03.PDF}
-\end{appendices}
+\subfile{summary/summary.tex}
 
-\begin{appendices}
-    \chapter{RTLS Anchor House (SolidWorks)}
+\begin{appendix}
+    \includepdf[pages=1, pagecommand={
+        \chapter{RTLS anchor board (Altium Designer)}
+        \label{appendix:rtls_anchor_board}
+    }, width=\textwidth, offset=0 -1cm]{RTLS-2020-11-09--04-03.PDF}
+
+    \includepdf[pages=2-,pagecommand={},width=\textwidth]{RTLS-2020-11-09--04-03.PDF}
+    
+    \chapter{RTLS anchor enclosure (SolidWorks)}
+    \label{appendix:rtls_anchor_enclosure}
     \begin{figure}[H]
         \begin{center}
             \includegraphics[scale=0.4]{Assem.JPG}
@@ -104,7 +178,7 @@
         \caption{RTLS SolidWorks Design}
         \label{fig:RTLS_SolidWork_Design}
     \end{figure}
-\end{appendices}
+\end{appendix}
 
 \printbibliography[heading=bibintoc,title={References}]
 

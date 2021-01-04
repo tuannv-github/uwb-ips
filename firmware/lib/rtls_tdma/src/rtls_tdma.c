@@ -384,26 +384,20 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
         /* Strange node detected */
         if(ieee_std_frame_hdr->src_address != rti->nodes[tdma_slot->idx].addr){
             /* I do not have see any node in this bcn slot before, it is a new node for this slot */
-            if(rti->nodes[tdma_slot->idx].addr == 0){
+            // if(rti->nodes[tdma_slot->idx].addr == 0){
                 /* I am a network member */
                 if(rti->slot_idx != 0){
                     /* I see a slot request from this node before. It is up now */
                     if(rti->slot_reqt != 0 && rti->slot_reqt_addr == ieee_std_frame_hdr->src_address){
-                        rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
-                        printf("Node up: 0x%04X\n", ieee_std_frame_hdr->src_address);
+                        // rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
                         /* This have request thi slot before, it must acctept my slot before joining */
-                        rti->nodes[tdma_slot->idx].accepted = true;
+                        // rti->nodes[tdma_slot->idx].accepted = true;
                         /* Release request context */
+                        printf("Node up: 0x%04X\n", ieee_std_frame_hdr->src_address);
                         rti->slot_reqt = 0;
                     }
-                    /* I am a tag, and I see a new anchor */
-                    else if(rti->role == RTR_TAG){
-                        printf("I am a tag and I see new anchor!\n");
-                        rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
-                        rti->nodes[tdma_slot->idx].accepted = false;
-                    }
                     /* I am a anchor */
-                    else{
+                    if (rti->role == RTR_ANCHOR){
                         /* I has joint the network and I do not see any request from this node before */
                         /* This node take this slot without permission */
                         struct uwb_dev_rxdiag *diag = (struct uwb_dev_rxdiag *)(rti->dev_inst->rxdiag);
@@ -414,7 +408,6 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                             rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
                             rti->nodes[tdma_slot->idx].accepted = true;
                         }
-                        return;
                     }
                 }
                 /* I am not a network member, just update this slot in table */
@@ -426,10 +419,10 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                     rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
                     node_slot_map_printf(rti);
                 }
-            }else{
-                printf("Slot colission: 0x%04X at slot %d\n", ieee_std_frame_hdr->src_address, tdma_slot->idx);
-                return;
-            }
+            // }else{
+            //     printf("Slot colission: 0x%04X at slot %d\n", ieee_std_frame_hdr->src_address, tdma_slot->idx);
+            //     return;
+            // }
         }
 
         /* If I received message from tabled node. Mark it available in this supperframe and reset timer */
@@ -474,6 +467,17 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                 {
                     rt_slot_map_t *rt_slot = (rt_slot_map_t *)(&rti->dev_inst->rxbuf[frame_idx]);
                     rti->nodes[tdma_slot->idx].slot_map = rt_slot->slot_map;
+                    /* I am a tag, and I see a new anchor */
+                    if(rti->slot_idx != 0 && ieee_std_frame_hdr->src_address != rti->nodes[tdma_slot->idx].addr && rti->role == RTR_TAG)
+                    {
+                        printf("I am a tag and I see new anchor!\n");
+                        rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
+                        // if(rt_slot->slot_map & (0x0001 << rti->slot_idx)){
+                            // rti->nodes[tdma_slot->idx].accepted = false;
+                        // }else{
+                            rti->nodes[tdma_slot->idx].accepted = true;
+                        // }
+                    }
                 }
                 default:
                 break;

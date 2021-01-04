@@ -19,7 +19,7 @@ The implemented UWB ranging system consists of one host and one device.
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.3]{host_device.png}
+        \includegraphics[width=0.2\textwidth]{host_device.png}
     \end{center}
     \caption{Host-device}
     \label{fig:host_device}
@@ -52,7 +52,7 @@ The ranging system is implemented follow 3 layers model as shown in figure \ref{
 Follow the bottom-up approach, detail description about each layer is provided in following sections.
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.3]{ranging_layered_architecture}
+        \includegraphics[width=0.2\textwidth]{ranging_layered_architecture}
     \end{center}
     \caption{Ranging layered architecture}
     \label{fig:ranging_layered_architecture}
@@ -102,7 +102,7 @@ The Frame Control field for the Multipurpose frame are specified in figure \ref{
 
 \begin{figure}[H]
     \centering
-    \begin{bytefield}[bitwidth=6em, bitheight=3em]{8}
+    \begin{bytefield}[bitwidth=5em, bitheight=4em]{8}
         \bitheader{0-7} \\
         \bitbox{3}{Frame Type} &
         \bitbox{1}{Long Frame Control} &
@@ -255,7 +255,8 @@ This section discusses detailed timing problems related to CCP. Before starting,
     \item Local epoch $ep_l$: Packet timestamp referenced to CCP slave device timing system.
     \item Os epoch $ep_o$: Packet timestamp referenced to CCP master or slave host timing system.
     \item Period $\tau$: The interval of a superframe.
-    \item $t_k$: Timestamp for $k$th frame in device timing system.
+    \item $t^k_{m}$: Timestamp for $k$th frame in device timing system of master node.
+    \item $t^k_{l}$: Timestamp for $k$th frame in device timing system of local node.
     \item $t_h$: Current host time (in host timing system).
     \item $t_d$: Current device time (in device timing system).
     \item $f_{d2h}$: A linear function for converting the device time to host time as explained in \ref{subsec:timing_system_subsection}
@@ -297,7 +298,7 @@ Finally, the duration for PHY is:
 \begin{equation}
     T_{PHY} = T_{bsym} * n_{phy-header} + T_{dsym} * n_{phy-payload}
 \end{equation}
-With:
+Where:
 \begin{itemize}
     \item $T_{bsym} = 1.0256410 \mu s$: Baserate symbols duration 850khz
     \item $T_{dsym} = 0.1282051 \mu s$: Datarate symbols duration (usec) 6.81Mhz
@@ -309,18 +310,19 @@ These parameters can be taken from IEEE 802.15.4-2015 standard \cite{IEEE_Std_80
 
 The CCP packet is sent with timestamp calculated from previous frame:
 \begin{equation}
-    t_k = t_{k-1} + \tau
+    t^k_m = t^{k-1}_m + \tau
 \end{equation}
 
 Each time the CCP master node complete to send a CCP packet, a TX event is called for re-calculating $ep_m$, $ep_l$ and $ep_o$ using the following formulas:
 \begin{equation}
-    ep_m = ep_l = t_k - T_{SHR}
+    ep_m = ep_l = t^k_m - T_{SHR}
 \end{equation}
 
 $ep_o$ is calculated form current host time:
 \begin{equation}
-    ep_o = t_h - f_{d2h}(t_d - t_k) - T_{SHR}
+    ep_o = t_h - f_{d2h}(t_d - t^k_m) - T_{SHR}
 \end{equation}
+where $f_{d2h}$ is a function to convert from device timing system to host timing system.
 
 After sending the CCP packet, the MCU will schedule for the next wake up at:
 \begin{equation}
@@ -329,7 +331,7 @@ After sending the CCP packet, the MCU will schedule for the next wake up at:
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.30]{ccp_timing_for_master_node.png}
+        \includegraphics[width=1\textwidth]{ccp_timing_for_master_node.png}
     \end{center}
     \caption{CCP master timing}
     \label{fig:interupt_latency_master}
@@ -339,19 +341,19 @@ After sending the CCP packet, the MCU will schedule for the next wake up at:
 
 Each time the CCP slave node complete to receive a CCP packet, a RX event is called for re-calculating $ep_m$, $ep_l$ and $ep_o$ using the following formulas:
 
-$ep_m$ is calculated from timestamp field $t_{k-master}$ of received frame:
+$ep_m$ is calculated from timestamp field $t^k_m$ of received frame:
 \begin{equation}
-    ep_m = t_{k-master} - T_{SHR}
+    ep_m = t^k_m - T_{SHR}
 \end{equation}
 
 $ep_l$ is calculated from current device time:
 \begin{equation}
-ep_l = t_k - T_{SHR}
+ep_l = t^k_l - T_{SHR}
 \end{equation}
 
 $ep_o$ is calculated form current host time:
 \begin{equation}
-    ep_o = t_h - f_{d2h}(t_d - t_k) - T_{SHR}
+    ep_o = t_h - f_{d2h}(t_d - t^k_l) - T_{SHR}
 \end{equation}
 
 After processing the CCP packet, the MCU will schedule for the next wake up at:
@@ -370,12 +372,13 @@ After processing the CCP packet, the MCU will schedule for the next wake up at:
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.35]{ccp_timing_for_slave_node.png}
+        \includegraphics[width=1\textwidth]{ccp_timing_for_slave_node.png}
     \end{center}
     \caption{CCP master timing}
     \label{fig:ccp_timing_for_slave_node}
 \end{figure}
 
+\subsubsection{Cascade relay of ccp packet}
 % \subsubsection{Repeat CCP packet}
 % \begin{figure}[H]
 %     \begin{center}
@@ -384,6 +387,29 @@ After processing the CCP packet, the MCU will schedule for the next wake up at:
 %     \caption{CCP Repeat}
 %     \label{fig:ccp_repeat}
 % \end{figure}
+When a node receives a CCP packet and want to repeat it, it have to hold the CCP packet for $T_{hold-off}$ before re-transmitting.
+\begin{equation}
+    T_{hold-off} = n_{repeat}*T_{hold-off-conf} + i_{slot}*T_{ccp}
+\end{equation}
+Where:
+\begin{itemize}
+    \item $n_{repeat}$ is the number of times that packet has been repeated plus 1
+    \item $T_{hold-off-conf}$ is a configurable parameter for holding the CCP packet before re-transmitting it
+    \item $i_{slot}$ is the slot index of the node in the TDMA system as described in the following section
+    \item  $T_{ccp}$ is the duration of a CCP packet
+\end{itemize}
+
+The CCP packet is repeated with timestamp calculated from equation \ref{eqn:cpp_repeat_timestamp}.
+\begin{equation}
+    t^k_m = t_{k-repeat} = t_k + T_{delay}
+    \label{eqn:cpp_repeat_timestamp}
+\end{equation}
+
+The hold off delay of a repeated ccp packet takes into account of transition interval or CCP period as shown in equation \ref{eqn:ccp_hold_off_vs_ccp_period}.
+\begin{equation}
+    \tau_{new} = \tau - T_{hold-off}
+    \label{eqn:ccp_hold_off_vs_ccp_period}
+\end{equation}
 
 \section{Time Division Multiple Access (TDMA)}
 The fundamental role of the TDMA layer is to give a notification to its upper layer when it is the time to run the service. To archive this, a node must firstly ask for getting an appropriate and available slot from jointed nodes.
@@ -397,7 +423,7 @@ In the TDMA layer, a jointed node must take one of two roles: Anchor or Tag.
 
 \subsection{TDMA slot}
 The superframe is divided into multiple slots as shown in figure \ref{fig:tdma_slot}.
-\begin{figure}[H]
+\begin{figure}[ht]
     \begin{center}
         \includegraphics[scale=0.4]{tdma_slot.png}
     \end{center}
@@ -429,7 +455,7 @@ With:
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.3]{tdma_timing.png}
+        \includegraphics[width=1\textwidth]{tdma_timing.png}
     \end{center}
     \caption{TDMA timing}
     \label{fig:tdma_timing}
@@ -466,7 +492,7 @@ The Frame Control field for the standard Data frame are specified in figure \ref
 
 \begin{figure}[H]
     \centering
-    \begin{bytefield}[bitwidth=3.0em, bitheight=6em]{16}
+    \begin{bytefield}[bitwidth=2.6em, bitheight=6em]{16}
         \bitheader{0-15} \\
         \bitbox{3}{Frame Type} &
         \bitbox{3}{} &
@@ -566,7 +592,7 @@ The master node is the initiator of the network. It has to be an anchor and occu
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.6]{tdma_state_diagram.png}
+        \includegraphics[width=0.4\textwidth]{tdma_state_diagram.png}
     \end{center}
     \caption{TDMA state diagram}
     \label{fig:tdma_state_diagram}
@@ -608,11 +634,11 @@ In a Ranging slot, jointed anchors will listen for a range-request message.
 \end{figure}
 
 \section{Two way ranging (TWR)}
-By using TWR, the need of synchronized clocks is eliminated since both the round-trip time(s) and the reply time(s) can be calculated separately using timestamps derived from each device. TWR service runs on Ranging slots of TDMA service.
+By using TWR, the need of synchronized clocks is eliminated since both the round-trip time(s) and the reply time(s) can be calculated separately using timestamps derived from each device. TWR service runs on Ranging slots of TDMA service. Figure \ref{fig:single_sided_two_way_ranging} illustrates a node sending a range request message to another node and receiving a range response message to calculate the distance.
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.2]{single_sided_two_way_ranging.png}
+        \includegraphics[width=0.8\textwidth]{single_sided_two_way_ranging.png}
     \end{center}
     \caption{Single-sided two-way ranging}
     \label{fig:single_sided_two_way_ranging}
@@ -646,7 +672,7 @@ By using TWR, the need of synchronized clocks is eliminated since both the round
 The Frame Control field for the standard Data frame are specified in figure \ref{fig:function_control_for_standard_data_frame}.
 \begin{figure}[H]
     \centering
-    \begin{bytefield}[bitwidth=3.0em, bitheight=6em]{16}
+    \begin{bytefield}[bitwidth=2.7em, bitheight=6em]{16}
         \bitheader{0-15} \\
         \bitbox{3}{Frame Type} &
         \bitbox{3}{} &
@@ -685,7 +711,7 @@ Code is a self-defined state variable for a TWR process. For single-sided TWR, t
 
 \begin{table}[H]
 \centering
-\begin{tabular}{ |p{6cm}|c|p{8cm}| } 
+\begin{tabular}{ |p{7.5cm}|c|p{7.5cm}| } 
     \hline
     UWB\_DATA\_CODE\_TWR\_INVALID & 0x0100 & Invalid TWR CODE \\\hline
     UWB\_DATA\_CODE\_SS\_TWR & 0x0110 & Single sided TWR \\\hline
@@ -703,7 +729,7 @@ The Frame Payload field contains information specific to individual frame types.
 For the range-request frame type, the payload shall be formatted as illustrated in figure \ref{fig:twr_slot_payload}.
 \begin{figure}[H]
     \centering
-    \begin{bytefield}[bitwidth=1.5em]{32}
+    \begin{bytefield}[bitwidth=1.3em]{32}
         \bitheader{0-31} \\
         \bitbox{2}{ptype} &
         \bitbox{14}{start slot id} &
@@ -716,7 +742,7 @@ For the range-request frame type, the payload shall be formatted as illustrated 
 For the range-response frame type, the payload shall be formatted as illustrated in figure \ref{fig:twr_response_payload}.
 \begin{figure}[H]
     \centering
-    \begin{bytefield}[bitwidth=1.5em]{32}
+    \begin{bytefield}[bitwidth=1em]{32}
         \bitheader{0-31} \\
         \bitbox{16}{reception timestamp} &
         \bitbox{16}{transmissiontimestamp} &
@@ -752,16 +778,25 @@ The initiator sends a range-request message in its slot and waits for range-resp
 \subsection{TWR implementation}
 Timestamping for each event in TWR process is precisely done by the radio IC. The host, on the other hand, calculate TOF by using equation \ref{eqn:twr_tof} as proved in figure \ref{fig:twr_timing}.
 \begin{equation}
-    tof = \frac{1}{2} \frac{t_{resp} - t_{reqt}}{t_{trans} - t_{recp}}
+    tof = \frac{1}{2} ((t_{resp} - t_{reqt}) - (t_{trans} - t_{recp}))
     \label{eqn:twr_tof}
 \end{equation}
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.3]{twr_timing.png}
+        \includegraphics[width=0.8\textwidth]{twr_timing.png}
     \end{center}
     \caption{Two way ranging timing}
     \label{fig:twr_timing}
 \end{figure}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{single_sided_two_way_nranging.png}
+    \end{center}
+    \caption{Single-sided two-way n ranging}
+    \label{fig:single_sided_two_way_nranging}
+\end{figure}
+Figure \ref{fig:single_sided_two_way_nranging} illustrates a initiator sending range request and receiving response message from 4 responder as a expected situation in the actual network.
 
 $T_{hold-off-conf}$ is a configured value for holding the range-request message before send the range-response message.
 As many anchors will response for a range-request, all anchors should respond at different time to not corrupt each other. To archive this, time slot index of anchor ($i_{slot}$) is used together with the duration of range-response frame ($T_{response-frame}$). The final hold-off time ($T_{hold-off}$) is produced using equation \ref{eqn:tdma_hold_off}.
@@ -769,7 +804,7 @@ As many anchors will response for a range-request, all anchors should respond at
    T_{hold-off} = T_{hold-off-conf} + i_{slot}(T_{guard} + T_{response-frame})
    \label{eqn:tdma_hold_off}
 \end{equation}
-With $T_{guard}$ is used for the purpose of making response more distinct from each other.
+Where $T_{guard}$ is used for the purpose of making response more distinct from each other.
 
 % \begin{figure}[H]
 %     \begin{center}
@@ -800,7 +835,7 @@ Figure \ref{fig:wireshark_802_15_5_packet} is an example of a 802.15.4 frame ana
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.4]{extcap_802_15_4.png}
+        \includegraphics[width=0.15\textwidth]{extcap_802_15_4.png}
     \end{center}
     \caption{Wireshark for debugging the network}
     \label{fig:extcap_802_15_4}
@@ -808,7 +843,7 @@ Figure \ref{fig:wireshark_802_15_5_packet} is an example of a 802.15.4 frame ana
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.6]{wireshark_interface.png}
+        \includegraphics[width=0.7\textwidth]{wireshark_interface.png}
     \end{center}
     \caption{UWB Wireshark interface}
     \label{fig:wireshark_interface}
@@ -816,7 +851,7 @@ Figure \ref{fig:wireshark_802_15_5_packet} is an example of a 802.15.4 frame ana
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.5]{wireshark_802_15_5_packet.png}
+        \includegraphics[width=0.7\textwidth]{wireshark_802_15_5_packet.png}
     \end{center}
     \caption{UWB 802.15.4 packet parsing}
     \label{fig:wireshark_802_15_5_packet}

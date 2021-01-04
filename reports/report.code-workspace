@@ -9,10 +9,16 @@
 		"latex-workshop.latex.rootFile.useSubFile": true,
 		"latex-workshop.latex.rootFile.doNotPrompt": true,
 		"cSpell.words": [
+			"a",
 			"carrierless",
+			"do",
+			"eirp",
+			"gradlew",
 			"marker",
+			"p",
 			"r",
 			"recp",
+			"snrs",
 			"spof",
 			"spofs",
 			"superframes",
@@ -20,6 +26,6 @@
 			"timestamping",
 			"unilateration"
 		],
-		"restructuredtext.languageServer.disabled": true
+		"restructuredtext.languageServer.disabled": true,
 	}
 }
