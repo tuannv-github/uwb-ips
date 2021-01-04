@@ -26,15 +26,66 @@ In the experimental, the localization error is calculated follow equation \ref{e
 \subsection{Preparation}
 This subsection provides images to illustrate the experimental setup used to evaluate the proposed localization system. The logical configuration of the system has been given in figure \ref{fig:system_overview}. The physical placement of devices is represented in figure \ref{fig:physical placement of devices}.
 
-\begin{figure}[H]
-    \begin{minipage}[t]{\textwidth}       
-        \centering
-        \includegraphics[width=0.9\textwidth]{system_overview_phy.png}
-    \end{minipage}
+\begin{figure}[H]     
+    \centering
+    \includegraphics[width=0.9\textwidth]{system_overview_phy.png}
     \caption{Physical placement of devices}
     \label{fig:physical placement of devices}
 \end{figure}
-The actual placement of device is shown in figure:..., ..., ...
+The actual placement of devices is shown in figures: \ref{fig:arena_00}, \ref{fig:node_0_1}, \ref{fig:node_2_3}.
+
+\begin{figure}[H]      
+    \centering
+    \includegraphics[width=0.7\textwidth]{arena_00.jpg}
+    \caption{Arena side view}
+    \label{fig:arena_00}
+\end{figure}
+
+% \begin{figure}[H]
+%     \centering
+%     \begin{subfigure}[b]{0.4\linewidth}
+%         \centering
+%         \includegraphics[angle=-90, width=0.65\linewidth]{arena_04.jpg}
+%         \label{fig:arena_04}
+%     \end{subfigure}
+%     \begin{subfigure}[b]{0.4\linewidth}
+%         \centering
+%         \includegraphics[angle=-90, width=0.65\linewidth]{arena_03.jpg}
+%         \label{fig:arena_03}
+%     \end{subfigure}
+%     \caption{Node 0,1}
+%     \label{fig:node_0_1_sep}
+% \end{figure}
+
+\begin{figure}[H]      
+    \centering
+    \includegraphics[width=0.7\textwidth]{arena_06.jpg}
+    \caption{Node 0,1}
+    \label{fig:node_0_1}
+\end{figure}
+
+% \begin{figure}[H]
+%     \centering
+%     \begin{subfigure}[b]{0.4\linewidth}
+%         \centering
+%         \includegraphics[angle=-90, width=0.65\linewidth]{arena_01.jpg}
+%         \label{fig:arena_00}
+%     \end{subfigure}
+%     \begin{subfigure}[b]{0.4\linewidth}
+%         \centering
+%         \includegraphics[angle=-90, width=0.65\linewidth]{arena_02.jpg}
+%         \label{fig:arena_02}
+%     \end{subfigure}
+%     \caption{Node 3,4}
+%     \label{fig:node_3_4_sep}
+% \end{figure}
+
+\begin{figure}[H]      
+    \centering
+    \includegraphics[width=0.7\textwidth]{arena_05.jpg}
+    \caption{Node 2,3}
+    \label{fig:node_2_3}
+\end{figure}
 
 The control and management interface for the experiment is shown in figure \ref{fig:proposed_rms_error}.
 \begin{figure}[H]   
@@ -44,7 +95,7 @@ The control and management interface for the experiment is shown in figure \ref{
     \label{fig:result_gui}
 \end{figure}
 
-\subsection{Result}
+\subsection{Static result}
 
 Table \ref{table:vendor_rms_error} provides RMS errors of the vendor reference system related to the position $(x,y)$. These errors are also graphically illustrated in \ref{fig:vendor_rms_error}.
 
@@ -70,7 +121,7 @@ All experiments are done with $z=3$.
     \begin{tabular}{|c|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{2cm}|>{\centering\arraybackslash}p{2cm}|}
     \hline
     \backslashbox{y(m)}{x(m)}  &  1.2 & 4.8 & 9.6 & 10.8 \\ \hline
-    0.6 &  0.10 & 0.28&  0.13 &  0.12  \\ \hline
+    0.6 &  0.10 & 0.20&  0.13 &  0.12  \\ \hline
     1.2 &  0.13 & 0.18&  0.17 &  0.16  \\ \hline
     2.4 &  0.09 & 0.10&  0.11 &  0.22  \\ \hline
     \end{tabular}
@@ -81,19 +132,32 @@ All experiments are done with $z=3$.
 \begin{figure}[H]
     \begin{minipage}[t]{\textwidth}       
         \centering
-        \includegraphics[width=0.9\textwidth]{rms_error}
+        \includegraphics[width=1\textwidth]{rms_error}
     \end{minipage}
-    \caption{Vendor system error}
+    \caption{Vendor system static error}
     \label{fig:vendor_rms_error}
 \end{figure}
 
 \begin{figure}[H]     
     \centering
-    \includegraphics[width=1\textwidth]{result.png}
-    \caption{Proposed system error}
+    \includegraphics[width=1\textwidth]{result_static.png}
+    \caption{Proposed system static error}
     \label{fig:proposed_rms_error}
 \end{figure}
 
+\subsection{Square movement result}
+
+\begin{figure}[H]     
+    \centering
+    \includegraphics[width=1\textwidth]{result_square.png}
+    \caption{Square movement result}
+    \label{fig:result_square}
+\end{figure}
+
+\subsection{Multi-cell movement result}
+
 \section{Conclusion}
 Using experimental results obtained from a decimeter-accuracy 3D indoor localization system, we conclude that the proposed system has a similar performance to the reference system given by the DecaWave while provides a better IoT service (Bluetooth mesh instead of normal Bluetooth Low Energy) which reduce the price of the entire system.
+
+For a mobile tag, the system performance is relatively low but may acceptable for simple applications.
 \end{document}

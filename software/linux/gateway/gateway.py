@@ -60,12 +60,24 @@ class Gateway:
 
         if(msg["mavpackettype"] == "LOCATION"):
             try:
-                self.mav.location_send(msg["uwb_address"], msg["location_x"], msg["location_y"], msg["location_z"])
+                x = float(msg["location_x"])
+                y = float(msg["location_y"])
+                z = float(msg["location_z"])
+                self.mav.location_send(msg["uwb_address"], x, y, z)
             except Exception as e:
                 print("Unable to send downlink msg: %s" % str(e))
         elif(msg["mavpackettype"] == "ONOFF"):
             try:
                 self.mav.onoff_send(msg["uwb_address"], msg["value"])
+            except Exception as e:
+                print("Unable to send downlink msg: %s" % str(e))
+        if(msg["mavpackettype"] == "BLINK"):
+            if(msg["role"] == "ANCHOR"):
+                role = ANCHOR
+            else:
+                role = TAG
+            try:
+                self.mav.blink_send(msg["uwb_address"], role)
             except Exception as e:
                 print("Unable to send downlink msg: %s" % str(e))
 
