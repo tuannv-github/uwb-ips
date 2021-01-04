@@ -27,28 +27,22 @@ pkg.deps:
     - "@apache-mynewt-core/sys/log/full"
     - "@apache-mynewt-core/sys/stats/full"
     - "@apache-mynewt-core/sys/shell"
-
-    # - "@apache-mynewt-nimble/nimble/controller"
-    # - "@apache-mynewt-nimble/nimble/host"
-    # - "@apache-mynewt-nimble/nimble/host/services/gap"
-    # - "@apache-mynewt-nimble/nimble/host/services/gatt"
-    # - "@apache-mynewt-nimble/nimble/host/store/ram"
-    # - "@apache-mynewt-nimble/nimble/transport/ram"
-
-    - "@apache-mynewt-core/kernel/os"
-    - "@apache-mynewt-core/sys/console/full"
-    - "@apache-mynewt-core/sys/shell"
-    - "@apache-mynewt-core/sys/log/full"
-    - "@apache-mynewt-core/sys/stats/full"
     - "@mynewt-timescale-lib/lib/timescale"
 
-    - "@rtls/lib/message"
+    - "@apache-mynewt-nimble/nimble/controller"
+    - "@apache-mynewt-nimble/nimble/host"
+    - "@apache-mynewt-nimble/nimble/host/services/gap"
+    - "@apache-mynewt-nimble/nimble/host/services/gatt"
+    - "@apache-mynewt-nimble/nimble/host/store/ram"
+    - "@apache-mynewt-nimble/nimble/transport/ram"
 
     - "@decawave-uwb-core/sys/uwbcfg"
     - "@decawave-uwb-core/hw/drivers/uwb"
 
     - "@rtls/lib/rtls_tdma"
-    - "@rtls/lib/uwb_nrng_ss"
+    - "@rtls/lib/rtls_nrng_ss"
+    - "@rtls/lib/message"
+    - "@rtls/lib/serial"
 
 pkg.cflags:
     - "-Waddress-of-packed-member"

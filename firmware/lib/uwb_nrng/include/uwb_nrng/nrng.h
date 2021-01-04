@@ -28,7 +28,7 @@
 #include <uwb/uwb_ftypes.h>
 #include <euclid/triad.h>
 #include <stats/stats.h>
-#include <uwb_rng/slots.h>
+#include <uwb_nrng/slots.h>
 
 #if MYNEWT_VAL(UWB_RNG_ENABLED)
 #include <uwb_rng/uwb_rng.h>
@@ -58,6 +58,39 @@ STATS_SECT_END
 #define NRNG_STATS_INC(__X) {}
 #endif
 
+//! Range configuration parameters.
+struct uwb_rng_config{
+   uint32_t rx_holdoff_delay;        //!< Delay between frames, in UWB usec.
+   uint32_t tx_holdoff_delay;        //!< Delay between frames, in UWB usec.
+   uint32_t tx_guard_delay;          //!< Delay between frames from subsequent nodes, in UWB sec.
+   uint16_t rx_timeout_delay;        //!< Receive response timeout, in UWB usec.
+   uint16_t bias_correction:1;       //!< Enable range bias correction polynomial
+   uint16_t fctrl_req_ack:1;         //!< Enable ack request
+};
+
+//! Range control parameters.
+typedef struct _uwb_rng_control_t{
+    uint16_t delay_start_enabled:1;  //!< Set for enabling delayed start
+    uint16_t complete_after_tx:1;    //!< Set by ranging state machine to say that exchange is complete after next tx
+}uwb_rng_control_t;
+
+//! Range status parameters
+typedef struct _uwb_rng_status_t{
+    uint16_t selfmalloc:1;           //!< Internal flag for memory garbage collection
+    uint16_t initialized:1;          //!< Instance allocated
+    uint16_t mac_error:1;            //!< Error caused due to frame filtering
+    uint16_t invalid_code_error:1;   //!< Error due to invalid code
+    uint16_t tx_ack_expected:1;      //!< Acknowledge expected
+    uint16_t rx_ack_expected:1;      //!< Acknowledge expected
+}uwb_rng_status_t;
+
+//! List of range types available
+struct rng_config_list {
+    uint16_t rng_code;
+    const char* name;
+    struct uwb_rng_config *config;
+    SLIST_ENTRY(rng_config_list) next;
+};
 typedef enum _nrng_device_type_t{
     DWT_NRNG_INITIATOR,
     DWT_NRNG_RESPONDER
@@ -145,6 +178,8 @@ struct uwb_rng_config * nrng_get_config(struct nrng_instance * nrng, uwb_datafra
 struct uwb_dev_status nrng_listen(struct nrng_instance * nrng, uwb_dev_modes_t mode);
 uint32_t nrng_get_uids(struct nrng_instance * nrng, uint16_t uids[], uint16_t nranges, uint16_t base);
 uint32_t nrng_get_ranges(struct nrng_instance * nrng, dpl_float32_t ranges[], uint16_t nranges, uint16_t base);
+uint32_t nrng_get_ranges_addresses(struct nrng_instance * nrng, float ranges[], uint16_t addresses[], bool updated[], uint16_t nranges, uint16_t base);
+uint32_t nrng_get_tofs_addresses(struct nrng_instance * nrng, uint32_t tofs[], uint16_t addresses[], uint8_t updated[], uint16_t nranges, uint16_t base);
 uint32_t usecs_to_response(struct uwb_dev * inst, uint16_t nslots, struct uwb_rng_config * config, uint32_t duration);
 
 void nrng_append_config(struct nrng_instance * nrng, struct rng_config_list *cfgs);

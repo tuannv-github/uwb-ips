@@ -1,0 +1,72 @@
+\documentclass[./main.tex]{subfiles}
+
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{commath}
+
+\begin{document}
+
+\chapter{Multilateration}
+
+\begin{equation}
+    \begin{dcases*}
+        P_0 = 
+        \begin{bmatrix}
+            p_0^x & p_0^y & p_0^z
+        \end{bmatrix} \\
+        P_1 = 
+        \begin{bmatrix}
+            p_1^x & p_1^y & p_1^z
+        \end{bmatrix} \\
+        P_2 = 
+        \begin{bmatrix}
+            p_2^x & p_2^y & p_2^z
+        \end{bmatrix} \\
+        P_3 = 
+        \begin{bmatrix}
+            p_3^x & p_3^y & p_3^z
+        \end{bmatrix}
+    \end{dcases*}
+    \label{eqn:anchor_location}
+\end{equation}
+
+\begin{equation}
+    \begin{dcases*}
+        r_0 \\ r_1 \\ r_2 \\ r_3
+    \end{dcases*}
+    \label{eqn:anchor_location}
+\end{equation}
+
+\begin{equation}
+    e_x^{1\times3} = \frac{P_1 - P_0}{\norm[1]{P_1 - P_0}}
+\end{equation}
+
+\begin{equation}
+    i^{1\times1} = e_x^{1\times3}.(P_2 - P_0)^{1\times3}
+\end{equation}
+
+\begin{equation}
+    e_y^{1\times3} = \frac{P_2-P_0-(i*e_x)}{\norm[1]{P_2-P_0-(i*e_x)}}
+\end{equation}
+
+\begin{equation}
+    e_z^{1\times3} = e_x \times e_y
+\end{equation}
+
+\begin{equation}
+    d = \norm[1]{P_1 - P_0}
+\end{equation}
+
+\begin{equation}
+    j^{1\times1} = e_y^{1\times3}.(P_2 - P_0)^{1\times3}
+\end{equation}
+
+\begin{equation}
+    x = \frac{r_0^2 - r_1^2 + d^2}{2d}
+\end{equation}
+
+\begin{equation}
+    y = r_0^2 - r_2^2 + i^2 + j^2/(2j) - \frac{i}{j}*x
+\end{equation}
+
+\end{document}

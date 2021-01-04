@@ -1,7 +1,9 @@
+from time import sleep
 from serial import Serial
 import threading
 import config
 import time
+import random
 
 from mavlink import *
 
@@ -10,24 +12,57 @@ mav = MAVLink(serial)
 
 NODE_MAX = 16
 
+class Node:
+    def __init__(self, a, t, x, y , z):
+        self.a = a
+        self.x = x
+        self.y = y
+        self.z = z
+        self.t = t
+
+    def getX(self):
+        return self.x
+    def getY(self):
+        return self.y
+    def getZ(self):
+        return self.z
+    def getT(self):
+        return self.t
+    def getA(self):
+        return self.a
+    def move(self):
+        if(self.t == TAG):
+            self.x = random.random()*5
+            self.y = random.random()*5
+            self.z = random.random()*5
+
 def loop_write():
     i = 0x00
-    location_x = 123.456
-    location_y = 99.2222
-    location_z = 789.123
-    while True:
-        if(i > NODE_MAX/2):
-            mav.location_send(i, STATUS, ANCHOR, location_x, location_y, location_z)
-        else:
-            mav.location_send(i, STATUS, TAG, location_x, location_y, location_z)
-        mav.onoff_send(i, STATUS, 1)
-        time.sleep(0.1)
+    nodes = []
 
-        i+=1
-        i %= NODE_MAX
-        location_x += 1
-        location_y += 2
-        location_z += 10
+    node = Node(0, ANCHOR, 0, 1, 2)
+    nodes.append(node)
+
+    node = Node(1, ANCHOR, 1, 4, 5)
+    nodes.append(node)
+
+    node = Node(2, ANCHOR, 5, 2, 5)
+    nodes.append(node)
+
+    node = Node(3, TAG, 0, 1, 2)
+    nodes.append(node)
+
+    node = Node(4, TAG, 0, 1, 2)
+    nodes.append(node)
+
+    node = Node(5, ANCHOR, 3, 2, 5)
+    nodes.append(node)
+
+    while True:
+        for node in nodes:
+            node.move()
+            mav.location_send(node.getA(), STATUS, node.getT(), node.getX(), node.getY(), node.getZ())
+            time.sleep(1)
 
 def loop_read():
     while True:

@@ -1,36 +1,10 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
 #include <os/os.h>
 #include <sysinit/sysinit.h>
 
 #include <uwb/uwb.h>
 #include <uwb/uwb_ftypes.h>
 #include <uwbcfg/uwbcfg.h>
-
-#include <wireshark/config.h>
-#include <wireshark/wireshark.h>
-
-typedef enum{
-    STATE_SLEEP,
-    STATE_RECV
-}state_t;
+#include <serial/serial.h>
 
 struct uwb_msg_hdr {
     uint64_t utime;
@@ -51,11 +25,19 @@ struct uwb_msg_hdr {
 
 static struct dpl_callout g_rx_enable_callout;
 static struct os_mqueue g_rx_pkt_q;
-static state_t g_state = STATE_SLEEP;
 static os_membuf_t g_mbuf_buffer[MBUF_MEMPOOL_SIZE];
 static struct os_mempool g_mempool;
 static struct os_mbuf_pool g_mbuf_pool;
-static int g_channel;
+static struct os_task g_wireshark_task;
+static os_stack_t g_wireshark_task_stack[MYNEWT_VAL(TASK_WIRESHARK_STACK_SIZE)];
+static bool g_running = false;
+
+bool rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs);
+static struct uwb_mac_interface 
+uwb_mac_if = {
+    .id = UWBEXT_APP0,
+    .rx_complete_cb = rx_complete_cb,
+};
 
 static void
 create_mbuf_pool(void)
@@ -112,122 +94,107 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     return true;
 }
 
-static struct uwb_mac_interface uwb_mac_if = {
-    .id = UWBEXT_APP0,
-    .rx_complete_cb = rx_complete_cb,
-};
+static void
+process_rx_data_queue(struct os_event *ev)
+{
+    struct os_mbuf *om = 0;
+    struct uwb_dev *udev = uwb_dev_idx_lookup(0);
+    static char buff[512];
+    static char sbuff[32];
 
-static
-void rx_enable_ev_cb(struct dpl_event *ev) {
+    while((om = os_mqueue_get(&g_rx_pkt_q)) != NULL) {
+        if(g_running){
+            int payload_len = OS_MBUF_PKTLEN(om);
+            payload_len = (payload_len > sizeof(buff)) ? sizeof(buff) : payload_len;
+            struct uwb_msg_hdr *hdr = (struct uwb_msg_hdr*)(OS_MBUF_USRHDR(om));
+            int rc = os_mbuf_copydata(om, 0, payload_len, buff);
+            if (!rc) {
+                serial_write_str("received: ");
+                for (int i=0; i<sizeof(buff) && i<hdr->dlen; i++)
+                {
+                    sprintf(sbuff, "%02X", buff[i]);
+                    serial_write_str(sbuff);
+                }
+
+                struct uwb_dev_rxdiag *diag = (struct uwb_dev_rxdiag *)(buff + hdr->diag_offset);
+                float rssi = uwb_calc_rssi(udev, diag);
+
+                sprintf(sbuff, " power: %d lqi: 0 time: %lld\r\n", (int)rssi, hdr->utime);
+                serial_write_str(sbuff);
+            }
+        }
+        os_mbuf_free_chain(om);
+    }
+}
+
+static void
+task_wireshark_func(void *arg){
+    static char line[256];
+    static int channel;
+    struct uwb_dev *inst = uwb_dev_idx_lookup(0);
+    while (1)
+    {
+        serial_read_line(line, 256);
+        if(sscanf(line, "channel %d", &channel)){
+            inst->config.channel = channel;
+            uwb_mac_config(inst, &inst->config);
+            dpl_callout_reset(&g_rx_enable_callout, 0);
+            serial_write_line("OK");
+        }
+        else if(!strcmp(line, "start")){
+            g_running = true;
+            serial_write_line("OK");
+        }
+        else if(!strcmp(line, "stop")){
+            g_running = false;
+            serial_write_line("");
+            serial_write_line("OK");
+        }
+    }
+}
+
+static void 
+rx_enable_ev_cb(struct dpl_event *ev) {
     printf("RX enable\n");
     struct uwb_dev *udev = uwb_dev_idx_lookup(0);
     uwb_set_rx_timeout(udev, 0);
     uwb_start_rx(udev);
 }
 
-static uint8_t print_buffer[1024];
-static void
-process_rx_data_queue(struct os_event *ev)
-{
-    struct os_mbuf *om = 0;
-    struct uwb_dev *udev = uwb_dev_idx_lookup(0);
-
-    while((om = os_mqueue_get(&g_rx_pkt_q)) != NULL) {
-        if(g_state == STATE_RECV){
-            int payload_len = OS_MBUF_PKTLEN(om);
-            payload_len = (payload_len > sizeof(print_buffer)) ? sizeof(print_buffer) : payload_len;
-            struct uwb_msg_hdr *hdr = (struct uwb_msg_hdr*)(OS_MBUF_USRHDR(om));
-            int rc = os_mbuf_copydata(om, 0, payload_len, print_buffer);
-            if (!rc) {
-                wireshark_printf("received: ");
-                for (int i=0; i<sizeof(print_buffer) && i<hdr->dlen; i++)
-                {
-                    wireshark_printf("%02X", print_buffer[i]);
-                }
-                wireshark_printf("FFFF");
-
-                struct uwb_dev_rxdiag *diag = (struct uwb_dev_rxdiag *)(print_buffer + hdr->diag_offset);
-                float rssi = uwb_calc_rssi(udev, diag);
-
-                wireshark_printf(" power: %d lqi: 0 time: %lld\r\n", (int)rssi, hdr->utime);
-            }
-        }
-        os_mbuf_free_chain(om);
-        memset(print_buffer, 0, sizeof(print_buffer));
-    }
-}
-
-static void
-channel_update_eventq(struct os_event * ev)
-{
-    printf("Channel config update\n");
-    struct uwb_dev *inst = uwb_dev_idx_lookup(0);
-
-    inst->config.channel = g_channel;
-    uwb_mac_config(inst, &inst->config);
-    dpl_callout_reset(&g_rx_enable_callout, 0);
-}
-
-void on_cmd(cmd_t cmd, void *arg){
-    static struct os_event ev = {
-        .ev_queued = 0,
-        .ev_cb = channel_update_eventq,
-        .ev_arg = 0};
-
-    switch (cmd)
-    {
-    case CMD_CHANNEL:
-        g_channel = (int)arg;
-        printf("CMD_CHANNEL: %d\n", g_channel);
-        os_eventq_put(os_eventq_dflt_get(), &ev);
-        break;
-    case CMD_SLEEP:
-        g_state = STATE_SLEEP;
-        printf("CMD_SLEEP\n");
-        break;
-    case CMD_RECV:
-        g_state = STATE_RECV;
-        printf("CMD_RECV\n");
-        break;
-    default:
-        break;
-    }
-}
-
-int main(int argc, char **argv){
-    int rc;
+int 
+main(int argc, char **argv){
+    /* Declare some variables */
     struct uwb_dev *udev;
     uint32_t utime;
 
+    /* System init */
     sysinit();
-    app_conf_init();
 
-    wireshark_init(on_cmd);
-
+    /* MBuf pool init */
     create_mbuf_pool();
     os_mqueue_init(&g_rx_pkt_q, process_rx_data_queue, NULL);
 
+    /* UWB device init */
     udev  = uwb_dev_idx_lookup(0);
-    if (!udev) {
-        printf("UWB device: not found");
-        return -1;
-    }
+    assert(udev);
     uwb_mac_append_interface(udev, &uwb_mac_if);
-
-    udev->config.rxdiag_enable = 1;
-    udev->config.bias_correction_enable = 0;
-    udev->config.LDE_enable = 1;
-    udev->config.LDO_enable = 0;
-    udev->config.sleep_enable = 0;
-    udev->config.wakeup_rx_enable = 1;
-    udev->config.trxoff_enable = 1;
-    udev->config.dblbuffon_enabled = 0;
-    udev->config.rxauto_enable = 1;
+    udev->config = (struct uwb_dev_config){
+        .rxdiag_enable = 1,
+        .bias_correction_enable = 0,
+        .LDE_enable = 1,
+        .LDO_enable = 0,
+        .sleep_enable = 0,
+        .wakeup_rx_enable = 1,
+        .trxoff_enable = 1,
+        .dblbuffon_enabled = 0,
+        .rxauto_enable = 1,
+        .channel = 5
+    };
     uwb_mac_config(udev, &udev->config);
-
     dpl_callout_init(&g_rx_enable_callout, dpl_eventq_dflt_get(), rx_enable_ev_cb, NULL);
     dpl_callout_reset(&g_rx_enable_callout, 0);
 
+    /* Print UWB information */
     utime = dpl_cputime_ticks_to_usecs(dpl_cputime_get32());
     printf("{\"utime\": %lu,\"exe\": \"%s\"}\n",                    utime,  __FILE__);
     printf("{\"utime\": %lu,\"msg\": \"device_id    = 0x%lX\"}\n",  utime,  udev->device_id);
@@ -237,9 +204,17 @@ int main(int argc, char **argv){
     printf("{\"utime\": %lu,\"msg\": \"lotID        = 0x%lX\"}\n",  utime,  (uint32_t)(udev->euid>>32));
     printf("{\"utime\": %lu,\"msg\": \"SHR_duration = %d usec\"}\n",utime,  uwb_phy_SHR_duration(udev));
 
+    /* Serial task */
+    os_task_init(&g_wireshark_task, "wireshark",
+        task_wireshark_func,
+        NULL,
+        MYNEWT_VAL(TASK_WIRESHARK_PRIORITY), 
+        OS_WAIT_FOREVER,
+        g_wireshark_task_stack,
+        MYNEWT_VAL(TASK_WIRESHARK_STACK_SIZE));
+
+    /* Loop */
     while (1) {
         os_eventq_run(os_eventq_dflt_get());
     }
-    assert(0);
-    return rc;
 }

@@ -5,7 +5,21 @@
 		},
 		{
 			"path": "gateway"
+		},
+		{
+			"path": "../algorithm"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"cSpell.words": [
+			"automargin",
+			"autosize",
+			"connmanctl",
+			"ests",
+			"scaleanchor",
+			"textfont",
+			"textposition",
+			"wifi"
+		]
+	}
 }

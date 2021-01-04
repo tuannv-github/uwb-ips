@@ -1,0 +1,16 @@
+\providecommand{\main}{..}
+\documentclass[\main/main.tex]{subfiles}
+
+\begin{document}
+\graphicspath{{imgs/}{00_misc/imgs/}}
+
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+The problem of outdoor localization has practically solved by  Global Positioning System (GPS).  GPS technology, however, cannot be used efficiently while performing indoor position detection  because of the losses occurring in the signal propagation. Hence, the need for accurate indoor localization services has become inscresingly important. Many researches related to IPS are still being conducted with the objective to improve the performance of positioning techniques. 
+\newline\newline
+A type of short-range radio communication called Ultra-wideband (UWB) can be used for indoor localization. In contrast to other technologies (e.g. Bluetooth Low Energy and Wi-Fi), the position is not determined based on the measurement of signal strengths (Receive Signal Strength Indicator, RSSI), but on a runtime method (Time of Flight, ToF). The light propagation time between an object (tag) and several receivers (anchors) is measured. For the exact localization of an object using trilateration, at least three receivers are required. There must also be a direct line of sight between the receiver and transmitter for the best performance.
+\newline\newline
+DecaWave's DW1000 single chip IEEE802.15.4-2011 UWB wireless transceiver provides a promising approach to Indoor Positioning System problem by being able to range with the accuracy to within 10cm.. The DWM1001 module is based on Decawave's DW1000 Ultra-Wideband transceiver IC. It integrates UWB and Bluetooth antenna, all RF circuitry, Nordic Semiconductor nRF52832 and a motion sensor. This thesis describes the process of building, controlling and managing an indoor localization using the DWM1001 module.
+
+\end{document}

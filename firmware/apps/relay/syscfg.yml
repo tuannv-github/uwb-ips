@@ -1,0 +1,71 @@
+
+syscfg.defs:
+    APP_GATEWAY_DOWNLINK_TASK_STACK_SZ:
+        description: 'Size of task stack'
+        value: 512
+    APP_GATEWAY_DOWNLINK_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 212
+
+    APP_GATEWAY_UPLINK_TASK_STACK_SZ:
+        description: 'Size of task stack'
+        value: 512
+    APP_GATEWAY_UPLINK_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 213
+    APP_GATEWAY_UPLINK_MAV_BUFFER_SIZE:
+        description: 'Buffer size'
+        value: 128
+
+    APP_GATEWAY_TASK_STACK_SIZE:
+        description: 'Size of task stack'
+        value: 512
+    APP_GATEWAY_TASK_PRIORITY:
+        description: 'Priority of task'
+        value: 214
+
+syscfg.vals:
+
+    MSYS_1_BLOCK_COUNT: 24
+    MSYS_1_BLOCK_SIZE: 128
+    
+    MSYS_2_BLOCK_COUNT: 24
+    MSYS_2_BLOCK_SIZE: 512
+
+    SHELL_TASK: 1
+    SHELL_NEWTMGR: 0
+    
+    CONSOLE_UART: false
+    CONSOLE_RTT: true
+    CONSOLE_HISTORY_SIZE: 8
+    RTT_TERMINAL_BUFFER_SIZE_UP: 1024
+    RTT_TERMINAL_BUFFER_SIZE_DOWN: 256
+    CONSOLE_ECHO: false
+
+    LOG_LEVEL: 1
+    OS_MAIN_STACK_SIZE: 1024
+    OS_CRASH_STACKTRACE: 1
+
+    BLE_MESH: 1
+    BLE_MESH_ADV_BUF_COUNT: 48
+    BLE_MESH_TX_SEG_MAX: 8
+
+    CONFIG_FCB: 1
+    CONFIG_NEWTMGR: 1
+    CONFIG_FCB_FLASH_AREA: FLASH_AREA_NFFS
+
+    BLE_MESH_SETTINGS: 1
+
+    # Shell
+    SHELL_TASK: 1
+    SHELL_PROMPT_MODULE: 1
+    SHELL_NEWTMGR: 1
+    CONFIG_CLI: 1
+    CONFIG_CLI_DEBUG: 1
+    DW1000_CLI: 1
+    STATS_NAMES: 1
+    STATS_CLI: 1
+
+    BLE_MESH_RELAY: 1
+    # BLE_MESH_DEBUG: 1
+    # BLE_MESH_DEBUG_NET: 1

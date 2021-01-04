@@ -30,8 +30,13 @@ pkg.cflags:
     - "-fms-extensions"
 
 pkg.deps:
-    - "@rtls/lib/uwb_ccp"
-    - "@rtls/lib/tdma"
+    - "@rtls/lib/rtls_ccp"
 
 pkg.lflags:
     - "-lm"
+
+pkg.init:
+    tdma_pkg_init: 404
+
+pkg.down:
+    tdma_pkg_down: 404
