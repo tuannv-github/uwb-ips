@@ -255,7 +255,8 @@ This section discusses detailed timing problems related to CCP. Before starting,
     \item Local epoch $ep_l$: Packet timestamp referenced to CCP slave device timing system.
     \item Os epoch $ep_o$: Packet timestamp referenced to CCP master or slave host timing system.
     \item Period $\tau$: The interval of a superframe.
-    \item $t_k$: Timestamp for $k$th frame in device timing system.
+    \item $t^k_{m}$: Timestamp for $k$th frame in device timing system of master node.
+    \item $t^k_{l}$: Timestamp for $k$th frame in device timing system of local node.
     \item $t_h$: Current host time (in host timing system).
     \item $t_d$: Current device time (in device timing system).
     \item $f_{d2h}$: A linear function for converting the device time to host time as explained in \ref{subsec:timing_system_subsection}
@@ -297,7 +298,7 @@ Finally, the duration for PHY is:
 \begin{equation}
     T_{PHY} = T_{bsym} * n_{phy-header} + T_{dsym} * n_{phy-payload}
 \end{equation}
-With:
+Where:
 \begin{itemize}
     \item $T_{bsym} = 1.0256410 \mu s$: Baserate symbols duration 850khz
     \item $T_{dsym} = 0.1282051 \mu s$: Datarate symbols duration (usec) 6.81Mhz
@@ -309,18 +310,19 @@ These parameters can be taken from IEEE 802.15.4-2015 standard \cite{IEEE_Std_80
 
 The CCP packet is sent with timestamp calculated from previous frame:
 \begin{equation}
-    t_k = t_{k-1} + \tau
+    t^k_m = t^{k-1}_m + \tau
 \end{equation}
 
 Each time the CCP master node complete to send a CCP packet, a TX event is called for re-calculating $ep_m$, $ep_l$ and $ep_o$ using the following formulas:
 \begin{equation}
-    ep_m = ep_l = t_k - T_{SHR}
+    ep_m = ep_l = t^k_m - T_{SHR}
 \end{equation}
 
 $ep_o$ is calculated form current host time:
 \begin{equation}
-    ep_o = t_h - f_{d2h}(t_d - t_k) - T_{SHR}
+    ep_o = t_h - f_{d2h}(t_d - t^k_m) - T_{SHR}
 \end{equation}
+where $f_{d2h}$ is a function to convert from device timing system to host timing system.
 
 After sending the CCP packet, the MCU will schedule for the next wake up at:
 \begin{equation}
@@ -339,19 +341,19 @@ After sending the CCP packet, the MCU will schedule for the next wake up at:
 
 Each time the CCP slave node complete to receive a CCP packet, a RX event is called for re-calculating $ep_m$, $ep_l$ and $ep_o$ using the following formulas:
 
-$ep_m$ is calculated from timestamp field $t_{k-master}$ of received frame:
+$ep_m$ is calculated from timestamp field $t^k_m$ of received frame:
 \begin{equation}
-    ep_m = t_{k-master} - T_{SHR}
+    ep_m = t^k_m - T_{SHR}
 \end{equation}
 
 $ep_l$ is calculated from current device time:
 \begin{equation}
-ep_l = t_k - T_{SHR}
+ep_l = t^k_l - T_{SHR}
 \end{equation}
 
 $ep_o$ is calculated form current host time:
 \begin{equation}
-    ep_o = t_h - f_{d2h}(t_d - t_k) - T_{SHR}
+    ep_o = t_h - f_{d2h}(t_d - t^k_l) - T_{SHR}
 \end{equation}
 
 After processing the CCP packet, the MCU will schedule for the next wake up at:
@@ -376,6 +378,7 @@ After processing the CCP packet, the MCU will schedule for the next wake up at:
     \label{fig:ccp_timing_for_slave_node}
 \end{figure}
 
+\subsubsection{Cascade relay of ccp packet}
 % \subsubsection{Repeat CCP packet}
 % \begin{figure}[H]
 %     \begin{center}
@@ -384,6 +387,29 @@ After processing the CCP packet, the MCU will schedule for the next wake up at:
 %     \caption{CCP Repeat}
 %     \label{fig:ccp_repeat}
 % \end{figure}
+When a node receives a CCP packet and want to repeat it, it have to hold the CCP packet for $T_{hold-off}$ before re-transmitting.
+\begin{equation}
+    T_{hold-off} = n_{repeat}*T_{hold-off-conf} + i_{slot}*T_{ccp}
+\end{equation}
+Where:
+\begin{itemize}
+    \item $n_{repeat}$ is the number of times that packet has been repeated plus 1
+    \item $T_{hold-off-conf}$ is a configurable parameter for holding the CCP packet before re-transmitting it
+    \item $i_{slot}$ is the slot index of the node in the TDMA system as described in the following section
+    \item  $T_{ccp}$ is the duration of a CCP packet
+\end{itemize}
+
+The CCP packet is repeated with timestamp calculated from equation \ref{eqn:cpp_repeat_timestamp}.
+\begin{equation}
+    t^k_m = t_{k-repeat} = t_k + T_{delay}
+    \label{eqn:cpp_repeat_timestamp}
+\end{equation}
+
+The hold off delay of a repeated ccp packet takes into account of transition interval or CCP period as shown in equation \ref{eqn:ccp_hold_off_vs_ccp_period}.
+\begin{equation}
+    \tau_{new} = \tau - T_{hold-off}
+    \label{eqn:ccp_hold_off_vs_ccp_period}
+\end{equation}
 
 \section{Time Division Multiple Access (TDMA)}
 The fundamental role of the TDMA layer is to give a notification to its upper layer when it is the time to run the service. To archive this, a node must firstly ask for getting an appropriate and available slot from jointed nodes.
