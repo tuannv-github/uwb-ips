@@ -395,18 +395,22 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                         /* Release request context */
                         printf("Node up: 0x%04X\n", ieee_std_frame_hdr->src_address);
                         rti->slot_reqt = 0;
+                        rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
+                        rti->nodes[tdma_slot->idx].accepted = true;
+                        node_slot_map_printf(rti);
                     }
                     /* I am a anchor */
-                    if (rti->role == RTR_ANCHOR){
+                    else if (rti->role == RTR_ANCHOR){
                         /* I has joint the network and I do not see any request from this node before */
                         /* This node take this slot without permission */
                         struct uwb_dev_rxdiag *diag = (struct uwb_dev_rxdiag *)(rti->dev_inst->rxdiag);
                         float rssi = uwb_calc_rssi(rti->dev_inst, diag);
-                        if(rssi > -85 && tdma_slot->idx <= MYNEWT_VAL(UWB_BCN_SLOT_MAX)){
+                        if(rssi > -95 && tdma_slot->idx <= MYNEWT_VAL(UWB_BCN_SLOT_MAX)){
                             printf("%d: 0x%04X: RSSI %d\n",tdma_slot->idx, ieee_std_frame_hdr->src_address, (int)(rssi));
                             printf("Unknown node: 0x%04X at slot %d\n", ieee_std_frame_hdr->src_address, tdma_slot->idx);
                             rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
                             rti->nodes[tdma_slot->idx].accepted = true;
+                            node_slot_map_printf(rti);
                         }
                     }
                 }
@@ -414,8 +418,8 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                 else{
                     struct uwb_dev_rxdiag *diag = (struct uwb_dev_rxdiag *)(rti->dev_inst->rxdiag);
                     float rssi = uwb_calc_rssi(rti->dev_inst, diag);
-                    printf("%d: 0x%04X: RSSI %d\n",tdma_slot->idx, ieee_std_frame_hdr->src_address, (int)(rssi));
-                    if(rssi < -90) return;
+                    printf("New node idx:%d address:0x%04X RSSI:%d\n",tdma_slot->idx, ieee_std_frame_hdr->src_address, (int)(rssi));
+                    if(rssi < -95) return;
                     rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
                     node_slot_map_printf(rti);
                 }
