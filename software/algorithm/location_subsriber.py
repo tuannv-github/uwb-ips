@@ -7,8 +7,11 @@ import json
 # Z = "-3"
 # FILE_NAME = DATA + X + "_" + Y + "_" + Z
 
-DATA = "square/"
-FILE_NAME = DATA + "06"
+# DATA = "square/"
+# FILE_NAME = DATA + "06"
+
+DATA = "trajectory/"
+FILE_NAME = DATA + "10"
 
 client = mqtt.Client()
 f = open(FILE_NAME, "w")
@@ -28,15 +31,15 @@ def on_message(client, userdata, msg):
         f.write(string + "\n")
         count+=1
         print(str(count) + ": " + string)
-    elif (msg["mavpackettype"]=='LOCATION_REDUCED' and msg["mesh_address"]==32):
-        string = ""
-        string += str(msg["location_x"]) + " "
-        string += str(msg["location_y"]) + " "
-        f.write(string + "\n")
-        count+=1
-        print(str(count) + ": " + string)    
+    # elif (msg["mavpackettype"]=='LOCATION_REDUCED' and msg["mesh_address"]==32):
+    #     string = ""
+    #     string += str(msg["location_x"]) + " "
+    #     string += str(msg["location_y"]) + " "
+    #     f.write(string + "\n")
+    #     count+=1
+    #     print(str(count) + ": " + string)    
 
 client.on_connect = on_connect
 client.on_message = on_message
-client.connect("127.0.0.1", 1883, 60)
+client.connect("192.168.10.12", 1883, 60)
 client.loop_forever()
