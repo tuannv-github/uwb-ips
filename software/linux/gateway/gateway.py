@@ -8,6 +8,9 @@ import sys
 
 from mavlink import *
 
+# SERVER_IP = "127.0.0.1"
+SERVER_IP = "192.168.10.12"
+
 class StoppableThread(threading.Thread):
     """Thread class with a stop() method. The thread itself has to check
     regularly for the stopped() condition."""
@@ -86,7 +89,7 @@ class Gateway:
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.client.on_disconnect = self.on_disconnect
-        self.client.connect("127.0.0.1", 1883, 60)
+        self.client.connect(SERVER_IP, 1883, 60)
         self.client.loop_forever()
 
     def thread_serial_func(self, loop, port, baud):
@@ -94,9 +97,8 @@ class Gateway:
         while True:
             try:
                 serial = Serial(port, baud)
-                if (port == "/dev/ttyGateway"):
-                    mav = MAVLink(serial)
-                    self.mav = mav
+                mav = MAVLink(serial)
+                self.mav = mav
                 break
             except:
                 time.sleep(1)
@@ -110,9 +112,8 @@ class Gateway:
                     print("Serial connection error: Retrying... " + str(retry_count))
                     retry_count+=1
                     serial = Serial(port, baud)
-                    if (port == "/dev/ttyGateway"):
-                        mav = MAVLink(serial)
-                        self.mav = mav
+                    mav = MAVLink(serial)
+                    self.mav = mav
                 except:
                     print("Unable to open port: " + port)
 

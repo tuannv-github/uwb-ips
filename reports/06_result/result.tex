@@ -32,11 +32,11 @@ This subsection provides images to illustrate the experimental setup used to eva
     \caption{Physical placement of devices}
     \label{fig:physical placement of devices}
 \end{figure}
-The actual placement of devices is shown in figures: \ref{fig:arena_00}, \ref{fig:node_0_1}, \ref{fig:node_2_3}.
+The actual placement of devices is shown in figures: \ref{fig:arena_00}, \ref{fig:node_0_1}, \ref{fig:node_2_3}, \ref{fig:node_4_5_6_7}.
 
 \begin{figure}[H]      
     \centering
-    \includegraphics[width=0.7\textwidth]{arena_00.jpg}
+    \includegraphics[width=1\textwidth]{arena_00.jpg}
     \caption{Arena side view}
     \label{fig:arena_00}
 \end{figure}
@@ -59,9 +59,16 @@ The actual placement of devices is shown in figures: \ref{fig:arena_00}, \ref{fi
 
 \begin{figure}[H]      
     \centering
-    \includegraphics[width=0.7\textwidth]{arena_06.jpg}
+    \includegraphics[width=1\textwidth]{arena_01.jpg}
     \caption{Node 0,1}
     \label{fig:node_0_1}
+\end{figure}
+
+\begin{figure}[H]      
+    \centering
+    \includegraphics[width=1\textwidth]{arena_02.jpg}
+    \caption{Node 2,3}
+    \label{fig:node_2_3}
 \end{figure}
 
 % \begin{figure}[H]
@@ -82,9 +89,9 @@ The actual placement of devices is shown in figures: \ref{fig:arena_00}, \ref{fi
 
 \begin{figure}[H]      
     \centering
-    \includegraphics[width=0.7\textwidth]{arena_05.jpg}
-    \caption{Node 2,3}
-    \label{fig:node_2_3}
+    \includegraphics[width=1\textwidth]{arena_03.jpg}
+    \caption{Node 4,5,6,7}
+    \label{fig:node_4_5_6_7}
 \end{figure}
 
 The control and management interface for the experiment is shown in figure \ref{fig:proposed_rms_error}.
@@ -96,12 +103,11 @@ The control and management interface for the experiment is shown in figure \ref{
 \end{figure}
 
 \subsection{Static result}
+In this section, all results are obtained by statically placing tags in a fixed position and measuring the location. Moreover, all experiments are done with $z=3$.
 
-Table \ref{table:vendor_rms_error} provides RMS errors of the vendor reference system related to the position $(x,y)$. These errors are also graphically illustrated in \ref{fig:vendor_rms_error}.
+Table \ref{table:vendor_rms_error} provides RMS errors of the vendor reference system relative to the position $(x,y)$. These errors are also graphically illustrated in \ref{fig:vendor_rms_error}.
 
-Table \ref{table:proposed_rms_error} provides RMS errors of the proposed system related to the position $(x,y)$. These errors are also graphically illustrated in \ref{fig:proposed_rms_error}.
-
-All experiments are done with $z=3$.  
+Table \ref{table:proposed_rms_error} provides RMS errors of the proposed system relative to the position $(x,y)$. These errors are also graphically illustrated in \ref{fig:proposed_rms_error}.
 
 \begin{table}[ht]
     \centering
@@ -146,8 +152,8 @@ All experiments are done with $z=3$.
 \end{figure}
 
 \subsection{Square movement result}
-
-\begin{figure}[H]     
+In this section, results shown in figure \ref{fig:result_square} are obtained as a tag moves along the boundary of a square. Since the reference path is not accurate enough, a numeric error is not provided. The only purpose is to give an intuitive performance evaluation of the system.
+\begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{result_square.png}
     \caption{Square movement result}
@@ -155,9 +161,16 @@ All experiments are done with $z=3$.
 \end{figure}
 
 \subsection{Multi-cell movement result}
+In this section, results illustrated in figure \ref{fig:multi_cell_movement_result} are obtained as a tag moves along the red line. Since the reference path is not accurate enough, a numeric error is not provided. The only purpose is to give an intuitive performance evaluation of the system.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{path.png}
+    \caption{Multi-cell movement result}
+    \label{fig:multi_cell_movement_result}
+\end{figure}
 
-\section{Conclusion}
+\subsection{Conclusion}
 Using experimental results obtained from a decimeter-accuracy 3D indoor localization system, we conclude that the proposed system has a similar performance to the reference system given by the DecaWave while provides a better IoT service (Bluetooth mesh instead of normal Bluetooth Low Energy) which reduce the price of the entire system.
 
-For a mobile tag, the system performance is relatively low but may acceptable for simple applications.
+For a mobile tag, the system performance is relatively low but may acceptable for simple applications. Moreover, system error also increases significantly when anchors are placed to form a narrow shape. Hence, square topology should be used in practice.
 \end{document}
