@@ -8,7 +8,7 @@ ax = plt.gca()
 DATA_DIR = "square"
 
 DATA = "trajectory/"
-FILE_NAME = DATA + "10"
+FILE_NAME = DATA + "out"
 
 f = open(FILE_NAME, 'r')
 for line in f.readlines():
