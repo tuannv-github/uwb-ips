@@ -208,13 +208,14 @@ superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     /* Check timeout and availability of ANCHOR only */
     for(int i=1; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
         rti->nodes[i].available = false;
-        if(rti->nodes[i].addr != 0){
+        // if(rti->nodes[i].addr != 0){
             rti->nodes[i].timeout++;
             if(rti->nodes[i].timeout > MYNEWT_VAL(RT_ANCHOR_TIMEOUT)){
                 node_rmv(rti, i);
-                printf("Remove node: %d\n", i);
-                node_slot_map_printf(rti);
-
+                if(rti->nodes[i].addr != 0){
+                    printf("Remove node: %d\n", i);
+                    node_slot_map_printf(rti);
+                }
                 /* Anchor may down when trying to get a slot */
                 if(rti->slot_reqt != 0 && node_all_accepted(rti) && rti->role == RTR_TAG){
                     node_add_me(rti, rti->slot_reqt);
@@ -223,7 +224,7 @@ superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
                     /* Reset slot_reqt to change it purpose */
                     // rti->slot_reqt = 0;
                 };
-            }
+            // }
         }
     }
 
