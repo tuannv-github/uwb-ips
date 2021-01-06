@@ -326,4 +326,39 @@ void trilaterate(sphere_t sphere[3], trilateration_result_t *trilateration_resul
     \label{fig:multilateration_c_implementation}
 \end{figure}
 
+\section{ToF to distance}
+The result obtained from TWR method is the time of a flight between anchor and tag. However, the required distance needs to be measured in meters. A linear regression model is good enough to estimate the relationship between ToF and the actual distance as illustrated in figure \ref{fig:tof_to_distance}.
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=1\textwidth]{tof_to_distance.png}
+    \end{center}
+    \caption{ToF to distance}
+    \label{fig:tof_to_distance}
+\end{figure}
+The LinearRegression model of sklearn library is utilized to approximate the distance based on ToF. The result is shown in equation \ref{eqn:distance_model}.
+\begin{equation}
+    d = w*ToF + b
+    \label{eqn:distance_model}
+\end{equation}
+Where:
+\begin{itemize}
+    \item $d$: The distance between tag and anchor
+    \item $ToF$: The time of a flight between tag and anchor
+    \item $w = 0.004632130984819555$: The slope of estimated model 
+    \item $b = 0.13043560944811894$: The bias of estimated model
+\end{itemize}
+
+The loss function of the model is given in equation \ref{eqn:distance_model_loss}.
+\begin{equation}
+    e = \frac{1}{n} \sum_{k = 1}^{n} | d^k_{est}-d^k \vert = \frac{1}{n} \sum_{k = 1}^{n} | w*ToF^k + b -d^k \vert  = 0.04095793575440317 (m)
+    \label{eqn:distance_model_loss}
+\end{equation}
+Where:
+\begin{itemize}
+    \item $d^k_{est}$ is the $k$th estimated distance
+    \item $d^k$ is the $k$th reference distance
+\end{itemize}
+
+In an ideal scenario, the mean error of the linear model is less than 5cm.
+
 \end{document}
