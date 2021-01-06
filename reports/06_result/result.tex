@@ -9,7 +9,7 @@
 \section{Whole system overview}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{system_overview.png}
+    \includegraphics[width=1\textwidth]{system_overview.png}
     \caption{Whole system overview}
     \label{fig:system_overview}
 \end{figure}
@@ -17,9 +17,9 @@ The whole system deployed in this thesis is illustrated in figure \ref{fig:syste
 
 \section{Evaluation}
 
-In the experimental, the localization error is calculated follow equation \ref{eqn:root_mean_square}.
+In all experiments, the location error is calculated follow equation \ref{eqn:root_mean_square}.
 \begin{equation}
-    e_{RMS} = \sqrt{\frac{1}{n} \sum_{k=1}^{n} ((x_k-x_{kg})^2 + (y_k-y_{kg})^2 + (z_k-z_{kg})^2)}
+    e_{RMS} = \frac{1}{n} \sum_{k=1}^{n} \sqrt{(x_k-x_{kg})^2 + (y_k-y_{kg})^2 + (z_k-z_{kg})^2}
     \label{eqn:root_mean_square}
 \end{equation}
 

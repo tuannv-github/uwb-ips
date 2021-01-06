@@ -1,4 +1,4 @@
-\documentclass[oneside, 12pt]{book}
+\documentclass[oneside, 12pt, a4paper]{book}
 
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
@@ -58,14 +58,13 @@
 \DeclareMathOperator*{\argmax}{argmax} 
 \DeclareMathOperator*{\argmin}{argmin} 
 
-\graphicspath{{imgs/}}
+\graphicspath{{img/}}
 
 \geometry{
     left=20mm,
     right=20mm,
     top=20mm,
     bottom=20mm,
-    heightrounded
 }
 
 \setlength\parindent{0pt}
@@ -173,10 +172,17 @@
     \label{appendix:rtls_anchor_enclosure}
     \begin{figure}[H]
         \begin{center}
-            \includegraphics[scale=0.4]{Assem.JPG}
+            \includegraphics[width=0.6\textwidth]{Assem.JPG}
         \end{center}
-        \caption{RTLS SolidWorks Design}
+        \caption{RTLS SolidWorks design}
         \label{fig:RTLS_SolidWork_Design}
+    \end{figure}
+    \begin{figure}[H]
+        \begin{center}
+            \includegraphics[width=0.6\textwidth]{anchor_final.jpg}
+        \end{center}
+        \caption{RTLS anchor}
+        \label{fig:RTLS_anchor}
     \end{figure}
 \end{appendix}
 

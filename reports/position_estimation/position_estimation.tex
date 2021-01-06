@@ -63,20 +63,20 @@ The TWR method relies on two-way communication between devices. As they communic
 
 Applying the TWR scheme between two devices, the distance between them can be measured and utilized to find the location of tags. One simple way to find the position from distances is to solve the intersection between circles, spheres or n-spheres as illustrated in figure \ref{fig:twr_trilateration}.
 
+This thesis uses the TWR approach to obtain distances. The multilateration method utilized to solve the location is described in the following section.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{twr_protocol.png}
+    \caption{Two-Way Ranging}
+    \label{fig:twr_anchor_and_tag}
+\end{figure}
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{twr.png}
     \caption{Localization using TWR}
     \label{fig:twr_trilateration}
-\end{figure}
-
-This thesis uses the TWR approach to obtain distances. The multilateration method utilized to solve the location is described in the following section.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\textwidth]{twr_protocol.png}
-    \caption{Two-Way Ranging}
-    \label{fig:twr_anchor_and_tag}
 \end{figure}
 
 \section{Multilateration in three-dimensional Euclidean space}
@@ -149,17 +149,11 @@ To fully solve the multilateration problem in Euclidean space, $A_1$, $A_2$, $A_
 
 Let $S =\{\boldsymbol{e_x}, \boldsymbol{e_y}, \boldsymbol{e_z}\}$ is the basis of the new vector space. Then $A_1$, $A_2$, $A_3$ can be written uniquely as a linear combination of vectors in the basis $S$. Basis $S$ is specially chosen to make the general problem become the simplified problem. As shown in equation \ref{eqn:multilateration_ex}, $\boldsymbol{e_x}$ is a unit vector lies on $\overrightarrow{A_1A_2}$.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{multilateration.png}
-    \caption{Multilateration in Euclidean space}
-    \label{fig:multilateration}
-\end{figure}
-
 \begin{equation}
     \boldsymbol{e_x} = \frac{A_2-A_1}{\Vert A_2 - A_1\Vert}
     \label{eqn:multilateration_ex}
 \end{equation}
+
 Since $\Vert \boldsymbol{e_x} \Vert = 1$, the scalar projection of $\overrightarrow{A_1A_3}$ onto $\overrightarrow{A_1A_2}$ is:
 \begin{equation}
     \begin{split}
@@ -168,6 +162,14 @@ Since $\Vert \boldsymbol{e_x} \Vert = 1$, the scalar projection of $\overrightar
     &= \boldsymbol{e_x} \cdot (A_3 - A_1)      
     \end{split}
 \end{equation}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{multilateration.png}
+    \caption{Multilateration in Euclidean space}
+    \label{fig:multilateration}
+\end{figure}
+
 The component of $\overrightarrow{A_1A_3}$ lies on $e_y$ is $A_3-A_1-(s*\boldsymbol{e_x})$. Hence:
 \begin{equation}
     \boldsymbol{e_y} = \frac{A_3-A_1-(s*\boldsymbol{e_x})}{\Vert A_3-A_1-(s*\boldsymbol{e_x})\Vert}
