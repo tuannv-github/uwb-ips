@@ -14,7 +14,9 @@ for filename in os.listdir(DATA_DIR):
     y = float(filename)
     f = open(DATA_DIR + "/" + filename, 'r')
     for i in range(0, 50):
-        x = float(f.readline())
+        line = f.readline()
+        print(str(i) + ": " + line)
+        x = float(line)
         print(str(x) + ": " + str(y))
         xs.append(x)
         ys.append(y)
@@ -37,8 +39,27 @@ plt.plot(x,y)
 # print(y)
 print(model.coef_[0])
 print(model.intercept_)
-x = 368
-y = model.coef_[0] * x + model.intercept_
-print(str(x) + ": " + str(y))
 
+# x = 368
+# y = model.coef_[0] * x + model.intercept_
+# print(str(x) + ": " + str(y))
+
+error_sum = 0
+error_count = 0
+
+for filename in os.listdir(DATA_DIR):
+    print(filename)
+    xs = []
+    ys = []
+    y = float(filename)
+    f = open(DATA_DIR + "/" + filename, 'r')
+    for i in range(0, 50):
+        line = f.readline()
+        print(str(i) + ": " + line)
+        x = float(line)
+        est_y = model.coef_[0] * x + model.intercept_
+        error_sum += abs(est_y - y)
+        error_count += 1
+
+print("mean error:" + str(error_sum/error_count))
 plt.show()

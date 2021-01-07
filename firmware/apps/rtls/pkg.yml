@@ -40,7 +40,7 @@ pkg.deps:
     - "@decawave-uwb-core/hw/drivers/uwb"
 
     - "@rtls/lib/rtls_tdma"
-    - "@rtls/lib/uwb_nrng_ss"
+    - "@rtls/lib/rtls_nrng_ss"
     - "@rtls/lib/message"
     - "@rtls/lib/serial"
 

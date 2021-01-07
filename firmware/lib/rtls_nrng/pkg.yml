@@ -34,7 +34,6 @@ pkg.lflags:
 
 pkg.deps:
     - "@rtls/lib/json"
-    # - "@rtls/lib/uwb_rng"
     - "@rtls/lib/euclid"
     - "@rtls/lib/rng_math"
 
