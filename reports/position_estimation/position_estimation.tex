@@ -5,7 +5,7 @@
 \graphicspath{{img/}{position_estimation/img/}}
 \chapter{Position estimation}
 
-In this chapter, a position estimation technique is introduced. The ultimate aim of this technique is to be simple enough to run on a microcontroller while providing reasonable accuracy. Section \ref{sec:distance_measurement_using_time_of_flight} discusses about a technique used for distance measurement. A solution for solving location from distance to known points is proposed in chapter \ref{sec:localization_using_multilateration}.
+In this chapter, a position estimation technique is introduced. The ultimate aim of this technique is to be simple enough to run on a microcontroller while providing reasonable accuracy. Section \ref{sec:distance_measurement_using_time_of_flight} discusses about techniques used for distance measurement. A solution for solving location from distances to known points is proposed in chapter \ref{sec:localization_using_multilateration}. The final section, on the other hand, gives a method for converting the time of flights to actual distances used for positioning.
 
 \section{Distance measurement using time-of-flight}
 \label{sec:distance_measurement_using_time_of_flight}
@@ -17,8 +17,8 @@ The RSSI method is based on the fact that the signal strength drops with increas
 \newline\newline
 The second approach is to use the signal’s ToF rather than RSSI. This may yield much more accurate results in LoF (Line of Sight) environments and can lead up to a decimeter-level accuracy depending on the frequency and nature of the signal. An accurate position with a precision of up to several decimeters can be obtained by combining the ToF measurements from several devices. The performance might be degraded by obscuring the LoF between devices. Nevertheless, in comparison to the RSSI-based method, the overall accuracy is still superior. The ToF-based method is used by Ultra-Wideband technology. The nature of UWB signals makes it an ideal candidate for utilizing the ToF distance estimation process. 
 \newline\newline
-From this basic principle that the distance between two radio transceivers can be measured by multiplying the time of flight of the signal by the speed of light, 
-the ToF-based method can be implemented in different ways based on the target application requirements: Two Way Ranging (TWR), Time Difference of Arrival (TDoA), or Phase Difference of Arrival (PDoA).
+From the basic principle that the distance between two radio transceivers can be measured by multiplying the time of flight of the signal by the speed of light, 
+the ToF-based method can be implemented in different ways based on the target application requirements: Time Difference of Arrival (TDoA), Phase Difference of Arrival (PDoA), or Two Way Ranging (TWR).
 
 \subsection{Time Difference of Arrival (TDoA)}
 The TDoA method is very similar to GPS. Multiple reference points (anchors), which are time-synchronized, are deployed in an area. The unknown-position point (tag) sends a beacon message. When receiving such a message, anchors will timestamp it and send a response back to the tag which will run multilateration algorithms based on the time difference of arrival of the beacon messages. The localization can be solved by finding the intersection of hyperbolic lines as shown in figure \ref{fig:tdoa}.
@@ -350,7 +350,7 @@ Where:
     \item $b = 0.13043560944811894$: The bias of estimated model
 \end{itemize}
 
-The loss function of the model is given in equation \ref{eqn:distance_model_loss}.
+Loss function of the linear model is given in equation \ref{eqn:distance_model_loss}.
 \begin{equation}
     e = \frac{1}{n} \sum_{k = 1}^{n} | d^k_{est}-d^k \vert = \frac{1}{n} \sum_{k = 1}^{n} | w*ToF^k + b -d^k \vert  = 0.04095793575440317 (m)
     \label{eqn:distance_model_loss}
