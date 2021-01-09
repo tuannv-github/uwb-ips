@@ -19,7 +19,7 @@ The main role of gateway firmware is to convert Bluetooth mesh messages to MAVLi
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.8\textwidth]{gateway_firmware.png}
+        \includegraphics[width=0.9\textwidth]{gateway_firmware.png}
     \end{center}
     \caption{Gateway firmware component}
     \label{fig:gateway_firmware}
@@ -31,7 +31,7 @@ The firmware part and software part of the gateway exchange messages using MAVLi
 The layered architecture for the MAVLink/UART communication model is illustrated in figure \ref{fig:mavlink_uart_stack}.
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.4\textwidth]{MAVLink_over_UART.png}
+        \includegraphics[width=0.5\textwidth]{MAVLink_over_UART.png}
     \end{center}
     \caption{MAVLink/UART stack}
     \label{fig:mavlink_uart_stack}
@@ -51,7 +51,7 @@ The maximum packet length is 263 bytes for full payload.
 Explanation for each field in the MAVLink V1 frame is given in table \ref{tab:mavlink_v1_frame_explanation}.
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.8\textwidth]{packet_mavlink_v1.jpg}
+        \includegraphics[width=0.9\textwidth]{packet_mavlink_v1.jpg}
     \end{center}
     \caption{MAVLink packet v1}
     \label{fig:packet_mavlink_v1}
@@ -125,7 +125,7 @@ Similar to the gateway firmware, the main role of gateway software is to convert
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.6\textwidth]{gateway_software.png}
+        \includegraphics[width=0.5\textwidth]{gateway_software.png}
     \end{center}
     \caption{Gateway software component}
     \label{fig:gateway_software}
@@ -137,7 +137,7 @@ MQTT is an OASIS standard messaging protocol for the Internet of Things (IoT). I
 MQTT protocol works on top of TCP/IP protocol and uses port 1883 (8883 if connecting through SSL) as default.
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.6\textwidth]{mqtt_tcp.png}
+        \includegraphics[width=0.3\textwidth]{mqtt_tcp.png}
     \end{center}
     \caption{MQTT layer in OSI model}
     \label{fig:mqtt_tcp}
@@ -159,17 +159,17 @@ There are a number of reasons answering the question: Why MQTT is widely used in
 The Publisher sends data on the MQTT Broker specifying a definite topic in a message. The Subscribers can receive various data from multiple Publishers depending on subscription to correspondent topics.
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.4]{mqtt-publish-subscribe.png}
+        \includegraphics[scale=0.35]{mqtt-publish-subscribe.png}
     \end{center}
     \caption{MQTT publish subscribe}
     \label{fig:mqtt_publish_subscribe.}
 \end{figure}
 
-Here are the main types of messages for a MQTT device to communication with the Broker:
+Here are the main types of messages for an MQTT device to communication with the Broker:
 
 \begin{itemize}
-    \item Connect: establish the connection to the message Broker
-    \item Disconnect: break the connection to the message Broker
+    \item Connect: establish the connection to the Broker
+    \item Disconnect: break the connection to the Broker
     \item Publish: publish data on a topic within the message Broker
     \item Subscribe: subscribe to a topic on the message Broker
     \item Unsubscribe: unsubscribe the topic
@@ -193,7 +193,7 @@ MQTT supports three levels of Quality of Service (QoS) when sending messages.
 This service level guarantees a best-effort delivery. There is no guarantee of delivery. The recipient does not acknowledge receipt of the message and the message is not stored and re-transmitted by the sender. QoS level 0 is often called “fire and forget” and provides the same guarantee as the underlying TCP protocol.
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.5\textwidth]{mqtt_qos_0.jpg}
+        \includegraphics[width=0.6\textwidth]{mqtt_qos_0.jpg}
     \end{center}
     \caption{QoS 0: At most once}
     \label{fig:mqtt_qos_0}
@@ -204,7 +204,7 @@ This level guarantees the message delivery to the broker, however, the duplicati
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.5\textwidth]{mqtt_qos_1.jpg}
+        \includegraphics[width=0.6\textwidth]{mqtt_qos_1.jpg}
     \end{center}
     \caption{QoS 1: At least once}
     \label{fig:mqtt_qos_1}
@@ -215,7 +215,7 @@ On this level the message delivery to a Client is guaranteed, with no duplicatio
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.5\textwidth]{mqtt_qos_2.jpg}
+        \includegraphics[width=0.6\textwidth]{mqtt_qos_2.jpg}
     \end{center}
     \caption{QoS 2: Exactly once}
     \label{fig:mqtt_qos_2}

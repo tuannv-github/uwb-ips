@@ -8,7 +8,7 @@
 This section provides a detailed description of the ranging network operation and layered system architecture.
 
 \section{Prerequisite}
-Before getting into, we should cover some fundamental definitions. It will make it easier for further discussions. 
+Before getting into details, some fundamental definitions should be covered. It will make it easier for further discussions. 
 
 \subsection{Host and device}
 The implemented UWB ranging system consists of one host and one device.
@@ -29,13 +29,13 @@ The implemented UWB ranging system consists of one host and one device.
 \label{subsec:timing_system_subsection}
 Since there are two running systems: \textbf{host} and \textbf{device}, there are two timing systems. Unfortunately, these two timing systems do not have an agreement in the smallest unit of time. A host can use a $1\mu s$ -resolution timer due to the number of redundancy timers it has. A device, on the other hand, may not have as many timers and clock source as a host has, so the device timing system is limited. In the case of DW1000 radio IC, $1\mu s$ is approximately 512 counts of the fundamental 499.2 MHz UWB clock which is actually \textbf{$\sim 1.026\mu s$}. 
 
-For precise timing, the implementation does not make any assumption about the equality of $1\mu s$ in host and device. Timestamp in the device must be converted to host reference for further processing, upon completion, the result must be converted back to the device reference before writing to that device. 
+For precise timing, the implementation does not make any assumption about the equality of $1\mu s$ in host and device. Timestamp in the device may be converted to host reference for further processing, upon completion, the result must be converted back to the device reference before writing to that device. 
 \subsection{RMarker}
-Because of the limited transmission speed, the interval between the begin of preamble and the end of PHY data unit is relatively large compared with the propagation interval. For the ultimate purpose of ranging using time of flight, a point should be considered to be marker for timestamping packet. As defined in the context of the IEEE 802.15.4-2015 standard \cite{IEEE_Std_802_15_4_2015}, RMarker is the first chip after the SFD, it also means that: RMarker defines the start of the PHR in either transmitter or receiver. 
+Because of the limited transmission speed, the interval between the beginning of the preamble and the end of the PHY data unit is relatively large compared with the propagation interval. For the ultimate purpose of ranging using time of flight, a point should be considered to be the marker to timestamp packet. As defined in the context of the IEEE 802.15.4-2015 standard \cite{IEEE_Std_802_15_4_2015}, RMarker is the first chip after the SFD, it also means that: RMarker defines the start of the PHR in either transmitter or receiver.
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.3]{802_15_4_physical.png}
+        \includegraphics[width=0.8\textwidth]{802_15_4_physical.png}
     \end{center}
     \caption{802.15.4 RMarker}
     \label{fig:802_15_4_rmarker}
@@ -52,20 +52,20 @@ The ranging system is implemented follow 3 layers model as shown in figure \ref{
 Follow the bottom-up approach, detail description about each layer is provided in following sections.
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.2\textwidth]{ranging_layered_architecture}
+        \includegraphics[width=0.15\textwidth]{ranging_layered_architecture}
     \end{center}
     \caption{Ranging layered architecture}
     \label{fig:ranging_layered_architecture}
 \end{figure}
 
-\section{Clock calibration packet (CCP)}
-The main role clock calibration packet is to provide the superframe synchronization between nodes. 
+\section{Clock calibration packet}
+The main role clock calibration packet (CCP) is to provide the superframe synchronization between nodes. 
 \subsection{CCP role}
 Three CCP roles are defined, allowing nodes to sync with others: Master, Slave, Relay.
 \begin{itemize}
-    \item \textbf{CCP master}: There is only and only one master node over the network. The master node is the only place where a clock calibration packet is produced. It will produce and transmit the clock calibration packet with the interval defined as a constant in the firmware. My implementation use the value of 100ms for such interval. 
-    \item \textbf{CCP slave}: Slave nodes listen for the clock calibration packet to start their internal timer for each superframe.
-    \item \textbf{CCP relay}: Relay nodes repeat the clock calibration packet to extend the network physical area. Before repeating the packets, they must do some modification so the receiver can sync with the  master node. There is a constraint in the maximum of repeat level which will be analyzed afterward.
+    \item \textbf{CCP master}: There is only and only one master node over the network. The master node is the only place where a clock calibration packet is produced. It will produce and transmit the clock calibration packet with the interval defined as a constant in the firmware. This thesis implementation uses the value of approximately 127ms for such an interval. 
+    \item \textbf{CCP slave}: Slave nodes listen for the clock calibration packet to start their internal software timers for each superframe.
+    \item \textbf{CCP relay}: Relay nodes repeat the clock calibration packet to extend the network physical coverage. Before repeating the packets, they must do some modification so the receiver can sync with the master node. There is a constraint in the maximum of repeat level which will be analyzed afterward.
 \end{itemize}
 
 To initialize the system, at least one of many nodes must be chosen as a master. The master node will start and control the network and allow other nodes to join and form a network. It is possible to configure more than one node as master, but only one will be active and the others will take the role of slave and/or replay node. A node can take the slave and relay roles at the same time.
@@ -106,8 +106,8 @@ The Frame Control field for the Multipurpose frame are specified in figure \ref{
         \bitheader{0-7} \\
         \bitbox{3}{Frame Type} &
         \bitbox{1}{Long Frame Control} &
-        \bitbox{2}{Destination Addressing Mode} &
-        \bitbox{2}{Source Addressing Mode}
+        \bitbox{2}{Destination \\ Addressing Mode} &
+        \bitbox{2}{Source \\ Addressing Mode}
         % \bitbox{1}{PAN ID Present} &
         % \bitbox{1}{Security Enabled} &
         % \bitbox{1}{Sequence Number Suppression} &
@@ -133,7 +133,7 @@ For the synchronization purpose, the final value of this field is \textbf{0xC5}.
 The Sequence Number field specifies the sequence identifier for the frame.
 
 \subsubsection{Extended Unique Identifier}
-Extended Unique Identifier as its name, it is 64-bit unique ID for each device over the globe. DW1000 radio IC takes it from its lot id and part id written by the manufacturer.
+Extended Unique Identifier as its name, it is a 64-bit unique ID for each device over the globe. DW1000 radio IC takes it from its lot ID and part ID pre-written in non-volatile memory by the manufacturer.
 
 \begin{equation}
     \texttt{ euid = ((uint64\_t)lot\_id) << 32 + part\_id}
@@ -152,7 +152,7 @@ The interval of a superframe, unit of time is a microsecond of DW1000 timer. As 
 \end{equation}
 
 \subsubsection{Transmission Timestamp}
-The moment that RMarker is transmitted is the event nominated as the transmit time-stamp. The DW1000 digital transmit circuitry takes note of the system clock counter as the RAW transmit timestamp at the point when it begins sending the PHR. It then adds to this the transmit antenna delay to get the antenna adjusted transmit timestamp.
+The moment that RMarker is transmitted is the event nominated as the transmit timestamp. The DW1000 digital transmit circuitry takes note of the system clock counter as the RAW transmit timestamp at the point when it begins sending the PHR. It then adds to this the transmit antenna delay to get the antenna adjusted transmit timestamp.
 
 \subsubsection{Repeat count}
 It is the number of non-master nodes that the ccp packet traveled before coming to this node.
@@ -168,27 +168,27 @@ To deal with SPOFs, in my implementation, there is no pre-configured node to be 
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.35]{ccp_state_diagram.png}
+        \includegraphics[width=0.5\textwidth]{ccp_state_diagram.png}
     \end{center}
     \caption{CCP state transition diagram}
     \label{fig:CCP_state_diagram}
 \end{figure}
 
-As shown in figure \ref{fig:CCP_state_diagram}, all node will start with ccp slave role. If there is already a master node, a just-powered-on node will receive ccp packets from the master node and remain in the slave state. If there is no master node, after its internal counter reaches a conditional random thresh hold, it will turn into the master request state. It now sends ccp request packets and listens for objection for a while. If no node object, the new state is ccp master. If it receives any ccp packet or ccp request packet in the master or master request state, it will immediately turn into the slave state as it is lazy.
+As shown in figure \ref{fig:CCP_state_diagram}, all node will start with ccp slave role. If there is already a master node, a new node will receive ccp packets from the master node and remain in the slave state. If there is no master node, after its internal counter reaches a conditional random thresh hold, it will turn into the master request state. It now sends ccp request packets and listens for rejection for a while. If no other ccp or ccp request packet is received, the node will change to master state. However, if it receives any ccp or ccp request packet in the master state, it will also immediately turn into the slave state as it is lazy.
 
 Figure \ref{fig:ccp_slave_flow_chart}, \ref{fig:ccp_master_reqt_flow_chart} and \ref{fig:ccp_master_flow_chart} are simplified flowcharts used for implementing each state.
 
 Figure \ref{fig:ccp_slave_flow_chart} is the flow chart for CCP\_SLAVE state. In this state, rx\_timeout\_counter variable is used to timeout the slave and turn it into the CCP\_MASTER\_REQT state.
-This variable is also checked for each RX timer callback, if it is not equal to 0, which means that there is a timeout event before, it is necessary to listen immediately to increase the chance of receiving the next ccp packet. If the variable equal to 0, the MCU will schedule the radio IC to receive the frame at a calculated moment. If a ccp packet is successfully received, MCU will schedule the next wake up to receive the next ccp packet based on the ccp packet it just received. 
+This variable is also checked for each RX timer callback, if it is not equal to 0, which means that there is a timeout event before, it is necessary to listen immediately to increase the chance of receiving the next ccp packet. If this variable equal to 0, the MCU will schedule the radio IC to receive the frame at a calculated moment. If a ccp packet is successfully received, MCU will schedule the next wake up to receive the next ccp packet based on the ccp packet it just received. 
 
 Figure \ref{fig:ccp_master_reqt_flow_chart} is the flow chart for
-CCP\_MASTER\_REQT state. In this state, a node will periodically send the ccp request packet. If no node protests by sending another cpp packet or ccp request packet, the variable master\_reqt\_state is used to timeout the CCP\_MASTER\_REQT state and turn the node into the master state.
+CCP\_MASTER\_REQT state. In this state, a node will periodically send the ccp request packet at a relatively high frequency. If no node protests by sending another cpp packet or ccp request packet, the variable master\_reqt\_state used to timeout the CCP\_MASTER\_REQT state will turn the node into the CCP\_MASTER state.
 
-Figure \ref{fig:ccp_master_flow_chart} is the flow chart for CCP\_MASTER state. A node enters this state by scheduling a TX timer and waiting for its timeout. This timer will wake up the CPU to schedule the radio IC for transmitting ccp packet at a calculated moment. The listen stage here is for the demonstration purpose only. In fact, the ccp packet does not listen in the master state. Instead, the ccp implementation act as an observer to analyze any packet received in the superframe internal interval. Packets must be received by listen commands of higher layers.
+Figure \ref{fig:ccp_master_flow_chart} is the flow chart for CCP\_MASTER state. In this state, a node schedules a TX timer and waiting for its timeout. This timer will wake up the CPU to schedule the radio IC for transmitting the ccp packet at a calculated moment. The listen stage here is for the demonstration purpose only. Basically, ccp packets are not explicitly listened in the master state. Instead, the ccp implementation act as an observer to analyze any packet received in the superframe internal interval. Packets must be received by listening commands of higher layers.
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.35]{ccp_slave_flow_chart.png}
+        \includegraphics[width=0.7\textwidth]{ccp_slave_flow_chart.png}
     \end{center}
     \caption{CCP slave flow chart}
     \label{fig:ccp_slave_flow_chart}
@@ -214,7 +214,7 @@ Figure \ref{fig:ccp_master_flow_chart} is the flow chart for CCP\_MASTER state. 
     \centering
     \begin{subfigure}[b]{0.47\textwidth}
         \begin{center}
-            \includegraphics[scale=0.3]{ccp_master_reqt_flow_chart.png}
+            \includegraphics[width=0.9\textwidth]{ccp_master_reqt_flow_chart.png}
         \end{center}
         \caption{CCP master request flow chart}
         \label{fig:ccp_master_reqt_flow_chart}
@@ -222,7 +222,7 @@ Figure \ref{fig:ccp_master_flow_chart} is the flow chart for CCP\_MASTER state. 
     \hfill
     \begin{subfigure}[b]{0.47\textwidth}
         \begin{center}
-            \includegraphics[scale=0.3]{ccp_master_flow_chart.png}
+            \includegraphics[width=0.7\textwidth]{ccp_master_flow_chart.png}
         \end{center}
         \caption{CCP master flow chart}
         \label{fig:ccp_master_flow_chart}
@@ -394,25 +394,25 @@ When a node receives a CCP packet and want to repeat it, it have to hold the CCP
 Where:
 \begin{itemize}
     \item $n_{repeat}$ is the number of times that packet has been repeated plus 1
-    \item $T_{hold-off-conf}$ is a configurable parameter for holding the CCP packet before re-transmitting it
+    \item $T_{hold-off-conf}$ is a pre-configurable parameter for holding the CCP packet before re-transmitting it
     \item $i_{slot}$ is the slot index of the node in the TDMA system as described in the following section
     \item  $T_{ccp}$ is the duration of a CCP packet
 \end{itemize}
 
 The CCP packet is repeated with timestamp calculated from equation \ref{eqn:cpp_repeat_timestamp}.
 \begin{equation}
-    t^k_m = t_{k-repeat} = t_k + T_{delay}
+    t^{k-repeat} = t^k + T_{hold-off}
     \label{eqn:cpp_repeat_timestamp}
 \end{equation}
 
-The hold off delay of a repeated ccp packet takes into account of transition interval or CCP period as shown in equation \ref{eqn:ccp_hold_off_vs_ccp_period}.
+The hold off delay of a repeated ccp packet takes into account of transition interval of CCP period as shown in equation \ref{eqn:ccp_hold_off_vs_ccp_period}.
 \begin{equation}
     \tau_{new} = \tau - T_{hold-off}
     \label{eqn:ccp_hold_off_vs_ccp_period}
 \end{equation}
 
 \section{Time Division Multiple Access (TDMA)}
-The fundamental role of the TDMA layer is to give a notification to its upper layer when it is the time to run the service. To archive this, a node must firstly ask for getting an appropriate and available slot from jointed nodes.
+The fundamental role of the TDMA layer is to give a notification to its upper layer when it is the time to run its services. To archive this, a node must firstly ask for getting an appropriate and available slot from jointed nodes.
 
 \subsection{TDMA role}
 In the TDMA layer, a jointed node must take one of two roles: Anchor or Tag.
@@ -583,12 +583,19 @@ Currently, three message types are defined: \textbf{Slot request/response}, \tex
     \caption{Slot map message}
     \label{fig:slot_map_message}
 \end{figure}
+Where:
+\begin{itemize}
+    \item $slot$ is the slot index of sending node
+    \item $slot$ $request/respond$ is the slot index that a node request for and accept or refuse slot request.
+    \item $location$ $x$, $y$, $z$ are the coordinates of the sending node.
+    \item $slot$ $map$ $high/low$ the high/low part of slot map with $slot$ $map$ is a 64-bit bit field that each bit represent the occupancy of a slot.
+\end{itemize}
 
 \subsection{Network management algorithm}
 
 \subsubsection{State diagram}
 The TDMA state diagram is shown in figure \ref{fig:tdma_state_diagram}. 
-The master node is the initiator of the network. It has to be an anchor and occupy BCN slot 1. Since there is no jointed node before, the master node does not need to ask others. Hence, after ccp layer provides first synchronization, all nodes begin with REQT state except for the master node. 
+The master node is the initiator of the network. It has to be an anchor and occupy BCN slot 1. Since there is no jointed node before, the master node does not need to ask others. Hence, after the ccp layer provides the first synchronization, all nodes begin with REQT state except for the master node. 
 
 \begin{figure}[H]
     \begin{center}
@@ -599,7 +606,7 @@ The master node is the initiator of the network. It has to be an anchor and occu
 \end{figure}
 
 \subsubsection{REQT state flow chart}
-The REQT state implementation is illustrated in the flow chart \ref{fig:REQT_state_flowchart}. The system is likely to be an  organization that a new member can only joint if all jointed members accept it. As all jointed anchors have a list of occupied slots, this joint mechanism makes sure that one anchor will never see more than one anchor in a time slot. It also makes a slot re-usable at different regions.
+The REQT state implementation is illustrated in the flow chart \ref{fig:REQT_state_flowchart}. The system is likely to be an  organization that a new member can only joint if all jointed members accept it. As all jointed anchors have a list of occupied slots, this joint mechanism makes sure that one anchor will never see more than one anchor in a time slot. It also makes a slot re-usable in different regions.
 
 In a BCN slot, a node listens for a BCN message, if it sees a new anchor, it will add that node to its anchor list and process the BCN message. If it received a slot-accept message, it will check if all node in its anchor list has accepted for its slot, if it is true, that node will enter the JOINT state.
 
@@ -619,7 +626,7 @@ In a Ranging slot, jointed anchors will listen for a range-request message.
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.3]{REQT_flow_chart.png}
+        \includegraphics[width=1\textwidth]{REQT_flow_chart.png}
     \end{center}
     \caption{REQT state flowchart}
     \label{fig:REQT_state_flowchart}
@@ -627,7 +634,7 @@ In a Ranging slot, jointed anchors will listen for a range-request message.
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.32]{JOINTED_state_flow_chart.png}
+        \includegraphics[width=1\textwidth]{JOINTED_state_flow_chart.png}
     \end{center}
     \caption{JOINTED state flowchart}
     \label{fig:JOINTED_state_flowchart}
@@ -759,7 +766,7 @@ The initiator sends a range-request message in its slot and waits for range-resp
     \centering
     \begin{subfigure}[b]{0.47\textwidth}
         \begin{center}
-            \includegraphics[scale=0.3]{twr_initiator.png}
+            \includegraphics[width=0.7\textwidth]{twr_initiator.png}
         \end{center}
         \caption{TWR initiator flow chart}
         \label{fig:twr_initiator}
@@ -767,7 +774,7 @@ The initiator sends a range-request message in its slot and waits for range-resp
     \hfill
     \begin{subfigure}[b]{0.47\textwidth}
         \begin{center}
-            \includegraphics[scale=0.3]{twr_responder.png}
+            \includegraphics[width=0.7\textwidth]{twr_responder.png}
         \end{center}
         \caption{TWR responder flow chart}
         \label{fig:twr_responder}
@@ -804,7 +811,7 @@ As many anchors will response for a range-request, all anchors should respond at
    T_{hold-off} = T_{hold-off-conf} + i_{slot}(T_{guard} + T_{response-frame})
    \label{eqn:tdma_hold_off}
 \end{equation}
-Where $T_{guard}$ is used for the purpose of making response more distinct from each other.
+Where $T_{guard}$ is used for the purpose of making responses more distinct from each other.
 
 % \begin{figure}[H]
 %     \begin{center}
@@ -835,7 +842,7 @@ Figure \ref{fig:wireshark_802_15_5_packet} is an example of a 802.15.4 frame ana
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.15\textwidth]{extcap_802_15_4.png}
+        \includegraphics[width=0.2\textwidth]{extcap_802_15_4.png}
     \end{center}
     \caption{Wireshark for debugging the network}
     \label{fig:extcap_802_15_4}
