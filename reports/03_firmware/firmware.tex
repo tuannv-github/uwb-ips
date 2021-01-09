@@ -618,11 +618,11 @@ The JOINTED state implementation is illustrated in the follow chart \ref{fig:JOI
 
 The SYNC slot is used to timeout and remove a node from the node list.
 
-In its BCN slot, a jointed anchor sends a beacon message to broadcast its state. If it is its BCN slot, such node will listen for BCN message to reset the timeout timer of each anchor and update anchor information based on the message received. An anchor also responds to slot request message in its slot.
+In its BCN slot, a jointed anchor sends a beacon message to broadcast its state. If it is not its BCN slot, it will listen for BCN messages to reset the timeout timer of each anchor and update anchor information based on the message received. An anchor also responds to the slot request message in its slot.
 
 In the SVC slot, jointed anchors will listen for a joint-request message.
 
-In a Ranging slot, jointed anchors will listen for a range-request message.
+In a Ranging slot, jointed anchors may listen for a range-request message and jointed tags may send range-request messages by calling a higher layer function.
 
 \begin{figure}[H]
     \begin{center}

@@ -143,7 +143,7 @@ MQTT protocol works on top of TCP/IP protocol and uses port 1883 (8883 if connec
     \label{fig:mqtt_tcp}
 \end{figure}
 
-\subsection{Why MQTT?}
+\subsection{Why MQTT? \cite{web_mqtt_org}}
 
 There are a number of reasons answering the question: Why MQTT is widely used in IOT? 
 \begin{itemize}
@@ -155,14 +155,14 @@ There are a number of reasons answering the question: Why MQTT is widely used in
     \item \textbf{Security enabled}: MQTT makes it easy to encrypt messages using TLS and authenticate clients using modern authentication protocols, such as OAuth.
 \end{itemize}
 
-\subsection{MQTT publish/subscribe architecture}
+\subsection{MQTT publish/subscribe architecture \cite{web_mqtt_ref}}
 The Publisher sends data on the MQTT Broker specifying a definite topic in a message. The Subscribers can receive various data from multiple Publishers depending on subscription to correspondent topics.
 \begin{figure}[H]
     \begin{center}
         \includegraphics[scale=0.35]{mqtt-publish-subscribe.png}
     \end{center}
     \caption{MQTT publish subscribe}
-    \label{fig:mqtt_publish_subscribe.}
+    \label{fig:mqtt_publish_subscribe}
 \end{figure}
 
 Here are the main types of messages for an MQTT device to communication with the Broker:
@@ -185,7 +185,7 @@ Figure \ref{fig:mqtt_schema} illustrates a scheme of simple communication betwee
     \label{fig:mqtt_schema}
 \end{figure}
 
-\subsection{Quality of service in MQTT protocol (QoS)}
+\subsection{Quality of service in MQTT protocol (QoS) \cite{web_mqtt_ref}}
 
 MQTT supports three levels of Quality of Service (QoS) when sending messages.
 
