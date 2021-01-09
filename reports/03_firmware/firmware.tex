@@ -4,13 +4,13 @@
 \begin{document}
 \graphicspath{{img/}{03_firmware/img/}}
 
-\chapter{Ranging system architecture}
+\chapter{Ranging System Architecture}
 This section provides a detailed description of the ranging network operation and layered system architecture.
 
 \section{Prerequisite}
 Before getting into details, some fundamental definitions should be covered. It will make it easier for further discussions. 
 
-\subsection{Host and device}
+\subsection{Host and Device}
 The implemented UWB ranging system consists of one host and one device.
 \begin{itemize}
     \item Host: the MCU which control the radio IC 
@@ -25,7 +25,7 @@ The implemented UWB ranging system consists of one host and one device.
     \label{fig:host_device}
 \end{figure}
 
-\subsection{Timing system}
+\subsection{Timing System}
 \label{subsec:timing_system_subsection}
 Since there are two running systems: \textbf{host} and \textbf{device}, there are two timing systems. Unfortunately, these two timing systems do not have an agreement in the smallest unit of time. A host can use a $1\mu s$ -resolution timer due to the number of redundancy timers it has. A device, on the other hand, may not have as many timers and clock source as a host has, so the device timing system is limited. In the case of DW1000 radio IC, $1\mu s$ is approximately 512 counts of the fundamental 499.2 MHz UWB clock which is actually \textbf{$\sim 1.026\mu s$}. 
 
@@ -41,7 +41,7 @@ Because of the limited transmission speed, the interval between the beginning of
     \label{fig:802_15_4_rmarker}
 \end{figure}
 
-\section{Layered architecture}
+\section{Layered Architecture}
 The ranging system is implemented follow 3 layers model as shown in figure \ref{fig:ranging_layered_architecture}. 
 \begin{itemize}
     \item CCP (Clock Calibration Packet) provides synchronization service for the upper layer. All nodes jointed to the network will be synced each time a new superframe start.
@@ -58,9 +58,9 @@ Follow the bottom-up approach, detail description about each layer is provided i
     \label{fig:ranging_layered_architecture}
 \end{figure}
 
-\section{Clock calibration packet}
+\section{Clock Calibration Packet}
 The main role clock calibration packet (CCP) is to provide the superframe synchronization between nodes. 
-\subsection{CCP role}
+\subsection{CCP Role}
 Three CCP roles are defined, allowing nodes to sync with others: Master, Slave, Relay.
 \begin{itemize}
     \item \textbf{CCP master}: There is only and only one master node over the network. The master node is the only place where a clock calibration packet is produced. It will produce and transmit the clock calibration packet with the interval defined as a constant in the firmware. This thesis implementation uses the value of approximately 127ms for such an interval. 
@@ -70,7 +70,7 @@ Three CCP roles are defined, allowing nodes to sync with others: Master, Slave, 
 
 To initialize the system, at least one of many nodes must be chosen as a master. The master node will start and control the network and allow other nodes to join and form a network. It is possible to configure more than one node as master, but only one will be active and the others will take the role of slave and/or replay node. A node can take the slave and relay roles at the same time.
 
-\subsection{CCP frame format}
+\subsection{CCP Frame Format}
 The ccp frame used for synchronization shall be formatted as illustrated in figure \ref{fig:ccp_blink_frame}. The format follow the IEEE 802.15.4-2015 \cite{IEEE_Std_802_15_4_2015} multipurpose frame.
 \begin{figure}[H]
     \centering
@@ -160,7 +160,7 @@ It is the number of non-master nodes that the ccp packet traveled before coming 
 \subsubsection{Repeat max}
 It is the maximum number of repetition times per packet of ccp.
 
-\subsection{CCP master selection algorithm}
+\subsection{CCP Master Selection Algorithm}
 
 When designing a synchronous system, one of the most fundamental problems is the persistence of the synchronization source. Here, the question is: what will happen if the synchronization source fails, will it stop the entire system from working? This problem is known as the single point of failure (SPOF) problem. SPOFs are undesirable in any system with a goal of high availability or reliability.
 
@@ -248,7 +248,7 @@ Figure \ref{fig:ccp_master_flow_chart} is the flow chart for CCP\_MASTER state. 
 %     \end{subfigure}
 %   \end{figure}
 
-\subsection{CCP implementation}
+\subsection{CCP Implementation}
 This section discusses detailed timing problems related to CCP. Before starting, some fundamental concepts should be defined and accepted:
 \begin{itemize}
     \item Master epoch $ep_m$: Packet timestamp referenced to CCP master device timing system.
@@ -414,14 +414,14 @@ The hold off delay of a repeated ccp packet takes into account of transition int
 \section{Time Division Multiple Access (TDMA)}
 The fundamental role of the TDMA layer is to give a notification to its upper layer when it is the time to run its services. To archive this, a node must firstly ask for getting an appropriate and available slot from jointed nodes.
 
-\subsection{TDMA role}
+\subsection{TDMA Role}
 In the TDMA layer, a jointed node must take one of two roles: Anchor or Tag.
 \begin{itemize}
     \item TDMA Anchor: A node taking the role as an anchor must be fixed and broadcast its pre-configured location information to others.
     \item TDMA Tag: TDMA tag node is the mobile node needed to be located in the coordinate of anchors.
 \end{itemize}
 
-\subsection{TDMA slot}
+\subsection{TDMA Slot}
 The superframe is divided into multiple slots as shown in figure \ref{fig:tdma_slot}.
 \begin{figure}[ht]
     \begin{center}
@@ -462,7 +462,7 @@ With:
 \end{figure}
 
 
-\subsection{TDMA frame format}
+\subsection{TDMA Frame Format}
 All TDMA frames consist two fields:
 \begin{itemize}
     \item IEEE fame header which conforms the 802.15.4-2015 standard.
@@ -591,7 +591,7 @@ Where:
     \item $slot$ $map$ $high/low$ the high/low part of slot map with $slot$ $map$ is a 64-bit bit field that each bit represent the occupancy of a slot.
 \end{itemize}
 
-\subsection{Network management algorithm}
+\subsection{Network Management Algorithm}
 
 \subsubsection{State diagram}
 The TDMA state diagram is shown in figure \ref{fig:tdma_state_diagram}. 
@@ -640,7 +640,7 @@ In a Ranging slot, jointed anchors may listen for a range-request message and jo
     \label{fig:JOINTED_state_flowchart}
 \end{figure}
 
-\section{Two way ranging (TWR)}
+\section{Two Way Ranging (TWR)}
 By using TWR, the need of synchronized clocks is eliminated since both the round-trip time(s) and the reply time(s) can be calculated separately using timestamps derived from each device. TWR service runs on Ranging slots of TDMA service. Figure \ref{fig:single_sided_two_way_ranging} illustrates a node sending a range request message to another node and receiving a range response message to calculate the distance.
 
 \begin{figure}[H]
@@ -651,12 +651,12 @@ By using TWR, the need of synchronized clocks is eliminated since both the round
     \label{fig:single_sided_two_way_ranging}
 \end{figure}
 
-\subsection{TWR role}
+\subsection{TWR Role}
 \begin{itemize}
     \item TWR initiator: The tag node who sends range-request message.
     \item TWR responder: The anchor node who waits for range-request message and responses with range-response message.
 \end{itemize}
-\subsection{TWR frame format}
+\subsection{TWR Frame Format}
 \begin{figure}[H]
     \centering
     \begin{bytefield}[bitwidth=1.1em]{32}
@@ -758,7 +758,7 @@ For the range-response frame type, the payload shall be formatted as illustrated
     \label{fig:twr_response_payload}
 \end{figure}
 
-\subsection{TWR flowchart}
+\subsection{TWR Flowchart}
 Flowcharts for TWR initiator and responder is shown is figure \ref{fig:twr_initiator} and \ref{fig:twr_responder}.
 The initiator sends a range-request message in its slot and waits for range-response messages from responders. If a response is successfully received, it will calculate the time of light using. In the other hand, responders wait for a range-request message and respond after a fixed interval.
 
@@ -782,7 +782,7 @@ The initiator sends a range-request message in its slot and waits for range-resp
     \caption{TWR flowchart}
 \end{figure}
 
-\subsection{TWR implementation}
+\subsection{TWR Implementation}
 Timestamping for each event in TWR process is precisely done by the radio IC. The host, on the other hand, calculate TOF by using equation \ref{eqn:twr_tof} as proved in figure \ref{fig:twr_timing}.
 \begin{equation}
     tof = \frac{1}{2} ((t_{resp} - t_{reqt}) - (t_{trans} - t_{recp}))
@@ -829,7 +829,7 @@ Where $T_{guard}$ is used for the purpose of making responses more distinct from
 %     \label{fig:twr_responder}
 % \end{figure}
 
-\section{Wireshark extcap for packets capturing}
+\section{Wireshark Extcap for Packets Capturing}
 While developing the whole system, Wireshark is an important tool to analyze network traffic and troubleshoot issues on the network. Wireshark has been pre-implemented for parsing 802.15.4 packet. Nevertheless, it can only capture packets from standard interfaces. The extcap interface, however, is a versatile plugin interface that allows external binaries to act as capture interfaces directly in Wireshark.
 
 Without extcap, a capture can always be achieved by directly writing to a capture file, but the extcap interface allows for such a connection to be easily established and configured using the Wireshark GUI. The extcap subsystem is made of multiple extcap binaries that are automatically called by the GUI in a row. Extcaps may be any binary or script within the extcap directory.

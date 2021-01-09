@@ -3,11 +3,11 @@
 
 \begin{document}
 \graphicspath{{img/}{position_estimation/img/}}
-\chapter{Position estimation}
+\chapter{Position Estimation}
 
 In this chapter, a position estimation technique is introduced. The ultimate aim of this technique is to be simple enough to run on a microcontroller while providing reasonable accuracy. Section \ref{sec:distance_measurement_using_time_of_flight} discusses about techniques used for distance measurement. A solution for solving location from distances to known points is proposed in chapter \ref{sec:localization_using_multilateration}. The final section, on the other hand, gives a method for converting the time of flights to actual distances used for positioning.
 
-\section{Distance measurement using time-of-flight}
+\section{Distance Measurement Using Time-of-Flight}
 \label{sec:distance_measurement_using_time_of_flight}
 
 \subsection{RSSI vs Time of Flight Distance Estimation}
@@ -79,7 +79,7 @@ This thesis uses the TWR approach to obtain distances. The multilateration metho
     \label{fig:twr_trilateration}
 \end{figure}
 
-\section{Multilateration in three-dimensional Euclidean space}
+\section{Multilateration in Three-dimensional Euclidean Space}
 \label{sec:localization_using_multilateration}
 
 Suppose there are three unique anchor points in three dimensional space: $A_1(x_1, y_1,z_1)$, $A_2(x_2, y_2,z_2)$,
@@ -93,7 +93,7 @@ and $A_3(x_3, y_3,z_3)$ and an unknown tag point $T(x,y,z)$ with three known dis
 \end{equation}
 The problem of finding the coordinates of $T$ is called multilateration in 3D space. The name is derived from trilateration, a  geometrical problem of determining an unknown position on a plane based on the distance to other two known vertices of a triangle (the length of two sides). In this section, closed-form solution for multilateration problem is derived base on a simplified problem.
 
-\subsection{Simplified problem}
+\subsection{Simplified Problem}
 \label{subsection:multilateration_simplified_problem}
 For simplicity, assume that the three anchor points lie on the $xy$ plane with $z = 0$. Rewriting the coordinates of the three anchors: $A_1(0,0,0)$, $A_2(x_2,0,0)$, $A_3(x_3,y_3,0)$ with $x_2 \neq 0$, $x_3 \neq 0$ and $y_3 \neq 0$, then equation of the sphere associated with each anchor is as follows:
 \begin{subequations}
@@ -144,7 +144,7 @@ Plug \ref{eqn:simplified_multilateration_x} and \ref{eqn:simplified_multilaterat
 \end{equation}
 There are unique solutions to the simplified multilateration problem, since the result of three intersecting spheres are two points.
 
-\subsection{A closed-form solution for multilateration problem}
+\subsection{A Closed-form Solution for Multilateration Problem}
 To fully solve the multilateration problem in Euclidean space, $A_1$, $A_2$, $A_3$ is firstly transformed to the coordinate as the above simplified problem. Since the distances are invariant under such transformation which are the linear and rotation transformation, $T$ can be found using \ref{eqn:simplified_multilateration_x}, \ref{eqn:simplified_multilateration_y} and \ref{eqn:simplified_multilateration_z}. $T$ is then transformed to the original coordinate to get the final result.
 
 Let $S =\{\boldsymbol{e_x}, \boldsymbol{e_y}, \boldsymbol{e_z}\}$ is the basis of the new vector space. Then $A_1$, $A_2$, $A_3$ can be written uniquely as a linear combination of vectors in the basis $S$. Basis $S$ is specially chosen to make the general problem become the simplified problem. As shown in equation \ref{eqn:multilateration_ex}, $\boldsymbol{e_x}$ is a unit vector lies on $\overrightarrow{A_1A_2}$.
@@ -199,7 +199,7 @@ Suppose that the coordinates of $T$ found in the basis $S$ are $T'_1(x_t,y_t,z_t
     \label{eqn:multilateration_inverse_transfrom}
 \end{equation}
 
-\subsection{Multilateration implementation}
+\subsection{Multilateration Implementation}
 
 On a real scenario, distances to other known points are used for selecting the final location from the two locations. The chosen location should have a distance to the known point being closest to the given one. If multiple distances are available, voting may be one solution.
 
@@ -328,7 +328,7 @@ void trilaterate(sphere_t sphere[3], trilateration_result_t *trilateration_resul
     \label{fig:multilateration_c_implementation}
 \end{figure}
 
-\section{ToF to distance}
+\section{ToF to Distance}
 The result obtained from TWR method is the time of a flight between anchor and tag. However, the required distance needs to be measured in meters. A linear regression model is good enough to estimate the relationship between ToF and the actual distance as illustrated in figure \ref{fig:tof_to_distance}.
 \begin{figure}[H]
     \begin{center}

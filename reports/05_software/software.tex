@@ -4,7 +4,7 @@
 \begin{document}
 \graphicspath{{img/}{05_software/img/}}
 
-\chapter{Software architecture}
+\chapter{Software Architecture}
 \begin{figure}[H]
     \begin{center}
         \includegraphics[width=0.9\textwidth]{software_architecture.png}
@@ -14,7 +14,7 @@
 \end{figure}
 A system of software application is built to manage and control both the Bluetooth mesh network and the UWB ranging network. As represented in figure \ref{fig:software_architecture}, a gateway is built of two parts: a firmware application running in a microcontroller (e.g. nRF52832) written in C language and a software application running in an embedded computer (e.g. BeagleBone Green Wireless) written in Python language. There is an  MQTT-Broker (e.g. Eclipse Mosquitto) and a Django-based server running in the embedded computer too. This chapter provides a brief introduction to the structure of each component together with  the protocol manipulated to communicate between such components.
 
-\section{Gateway firmware}
+\section{Gateway Firmware}
 The main role of gateway firmware is to convert Bluetooth mesh messages to MAVLink messages and vice versa. As illustrated in figure \ref{fig:gateway_firmware}, four threads run in the gateway firmware. The net receiver thread listens for MAVLink messages and puts them into the mav2mesh\_mqueue message queue. The OS notifies the mesh sender thread when messages are available in the message queue. The mesh sender thread then sends it to the mesh network. The process is reserved for the message from the mesh network. As each message put to the message queue is a struct, threads must convert from theirs received message type to an application well-known struct before giving it to the message queue.
 
 \begin{figure}[H]
@@ -40,7 +40,7 @@ The layered architecture for the MAVLink/UART communication model is illustrated
 \subsection{What is MAVLink?}
 MAVLink is a very lightweight messaging protocol for communicating with drones and between onboard drone components \cite{web_mavlink}.
 
-\subsection{MAVLink packet format}
+\subsection{MAVLink Packet Format}
 
 Figure \ref{fig:packet_mavlink_v1} is the over-the-wire format for a MAVLink 1 packet, the in-memory representation might differ.
 
@@ -78,7 +78,7 @@ This is a Python implementation of the MAVLink protocol. It includes a source co
 
 Figure \ref{net_mesh_mavlink_protocol} shows an example definition for message exchanged between gateway firmware and software. The \textbf{mavgen.py} script is used to generate C and Python implementation for the protocol from the XML file given in figure \ref{net_mesh_mavlink_protocol}. The C implementation is used in firmware while the Python one is used in software.
 
-\section{Gateway software}
+\section{Gateway Software}
 Similar to the gateway firmware, the main role of gateway software is to convert from MAVLink messages to JSON format strings, publish them to an MQTT topic and vice versa. Fortunately, the generated Python implementation provides APIs to easily convert a MAVLink message to a JSON string. As represented in figure \ref{fig:gateway_software}, two threads run in the software application play the opposite role. 
 
 \begin{figure}[H]
@@ -155,7 +155,7 @@ There are a number of reasons answering the question: Why MQTT is widely used in
     \item \textbf{Security enabled}: MQTT makes it easy to encrypt messages using TLS and authenticate clients using modern authentication protocols, such as OAuth.
 \end{itemize}
 
-\subsection{MQTT publish/subscribe architecture \cite{web_mqtt_ref}}
+\subsection{MQTT Publish/Subscribe Architecture \cite{web_mqtt_ref}}
 The Publisher sends data on the MQTT Broker specifying a definite topic in a message. The Subscribers can receive various data from multiple Publishers depending on subscription to correspondent topics.
 \begin{figure}[H]
     \begin{center}
@@ -185,7 +185,7 @@ Figure \ref{fig:mqtt_schema} illustrates a scheme of simple communication betwee
     \label{fig:mqtt_schema}
 \end{figure}
 
-\subsection{Quality of service in MQTT protocol (QoS) \cite{web_mqtt_ref}}
+\subsection{Quality of Service in MQTT Protocol (QoS) \cite{web_mqtt_ref}}
 
 MQTT supports three levels of Quality of Service (QoS) when sending messages.
 
@@ -222,7 +222,7 @@ On this level the message delivery to a Client is guaranteed, with no duplicatio
 \end{figure}
 The publisher sends a message to the broker. The message contains the unique packet ID, QoS=2 and DUP=0. The publisher stores the message unacknowledged unless it gets a PUBREC response from the broker. The broker replies with the PUBREC message containing the same packet ID. After receiving this message, the publisher sends PUBREL with the same packet ID. The broker must store the message copy until it gets PUBREL. Once the broker receives PUBREL, it deletes the message copy and sends to the publisher the PUBCOMP message about the completed transaction.
 
-\subsection{MQTT application message definition}
+\subsection{MQTT Application Message Definition}
 The application message transferred over the MQTT connection is derived from the protocol XML file as illustrated in figure \ref{fig:gateway_software}. The generated Python implementation automatically provides APIs for converting MAVLink messages to JSON strings.  These JSON strings are then published to an MQTT topic as shown in figure \ref{fig:mqtt_json_string}.
 
 \begin{figure}[H]
@@ -233,7 +233,7 @@ The application message transferred over the MQTT connection is derived from the
     \label{fig:mqtt_json_string}
 \end{figure}
 
-\section{System control and management application}
+\section{System Control and Management Application}
 Figure \ref{fig:system_control_and_manage_application} provides an overview for the GUI used control and manage the ranging network.
 \begin{figure}[H]   
     \centering

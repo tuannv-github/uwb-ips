@@ -6,10 +6,10 @@
 \setlength{\abovecaptionskip}{0pt}
 \setlength{\belowcaptionskip}{0pt}
 
-\chapter{Anchor hardware implementation}
+\chapter{Anchor Hardware Implementation}
 In this chapter, the hardware problems relating to the anchor are discussed. The chapter starts by a brief introduction to the DWM1001 module - the main hardware for this thesis. The following sections analyze some important blocks of the circuitry for an anchor proposed by this thesis. A full Altium design for the anchor is provided in appendix \ref{appendix:rtls_anchor_board}.
 
-\section{Introduction to DWM1001 module}
+\section{Introduction to DWM1001 Module}
 \begin{figure}[H]
     \begin{center}
         \includegraphics[width=0.3\textwidth]{DWM1001-Module_ProdPage_600x430.jpg}
@@ -49,7 +49,7 @@ Followings are some key features:
 
 The nRF52832 is a general-purpose multi-protocol SoC. It meets the challenges of a broad range of applications that need advanced Bluetooth LE features. It is built around an Arm® Cortex™-M4 CPU with floating-point unit running at 64 MHz. As shown in figure \ref{fig:dwm1001_block_diagram}, in the DWM1001 module, there is an nRF52832 MCU communicating to  a DW1000 radio IC over an SPI connection.
 
-\section{Battery charger circuit}
+\section{Battery Charger Circuit}
 The schematic for battery charger circuit is given in figure \ref{fig:battery_charger_circuit}. Subsequence subsections provide principle descriptions about main components of the circuit.
 \begin{figure}[H]
     \begin{center}
@@ -59,7 +59,7 @@ The schematic for battery charger circuit is given in figure \ref{fig:battery_ch
     \label{fig:battery_charger_circuit}
 \end{figure}
 
-\subsection{Constant current - constant voltage charging}
+\subsection{Constant Current - Constant Voltage Charging}
 
 \subsubsection{CC-CV charging method}
 The constant current - constant voltage (CC-CV) charging method has been extensively used for charging batteries cause it combines the advantages of both the CC and CV charging methods. As presented in figure \ref{fig:tp4056_cc_cv_profile}, the CC-CV charging method uses CC charging in the first charging stage, and when the voltage reaches the maximum safe threshold value, the charging process shifts to the CV charging method. The charging process is complete when the current levels off or when full battery capacity is reached.
@@ -92,7 +92,7 @@ Figure \ref{fig:tp4056_complete_charge_cycle} is the real profile of CC-CV charg
     \label{fig:tp4056_complete_charge_cycle}
 \end{figure}
 
-\subsection{Battery protection}
+\subsection{Battery Protection}
 To protect lithium-ion/polymer battery from damage or degrading the lifetime due to overcharge, overdischarge, and/or overcurrent, a simple battery protection circuit is designed with the use of a DW01A IC and a dual N-channel power MOSFET (FS8205A). The principle of battery protection circuit is shown in figure \ref{fig:dw01a_typical_use}.
 \begin{figure}[H]
     \begin{center}
@@ -111,7 +111,7 @@ If the battery voltage is less than the overdischarge protection voltage ($V_{OD
 \subsubsection{Discharge overcurrent and short-circuit detection}
 The CS pin (current sense pin) is used to detect the overcurrent condition. When the voltage at CS pin ($V_{CS}$) is greater than the overcurrent protection voltage ($V_{OIP} = 0.15V$) or the short current protection Voltage ($V_{SIP} = 1.2V$), DW01A turns off the discharging MOSFET (M1). It then turns on discharging MOSFET when $V_{CS}$ drops below the thresholds.
 
-\section{Voltage step down converter}
+\section{Voltage Step-down Converter}
 In this thesis, a switching power supply is used instead of a linear one to increase the power efficiency. The dedicated PWM step-down DC/DC converter IC (RT8059) is able to delivery 1A output current over a wide input voltage range from 2.8V to 5V as provided by the battery. Figure \ref{fig:voltage_set_down_converter} is the schematic for the buck circuit.
 \begin{figure}[H]
     \begin{center}
@@ -120,7 +120,7 @@ In this thesis, a switching power supply is used instead of a linear one to incr
     \caption{Voltage set down converter}
     \label{fig:voltage_set_down_converter}
 \end{figure}
-\subsection{Buck converter}
+\subsection{Buck Converter}
 A buck converter (step-down converter) is a DC-to-DC power converter which steps down voltage (while stepping up current) from its input (supply) to its output (load).
 
 \begin{figure}[H]
@@ -133,7 +133,7 @@ A buck converter (step-down converter) is a DC-to-DC power converter which steps
 
 The relation between current and voltage of the inductor may be the best explanation to understand the conceptual model of the buck converter. In the beginning, the switch is open (off-state) and the current in the circuit is zero. When the switch is first closed (on-state), the current will begin to increase. In response to the changing current, the inductor will produce an opposing voltage across its terminals. This voltage drop counteracts the voltage of the source and therefore reduces the net voltage across the load. Over time, the voltage across the inductor decreases as the rate of change of current decreases, leading to an increase of the voltage at the load. During this time, energy in the form of a magnetic field is stored in the inductor. If the switch is opened while the current is still changing, then there will always be a voltage drop across the inductor, so the net voltage at the load will always be less than the input voltage source. If the switch is opened again (off-state), the current will decrease since the voltage source is removed from the circuit. The decreasing current will produce a voltage drop across the inductor (opposite to the drop at on-state). Now, the inductor becomes a current source. The current flow through the load is supported by the stored energy in the inductor's magnetic field. During the off-state, the inductor is discharging its stored energy into the rest of the circuit. The charge-discharge process of the inductor results in a smaller average voltage across the load compared with the input voltage.
 
-\subsection{Buck converter in action}
+\subsection{Buck Converter in Action}
 
 \subsubsection{Inductor selection}
 For a given input and output voltage, the inductor value

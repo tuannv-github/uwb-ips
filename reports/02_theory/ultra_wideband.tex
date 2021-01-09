@@ -5,11 +5,11 @@
 \graphicspath{{img/}{02_theory/img/}}
 
 % \chapterimage{chapter_head_1.pdf}
-\chapter{Ultra-Wideband signals}
+\chapter{Ultra-Wideband Signals}
 
 This chapter provides a quick explanation of UWB along with its advantages and regulations. The later 2 sections also give a modulation scheme and the IEEE standard for UWB.
 
-\section{Definition of Ultra-Wideband system \cite{ultra_wideband_positioning_systems}}
+\section{Definition of Ultra-Wideband System \cite{ultra_wideband_positioning_systems}}
 
 With $f$\textsubscript{c} is the frequency in which the system has the maximum power density and the frequencies $f$\textsubscript{h} and $f$\textsubscript{L} determine the location where the power of spectral density is 10dB less then the $f$\textsubscript{c}. $B$\textsubscript{frac} is defined as 
 \begin{equation}
@@ -73,7 +73,7 @@ Using UWB technology, a very high multi-path resolution is achieved because of t
 
 The very narrow time-domain pulse of UWB radios means that it is potentially able to offer timing precision much better than other radio systems. Together with good material penetration properties, UWB signals offer opportunities for short-range radar applications such as rescue and anti-crime operations, as well as in surveying and the mining industry. UWB does not provide precise timing and extreme penetration at the same time, but UWB waveforms present a better choice than do conventional radio systems.
 
-\section{International regulations for UWB signals}
+\section{International Regulations for UWB Signals}
 
 The effective isotropic radiated power (EIRP) which can be defined as the product of its gain and input power is one important feature of a radar and communications transmitter . Figure \ref{fig:fcc_spectral_mask_for_indoor_uwb_systems} shows the FCC spectral mask of the indoor UWB EIRP emission level. It is evidence that the maximum signal power is limited to -41.3 dBm per MHz throughout the whole UWB frequency range from 3.1 to 10.6 GHz. To comply with the FCC standards and regulations, all UWB systems and devices must work within this spectral mask for legal operation.
 
@@ -84,7 +84,7 @@ The effective isotropic radiated power (EIRP) which can be defined as the produc
     \label{fig:fcc_spectral_mask_for_indoor_uwb_systems}
 \end{figure}
 
-\section{Relationship of bandwidth with data rate and power consumption}
+\section{Relationship of Bandwidth with Data Rate and Power Consumption}
 As indicated by the Shannon-Harley theorem, there is a direct relationship between capacity and bandwidth and an inverse relationship between bandwidth and power consumption. Their theorem states: 
 \begin{equation}
     C=B\log_2(1+\frac{S}{N})
@@ -99,7 +99,7 @@ For a specific capacity, it consumes less power with a larger bandwidth. Since $
     \label{fig:capacity_versus_bandwidth_curves_for_uwb_systems_over_awgn_channels}
 \end{figure}
 
-\section{An UWB modulation scheme: Impulse radio scheme}
+\section{An UWB Modulation Scheme: Impulse Radio Scheme}
 
 Time-modulated ultra wide-band (TM-UWB) communication is based on discontinuous emission of very short Gaussian pulses or other types of pulse waveforms (monocycles).
 
@@ -117,7 +117,7 @@ As in figure \ref{fig:an_ir_uwb_signal} \cite{ultra_wideband_positioning_systems
 
 An IR UWB signal, in which two pulses are transmitted per information symbol, and information is conveyed by the polarities of the pulses (BPSK). Hence, +1, -1 and +1 are being transmitted in the example shown in figure \ref{fig:an_ir_uwb_signal}. Note that each pulse resides in an interval of $T\textsubscript{$f$}$ seconds, called a “frame’’, and the positions of the pulses in different frames are determined by a TH (Time-hoping) code, which is {2, 1, 2, 3, 1, 0} in the example, so the first and the second signals are shifted by two and one chip-interval respectively and so on. 
 
-\section{IEEE 802.15.4a standard}
+\section{IEEE 802.15.4a Standard}
 A new physical layer concept for low data rate applications utilizing UWB technology has been defined by the 802.15.4a study group \cite{IEEE_Std_802_15_4_2015}. Applications that require only moderate data throughput, but long battery life such as low-rate wireless personal area networks, sensors, and small networks are well-suited to UWB technology.
 
 The IEEE 802.15.4a specifies two optional signaling formats based on  impulse-radio Ultra-Wideband (IR-UWB) and chirp spread spectrum (CSS). The IR-UWB option can use 250–750 MHz, 3.244-4.742 GHz, or 5.944-10.234 GHz bands; whereas the CSS uses the 2.4–2.4835 GHz band. For the IR-UWB there is an optional ranging capability, whereas the CSS signals can only be used for communications purposes. Only the IR-UWB option of the IEEE 802.15.4a standard is studied in this thesis.
