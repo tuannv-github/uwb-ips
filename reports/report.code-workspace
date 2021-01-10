@@ -9,6 +9,9 @@
 		"latex-workshop.latex.rootFile.useSubFile": true,
 		"latex-workshop.latex.rootFile.doNotPrompt": true,
 		"cSpell.words": [
+			"MQTT's",
+			"PUBCOMP",
+			"PUBREL",
 			"a",
 			"carrierless",
 			"do",
@@ -16,6 +19,8 @@
 			"gradlew",
 			"marker",
 			"p",
+			"pubrec",
+			"pubrel",
 			"r",
 			"recp",
 			"snrs",
