@@ -17,12 +17,13 @@ Ultra-wideband (UWB) is a radio technology which makes extremely precise indoor 
 \newline\newline
 The DW1000 is a fully integrated single-chip Ultra-Wideband (UWB) low-power low-cost transceiver IC compliant to IEEE802.15.4-2011. It can be used in 2-way ranging or TDOA location systems to locate assets to a ranging precision of 10 cm. It also supports data transfer at rates up to 6.8 Mbps \cite{decawave:dw1000_datasheet}.
 \newline\newline
-The DWM1001C module combines the DW1000, a Nordic Semiconductor nRF52832 MCU, and a 3-axis accelerometer. Using this module accelerates the design cycle, reduces development costs, and shortens time to market.
+The Decawave's DWM1001C module combines the DW1000, a Nordic Semiconductor nRF52832 MCU, and a 3-axis accelerometer. Using this module accelerates the design cycle, reduces development costs, and shortens time to market.
 \newline\newline
-The DWM1001C module is delivered with pre-installed localization firmware. However, the vendor system utilizes traditional Bluetooth Low Energy (BLE) which is limited in the maximum number of simultaneous connections to configure nodes. Moreover, it requires a gateway for each cell which rapidly increases the system cost as the system grows. This thesis provides solutions for such weaknesses by proposing a new firmware for localization and replacing BLE with Bluetooth mesh technology.
+Decawave also provides a reference solution for the indoor positioning problem. However, this system is closed-source and requires a UWB-capable device in each cell to act as a gateway. Therefore, an extra infrastructure is needed to communicate between gateways. In practice, an IP network is utilized for this purpose which results in more hardware and increases the system cost.
+In comparison with the vendor system, this thesis provides a solution to reduce the system cost while brings a similar performance and potentially some IoT services. This thesis makes use of Bluetooth mesh technology to replace the IP network. As the Bluetooth hardware has been pre-implemented in the module, no additional hardware is required.
 
 \section{Thesis Objective}
-The main objective of this thesis is to design and implement an indoor localization system using the UWB-based DWM1001C module. In addition, a system based on a Bluetooth mesh network is also built to manage and control the localization system. The mesh network also provides some IoT services for remote lighting control and self-identification.
+The main objective of this thesis is to design and implement an indoor localization system using the UWB-based DWM1001C module. In addition, a system based on a Bluetooth mesh network is also built to manage and control the localization system. The mesh network also provides some IoT services for remote control and self-identification.
 
 % \begin{figure}[H]
 %     \begin{center}
