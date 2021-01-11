@@ -219,21 +219,21 @@ System error increases significantly when anchors are placed to form a narrow sh
 In this thesis, the Bluetooth mesh network is also configured to provide some IoT services. This subsubsection presents the result of remotely controlling the bulb attached to each anchor.
 \subsubsection{Result}
 
-Figure \ref{fig:result_remote_control_off_result} illustrated the OFF state of the bulb when the GUI sends OFF message as given in figure \ref{fig:result_remote_control_off_gui}.
+Figure \ref{fig:result_remote_control_off_result} illustrated the OFF state of the bulb when receiving OFF messages. As shown in figure \ref{fig:result_remote_control_off_gui}, when a user clicks on the light control button (marked as red number 1), the web socket will publish an ONOFF message with the value of 0 (marked as red number 3). After a while, the GUI receives an ONOFF reply message from the localization system (marked as red number 4) and displays the result using two small light bulb icons (marked as red number 5).
 
-Figure \ref{fig:result_remote_control_on_result} illustrated the ON state of the bulb when the GUI sends ON message as given in figure \ref{fig:result_remote_control_on_gui}.
+Figure \ref{fig:result_remote_control_on_result} illustrated the ON state of the bulb when receiving ON messages. As shown in figure \ref{fig:result_remote_control_on_gui}, when a user clicks on the light control button (marked as red number 1), the web socket will publish an ONOFF message with the value of 6 (marked as red number 3). After a while, the GUI receives an ONOFF reply message from the localization system (marked as red number 4) and displays the result using two small light bulb icons (marked as red number 5).
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{result_remote_control_off_gui.png}
-    \caption{Bulb off}
+    \caption{Control the bulb off}
     \label{fig:result_remote_control_off_gui}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{result_remote_control_on_gui.png}
-    \caption{Bulb on}
+    \caption{Control the bulb on}
     \label{fig:result_remote_control_on_gui}
 \end{figure}
 
@@ -277,4 +277,5 @@ Figure \ref{fig:result_remote_control_on_result} illustrated the ON state of the
 
 \subsubsection{Evaluation}
 The Bluetooth mesh system has successfully provided remote control service to the system.
+
 \end{document}
