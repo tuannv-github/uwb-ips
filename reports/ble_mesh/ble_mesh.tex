@@ -19,10 +19,10 @@ Compared with other topologies, in a mesh network, each node may have a direct c
 \end{figure}
 
 
-\section{Mesh System Architecture \cite{bluetooth_sig:mesh_profile_specification_1_0_1}}
+\section{Mesh System Architecture}
 This subsection provides an overview of the mesh network operation and layered system architecture.
 
-\subsection{Layered Architecture}
+\subsection{Layered Architecture \cite{bluetooth_sig:mesh_profile_specification_1_0_1}}
 
 The Mesh Profile specification is defined as a layered architecture as shown in \ref{fig:ble_mesh_layered_architecture}.
 
@@ -59,7 +59,7 @@ reject them. It also defines how a network message is encrypted and authenticate
 The bearer layer defines how network messages are transported between nodes. There are two bearers
 defined, the advertising bearer and the GATT bearer. Additional bearers may be defined in the future.
 
-\subsection{Overview of Mesh Operation}
+\subsection{Overview of Mesh Operation \cite{bluetooth_sig:mesh_profile_specification_1_0_1}}
 The Bluetooth mesh network operation is designed to:
 \begin{itemize}
     \item Enable messages to be sent from one element to one or more elements
@@ -110,7 +110,7 @@ To assist with \textbf{provisioning of multiple devices}, a device has an attent
 \newline\newline
 The protocol to run over these two bearers is a derivative of the Security Manager protocol of v4.2 of the Bluetooth Core Specification to introduce the ability to authenticate devices that have a very limited user interface, such as a light or a switch. The Security Manager protocol requires a reliable bearer, something that cannot be guaranteed by the advertising provisioning bearer; therefore the protocol is designed to enable reliable delivery of messages independent of the bearer. The similarity to the Security Manager protocol enables significant reuse of existing code on devices that have implemented such functionality.
 
-\subsection{Architectural Concepts}
+\subsection{Architectural Concepts \cite{bluetooth_sig:mesh_profile_specification_1_0_1}}
 The Bluetooth mesh networking architecture uses several different concepts: states, messages, elements, addressing, models, publish-subscribe, mesh keys, etc.
 \subsubsection{States}
 A state is a value representing a condition of an element.
