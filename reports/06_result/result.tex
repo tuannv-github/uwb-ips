@@ -218,9 +218,63 @@ System error increases significantly when anchors are placed to form a narrow sh
 \subsubsection{Objective}
 In this thesis, the Bluetooth mesh network is also configured to provide some IoT services. This subsubsection presents the result of remotely controlling the bulb attached to each anchor.
 \subsubsection{Result}
-Figure ... illustrated the ON state of the bulb when the GUI sends ON message as given in figure ... .
 
-Figure ... illustrated the OFF state of the bulb when the GUI sends OFF message as given in figure ... .
+Figure \ref{fig:result_remote_control_off_result} illustrated the OFF state of the bulb when the GUI sends OFF message as given in figure \ref{fig:result_remote_control_off_gui}.
+
+Figure \ref{fig:result_remote_control_on_result} illustrated the ON state of the bulb when the GUI sends ON message as given in figure \ref{fig:result_remote_control_on_gui}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{result_remote_control_off_gui.png}
+    \caption{Bulb off}
+    \label{fig:result_remote_control_off_gui}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{result_remote_control_on_gui.png}
+    \caption{Bulb on}
+    \label{fig:result_remote_control_on_gui}
+\end{figure}
+
+
+% \begin{figure}[H]
+%     \centering
+%     \begin{subfigure}[b]{0.4\linewidth}
+%         \centering
+%         \includegraphics[width=0.9\linewidth]{result_remote_control_off.png}
+%         \caption{Bulb off}
+%         \label{fig:result_remote_control_off}
+%     \end{subfigure}
+%     \begin{subfigure}[b]{0.4\linewidth}
+%         \centering
+%         \includegraphics[width=0.9\linewidth]{result_remote_control_on.png}
+%         \caption{Bulb on}
+%         \label{fig:result_remote_control_on}
+%     \end{subfigure}
+%     \caption{GUI for remote on-off control}
+%     \label{fig:result_remote_control_gui}
+% \end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.4\linewidth}
+        \centering
+        \includegraphics[angle = 90, width=0.9\linewidth]{result_remote_control_off_result.jpg}
+        \caption{Bulb off}
+        \label{fig:result_remote_control_off_result}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.4\linewidth}
+        \centering
+        \includegraphics[angle = 90, width=0.9\linewidth]{result_remote_control_on_result.jpg}
+        \caption{Bulb on}
+        \label{fig:result_remote_control_on_result}
+    \end{subfigure}
+    \caption{Remote on-off control}
+    \label{fig:result_remote_control}
+\end{figure}
+
+
 \subsubsection{Evaluation}
 The Bluetooth mesh system has successfully provided remote control service to the system.
 \end{document}

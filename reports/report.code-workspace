@@ -9,6 +9,7 @@
 		"latex-workshop.latex.rootFile.useSubFile": true,
 		"latex-workshop.latex.rootFile.doNotPrompt": true,
 		"cSpell.words": [
+			"Decawave's",
 			"MQTT's",
 			"PUBCOMP",
 			"PUBREL",
