@@ -8,6 +8,9 @@
 		},
 		{
 			"path": "../algorithm"
+		},
+		{
+			"path": "."
 		}
 	],
 	"settings": {
