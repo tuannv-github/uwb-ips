@@ -113,7 +113,7 @@ paho-mqtt==1.5.1
 PAM==0.4.2
 pandas==0.24.2
 pandocfilters==1.4.2
-paramiko==2.0.0
+paramiko==2.0.9
 pathlib2==2.3.5
 pathtools==0.1.2
 pexpect==4.7.0
