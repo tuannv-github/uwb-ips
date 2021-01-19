@@ -1,1 +1,1 @@
-# latex-multi-file-template
+# Latex
