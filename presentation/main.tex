@@ -287,6 +287,59 @@ Federal Communication Commission (FCC) has defined UWB signal:
 
 \section{Ranging system architecture}
 
+\begin{frame}
+    \frametitle{Ranging system architecture: Layered Architecture}
+\begin{figure}[H]
+    \begin{columns}
+        \column{0.6\textwidth}
+            3 layers model:
+            \begin{itemize}
+                \item CCP: Clock Calibration Packet
+                \item TDMA: Time Division Multiple Access
+                \item TWR: Two-Way Ranging
+            \end{itemize}
+        \column{0.4\textwidth}
+            \begin{center}
+                \includegraphics[width=0.6\textwidth]{ranging_layered_architecture}
+            \end{center}
+            \caption{Ranging layered architecture}
+            \label{fig:ranging_layered_architecture}
+    \end{columns}
+\end{figure}
+\end{frame}
+
+% \begin{frame}
+%     \frametitle{}
+%     \begin{columns}
+%         \column{0.5\textwidth}
+%         \column{0.5\textwidth}
+%     \end{columns}
+% \end{frame}
+
+\begin{frame}
+    \frametitle{Ranging system architecture: CCP state diagram}
+    % \begin{columns}
+        % \column{0.5\textwidth}
+        % \column{0.5\textwidth}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\textwidth]{ccp_state_diagram.png}
+            \caption{CCP state transition diagram}
+            \label{fig:CCP_state_diagram}
+        \end{figure}
+    % \end{columns}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Ranging system architecture: Slave Flowchart}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.3\textwidth, trim={0 0 {0.5\width} 0}]{ccp_slave_flow_chart.png}
+        \caption{CCP slave flow chart}
+        \label{fig:ccp_slave_flow_chart}
+    \end{figure}
+\end{frame}
+
 \section{Bluetooth mesh}
 
 \section{Hardware}
