@@ -8,6 +8,11 @@
 \usepackage{subcaption}
 \usepackage{tabularx}
 \usepackage{diagbox}
+\usepackage{tikz}
+\usepackage{pgf}
+
+\providecommand{\main}{.}
+\usepackage{\main/sty/slashbox}
 
 \usetheme{Madrid}
 % \usecolortheme{beaver}
@@ -15,7 +20,6 @@
 % \setlength{\abovecaptionskip}{0pt}
 \setlength{\belowcaptionskip}{0pt}
 
-\providecommand{\main}{.}
 \graphicspath{{\main/img/}{\main/03_firmware/img/}{\main/ble_mesh/img/}{\main/04_hardware/img/}{\main/05_software/img/}{\main/06_result/img/}}
 
 \title[INDOOR LOCALIZATION SYSTEM]{DESIGN AND IMPLEMENTATION OF INDOOR LOCALIZATION SYSTEM USING UWB AND WIRELESS MESH NETWORK}
@@ -23,7 +27,7 @@
 \author[Ngo Van Tuan - 1613861]{Student: Ngo Van Tuan - 1613861\\
 Supervisor: Dr. Vo Que Son
 }
-\institute[HCMUT] % (optional)
+\institute[HCMUT]
 {
   \inst{1}
 %   VIETNAM NATIONAL UNIVERSITY HO CHI MINH CITY\\
@@ -32,26 +36,29 @@ Supervisor: Dr. Vo Que Son
   DEPARTMENT OF TELECOMMUNICATIONS ENGINEERING
 }
 \date{January 26, 2021}
-\logo{\includegraphics[height=1cm]{logoBK.png}}
+
+% \logo{\pgfputat{\pgfxy(-1,7.5)}{\pgfbox[center,base]{\includegraphics[width=1cm]{logoBK.png}}}}
 
 \newcolumntype{g}{>{\columncolor{Gray}}c}
 \newcolumntype{w}{>{\columncolor{white}}c}
 \newcolumntype{L}{>{\arraybackslash}X}
 \newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1\textwidth}}
 
+\newcommand{\myframetitle}[1]{\frametitle{\makebox[\framewidth]{#1 \hfill\includegraphics[width=0.6cm]{logoBK.png}}}}
+
 \begin{document}
 
 \frame{\titlepage}
 
 \begin{frame}
-    \frametitle{Table of Contents}
+    \myframetitle{Table of Contents}
     \tableofcontents
 \end{frame}
 
 \AtBeginSection[]
 {
   \begin{frame}
-    \frametitle{Table of Contents}
+    \myframetitle{Table of Contents}
     \tableofcontents[currentsection]
   \end{frame}
 }
@@ -67,7 +74,7 @@ Supervisor: Dr. Vo Que Son
 \section{Introduction}
 
 \begin{frame}
-\frametitle{Introduction: Outdoor vs Indoor Localization}
+\myframetitle{Introduction: Outdoor vs Indoor Localization}
 \begin{columns}
 \column{0.5\textwidth}
 Advantages of GPS:
@@ -102,7 +109,8 @@ Disadvantages of GPS:
 \end{frame}
 
 \begin{frame}
-    \frametitle{Introduction: Thesis Objective}    
+    \frametitle{Introduction: Thesis Objective}
+    % \frametitle{\makebox[\framewidth]{Introduction: Thesis Objective \hfill\includegraphics[width=0.6cm]{logoBK.png}}}
     \begin{columns}
         \column{0.4\textwidth}
     \begin{itemize}
@@ -120,19 +128,17 @@ Disadvantages of GPS:
 \end{frame}
 
 \begin{frame}
-    \frametitle{Introduction: Ultra-Wideband}
+    \myframetitle{Introduction: Ultra-Wideband}
     Definition of Ultra-Wideband signal:
 \begin{columns}
     \column{0.3\textwidth}
-    \begin{equation}
-        B=(f\textsubscript{H} - f\textsubscript{L})
-    \end{equation}
-    \begin{equation}
-        f\textsubscript{c} = \frac{f\textsubscript{H} + f\textsubscript{L}}{2}\
-    \end{equation} 
-    \begin{equation}
-        B\textsubscript{frac} =\frac{B}{f\textsubscript{c}} = \frac{2(f\textsubscript{H} - f\textsubscript{L})}{f\textsubscript{H} + f\textsubscript{L}}
-    \end{equation}
+    \begin{equation*}
+        \begin{split}
+            & B = (f\textsubscript{H} - f\textsubscript{L})\\
+            & f\textsubscript{c} = \frac{f\textsubscript{H} + f\textsubscript{L}}{2}\\
+            & B\textsubscript{frac} = \frac{B}{f\textsubscript{c}} = \frac{2(f\textsubscript{H} - f\textsubscript{L})}{f\textsubscript{H} + f\textsubscript{L}}
+        \end{split}
+    \end{equation*}
     \column{0.7\textwidth}
     \begin{figure}[H]
     \centering
@@ -149,7 +155,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{Introduction: Why UWB + DWM1001?}
+    \myframetitle{Introduction: Why UWB + DWM1001?}
     Advantages of UWB:
     \begin{itemize}
         \item Potentially low complexity and low cost
@@ -178,7 +184,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \section{Position estimation}
 
 \begin{frame}
-    \frametitle{Position estimation: Two-Way Ranging}
+    \myframetitle{Position estimation: Two-Way Ranging}
     Time of Fight formula: 
     \begin{equation}
         tof = \frac{1}{2} ((tt2 - tt1) - (ta2 - ta1))
@@ -203,7 +209,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{Position estimation: Multilateration in 3D Euclidean Space}
+    \myframetitle{Position estimation: Multilateration}
     \begin{columns}
     \column{0.5\textwidth}
         \begin{columns}
@@ -262,7 +268,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{Position estimation: Multilateration in 3D Euclidean Space}
+    \myframetitle{Position estimation: Multilateration}
     \begin{columns}
         \column{0.4\textwidth}
         Closed-form Solution:
@@ -296,7 +302,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{Position estimation: ToF to Distance}
+    \myframetitle{Position estimation: ToF to Distance}
     \begin{figure}[H]
         \centering
         \includegraphics[width=1\textwidth]{tof_to_distance.png}
@@ -321,7 +327,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \section{Ranging System Architecture}
 
 \begin{frame}
-    \frametitle{RAS: Layered Architecture}
+    \myframetitle{RAS: Layered Architecture}
 \begin{figure}[H]
     \begin{columns}
         \column{0.6\textwidth}
@@ -342,7 +348,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{RAS: CCP state diagram}
+    \myframetitle{RAS: CCP state diagram}
     % \begin{columns}
         % \column{0.4\textwidth}
         CCP state:
@@ -362,7 +368,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{RAS: Slave Flowchart}
+    \myframetitle{RAS: Slave Flowchart}
     \begin{columns}
         \column{0.5\textwidth}
         \begin{figure}[H]
@@ -382,7 +388,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{RAS: Master and Master Request Flowchart}
+    \myframetitle{RAS: Master and Master Request Flowchart}
     \begin{columns}
         \column{0.5\textwidth}
         \begin{figure}[H]
@@ -401,7 +407,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{RSA: CCP Master Timing}
+    \myframetitle{RSA: CCP Master Timing}
     \begin{equation*}
         t^k_m = t^{k-1}_m + \tau \qquad 
         ep_m = ep_l = t^k_m - T_{SHR} \qquad 
@@ -443,7 +449,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{RSA: CCP Slave Timing}
+    \myframetitle{RSA: CCP Slave Timing}
     \begin{columns}
         \column{0.5\textwidth}
         \begin{equation*}
@@ -470,7 +476,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{RSA: TDMA state diagram}
+    \myframetitle{RSA: TDMA state diagram}
     2 TDMA states:
     \begin{itemize}
         \item TDMA\_REQT
@@ -500,7 +506,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{RSA: TDMA REQT Flowchart}
+    \myframetitle{RSA: TDMA REQT Flowchart}
     \begin{columns}
         \column{0.5\textwidth}
         \begin{figure}[H]
@@ -518,7 +524,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{RSA: TDMA JOINTED Flowchart}
+    \myframetitle{RSA: TDMA JOINTED Flowchart}
     \begin{columns}
         \column{0.5\textwidth}
         \begin{figure}[H]
@@ -536,7 +542,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{RSA: Two-Way Ranging Flowchart}
+    \myframetitle{RSA: Two-Way Ranging Flowchart}
     \begin{columns}
         \column{0.5\textwidth}
         \begin{figure}[H]
@@ -554,7 +560,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{RSA: Two-Way Ranging}
+    \myframetitle{RSA: Two-Way Ranging}
     \begin{equation*}
         \begin{split}
             & tof = \frac{1}{2} ((t_{resp} - t_{reqt}) - (t_{trans} - t_{recp})) \\
@@ -578,7 +584,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{RSA: Wireshark}
+    \myframetitle{RSA: Wireshark}
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.6\textwidth]{extcap_802_15_4.png}
@@ -599,6 +605,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \section{Bluetooth Mesh}
 
 \begin{frame}
+    \myframetitle{Bluetooth Mesh: Architecture}
     Terminology:
     \begin{itemize}
         \item Network: network addresses, network keys
@@ -607,7 +614,6 @@ Federal Communication Commission (FCC) has defined UWB signal:
         \item Element: primary  element + additional secondary elements
         \item Model: basic functionality of a element
     \end{itemize}
-    \frametitle{Bluetooth Mesh: Architecture}
     \begin{columns}
         \column{0.7\textwidth}
         \begin{figure}[H]
@@ -625,7 +631,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{Bluetooth Mesh:  Best-effort Broadcast Service}
+    \myframetitle{Bluetooth Mesh:  Best-effort Broadcast Service}
     All node publish and subscribe to a specific group address\\
     Group address: 0xC000
     \begin{figure}[H]
@@ -635,7 +641,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{Bluetooth Mesh:  nRFMesh}
+    \myframetitle{Bluetooth Mesh: nRFMesh}
     \begin{figure}[H]
         \centering
         \begin{subfigure}[b]{0.24\linewidth}
@@ -664,7 +670,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{Bluetooth Mesh: nRFMesh}
+    \myframetitle{Bluetooth Mesh: nRFMesh}
     \begin{figure}[H]
         \centering
         \begin{subfigure}[b]{0.24\linewidth}
@@ -694,7 +700,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 
 \section{Hardware}
 \begin{frame}
-    \frametitle{Hardware: Battery Charger Circuit + Buck Converter}
+    \myframetitle{Hardware: Battery Charger Circuit + Buck Converter}
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.8\textwidth]{battery_charger_circuit.png}
@@ -710,7 +716,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{Hardware: RTLS Board}
+    \myframetitle{Hardware: RTLS Board}
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.5\textwidth]{rtls_anchor_hw_upper.jpg}
@@ -726,7 +732,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \section{Software}
 
 \begin{frame}
-    \frametitle{Software: Gateway}
+    \myframetitle{Software: Gateway}
     \begin{figure}[H]
         \centering
         \begin{subfigure}[b]{0.3\linewidth}
@@ -748,7 +754,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{Software: MQTT}
+    \myframetitle{Software: MQTT}
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.7\textwidth]{mqtt-publish-subscribe.png}
@@ -762,7 +768,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{Software: System Control and Management}
+    \myframetitle{Software: System Control and Management}
     \begin{figure}[H]
         \centering
         \includegraphics[width=1\textwidth]{system_control_and_manage_application.png}
@@ -771,7 +777,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{Software: System Control and Management}
+    \myframetitle{Software: System Control and Management}
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.5\textwidth]{control_and_manage_pannel.png}
@@ -782,7 +788,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \section{System evaluation}
 
 \begin{frame}
-    \frametitle{SE: System Overview}
+    \myframetitle{SE: System Overview}
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.6\textwidth]{system_overview.png}
@@ -792,7 +798,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{SE: Static Tag in Single-cell Environment}
+    \myframetitle{SE: Static Tag in Single-cell Environment}
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.75\textwidth]{system_overview_phy.png}
@@ -802,7 +808,17 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{SE: Static Tag in Single-cell Environment}
+    \myframetitle{SE: Static Tag in Single-cell Environment}
+    \begin{figure}[H]      
+        \centering
+        \includegraphics[width=1\textwidth]{arena_00.jpg}
+        \caption{Experimental arena}
+        \label{fig:arena_00}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \myframetitle{SE: Static Tag in Single-cell Environment}
 
     \begin{columns}
     \column{0.5\textwidth}
@@ -847,7 +863,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{SE: Mobile Tag in Single-cell Environment}
+    \myframetitle{SE: Mobile Tag in Single-cell Environment}
     \begin{figure}[H]
         \centering
         \includegraphics[width=1\textwidth]{result_square.png}
@@ -857,7 +873,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{SE: Mobile Tag in Multi-cell Environment}
+    \myframetitle{SE: Mobile Tag in Multi-cell Environment}
     \begin{figure}[H]
         \centering
         \includegraphics[width=1\textwidth]{system_overview_phy_full.png}
@@ -867,7 +883,17 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \frametitle{SE: Mobile Tag in Multi-cell Environment}
+    \myframetitle{SE: Mobile Tag in Multi-cell Environment}
+    \begin{figure}[H]      
+        \centering
+        \includegraphics[width=1\textwidth]{arena_03.jpg}
+        \caption{Experimental arena}
+        \label{fig:node_4_5_6_7}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \myframetitle{SE: Mobile Tag in Multi-cell Environment}
     \begin{figure}[H]
         \centering
         \includegraphics[width=1\textwidth]{path.png}
@@ -876,9 +902,34 @@ Federal Communication Commission (FCC) has defined UWB signal:
     \end{figure}
 \end{frame}
 
+\begin{frame}
+    \myframetitle{SE: IoT Service}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.9\textwidth]{result_remote_control_off_gui.png}
+    \end{figure}
+    
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.9\textwidth]{result_remote_control_on_gui.png}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \myframetitle{SE: IoT Service}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{result_remote_control_off_result.jpg}
+    \end{figure}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{result_remote_control_on_result.jpg}
+    \end{figure}
+\end{frame}
+
 \section{Summary}
 \begin{frame}
-    \frametitle{Summary}
+    \myframetitle{Summary}
     Achievement:
     \begin{itemize}
         \item Design and implement an indoor localization system using UWB. \\The performance => similar in comparison with the vendor system.
