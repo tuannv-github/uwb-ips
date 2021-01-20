@@ -4,6 +4,10 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{newtxtext,newtxmath}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{tabularx}
+\usepackage{slashbox,pict2e}
 
 \usetheme{Madrid}
 % \usecolortheme{beaver}
@@ -12,7 +16,7 @@
 \setlength{\belowcaptionskip}{0pt}
 
 \providecommand{\main}{.}
-\graphicspath{{\main/img/}{\main/03_firmware/img/}}
+\graphicspath{{\main/img/}{\main/03_firmware/img/}{\main/ble_mesh/img/}{\main/04_hardware/img/}{\main/05_software/img/}{\main/06_result/img/}}
 
 \title[INDOOR LOCALIZATION SYSTEM]{DESIGN AND IMPLEMENTATION OF INDOOR LOCALIZATION SYSTEM USING UWB AND WIRELESS MESH NETWORK}
 \subtitle{Graduation Thesis}
@@ -29,6 +33,11 @@ Supervisor: Dr. Vo Que Son
 }
 \date{January 26, 2021}
 \logo{\includegraphics[height=1cm]{logoBK.png}}
+
+\newcolumntype{g}{>{\columncolor{Gray}}c}
+\newcolumntype{w}{>{\columncolor{white}}c}
+\newcolumntype{L}{>{\arraybackslash}X}
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1\textwidth}}
 
 \begin{document}
 
@@ -47,8 +56,6 @@ Supervisor: Dr. Vo Que Son
   \end{frame}
 }
 
-\section{Introduction}
-
 % \begin{frame}
 %     \frametitle{}
 %     \begin{columns}
@@ -56,6 +63,8 @@ Supervisor: Dr. Vo Que Son
 %         \column{0.5\textwidth}
 %     \end{columns}
 % \end{frame}
+
+\section{Introduction}
 
 \begin{frame}
 \frametitle{Introduction: Outdoor vs Indoor Localization}
@@ -579,19 +588,229 @@ Federal Communication Commission (FCC) has defined UWB signal:
     \end{columns}
 \end{frame}
 
-% \begin{figure}[H]
-%     \begin{center}
-%     \label{fig:wireshark_802_15_5_packet}
-% \end{figure}
-
 \section{Bluetooth mesh}
 
+\begin{frame}
+    \frametitle{Bluetooth mesh: Architecture}
+    \begin{columns}
+        \column{0.7\textwidth}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.8\textwidth]{mesh_topology.jpg}
+            \caption{Mesh topology}
+        \end{figure}
+        \column{0.3\textwidth}
+        \begin{figure}[H]
+            \includegraphics[width=0.8\textwidth]{ble_mesh_layered_architecture.png}
+            \caption{Mesh system architecture}
+        \end{figure}
+    \end{columns}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Bluetooth mesh:  Best-effort Broadcast Service}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{ble_mesh_comunication.png}
+    \end{figure}
+\end{frame}
+
 \section{Hardware}
+\begin{frame}
+    \frametitle{Hardware: Battery Charger Circuit}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{battery_charger_circuit.png}
+        \caption{Battery charger circuit}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Hardware: RTLS Board}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\textwidth]{rtls_anchor_hw_upper.jpg}
+        \caption{RTLS anchor board upper face}
+    \end{figure}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\textwidth]{rtls_anchor_hw_lower.jpg}
+        \caption{RTLS anchor board lower face}
+    \end{figure}
+\end{frame}
 
 \section{Software}
 
+\begin{frame}
+    \frametitle{Software: Gateway}
+    \begin{figure}[H]
+        \centering
+        \begin{subfigure}[b]{0.3\linewidth}
+            \centering
+            \includegraphics[width=1\textwidth]{MAVLink_over_UART.png}
+            \caption{MAVLink/UART stack}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.6\linewidth}
+            \centering
+            \includegraphics[width=0.7\textwidth]{gateway_software.png}
+            \caption{Gateway software component}
+        \end{subfigure}
+    \end{figure}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.9\textwidth]{gateway_firmware.png}
+        \caption{Gateway firmware component}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Software: MQTT}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{mqtt_json_string.png}
+        \caption{Gateway firmware component}
+    \end{figure}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.7\textwidth]{mqtt-publish-subscribe.png}
+        \caption{Gateway firmware component}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Software: System Control and Management}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{system_control_and_manage_application.png}
+        \caption{Gateway firmware component}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Software: System Control and Management}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\textwidth]{control_and_manage_pannel.png}
+        \caption{Gateway firmware component}
+    \end{figure}
+\end{frame}
+
 \section{System evaluation}
 
-\section{Conclusion}
+\begin{frame}
+    \frametitle{SE: System Overview}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{system_overview.png}
+        \caption{Whole system overview}
+        \label{fig:system_overview}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \frametitle{SE: Static Tag in Single-cell Environment}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.75\textwidth]{system_overview_phy.png}
+        \caption{Scenario 1}
+        \label{fig:scenario_1}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \frametitle{SE: Static Tag in Single-cell Environment}
+
+    \begin{columns}
+    \column{0.5\textwidth}
+    \begin{table}[ht]
+        \centering
+        \begin{tabular}{|c|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|}
+        \hline
+        \backslashbox{y}{x}  &  3 & 7 & 10 \\ \hline
+        0 &  0.2 &  0.28 &  0.25  \\ \hline
+        2 &  0.14 &  0.13 &  0.18  \\ \hline
+        4 &  0.22 &  0.19 &  0.27  \\ \hline
+        \end{tabular}
+        \caption{Vendor system error}
+        \label{table:vendor_rms_error}
+    \end{table}
+    \column{0.5\textwidth}
+    \begin{figure}[H]     
+        \centering
+        \includegraphics[width=1\textwidth]{rms_error.png}
+    \end{figure}
+    \end{columns}
+    \begin{columns}
+        \column{0.5\textwidth}
+        \begin{table}[H]
+            \centering
+            \begin{tabular}{|c|>{\centering\arraybackslash}p{0.4cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|>{\centering\arraybackslash}p{0.5cm}|}
+            \hline
+            \backslashbox{y}{x}  &  1.2 & 4.8 & 9.6 & 10.8 \\ \hline
+            0.6 &  0.10 & 0.20&  0.13 &  0.12  \\ \hline
+            1.2 &  0.13 & 0.18&  0.17 &  0.16  \\ \hline
+            2.4 &  0.09 & 0.10&  0.11 &  0.22  \\ \hline
+            \end{tabular}
+            \caption{Proposed system error}
+            \label{table:proposed_rms_error}
+        \end{table}
+        \column{0.5\textwidth}
+        \begin{figure}[H]     
+            \centering
+            \includegraphics[width=1\textwidth]{result_static.png}
+        \end{figure}
+    \end{columns}
+\end{frame}
+
+\begin{frame}
+    \frametitle{SE: Mobile Tag in Single-cell Environment}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{result_square.png}
+        \caption{Rectangle movement result}
+        \label{fig:result_rectangle}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \frametitle{SE: Mobile Tag in Multi-cell Environment}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{system_overview_phy_full.png}
+        \caption{Scenario 3}
+        \label{fig:scenario_3}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \frametitle{SE: Mobile Tag in Multi-cell Environment}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{path.png}
+        \caption{Multi-cell movement result}
+        \label{fig:multi_cell_movement_result}
+    \end{figure}
+\end{frame}
+
+\section{Summary}
+\begin{frame}
+    \frametitle{SE: Mobile Tag in Multi-cell Environment}
+    Achievement:
+    \begin{itemize}
+        \item Design and implement an indoor localization system using UWB. \\The performance => similar in comparison with the vendor system.
+        \item Build a system to manage and control the localization system based on a Bluetooth mesh network.
+        \item The mesh network also provides remote control service.
+    \end{itemize}
+    Further Development:
+    \begin{itemize}
+        \item Improve the system stability.
+        \item Test and deploy the network with more nodes.
+        \item Test and deploy the network with more cells.
+        \item Optimize system to extend battery life.
+        \item Design and implement a reliable protocol based on best-effort broadcast service provided by Bluetooth mesh network.
+        \item Try different distance measurement methods.
+        \item Try different position estimation methods.
+    \end{itemize}
+\end{frame}
 
 \end{document}
