@@ -7,7 +7,7 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{tabularx}
-\usepackage{slashbox,pict2e}
+\usepackage{diagbox}
 
 \usetheme{Madrid}
 % \usecolortheme{beaver}
@@ -471,6 +471,11 @@ Federal Communication Commission (FCC) has defined UWB signal:
 
 \begin{frame}
     \frametitle{RSA: TDMA state diagram}
+    2 TDMA states:
+    \begin{itemize}
+        \item TDMA\_REQT
+        \item TDMA\_JOINTED
+    \end{itemize}
     \begin{columns}
         \column{0.75\textwidth}
         \begin{figure}[H]
@@ -483,12 +488,15 @@ Federal Communication Commission (FCC) has defined UWB signal:
         \column{0.25\textwidth}
         \begin{figure}[H]
             \begin{center}
-                \includegraphics[width=1\textwidth]{tdma_state_diagram.png}
+                \includegraphics[width=0.9\textwidth]{tdma_state_diagram.png}
             \end{center}
             \caption{TDMA state diagram}
             \label{fig:tdma_state_diagram}
         \end{figure}
     \end{columns}
+    \begin{equation*}
+        t_{slot-wake-up} = d_{slot}*i_{slot} - T_{os-latency}
+    \end{equation*}
 \end{frame}
 
 \begin{frame}
@@ -588,40 +596,116 @@ Federal Communication Commission (FCC) has defined UWB signal:
     \end{columns}
 \end{frame}
 
-\section{Bluetooth mesh}
+\section{Bluetooth Mesh}
 
 \begin{frame}
-    \frametitle{Bluetooth mesh: Architecture}
+    Terminology:
+    \begin{itemize}
+        \item Network: network addresses, network keys
+        \item Provisioning: devices and nodes
+        \item Address: unicast address, virtual address, group address
+        \item Element: primary  element + additional secondary elements
+        \item Model: basic functionality of a element
+    \end{itemize}
+    \frametitle{Bluetooth Mesh: Architecture}
     \begin{columns}
         \column{0.7\textwidth}
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.8\textwidth]{mesh_topology.jpg}
+            \includegraphics[width=0.9\textwidth]{mesh_topology.jpg}
             \caption{Mesh topology}
         \end{figure}
         \column{0.3\textwidth}
         \begin{figure}[H]
-            \includegraphics[width=0.8\textwidth]{ble_mesh_layered_architecture.png}
+            \centering
+            \includegraphics[width=0.9\textwidth]{ble_mesh_layered_architecture.png}
             \caption{Mesh system architecture}
         \end{figure}
     \end{columns}
 \end{frame}
 
 \begin{frame}
-    \frametitle{Bluetooth mesh:  Best-effort Broadcast Service}
+    \frametitle{Bluetooth Mesh:  Best-effort Broadcast Service}
+    All node publish and subscribe to a specific group address\\
+    Group address: 0xC000
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.6\textwidth]{ble_mesh_comunication.png}
     \end{figure}
 \end{frame}
 
-\section{Hardware}
 \begin{frame}
-    \frametitle{Hardware: Battery Charger Circuit}
+    \frametitle{Bluetooth Mesh:  nRFMesh}
     \begin{figure}[H]
         \centering
-        \includegraphics[width=1\textwidth]{battery_charger_circuit.png}
+        \begin{subfigure}[b]{0.24\linewidth}
+            \centering
+            \includegraphics[width=0.9\linewidth]{nRF_Mesh_00.jpg}
+            \caption{Bluetooth mesh device scan}
+            \label{fig:bluetooth_mesh_device_scan}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\linewidth}
+            \centering
+            \includegraphics[width=0.9\linewidth]{nRF_Mesh_01.jpg}
+            \caption{Config device address}
+            \label{fig:config_device_address}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\linewidth}
+            \centering
+            \includegraphics[width=0.9\linewidth]{nRF_Mesh_02.jpg}
+            \caption{Bluetooth mesh provisioning}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\linewidth}
+            \centering
+            \includegraphics[width=0.9\linewidth]{nRF_Mesh_03.jpg}
+            \caption{Device provision complete}
+        \end{subfigure}
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Bluetooth Mesh: nRFMesh}
+    \begin{figure}[H]
+        \centering
+        \begin{subfigure}[b]{0.24\linewidth}
+            \centering
+            \includegraphics[width=0.9\linewidth]{nRF_Mesh_04.jpg}
+            \caption{Bluetooth mesh node list}
+            \label{fig:bluetooth_mesh_node_list}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\linewidth}
+            \centering
+            \includegraphics[width=0.9\linewidth]{nRF_Mesh_05.jpg}
+            \caption{Node information tab}
+            \label{fig:node_element}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\linewidth}
+            \centering
+            \includegraphics[width=0.9\linewidth]{nRF_Mesh_06.jpg}
+            \caption{Element before configuration}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.24\linewidth}
+            \centering
+            \includegraphics[width=0.9\linewidth]{nRF_Mesh_07.jpg}
+            \caption{Element after configuration}
+        \end{subfigure}
+    \end{figure}
+\end{frame}
+
+\section{Hardware}
+\begin{frame}
+    \frametitle{Hardware: Battery Charger Circuit + Buck Converter}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{battery_charger_circuit.png}
         \caption{Battery charger circuit}
+    \end{figure}
+    \begin{figure}[H]
+        \begin{center}
+            \includegraphics[width=0.8\textwidth]{voltage_set_down_converter.png}
+        \end{center}
+        \caption{Voltage step-down circuit}
+        \label{fig:voltage_set_down_converter}
     \end{figure}
 \end{frame}
 
@@ -667,13 +751,13 @@ Federal Communication Commission (FCC) has defined UWB signal:
     \frametitle{Software: MQTT}
     \begin{figure}[H]
         \centering
-        \includegraphics[width=1\textwidth]{mqtt_json_string.png}
-        \caption{Gateway firmware component}
+        \includegraphics[width=0.7\textwidth]{mqtt-publish-subscribe.png}
+        \caption{MQTT publish-subscribe}
     \end{figure}
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.7\textwidth]{mqtt-publish-subscribe.png}
-        \caption{Gateway firmware component}
+        \includegraphics[width=0.9\textwidth]{mqtt_json_string.png}
+        \caption{MQTT messages}
     \end{figure}
 \end{frame}
 
@@ -682,7 +766,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
     \begin{figure}[H]
         \centering
         \includegraphics[width=1\textwidth]{system_control_and_manage_application.png}
-        \caption{Gateway firmware component}
+        \caption{System Control and Management}
     \end{figure}
 \end{frame}
 
@@ -691,7 +775,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.5\textwidth]{control_and_manage_pannel.png}
-        \caption{Gateway firmware component}
+        \caption{Node tab}
     \end{figure}
 \end{frame}
 
@@ -794,7 +878,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 
 \section{Summary}
 \begin{frame}
-    \frametitle{SE: Mobile Tag in Multi-cell Environment}
+    \frametitle{Summary}
     Achievement:
     \begin{itemize}
         \item Design and implement an indoor localization system using UWB. \\The performance => similar in comparison with the vendor system.
