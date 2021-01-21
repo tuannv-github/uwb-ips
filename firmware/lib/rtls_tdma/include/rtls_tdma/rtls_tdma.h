@@ -4,7 +4,7 @@
 
 #include <uwb/uwb.h>
 #include <rtls_tdma/tdma.h>
-#include <uwb_nrng/nrng.h>
+#include <rtls_nrng/rtls_nrng.h>
 
 typedef enum{
     RTS_JOINT_NONE,

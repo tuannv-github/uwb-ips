@@ -49,7 +49,7 @@ syscfg.vals:
     # CONSOLE_RTT: false
     # CONSOLE_UART: true
     # CONSOLE_UART_BAUD: 115200
-    # CONSOLE_UART_TX_BUF_SIZE: 1024
+    # CONSOLE_UART_TX_BUF_SIZE: 256
     # CONSOLE_UART_RX_BUF_SIZE: 256
 
     # Shell
@@ -97,6 +97,7 @@ syscfg.vals:
     BLE_MESH_TX_SEG_MSG_COUNT: 4
 
     TDMA_NSLOTS: 20
+    NRNG_NNODES: 10
     TDMA_TASK_STACK_SZ: 512
 
     RNG_VERBOSE: 0
@@ -110,6 +111,6 @@ syscfg.vals:
     GPIO_AS_PIN_RESET: 1
     RTLS_CPP_VERBOSE: 1
 
-    BLE_MESH_CRPL: 0
+    BLE_MESH_CRPL: 20
 
     BLE_MESH_DEVICE_NAME: '"rtls-mesh-node"'

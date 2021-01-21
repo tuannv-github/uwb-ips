@@ -6,18 +6,22 @@
 
 \chapter{Summary}
 
-\section{Accomplishment}
-This thesis has accomplished two main tasks:
+\section{Achievement}
+The main hardware of this thesis is the Decawave's DWM1001C module which is delivered with pre-installed closed-source localization firmware. Decawave also provides an IPS solution based on the given firmware. This system, however, utilizes traditional Bluetooth Low Energy (BLE) which is limited in the maximum number of simultaneous connections to configure nodes. Moreover, it requires a gateway for each cell which rapidly increases the system cost as the system grows. This thesis has provided solutions for such weaknesses by proposing a new firmware for localization and replacing BLE with Bluetooth mesh technology.
+
+In summary, this thesis has completed two main tasks:
 \begin{itemize}
-    \item Design and implement an indoor localization system using UWB
-    \item Build a system to manage and control the localization system based on Bluetooth mesh network.
+    \item For the first task, this thesis has designed and implemented an indoor localization system using UWB. The performance is similar compared to that of the vendor system.
+    \item For the second task, this thesis has built a system to manage and control the localization system based on a Bluetooth mesh network. This system has a friendly GUI for configuring node type (Anchor or Tag) and node location, and showing the location of nodes in a 2D coordinate system. Moreover, the mesh network is also employed to provide remote control services.
 \end{itemize}
 
-\section{Further development}
-Follows are some plans for future work.
+\section{Further Development}
+Follows are some plans for future work:
 \begin{itemize}
-    \item Improve the system stability: More experiments must be done to find sensitive issues hidden in the system.
+    \item Improve the system stability: Currently, the proposed system is stable enough for a demonstration. However, there is no guarantee for an industrial application. More experiments must be done to find possible hidden issues in the source code of the system.
     \item Test and deploy the network with more nodes: The current system has been tested with 8 anchors and two tags, however, an industrial system may need a greater number of nodes.
-    \item Optimize system for longer battery life: In the current system, with a 600mAh backup battery from China, an anchor can last for approximately 8.0 hours. Better battery life may be necessary.
+    \item Test and deploy the network with more cells: The current system has been tested with 3 cells, more cells may be required for a practical application.
+    \item Optimize system to extend battery life: In the current system, an anchor can last for approximately 8.0 hours with a 600mAh backup battery. Better battery life can be achieved by increasing the sleep interval of the TDMA network or even replacing TDMA with another multiple access method.
+    \item Design and implement a reliable protocol based on best-effort broadcast service provided by Bluetooth mesh network: Currently, Bluetooth mesh network only provides best-effort broadcast service which makes communication unstable. An application layer reliable mechanism should be built on top of the mesh network to upgrade the performance.
 \end{itemize}
 \end{document}

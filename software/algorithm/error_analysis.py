@@ -31,6 +31,8 @@ for filename in os.listdir(DATA_DIR):
     ax.add_artist(circle1)
     print(str(location) + ": " + str(d_mean))
 
-ax.set_xlim((0, 12))
-ax.set_ylim((-1, 3))
+ax.set_xlim((-2, 14))
+ax.set_ylim((-2, 6))
+plt.axes().set_aspect('equal')
+plt.grid()
 plt.show()

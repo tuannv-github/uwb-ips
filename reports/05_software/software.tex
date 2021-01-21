@@ -4,7 +4,7 @@
 \begin{document}
 \graphicspath{{img/}{05_software/img/}}
 
-\chapter{Software architecture}
+\chapter{Software Architecture}
 \begin{figure}[H]
     \begin{center}
         \includegraphics[width=0.9\textwidth]{software_architecture.png}
@@ -14,12 +14,12 @@
 \end{figure}
 A system of software application is built to manage and control both the Bluetooth mesh network and the UWB ranging network. As represented in figure \ref{fig:software_architecture}, a gateway is built of two parts: a firmware application running in a microcontroller (e.g. nRF52832) written in C language and a software application running in an embedded computer (e.g. BeagleBone Green Wireless) written in Python language. There is an  MQTT-Broker (e.g. Eclipse Mosquitto) and a Django-based server running in the embedded computer too. This chapter provides a brief introduction to the structure of each component together with  the protocol manipulated to communicate between such components.
 
-\section{Gateway firmware}
+\section{Gateway Firmware}
 The main role of gateway firmware is to convert Bluetooth mesh messages to MAVLink messages and vice versa. As illustrated in figure \ref{fig:gateway_firmware}, four threads run in the gateway firmware. The net receiver thread listens for MAVLink messages and puts them into the mav2mesh\_mqueue message queue. The OS notifies the mesh sender thread when messages are available in the message queue. The mesh sender thread then sends it to the mesh network. The process is reserved for the message from the mesh network. As each message put to the message queue is a struct, threads must convert from theirs received message type to an application well-known struct before giving it to the message queue.
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.8\textwidth]{gateway_firmware.png}
+        \includegraphics[width=0.9\textwidth]{gateway_firmware.png}
     \end{center}
     \caption{Gateway firmware component}
     \label{fig:gateway_firmware}
@@ -31,7 +31,7 @@ The firmware part and software part of the gateway exchange messages using MAVLi
 The layered architecture for the MAVLink/UART communication model is illustrated in figure \ref{fig:mavlink_uart_stack}.
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.4\textwidth]{MAVLink_over_UART.png}
+        \includegraphics[width=0.5\textwidth]{MAVLink_over_UART.png}
     \end{center}
     \caption{MAVLink/UART stack}
     \label{fig:mavlink_uart_stack}
@@ -40,7 +40,7 @@ The layered architecture for the MAVLink/UART communication model is illustrated
 \subsection{What is MAVLink?}
 MAVLink is a very lightweight messaging protocol for communicating with drones and between onboard drone components \cite{web_mavlink}.
 
-\subsection{MAVLink packet format}
+\subsection{MAVLink Packet Format}
 
 Figure \ref{fig:packet_mavlink_v1} is the over-the-wire format for a MAVLink 1 packet, the in-memory representation might differ.
 
@@ -51,7 +51,7 @@ The maximum packet length is 263 bytes for full payload.
 Explanation for each field in the MAVLink V1 frame is given in table \ref{tab:mavlink_v1_frame_explanation}.
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.8\textwidth]{packet_mavlink_v1.jpg}
+        \includegraphics[width=0.9\textwidth]{packet_mavlink_v1.jpg}
     \end{center}
     \caption{MAVLink packet v1}
     \label{fig:packet_mavlink_v1}
@@ -78,7 +78,7 @@ This is a Python implementation of the MAVLink protocol. It includes a source co
 
 Figure \ref{net_mesh_mavlink_protocol} shows an example definition for message exchanged between gateway firmware and software. The \textbf{mavgen.py} script is used to generate C and Python implementation for the protocol from the XML file given in figure \ref{net_mesh_mavlink_protocol}. The C implementation is used in firmware while the Python one is used in software.
 
-\section{Gateway software}
+\section{Gateway Software}
 Similar to the gateway firmware, the main role of gateway software is to convert from MAVLink messages to JSON format strings, publish them to an MQTT topic and vice versa. Fortunately, the generated Python implementation provides APIs to easily convert a MAVLink message to a JSON string. As represented in figure \ref{fig:gateway_software}, two threads run in the software application play the opposite role. 
 
 \begin{figure}[H]
@@ -125,7 +125,7 @@ Similar to the gateway firmware, the main role of gateway software is to convert
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.6\textwidth]{gateway_software.png}
+        \includegraphics[width=0.5\textwidth]{gateway_software.png}
     \end{center}
     \caption{Gateway software component}
     \label{fig:gateway_software}
@@ -137,7 +137,7 @@ MQTT is an OASIS standard messaging protocol for the Internet of Things (IoT). I
 MQTT protocol works on top of TCP/IP protocol and uses port 1883 (8883 if connecting through SSL) as default.
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.6\textwidth]{mqtt_tcp.png}
+        \includegraphics[width=0.3\textwidth]{mqtt_tcp.png}
     \end{center}
     \caption{MQTT layer in OSI model}
     \label{fig:mqtt_tcp}
@@ -147,29 +147,29 @@ MQTT protocol works on top of TCP/IP protocol and uses port 1883 (8883 if connec
 
 There are a number of reasons answering the question: Why MQTT is widely used in IOT? 
 \begin{itemize}
-    \item \textbf{Lightweight and efficient}: MQTT clients are very small, require minimal resources so can be used on small microcontrollers. MQTT message headers are small to optimize network bandwidth.
-    \item \textbf{Bi-directional communications}: MQTT allows for messaging between device to cloud and cloud to device. This makes for easy broadcasting messages to groups of things.
+    \item \textbf{Lightweight and efficient}: MQTT clients can be easily implemented on small microcontrollers as they are very small, require minimal resources. Moreover, to optimize network bandwidth, MQTT message headers are also minimized.
+    \item \textbf{Bi-directional communications}: MQTT allows for messaging between devices to cloud and cloud to devices. This makes for easy broadcasting messages to groups of things.
     \item \textbf{Scale to millions of things}: MQTT can scale to connect with millions of IoT devices.
-    \item \textbf{Reliable message delivery}: Reliability of message delivery is important for many IoT use cases. This is why MQTT has 3 defined quality of service levels: 0 - at most once, 1- at least once, 2 - exactly once
-    \item \textbf{Support for unreliable networks}: Many IoT devices connect over unreliable cellular networks. MQTT’s support for persistent sessions reduces the time to reconnect the client with the broker.
+    \item \textbf{Reliable message delivery}: MQTT has 3 defined quality of service levels: 0 - at most once, 1- at least once, 2 - exactly once as the reliability of message delivery is important for many IoT use cases.
+    \item \textbf{Support for unreliable networks}: MQTT's support for persistent sessions reduces the time for clients to reconnect with the broker as many IoT devices connect over unreliable cellular networks. 
     \item \textbf{Security enabled}: MQTT makes it easy to encrypt messages using TLS and authenticate clients using modern authentication protocols, such as OAuth.
 \end{itemize}
 
-\subsection{MQTT publish/subscribe architecture}
+\subsection{MQTT Publish/Subscribe Architecture}
 The Publisher sends data on the MQTT Broker specifying a definite topic in a message. The Subscribers can receive various data from multiple Publishers depending on subscription to correspondent topics.
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[scale=0.4]{mqtt-publish-subscribe.png}
+        \includegraphics[scale=0.35]{mqtt-publish-subscribe.png}
     \end{center}
     \caption{MQTT publish subscribe}
-    \label{fig:mqtt_publish_subscribe.}
+    \label{fig:mqtt_publish_subscribe}
 \end{figure}
 
-Here are the main types of messages for a MQTT device to communication with the Broker:
+Here are the main types of messages for an MQTT device to communication with the Broker:
 
 \begin{itemize}
-    \item Connect: establish the connection to the message Broker
-    \item Disconnect: break the connection to the message Broker
+    \item Connect: establish the connection to the Broker
+    \item Disconnect: break the connection to the Broker
     \item Publish: publish data on a topic within the message Broker
     \item Subscribe: subscribe to a topic on the message Broker
     \item Unsubscribe: unsubscribe the topic
@@ -179,61 +179,77 @@ Here are the main types of messages for a MQTT device to communication with the 
 Figure \ref{fig:mqtt_schema} illustrates a scheme of simple communication between subscriber, publisher and broker: 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.8\textwidth]{mqtt_schema.jpg}
+        \includegraphics[width=0.7\textwidth]{mqtt_schema.jpg}
     \end{center}
     \caption{MQTT simple scheme}
     \label{fig:mqtt_schema}
 \end{figure}
 
-\subsection{Quality of service in MQTT protocol (QoS)}
+\subsection{Quality of Service in MQTT Protocol (QoS)}
 
 MQTT supports three levels of Quality of Service (QoS) when sending messages.
 
 \subsubsection{QoS 0: At most once}
-This service level guarantees a best-effort delivery. There is no guarantee of delivery. The recipient does not acknowledge receipt of the message and the message is not stored and re-transmitted by the sender. QoS level 0 is often called “fire and forget” and provides the same guarantee as the underlying TCP protocol.
+This service level is a best-effort delivery. Since the recipient does not acknowledge receipt of the message, there is no guarantee of delivery. Once the broker delivers the message, it is immediately deleted so it won't be redelivered. QoS level 0 is often called “fire and forget” as it provides the same guarantee as the underlying protocol.
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.5\textwidth]{mqtt_qos_0.jpg}
+        \includegraphics[width=0.8\textwidth]{mqtt_qos_at_most_once.png}
     \end{center}
     \caption{QoS 0: At most once}
     \label{fig:mqtt_qos_0}
 \end{figure}
 
 \subsubsection{QoS 1: At least once}
-This level guarantees the message delivery to the broker, however, the duplication of messages from the publisher is possible. Once a duplicate copy is received, the broker sends out this message to the subscribers again, and forwards the message receipt acknowledgment to the publisher. If the publisher does not get PUBACK message from the broker, it will attempt to re-deliver this packet.
+This level guarantees that messages are delivered to the broker, however, the duplication of messages is possible. This level is more reliable in that messages are persisted to ensure that they are delivered even if the broker dies. Once a message is received, the broker publishes this message to the subscribers again, and sends the message acknowledgment to the publisher. If the publisher does not receive any PUBACK message from the broker, it will attempt to re-deliver this packet.
+
+% \begin{figure}[H]
+%     \begin{center}
+%         \includegraphics[width=0.5\textwidth]{mqtt_qos_at_least_once.png}
+%     \end{center}
+%     \caption{QoS 1: At least once}
+%     \label{fig:mqtt_qos_1}
+% \end{figure}
 
 \begin{figure}[H]
-    \begin{center}
-        \includegraphics[width=0.5\textwidth]{mqtt_qos_1.jpg}
-    \end{center}
-    \caption{QoS 1: At least once}
-    \label{fig:mqtt_qos_1}
+    \centering
+    \begin{subfigure}[b]{0.49\linewidth}
+        \centering
+        \includegraphics[width=1\textwidth]{mqtt_qos_at_least_once.png}
+        \caption{QoS 1: At least once}
+        \label{fig:mqtt_qos_1}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.49\linewidth}
+        \centering
+        \includegraphics[width=1\textwidth]{mqtt_qos_exact_once.png}
+        \caption{QoS 2: Exactly once}
+        \label{fig:mqtt_qos_2}
+    \end{subfigure}
 \end{figure}
 
 \subsubsection{QoS 2: Exactly once}
-On this level the message delivery to a Client is guaranteed, with no duplication copies possible.
 
-\begin{figure}[H]
-    \begin{center}
-        \includegraphics[width=0.5\textwidth]{mqtt_qos_2.jpg}
-    \end{center}
-    \caption{QoS 2: Exactly once}
-    \label{fig:mqtt_qos_2}
-\end{figure}
-The publisher sends a message to the broker. The message contains the unique packet ID, QoS=2 and DUP=0. The publisher stores the message unacknowledged unless it gets a PUBREC response from the broker. The broker replies with the PUBREC message containing the same packet ID. After receiving this message, the publisher sends PUBREL with the same packet ID. The broker must store the message copy until it gets PUBREL. Once the broker receives PUBREL, it deletes the message copy and sends to the publisher the PUBCOMP message about the completed transaction.
+% \begin{figure}[H]
+%     \begin{center}
+%         \includegraphics[width=0.5\textwidth]{mqtt_qos_exact_once.png}
+%     \end{center}
+%     \caption{QoS 2: Exactly once}
+%     \label{fig:mqtt_qos_2}
+% \end{figure}
 
-\subsection{MQTT application message definition}
+This level guarantees that message is delivered to clients without  duplication. When the publisher sends a message to the broker, this message contains the unique packet ID. The publisher stores the unacknowledged message until it gets a PUBREC response containing the same packet ID from the broker. After receiving PUBREC message, the publisher sends PUBREL, again with the same packet ID. Once the broker receives PUBREL, it can delete the message copy saved previously and send the PUBCOMP message to the publisher about the completed transaction.
+
+\subsection{MQTT Application Message Definition}
 The application message transferred over the MQTT connection is derived from the protocol XML file as illustrated in figure \ref{fig:gateway_software}. The generated Python implementation automatically provides APIs for converting MAVLink messages to JSON strings.  These JSON strings are then published to an MQTT topic as shown in figure \ref{fig:mqtt_json_string}.
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.95\textwidth]{mqtt_json_string.png}
+        \includegraphics[width=1\textwidth]{mqtt_json_string.png}
     \end{center}
     \caption{MQTT json string}
     \label{fig:mqtt_json_string}
 \end{figure}
 
-\section{System control and management application}
+\section{System Control and Management Application}
 Figure \ref{fig:system_control_and_manage_application} provides an overview for the GUI used control and manage the ranging network.
 \begin{figure}[H]   
     \centering
@@ -252,14 +268,14 @@ As shown in figure \ref{fig:system_control_and_manage_application}, there are tw
 
 Below are the descriptions for each field:
 \begin{itemize}
-    \item The field with value of 0x03B8: The address of node in UWB network
-    \item The field with value of 0x0015: The address of node in Bluetooth mesh network
-    \item The field with value of 1: The slot index of the node in the TDMA network
-    \item The field with value of 5: The number of location messages received by the application.
-    \item The field with value of 0: The number of distance messages received by the application.
+    \item The field with the value of 0x03B8: The address of the node in UWB network
+    \item The field with the value of 0x0015: The address of the node in Bluetooth mesh network
+    \item The field with the value of 1: The slot index of the node in the TDMA network
+    \item The field with the value of 5: The number of location messages received by the application.
+    \item The field with the value of 0: The number of on-off messages received by the application.
     \item Type: The type of the node: ANCHOR or TAG
     \item Location: The location of the node
-    \item Identify button: Turn on/off the self identification process of the node
+    \item Identify button: Turn on/off the self-identification process of the node
     \item Bulb button: Turn on/off light bulb on the anchor
     \item Edit button: Enter the editing mode to change node type and location (location edit is only available for anchor)
     \item Update button: Update the configuration (node type and location) to the node, only available in editing mode

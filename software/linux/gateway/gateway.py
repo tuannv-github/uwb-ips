@@ -5,8 +5,13 @@ import config
 import json
 import signal
 import sys
+import socket
 
 from mavlink import *
+
+# SERVER_IP = "127.0.0.1"
+# SERVER_IP = "192.168.10.12"
+HOSTNAME = "rtls.local"
 
 class StoppableThread(threading.Thread):
     """Thread class with a stop() method. The thread itself has to check
@@ -60,12 +65,24 @@ class Gateway:
 
         if(msg["mavpackettype"] == "LOCATION"):
             try:
-                self.mav.location_send(msg["uwb_address"], msg["location_x"], msg["location_y"], msg["location_z"])
+                x = float(msg["location_x"])
+                y = float(msg["location_y"])
+                z = float(msg["location_z"])
+                self.mav.location_send(msg["uwb_address"], x, y, z)
             except Exception as e:
                 print("Unable to send downlink msg: %s" % str(e))
         elif(msg["mavpackettype"] == "ONOFF"):
             try:
                 self.mav.onoff_send(msg["uwb_address"], msg["value"])
+            except Exception as e:
+                print("Unable to send downlink msg: %s" % str(e))
+        if(msg["mavpackettype"] == "BLINK"):
+            if(msg["role"] == "ANCHOR"):
+                role = ANCHOR
+            else:
+                role = TAG
+            try:
+                self.mav.blink_send(msg["uwb_address"], role)
             except Exception as e:
                 print("Unable to send downlink msg: %s" % str(e))
 
@@ -74,7 +91,11 @@ class Gateway:
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.client.on_disconnect = self.on_disconnect
-        self.client.connect("127.0.0.1", 1883, 60)
+        ip_address = socket.gethostbyname(HOSTNAME)
+        while(ip_address is None):
+            ip_address = socket.gethostbyname(HOSTNAME)
+            time.sleep(1)
+        self.client.connect(ip_address, 1883, 60)
         self.client.loop_forever()
 
     def thread_serial_func(self, loop, port, baud):
@@ -82,9 +103,8 @@ class Gateway:
         while True:
             try:
                 serial = Serial(port, baud)
-                if (port == "/dev/ttyGateway"):
-                    mav = MAVLink(serial)
-                    self.mav = mav
+                mav = MAVLink(serial)
+                self.mav = mav
                 break
             except:
                 time.sleep(1)
@@ -98,9 +118,8 @@ class Gateway:
                     print("Serial connection error: Retrying... " + str(retry_count))
                     retry_count+=1
                     serial = Serial(port, baud)
-                    if (port == "/dev/ttyGateway"):
-                        mav = MAVLink(serial)
-                        self.mav = mav
+                    mav = MAVLink(serial)
+                    self.mav = mav
                 except:
                     print("Unable to open port: " + port)
 

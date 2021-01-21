@@ -11,7 +11,7 @@
 #include <message/mavlink/protocol/mavlink.h>
 
 #include <uwb/uwb.h>
-#include <uwb_nrng/nrng.h>
+#include <rtls_nrng/rtls_nrng.h>
 #include <uwb/uwb_mac.h>
 #include <serial/serial.h>
 
@@ -255,7 +255,7 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     printf("-------------\n");
     uint16_t updated_counter = 0;
     for(int j=0; j<ANCHOR_NUM; j++){
-        if(g_distance.updated[j]){
+        if(g_distance.anchors[j] != 0 && g_distance.updated[j]){
             updated_counter++;
             printf("0x%04X: %5ld\n", g_distance.anchors[j], g_distance.tofs[j]); 
         }
@@ -266,10 +266,22 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     uint32_t max_tof = 0;
     for(int i=0; i<4; i++){
         g_distance4.updated[i] = false;
+        g_distance4.anchors[i] = 0;
         uint32_t min_tof = -1;
+        
         for(int j=0; j<ANCHOR_NUM; j++){
             if(g_distance.anchors[j] != 0 && g_distance.updated[j]){
-                if(g_distance.tofs[j] < min_tof && g_distance.tofs[j] >= max_tof){
+                if(g_distance.tofs[j] >= max_tof && g_distance.tofs[j] <= min_tof){
+                    bool cont = false;
+                    if(g_distance.tofs[j] == max_tof){
+                        for(int k=0; k<i; k++){
+                            if(g_distance.anchors[j] == g_distance4.anchors[k]){
+                                cont = true;
+                                break;
+                            }
+                        }
+                    }
+                    if(cont) continue;
                     min_tof = g_distance.tofs[j];
                     g_distance4.tofs[i] =  g_distance.tofs[j];
                     g_distance4.anchors[i] = g_distance.anchors[j];
@@ -277,8 +289,12 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
                 }
             }
         }
-        max_tof = min_tof+1;
+        if(min_tof != -1){
+            max_tof = min_tof;
+        }
     }
+    printf("max_tof: %ld\n", max_tof);
+
 
     uint8_t sphere_idx = 0;
     for(int i=0; i<4; i++){
@@ -310,6 +326,7 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     }
 
     for(int j=0; j<ANCHOR_NUM; j++){
+        g_distance.anchors[j] = 0;
         g_distance.updated[j] = false;
     }
 
@@ -355,6 +372,7 @@ void rtls_init(){
     uwb_set_dblrxbuff(udev, false);
 
     g_nrng = (struct nrng_instance*)uwb_mac_find_cb_inst_ptr(udev, UWBEXT_NRNG);
+    // g_nrng->nnodes = 10;
     assert(g_nrng);
 
     g_cbs = (struct uwb_mac_interface){

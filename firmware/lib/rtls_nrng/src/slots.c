@@ -30,7 +30,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
-#include <uwb_nrng/slots.h>
+#include <rtls_nrng/slots.h>
 
 /**
  * Help function to calculate the number of slots within a bitmask
