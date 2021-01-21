@@ -1,5 +1,7 @@
 #include <os/os.h>
 #include <sysinit/sysinit.h>
+#include <hal/hal_gpio.h>
+#include <bsp/bsp.h>
 
 #include <uwb/uwb.h>
 #include <uwb/uwb_ftypes.h>
@@ -61,6 +63,7 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
 
     struct uwb_dev *udev = uwb_dev_idx_lookup(0);
 
+    hal_gpio_write(LED_3, 0);
     om = os_mbuf_get_pkthdr(&g_mbuf_pool, sizeof(struct uwb_msg_hdr));
     /* Not enough memory to handle incoming packet, drop it */
     if (!om) return true;
@@ -91,6 +94,7 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
         return true;
     }
 
+    hal_gpio_write(LED_3, 1);
     return true;
 }
 
@@ -100,7 +104,7 @@ process_rx_data_queue(struct os_event *ev)
     struct os_mbuf *om = 0;
     struct uwb_dev *udev = uwb_dev_idx_lookup(0);
     static char buff[512];
-    static char sbuff[32];
+    static char sbuff[128];
 
     while((om = os_mqueue_get(&g_rx_pkt_q)) != NULL) {
         hal_gpio_write(LED_1, 0);
@@ -219,7 +223,7 @@ main(int argc, char **argv){
 
     hal_gpio_init_out(LED_1, 1);
     hal_gpio_init_out(LED_2, 1);
-
+    hal_gpio_init_out(LED_3, 1);
     /* Loop */
     while (1) {
         os_eventq_run(os_eventq_dflt_get());
