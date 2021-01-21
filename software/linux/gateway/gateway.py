@@ -5,11 +5,13 @@ import config
 import json
 import signal
 import sys
+import socket
 
 from mavlink import *
 
 # SERVER_IP = "127.0.0.1"
-SERVER_IP = "192.168.10.12"
+# SERVER_IP = "192.168.10.12"
+HOSTNAME = "rtls.local"
 
 class StoppableThread(threading.Thread):
     """Thread class with a stop() method. The thread itself has to check
@@ -89,7 +91,11 @@ class Gateway:
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.client.on_disconnect = self.on_disconnect
-        self.client.connect(SERVER_IP, 1883, 60)
+        ip_address = socket.gethostbyname(HOSTNAME)
+        while(ip_address is None):
+            ip_address = socket.gethostbyname(HOSTNAME)
+            time.sleep(1)
+        self.client.connect(ip_address, 1883, 60)
         self.client.loop_forever()
 
     def thread_serial_func(self, loop, port, baud):
