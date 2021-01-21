@@ -4,7 +4,7 @@
 \begin{document}
 \graphicspath{{img/}{ble_mesh/img/}}
 
-\chapter{Bluetooth mesh}
+\chapter{Bluetooth Mesh}
 
 Bluetooth mesh networking provides the foundation to create a truly large-scale device network, allowing tens, hundreds or even thousands of wireless devices to communicate with each other reliably and securely.
 
@@ -19,10 +19,10 @@ Compared with other topologies, in a mesh network, each node may have a direct c
 \end{figure}
 
 
-\section{Mesh system architecture \cite{bluetooth_sig:mesh_profile_specification_1_0_1}}
+\section{Mesh System Architecture}
 This subsection provides an overview of the mesh network operation and layered system architecture.
 
-\subsection{Layered architecture}
+\subsection{Layered Architecture \cite{bluetooth_sig:mesh_profile_specification_1_0_1}}
 
 The Mesh Profile specification is defined as a layered architecture as shown in \ref{fig:ble_mesh_layered_architecture}.
 
@@ -59,7 +59,7 @@ reject them. It also defines how a network message is encrypted and authenticate
 The bearer layer defines how network messages are transported between nodes. There are two bearers
 defined, the advertising bearer and the GATT bearer. Additional bearers may be defined in the future.
 
-\subsection{Overview of mesh operation}
+\subsection{Overview of Mesh Operation \cite{bluetooth_sig:mesh_profile_specification_1_0_1}}
 The Bluetooth mesh network operation is designed to:
 \begin{itemize}
     \item Enable messages to be sent from one element to one or more elements
@@ -110,7 +110,7 @@ To assist with \textbf{provisioning of multiple devices}, a device has an attent
 \newline\newline
 The protocol to run over these two bearers is a derivative of the Security Manager protocol of v4.2 of the Bluetooth Core Specification to introduce the ability to authenticate devices that have a very limited user interface, such as a light or a switch. The Security Manager protocol requires a reliable bearer, something that cannot be guaranteed by the advertising provisioning bearer; therefore the protocol is designed to enable reliable delivery of messages independent of the bearer. The similarity to the Security Manager protocol enables significant reuse of existing code on devices that have implemented such functionality.
 
-\subsection{Architectural concepts}
+\subsection{Architectural Concepts \cite{bluetooth_sig:mesh_profile_specification_1_0_1}}
 The Bluetooth mesh networking architecture uses several different concepts: states, messages, elements, addressing, models, publish-subscribe, mesh keys, etc.
 \subsubsection{States}
 A state is a value representing a condition of an element.
@@ -174,7 +174,7 @@ There are three types of model: server models, client models, and control models
     \item \textbf{Control model}: A control model may contain client model functionality to communicate with other server models and server model functionality to communicate with other client models. A control model may also contain control logic, which is a set of rules and behaviors that coordinate the interactions between other models that the control model connects to.
 \end{itemize}
 A single device may include server, client, and control models.
-\subsubsection{Publish-subscribe and message exchange}
+\subsubsection{Publish-subscribe and Message Exchange}
 Publication and subscription of data within the mesh network is described as using a publish-subscribe paradigm. Nodes that generate messages publish the messages to a unicast address, group address, or virtual address. Nodes that are interested in receiving the messages will subscribe to these addresses.
 \newline\newline
 Generated messages are sent to destination mesh addresses that can be unicast, pre-configured group addresses, or virtual addresses. Messages can be sent as replies to other messages or can be unsolicited messages. When an instance of a model is sending a reply message, it uses the incoming message originator’s source address as the destination address. When an instance of a model is sending unsolicited messages, it uses a model publish address as the destination address. Each instance of a model within a node has a single publish address.
@@ -198,7 +198,7 @@ All messages are encrypted and authenticated using two types of keys. One key ty
 \newline\newline
 \textbf{Initialization vector index}: A Network PDU contains a 24-bit sequence number that allows an element to transmit 16,777,216 Network PDUs. The sequence number is used in the security nonce to provide uniqueness; therefore the sequence number must not wrap. If an element is transmitting a new message at 2 Hz, then these sequence numbers would be exhausted after 97 days. To enable a mesh network to operate for longer periods of time than the sequence number space allows, an additional 4-octet value called the IV Index is defined that is included in the security nonce. For example, using the same 2 Hz message frequency would measure the lifetime of the network using the IV Index in billions of years.
 
-\section{Bluetooth mesh-based application with NimBLE}
+\section{Bluetooth Mesh-based Application with NimBLE}
 \label{sec:bluetooth_mesh_based_application_with_nimble}
 Apache NimBLE is an open-source Bluetooth 5.1 stack (both Host and Controller) that completely replaces the proprietary SoftDevice on Nordic chipsets. It is part of the Apache Mynewt project \cite{web_nimble}.
 
@@ -220,7 +220,7 @@ This subsection introduces the process of defining a Bluetooth mesh-based applic
     \item Define models in each element
     \item Define model operations in each model
 \end{itemize}
-\subsection{Node composition}
+\subsection{Node Composition}
 As discussed in previous sections, a node may consist of one or more elements. In NimBLE, a node is defined by a struct as shown in figure \ref{fig:node_struct}. The thee upper components is the ID of the node itself:
 \begin{itemize}
     \item CID: Company ID
@@ -257,7 +257,7 @@ static const struct bt_mesh_comp g_comp = {
     \label{fig:node_struct_example}
 \end{figure}
 
-\subsection{Mesh element}
+\subsection{Mesh Element}
 Figure \ref{fig:mesh_element} illustrates the definition of the mesh element. Each elements of a node have a 16-bit unique address in the network $addr$. Moreover, a element may have one or more models as the theory introduced. These models of the element are pointed by the two lower components: $models$ and $vnd\_models$ (vendor model). Figure \ref{fig:mesh_element_example} provides the definition for $g\_elements$ array of the node. As shown if figure \ref{fig:mesh_element_macro}, a macro is used to define an element. The second parameter of the function-like macro ($model\_root$) is a pointer to an array of models. The definition for  $model\_root$ will be provided subsequently.
 \begin{figure}[H]
     \begin{lstlisting}[style=CStyle]
@@ -304,7 +304,7 @@ static struct bt_mesh_elem g_elements[] = {
     \label{fig:mesh_element_macro}
 \end{figure}
 
-\subsection{Mesh model}
+\subsection{Mesh Model}
 The definition for the mesh model is given in figure \ref{fig:mesh_model}. The following are explanation for important fields:
 \begin{itemize}
     \item $elem\_idx$: the index of the element to which the model belong
@@ -395,7 +395,7 @@ static struct bt_mesh_cfg_srv cfg_srv = {
 \label{fig:mesh_configuration_server}
 \end{figure}
 
-\subsection{Mesh operation}
+\subsection{Mesh Operation}
 The struct of the mesh operation is given in figure \ref{fig:mesh_model_operation}. The two main components of the struct are the operation code $opcode$ and the function handler called when receiving a message with operation code $opcode$. Figure \ref{fig:mesh_model_operation_example} provide the definition for $rtls\_op$. After checking for the destination address, the access layer will check for the operation code of the message, if the callback handler is available for that $opcode$, such function will be called.
 
 \begin{figure}[H]
@@ -428,20 +428,20 @@ static const struct bt_mesh_model_op rtls_op[] = {
 \label{fig:mesh_model_operation_example}
 \end{figure}
 
-\section{Using Bluetooth mesh for best-effort broadcast service}
+\section{Using Bluetooth Mesh for Best-effort Broadcast Service}
 \label{sec:using_bluetooth_mesh_for_best_effort_broadcast_service}
 In this thesis, all nodes subscribe and publish to a group address which is 0xC000. Anchors and tags subscribe to the SET operation and publish STATUS operation while gateways subscribe to STATUS operation and publish SET operation. This makes a SET message from a gateway broadcasted to all tags and anchors in the network and a STATUS message from an anchor or tag shall be transmitted to a gateway. Figure \ref{fig:ble_mesh_comunication} illustrates the idea of broadcast service over a publish-subscribe paradigm. Since the message sent to a group address is not acknowledged, the service provided by the network is the best-effort service. This means that there is no guarantee that the packet will be delivered to the final destination. 
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.7\textwidth]{ble_mesh_comunication.png}
+        \includegraphics[width=0.6\textwidth]{ble_mesh_comunication.png}
     \end{center}
-    \caption{ble mesh communication}
+    \caption{Bluetooth mesh communication}
     \label{fig:ble_mesh_comunication}
 \end{figure}
 
 In section \ref{sec:bluetooth_mesh_based_application_with_nimble}, the process of defining a Bluetooth mesh-based device has been introduced. In the next section, an Android application manipulated to make such devices communicate as discussed in this section will be described.
-\section{nRF Mesh Android application}
+\section{nRF Mesh Android Application}
 The nRF Mesh application is a provisioner making an unprovisioned device become a node in the Bluetooth mesh network. 
 
 Figure \ref{fig:bluetooth_mesh_device_scan} shows that there is one mesh capable device around the provisioner. The address of the device in the network after being provisioned is configured as shown in figure \ref{fig:config_device_address}. This is the address of the primary element, all other elements of the node are addressed by increasing this value by 1 after each element.

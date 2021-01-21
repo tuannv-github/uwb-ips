@@ -1,4 +1,4 @@
-\documentclass[oneside, 12pt]{book}
+\documentclass[oneside, 12pt, a4paper]{book}
 
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
@@ -58,14 +58,13 @@
 \DeclareMathOperator*{\argmax}{argmax} 
 \DeclareMathOperator*{\argmin}{argmin} 
 
-\graphicspath{{imgs/}}
+\graphicspath{{img/}}
 
 \geometry{
     left=20mm,
     right=20mm,
     top=20mm,
     bottom=20mm,
-    heightrounded
 }
 
 \setlength\parindent{0pt}
@@ -165,18 +164,37 @@
     \includepdf[pages=1, pagecommand={
         \chapter{RTLS anchor board (Altium Designer)}
         \label{appendix:rtls_anchor_board}
-    }, width=\textwidth, offset=0 -1cm]{RTLS-2020-11-09--04-03.PDF}
+    }, width=\textwidth, offset=0 -1cm]{\main/docs//RTLS-2021-01-09--13-27.PDF}
 
-    \includepdf[pages=2-,pagecommand={},width=\textwidth]{RTLS-2020-11-09--04-03.PDF}
+    \includepdf[pages=2-,pagecommand={},width=\textwidth]{\main/docs/RTLS-2021-01-09--13-27.PDF}
     
     \chapter{RTLS anchor enclosure (SolidWorks)}
     \label{appendix:rtls_anchor_enclosure}
+    % \begin{figure}[H]
+    %     \begin{center}
+    %         \includegraphics[angle=90, width=0.65\textwidth]{Assem.JPG}
+    %     \end{center}
+    %     \caption{RTLS SolidWorks design}
+    %     \label{fig:RTLS_SolidWork_Design}
+    % \end{figure}
+    % \begin{figure}[H]
+    %     \centering
+    %     \includegraphics[angle=90, width=0.65\textwidth]{anchor_final.jpg}
+    %     \caption{RTLS anchor}
+    %     \label{fig:RTLS_anchor}
+    % \end{figure}
     \begin{figure}[H]
         \begin{center}
-            \includegraphics[scale=0.4]{Assem.JPG}
+            \includegraphics[width=0.8\textwidth]{Assem.JPG}
         \end{center}
-        \caption{RTLS SolidWorks Design}
+        \caption{RTLS SolidWorks design}
         \label{fig:RTLS_SolidWork_Design}
+    \end{figure}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{anchor_final.jpg}
+        \caption{RTLS anchor}
+        \label{fig:RTLS_anchor}
     \end{figure}
 \end{appendix}
 

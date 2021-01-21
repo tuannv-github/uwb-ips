@@ -111,6 +111,6 @@ syscfg.vals:
     GPIO_AS_PIN_RESET: 1
     RTLS_CPP_VERBOSE: 1
 
-    BLE_MESH_CRPL: 0
+    BLE_MESH_CRPL: 20
 
     BLE_MESH_DEVICE_NAME: '"rtls-mesh-node"'
