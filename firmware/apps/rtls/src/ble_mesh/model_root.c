@@ -96,6 +96,10 @@ rtls_model_set(struct bt_mesh_model *model,
             hal_gpio_write(LIGHT_BULB_1, 1);
         }
         break;
+    case MAVLINK_MSG_ID_BLINK:
+        rtls_set_ntype(msg_rtls.role);
+        msg_print_rtls(&msg_rtls);
+        break;
     default:
         break;
     }
@@ -191,16 +195,25 @@ static void
 task_location_func(void *arg){
 
     uint8_t node_type;
+    int cnt = 0;
     while(1){
         rtls_get_ntype(&node_type);
         if(node_type == RTR_ANCHOR){
-            dpl_time_delay(dpl_time_ms_to_ticks32(5000));
+            dpl_time_delay(dpl_time_ms_to_ticks32(10000));
             if (pub->addr == BT_MESH_ADDR_UNASSIGNED) continue;
 
-            os_mutex_pend(&g_model_mutex, OS_TIMEOUT_NEVER);
-            msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
-            msg_rtls.msg_id = MAVLINK_MSG_ID_LOCATION;
-            rtls_get_address(&msg_rtls.uwb_address);
+            cnt++;
+            if(cnt%2){
+                os_mutex_pend(&g_model_mutex, OS_TIMEOUT_NEVER);
+                msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
+                msg_rtls.msg_id = MAVLINK_MSG_ID_LOCATION_REDUCED;
+                rtls_get_address(&msg_rtls.uwb_address);
+            }else{
+                os_mutex_pend(&g_model_mutex, OS_TIMEOUT_NEVER);
+                msg_rtls.opcode = BT_MESH_MODEL_OP_STATUS;
+                msg_rtls.msg_id = MAVLINK_MSG_ID_LOCATION;
+                rtls_get_address(&msg_rtls.uwb_address);
+            }
         }
         else{
             dpl_time_delay(dpl_time_ms_to_ticks32(MYNEWT_VAL(UWB_CCP_PERIOD)/1000));

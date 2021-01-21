@@ -208,13 +208,14 @@ superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     /* Check timeout and availability of ANCHOR only */
     for(int i=1; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
         rti->nodes[i].available = false;
-        if(rti->nodes[i].addr != 0){
+        // if(rti->nodes[i].addr != 0){
             rti->nodes[i].timeout++;
             if(rti->nodes[i].timeout > MYNEWT_VAL(RT_ANCHOR_TIMEOUT)){
                 node_rmv(rti, i);
-                printf("Remove node: %d\n", i);
-                node_slot_map_printf(rti);
-
+                if(rti->nodes[i].addr != 0){
+                    printf("Remove node: %d\n", i);
+                    node_slot_map_printf(rti);
+                }
                 /* Anchor may down when trying to get a slot */
                 if(rti->slot_reqt != 0 && node_all_accepted(rti) && rti->role == RTR_TAG){
                     node_add_me(rti, rti->slot_reqt);
@@ -223,7 +224,7 @@ superframe_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
                     /* Reset slot_reqt to change it purpose */
                     // rti->slot_reqt = 0;
                 };
-            }
+            // }
         }
     }
 
@@ -395,18 +396,22 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                         /* Release request context */
                         printf("Node up: 0x%04X\n", ieee_std_frame_hdr->src_address);
                         rti->slot_reqt = 0;
+                        rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
+                        rti->nodes[tdma_slot->idx].accepted = true;
+                        node_slot_map_printf(rti);
                     }
                     /* I am a anchor */
-                    if (rti->role == RTR_ANCHOR){
+                    else if (rti->role == RTR_ANCHOR){
                         /* I has joint the network and I do not see any request from this node before */
                         /* This node take this slot without permission */
                         struct uwb_dev_rxdiag *diag = (struct uwb_dev_rxdiag *)(rti->dev_inst->rxdiag);
                         float rssi = uwb_calc_rssi(rti->dev_inst, diag);
-                        if(rssi > -85 && tdma_slot->idx <= MYNEWT_VAL(UWB_BCN_SLOT_MAX)){
+                        if(rssi > -95 && tdma_slot->idx <= MYNEWT_VAL(UWB_BCN_SLOT_MAX)){
                             printf("%d: 0x%04X: RSSI %d\n",tdma_slot->idx, ieee_std_frame_hdr->src_address, (int)(rssi));
                             printf("Unknown node: 0x%04X at slot %d\n", ieee_std_frame_hdr->src_address, tdma_slot->idx);
                             rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
                             rti->nodes[tdma_slot->idx].accepted = true;
+                            node_slot_map_printf(rti);
                         }
                     }
                 }
@@ -414,8 +419,8 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                 else{
                     struct uwb_dev_rxdiag *diag = (struct uwb_dev_rxdiag *)(rti->dev_inst->rxdiag);
                     float rssi = uwb_calc_rssi(rti->dev_inst, diag);
-                    printf("%d: 0x%04X: RSSI %d\n",tdma_slot->idx, ieee_std_frame_hdr->src_address, (int)(rssi));
-                    if(rssi < -90) return;
+                    printf("New node idx:%d address:0x%04X RSSI:%d\n",tdma_slot->idx, ieee_std_frame_hdr->src_address, (int)(rssi));
+                    if(rssi < -95) return;
                     rti->nodes[tdma_slot->idx].addr = ieee_std_frame_hdr->src_address;
                     node_slot_map_printf(rti);
                 }

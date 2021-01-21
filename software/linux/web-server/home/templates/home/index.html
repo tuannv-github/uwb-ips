@@ -192,7 +192,7 @@ function handler_location_reduced(msg){
 			value += 1;
 			$('#node' + node.uwb_address + 'CounterLoc').text(value);
 		}
-		nodeLocationUpdate(node, msg.location_x, msg.location_y, 0);
+		nodeLocationUpdate(node, msg.location_x, msg.location_y, node.locationZ);
 	}
 }
 
@@ -699,11 +699,10 @@ const nodeTemplate = ({ address, uwbAddressHex, nodeRole, locationX, locationY, 
                 <div class="col-sm-3 p-1"><button type="button" class="btn btn-outline-primary btn-block" id="node${address}BtnEdit" onclick="onEditBtnClick('${address}')">Edit</button></div>
 				<div class="col-sm-3 p-1"><button type="button" class="btn btn-outline-primary btn-block" id="node${address}Update" onclick="onUpdateBtnClick('${address}')">Update</button></div>
 			</div>
-			<i class="fa fa-lightbulb-o" aria-hidden="true"></i>
         </div>
     </div>
 </div>
-`;
+`
 
 function nodeLocationUpdate(node, locationX, locationY, locationZ){
 	node.locationX = locationX;
@@ -760,9 +759,10 @@ function onUpdateBtnClick(address){
 			toastError("Enter editing mode first");
 			return;
 		}
-		locationX = parseFloat($('#node' + node.uwb_address + 'LocationX').val());
-		locationY = parseFloat($('#node' + node.uwb_address + 'LocationY').val());
-		locationZ = parseFloat($('#node' + node.uwb_address + 'LocationZ').val());
+		// locationZ = parseFloat();
+		locationX = $('#node' + node.uwb_address + 'LocationX').val();
+		locationY = $('#node' + node.uwb_address + 'LocationY').val();
+		locationZ = $('#node' + node.uwb_address + 'LocationZ').val();
 		address = parseInt(address);
 		if(isNaN(locationX) || isNaN(locationY) || isNaN(locationZ)){
 			toastError("Invalid location");
@@ -773,12 +773,14 @@ function onUpdateBtnClick(address){
 			return;
 		}
 
-		if($('#node' + node.uwb_address + 'Select').children("option")[0].selected)
-			node = "ANCHOR";
-		else
-			node = "TAG";
 		cmd = '{"mavpackettype": "LOCATION", "uwb_address": ' + address + ', "location_x": ' + locationX +', "location_y": ' + locationY + ', "location_z": ' + locationZ + '}';
+		publish("{{topic_publish}}", cmd);
 
+		if($('#node' + node.uwb_address + 'Select').children("option")[0].selected)
+			role = "ANCHOR";
+		else
+			role = "TAG";
+		cmd = '{"mavpackettype": "BLINK", "uwb_address": ' + address + ', "role": "' + role + '"}';
 		publish("{{topic_publish}}", cmd);
 	}
 }

@@ -192,6 +192,10 @@ void msg_parse_rtls_pipe(struct os_mbuf *mbuf, msg_rtls_t *msg){
 void msg_print_rtls(msg_rtls_t *msg){
     switch (msg->msg_id)
     {
+    case MAVLINK_MSG_ID_BLINK:
+        printf("{opcode: %ld, msg_id: %d, uwb_address: 0x%04x, role: %d}\n", 
+                msg->opcode, msg->msg_id, msg->uwb_address, msg->role);
+        break;
     case MAVLINK_MSG_ID_LOCATION:
         printf("{opcode: %ld, msg_id: %d, uwb_address: 0x%04x, location: [%d.%d, %d.%d, %d.%d]}\n", 
                 msg->opcode, msg->msg_id, msg->uwb_address, 
