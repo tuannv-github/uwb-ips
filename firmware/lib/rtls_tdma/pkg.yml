@@ -31,6 +31,7 @@ pkg.cflags:
 
 pkg.deps:
     - "@rtls/lib/rtls_ccp"
+    - "@rtls/lib/rtls_nrng"
 
 pkg.lflags:
     - "-lm"

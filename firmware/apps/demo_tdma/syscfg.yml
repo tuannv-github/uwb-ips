@@ -1,21 +1,16 @@
-syscfg.defs:
-    NODE_ADDRESS:
-        description: 'Address of anchor'
-        value: 0x1000
-
 syscfg.vals:
     LOG_LEVEL: 5
 
     # Route console to UART
     UART_0: 1
-    CONSOLE_RTT: 0
-    CONSOLE_UART: 1
+    CONSOLE_RTT: 1
+    CONSOLE_UART: 0
     CONSOLE_UART_BAUD: 115200
     CONSOLE_UART_TX_BUF_SIZE: 1024
-    CONSOLE_UART_RX_BUF_SIZE: 256
+    CONSOLE_UART_RX_BUF_SIZE: 1024
     CONSOLE_HISTORY_SIZE: 8
     RTT_TERMINAL_BUFFER_SIZE_UP: 1024
-    RTT_TERMINAL_BUFFER_SIZE_DOWN: 256
+    RTT_TERMINAL_BUFFER_SIZE_DOWN: 1024
     
     # Shell
     SHELL_TASK: 1
@@ -38,7 +33,7 @@ syscfg.vals:
     UWB_CLI_BACKTRACE: 0
 
     UWB_CCP_ENABLED: 1
-    UWB_CCP_PERIOD: ((uint32_t)1000000)
+    UWB_CCP_PERIOD: ((uint32_t)0x100000)
     UWB_CCP_MAX_CASCADE_RPTS: 2
     
     ## Where to store config

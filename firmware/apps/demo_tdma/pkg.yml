@@ -17,7 +17,7 @@
 # under the License.
 #
 
-pkg.name: apps/tdma_app
+pkg.name: apps/demo_tdma
 pkg.type: app
 pkg.description: "UWB TDMA app"
 pkg.author: "Tuan Ngo Van <tuanngo0898@gmail.com>"
