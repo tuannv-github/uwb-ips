@@ -109,7 +109,7 @@ Disadvantages of GPS:
 \end{frame}
 
 \begin{frame}
-    \frametitle{Introduction: Thesis Objective}
+    \myframetitle{Introduction: Thesis Objective}
     % \frametitle{\makebox[\framewidth]{Introduction: Thesis Objective \hfill\includegraphics[width=0.6cm]{logoBK.png}}}
     \begin{columns}
         \column{0.4\textwidth}
@@ -408,39 +408,22 @@ Federal Communication Commission (FCC) has defined UWB signal:
 
 \begin{frame}
     \myframetitle{RSA: CCP Master Timing}
-    \begin{equation*}
-        t^k_m = t^{k-1}_m + \tau \qquad 
-        ep_m = ep_l = t^k_m - T_{SHR} \qquad 
-        ep_o = t_h - f_{d2h}(t_d - t^k_m) - T_{SHR}
-    \end{equation*}
-    % \begin{columns}
-        % \column{0.25\textwidth}
-        % \begin{equation*}
-        %     \begin{split}
-        %     & t^k_m = t^{k-1}_m + \tau\\
-        %     & ep_m = ep_l = t^k_m - T_{SHR}\\
-        %     & ep_o = t_h - f_{d2h}(t_d - t^k_m) - T_{SHR}
-        %     \end{split}
-        % \end{equation*}
-        % Where:
-        % \begin{itemize}
-        %     \item $ep_m$: master epoch
-        %     \item $ep_l$: local epoch 
-        %     \item $ep_o$: os epoch 
-        %     \item $\tau$: CCP period
-        %     \item $t^k_{m}$: $k$th frame in device
-        %     \item $t_d$: device timestamp
-        %     \item $f_{d2h}$: device time to host 
-        %     \item $T_{SHR}$: duration of SHR
-        %     \end{itemize}
-        % \column{0.75\textwidth}
-        % \begin{figure}[H]
-        %     \flushright
-        %     \includegraphics[width=1\textwidth]{ccp_timing_for_master_node.png}
-        %     \caption{CCP master timing}
-        %     \label{fig:interupt_latency_master}
-        % \end{figure}
-    % \end{columns}
+    \begin{columns}
+        \column{0.4\textwidth}
+        \begin{equation*}
+            \begin{split}
+                &t^k_m = t^{k-1}_m + \tau \\
+                &ep_m = ep_l = t^k_m - T_{SHR} 
+            \end{split}
+        \end{equation*}
+        \column{0.6\textwidth}
+        \begin{equation*}
+            \begin{split}
+                &ep_o = t_h - f_{d2h}(t_d - t^k_m) - T_{SHR}\\
+                &t_{wake up} = ep_o + \tau - T_{latency}
+            \end{split}
+        \end{equation*}
+    \end{columns}
     \begin{figure}[H]
         \includegraphics[width=0.75\textwidth]{ccp_timing_for_master_node.png}
         \caption{CCP master timing}
@@ -449,26 +432,29 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \myframetitle{RSA: CCP Slave Timing}
+    \myframetitle{RSA: CCP Slave Timing - Message Relay}
     \begin{columns}
-        \column{0.5\textwidth}
+        \column{0.4\textwidth}
         \begin{equation*}
             \begin{split}
                 & ep_m = t^k_m - T_{SHR}\\
-                & ep_o = t_h - f_{d2h}(t_d - t^k_l) - T_{SHR}
+                & ep_l = t^k_l - T_{SHR} \\
+                & ep_o = t_h - f_{d2h}(t_d - t^k_l) - T_{SHR}\\
+                & t_{wake up} = ep_o + \tau - T_{latency}
             \end{split}
         \end{equation*}
-        \column{0.5\textwidth}
+        \column{0.6\textwidth}
         \begin{equation*}
             \begin{split}
-                & ep_l = t^k_l - T_{SHR} \\
-                & t_{wake up} = ep_o + \tau - T_{latency}
+                &T_{hold-off} = n_{repeat}*T_{hold-off-conf} + i_{slot}*T_{ccp}\\
+                &t^{k-repeat} = t^k + T_{hold-off}\\
+                &\tau_{new} = \tau - T_{hold-off}
             \end{split}
         \end{equation*}
     \end{columns}
     \begin{figure}[H]
         \begin{center}
-            \includegraphics[width=0.75\textwidth]{ccp_timing_for_slave_node.png}
+            \includegraphics[width=0.65\textwidth]{ccp_timing_for_slave_node.png}
         \end{center}
         \caption{CCP slave timing}
         \label{fig:ccp_timing_for_slave_node}
