@@ -114,14 +114,16 @@ class Gateway:
                     retry_count = 0
             except:
                 time.sleep(0.5)
-                try:
+                retry_count+=1
+                if(retry_count < 10):
                     print("Serial connection error: Retrying... " + str(retry_count))
-                    retry_count+=1
+                try:
                     serial = Serial(port, baud)
                     mav = MAVLink(serial)
                     self.mav = mav
                 except:
-                    print("Unable to open port: " + port)
+                    if(retry_count < 10):
+                        print("Unable to open port: " + port)
 
     def loop_gateway(self, serial, mav):
         byte = serial.read()
