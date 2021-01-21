@@ -108,6 +108,32 @@
         {
           "type": "gnu-debugger",
           "request": "launch",
+          "name": "Debug: demo_tdma",
+          "program": "/home/tuannv/thesis/firmware/bin/targets/demo_tdma/app/apps/demo_tdma/demo_tdma.elf",
+          "toolchain": "/usr/local/bin/",
+          "client": "arm-none-eabi-gdb",
+          "server": "JLinkGDBServer",
+          "windows": {
+            "server": "JLinkGDBServerCL",
+          },
+          "serverArgs": [
+            "-device", "nrf52",
+            "-if", "SWD",
+            "-speed", "4000"
+          ],
+          "serverPort": 2331,
+          "serverHost": "localhost",
+          "customVariables": [
+            "port0",
+            "port1",
+            "port2",
+          ],
+          "autoRun": false,
+          "debugOutput": false,
+        },
+        {
+          "type": "gnu-debugger",
+          "request": "launch",
           "name": "Debug: gateway",
           "program": "/home/tuannv/thesis/firmware/bin/targets/gateway_pca10040/app/apps/gateway/gateway.elf",
           "toolchain": "/usr/local/bin/",

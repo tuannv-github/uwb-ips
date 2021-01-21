@@ -17,27 +17,27 @@
 # under the License.
 #
 
-pkg.name: lib/rtls_tdma
-pkg.description: Time-division multiple access
+pkg.name: apps/demo_tdma
+pkg.type: app
+pkg.description: "UWB TDMA app"
 pkg.author: "Tuan Ngo Van <tuanngo0898@gmail.com>"
 pkg.homepage: "https://github.com/tuanngo0898"
 pkg.keywords:
-    - uwb
-    - TDMA
-
-pkg.cflags:
-    - "-std=gnu99"
-    - "-fms-extensions"
+  - dw1000
 
 pkg.deps:
-    - "@rtls/lib/rtls_ccp"
-    - "@rtls/lib/rtls_nrng"
+    - "@apache-mynewt-core/kernel/os"
+    - "@apache-mynewt-core/sys/console/full"
+    - "@apache-mynewt-core/sys/shell"
+    - "@apache-mynewt-core/sys/log/full"
+    - "@apache-mynewt-core/sys/stats/full"
+    - "@mynewt-timescale-lib/lib/timescale"
 
-pkg.lflags:
-    - "-lm"
+    - "@decawave-uwb-core/sys/uwbcfg"
+    - "@decawave-uwb-core/hw/drivers/uwb"
 
-pkg.init:
-    tdma_pkg_init: 404
+    - "@rtls/lib/rtls_tdma"
 
-pkg.down:
-    tdma_pkg_down: 404
+pkg.cflags:
+    - "-std=gnu11"
+    - "-fms-extensions"

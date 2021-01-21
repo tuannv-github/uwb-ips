@@ -76,9 +76,18 @@ python -m pymavlink.tools.mavgen --lang=Python --wire-protocol=1.0 --output=../m
 python -m pymavlink.tools.mavgen --lang=C --wire-protocol=1.0 --output=../../../../firmware/lib/message/include/message/mavlink   ../protocol.xml
 ```
 
-Udev rule file `/etc/udev/rules.d/`:
+Link rule file to current file:
+```
+sudo ln -s  `pwd`/100-rtls.rules /etc/udev/rules.d/100-rtls.rules
+```
+
+Find device serial number:
 ```
 udevadm info -a -n /dev/ttyUSB1 | grep '{serial}'
+```  
+
+Re-apply udev rule:
+```
 systemctl restart systemd-udevd.service
 sudo udevadm control --reload-rules && udevadm trigger
 ```

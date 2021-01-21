@@ -49,9 +49,8 @@ class UwbSniffer(object):
         """
         res = []
         res.append("extcap {version=0.0.1}{display=UWB sniffer for 802.15.4}")
-        for port in comports():
+        for port in comports(include_links=True):
             res.append ("interface {value=%s}{display=UWB Sniffer for 802.15.4}" % (port.device,) )
-        # res.append ("interface {value=/dev/pts/4}{display=UWB Sniffer for 802.15.4}")
         return "\n".join(res)
 
     @staticmethod

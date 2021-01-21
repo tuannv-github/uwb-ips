@@ -103,7 +103,9 @@ process_rx_data_queue(struct os_event *ev)
     static char sbuff[32];
 
     while((om = os_mqueue_get(&g_rx_pkt_q)) != NULL) {
+        hal_gpio_write(LED_1, 0);
         if(g_running){
+            hal_gpio_write(LED_2, 0);
             int payload_len = OS_MBUF_PKTLEN(om);
             payload_len = (payload_len > sizeof(buff)) ? sizeof(buff) : payload_len;
             struct uwb_msg_hdr *hdr = (struct uwb_msg_hdr*)(OS_MBUF_USRHDR(om));
@@ -122,8 +124,10 @@ process_rx_data_queue(struct os_event *ev)
                 sprintf(sbuff, " power: %d lqi: 0 time: %lld\r\n", (int)rssi, hdr->utime);
                 serial_write_str(sbuff);
             }
+            hal_gpio_write(LED_2, 1);
         }
         os_mbuf_free_chain(om);
+        hal_gpio_write(LED_1, 1);
     }
 }
 
@@ -212,6 +216,9 @@ main(int argc, char **argv){
         OS_WAIT_FOREVER,
         g_wireshark_task_stack,
         MYNEWT_VAL(TASK_WIRESHARK_STACK_SIZE));
+
+    hal_gpio_init_out(LED_1, 1);
+    hal_gpio_init_out(LED_2, 1);
 
     /* Loop */
     while (1) {

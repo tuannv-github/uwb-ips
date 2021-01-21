@@ -38,8 +38,8 @@ STATS_NAME_START(uwb_ccp_stat_section)
     STATS_NAME(uwb_ccp_stat_section, see_another_master)
 STATS_NAME_END(uwb_ccp_stat_section)
 
-#define FCNTL_CCP_SYNC 0x00C5
-#define FCNTL_CCP_REQT 0x00C6
+#define FCNTL_CCP_SYNC 0xC5
+#define FCNTL_CCP_REQT 0xC6
 
 #define CCP_STATS_INC(__X) STATS_INC(ccp->stat, __X)
 #define CCP_STATS_SET(__X, __N) {STATS_CLEAR(ccp->stat, __X);STATS_INCN(ccp->stat, __X, __N);}
@@ -170,7 +170,7 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     struct uwb_ccp_instance *ccp = (struct uwb_ccp_instance *)cbs->inst_ptr;
 
     /* CCP filter function control */
-    if (inst->fctrl != FCNTL_CCP_SYNC && inst->fctrl != FCNTL_CCP_REQT){
+    if (inst->fctrl_array[0] != FCNTL_CCP_SYNC && inst->fctrl_array[0] != FCNTL_CCP_REQT){
         if(dpl_sem_get_count(&ccp->sem) == 0){
             // We're hunting for a ccp but received something else,
             // set a long timeout and keep listening
@@ -330,7 +330,7 @@ rx_complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
         }
     }
 
-    if(inst->fctrl == FCNTL_CCP_SYNC){
+    if(inst->fctrl_array[0] == FCNTL_CCP_SYNC){
         /* Call all available superframe callbacks */
         struct uwb_mac_interface * lcbs = NULL;
         if(!(SLIST_EMPTY(&inst->interface_cbs))) {

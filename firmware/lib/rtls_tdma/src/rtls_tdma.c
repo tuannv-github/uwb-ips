@@ -76,7 +76,9 @@ rtls_tdma_slot_listen(rtls_tdma_instance_t *rti, uint16_t idx)
 
 static void
 node_slot_map_printf(rtls_tdma_instance_t *rti){
-    printf("- My slot: %d\n", rti->slot_idx);
+    if(rti->slot_idx != 0){
+        printf("- My slot: %d\n", rti->slot_idx);
+    }
     for(int i=1; i<MYNEWT_VAL(TDMA_NSLOTS); i++){
         if(rti->nodes[i].addr!=0){
             printf("--- Slot: %02d, addr: 0x%04x, accepted: %d, map:", i, rti->nodes[i].addr, rti->nodes[i].accepted);
