@@ -86,9 +86,9 @@ Suppose there are three unique anchor points in three dimensional space: $A_1(x_
 and $A_3(x_3, y_3,z_3)$ and an unknown tag point $T(x,y,z)$ with three known distances to each anchor point:
 \begin{equation}
     \begin{split}
-        d_1 = | T - A_1| \\
-        d_2 = | T - A_2| \\
-        d_3 = | T - A_3|
+        d_1 &= \| T - A_1 \|_2 \\
+        d_2 &= \| T - A_2 \|_2 \\
+        d_3 &= \| T - A_3 \|_2
     \end{split}
 \end{equation}
 The problem of finding the coordinates of $T$ is called multilateration in 3D space. The name is derived from trilateration, a  geometrical problem of determining an unknown position on a plane based on the distance to other two known vertices of a triangle (the length of two sides). In this section, closed-form solution for multilateration problem is derived base on a simplified problem.
@@ -170,9 +170,9 @@ Since $\Vert \boldsymbol{e_x} \Vert = 1$, the scalar projection of $\overrightar
     \label{fig:multilateration}
 \end{figure}
 
-The component of $\overrightarrow{A_1A_3}$ lies on $e_y$ is $A_3-A_1-(s*\boldsymbol{e_x})$. Hence:
+The component of $\overrightarrow{A_1A_3}$ lies on $e_y$ is $A_3-A_1-(V_x*\boldsymbol{e_x})$. Hence:
 \begin{equation}
-    \boldsymbol{e_y} = \frac{A_3-A_1-(s*\boldsymbol{e_x})}{\Vert A_3-A_1-(s*\boldsymbol{e_x})\Vert}
+    \boldsymbol{e_y} = \frac{A_3-A_1-(V_x*\boldsymbol{e_x})}{\Vert A_3-A_1-(V_x*\boldsymbol{e_x})\Vert}
 \end{equation}
 Finally, $\boldsymbol{e_z}$ is the cross product of the two other unit vectors.
 \begin{equation}
