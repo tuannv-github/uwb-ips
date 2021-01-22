@@ -89,5 +89,7 @@ udevadm info -a -n /dev/ttyUSB1 | grep '{serial}'
 Re-apply udev rule:
 ```
 systemctl restart systemd-udevd.service
+```
+```
 sudo udevadm control --reload-rules && udevadm trigger
 ```
