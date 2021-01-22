@@ -1,5 +1,5 @@
 \providecommand{\main}{..}
-\documentclass[\main/main.tex]{subfiles}
+\documentclass[\main/thesis.tex]{subfiles}
 
 \begin{document}
 \graphicspath{{img/}{summary/img/}}
@@ -23,5 +23,7 @@ Follows are some plans for future work:
     \item Test and deploy the network with more cells: The current system has been tested with 3 cells, more cells may be required for a practical application.
     \item Optimize system to extend battery life: In the current system, an anchor can last for approximately 8.0 hours with a 600mAh backup battery. Better battery life can be achieved by increasing the sleep interval of the TDMA network or even replacing TDMA with another multiple access method.
     \item Design and implement a reliable protocol based on best-effort broadcast service provided by Bluetooth mesh network: Currently, Bluetooth mesh network only provides best-effort broadcast service which makes communication unstable. An application layer reliable mechanism should be built on top of the mesh network to upgrade the performance.
+    \item Implement a better distance measurement scheme: There are some enhance distance measurement methods which might be better than the original two-way ranging one. One of potential methods is called double-side two-way ranging.
+    \item Improve location estimation result using fusion algorithm: Accelerometers, gyroscopes, and sometimes magnetometers can be fused with distances measured to improve the final location estimation result.
 \end{itemize}
 \end{document}
