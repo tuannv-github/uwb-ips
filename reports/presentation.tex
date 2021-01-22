@@ -186,10 +186,10 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \begin{frame}
     \myframetitle{Position estimation: Two-Way Ranging}
     Time of Fight formula: 
-    \begin{equation}
+    \begin{equation*}
         tof = \frac{1}{2} ((tt2 - tt1) - (ta2 - ta1))
         \label{eqn:pos_est_twr_tof}
-    \end{equation}
+    \end{equation*}
     \begin{columns}
         \column{0.3\textwidth}
         \begin{figure}[H]
@@ -226,20 +226,20 @@ Federal Communication Commission (FCC) has defined UWB signal:
             \column{0.8\textwidth}
             $T(x,y,z)$
         \end{columns}
-        \begin{equation}
+        \begin{equation*}
             \begin{split}
-                d_1 = | T - A_1| \\
-                d_2 = | T - A_2| \\
-                d_3 = | T - A_3|
+                d_1 &= \| T - A_1 \|_2 \\
+                d_2 &= \| T - A_2 \|_2 \\
+                d_3 &= \| T - A_3 \|_2
             \end{split}
-        \end{equation}
-        \begin{subequations}
-            \begin{align}
-                & x^2 + y^2 + z^2 = d_1^2 \label{eqn:d1_t_a_a}\\
-                & (x-x_2)^2 + y^2 + z^2 = d_2^2 \label{eqn:d1_t_a_b}\\
-                & (x-x_3)^2 + (y-y_3)^2 + z^2 = d_3^2 \label{eqn:d1_t_a_c}
-            \end{align}
-        \end{subequations}
+        \end{equation*}
+        \begin{equation*}
+            \begin{split}
+                & x^2 + y^2 + z^2 = d_1^2\\
+                & (x-x_2)^2 + y^2 + z^2 = d_2^2 \\
+                & (x-x_3)^2 + (y-y_3)^2 + z^2 = d_3^2
+            \end{split}
+        \end{equation*}
     \column{0.5\textwidth}
         \begin{figure}[H]
             \centering
@@ -250,20 +250,20 @@ Federal Communication Commission (FCC) has defined UWB signal:
     \end{columns}
     \begin{columns}
         \column{0.4\textwidth}
-        \begin{equation}
+        \begin{equation*}
             \begin{split}
                 x &= \frac{d_1^2 - d_2^2 + x_2^2}{2x_2}\\
                 z &= \pm \sqrt{d_1^2 - x^2 - y^2} \\
             \end{split}
             \label{eqn:simplified_multilateration_x}
-        \end{equation}
+        \end{equation*}
         \column{0.6\textwidth}
-        \begin{equation}
+        \begin{equation*}
             \begin{split}
                 y &= \frac{d_1^2 - d_3^2 + x_3^2 + y_3^2 - \frac{x_3(d_1^2 - d_2^2 + x_2^2)}{x_2}}{2y_3}
             \end{split}
             \label{eqn:simplified_multilateration_z}
-        \end{equation}
+        \end{equation*}
     \end{columns}
 \end{frame}
 
@@ -272,33 +272,45 @@ Federal Communication Commission (FCC) has defined UWB signal:
     \begin{columns}
         \column{0.4\textwidth}
         Closed-form Solution:
-        \begin{equation}
+        \begin{equation*}
             \begin{split}
+            U &= \Vert A_2 - A_1 \Vert\\
             \boldsymbol{e_x} &= \frac{A_2-A_1}{\Vert A_2 - A_1\Vert} \\
             V_x &= \Vert A_3 - A_1 \Vert \cos{\gamma} \\
             &= \Vert \boldsymbol{e_x} \Vert \Vert A_3 - A_1 \Vert \cos{\gamma} \\
             &= \boldsymbol{e_x} \cdot (A_3 - A_1) \\
-            \boldsymbol{e_y} &= \frac{A_3-A_1-(s*\boldsymbol{e_x})}{\Vert A_3-A_1-(s*\boldsymbol{e_x})\Vert} \\
+            \boldsymbol{e_y} &= \frac{A_3-A_1-(V_x*\boldsymbol{e_x})}{\Vert A_3-A_1-(V_x*\boldsymbol{e_x})\Vert} \\
+            V_y &= \boldsymbol{e_y} \cdot (A_3 - A_1)\\
             \boldsymbol{e_z} &= \boldsymbol{e_x} \times \boldsymbol{e_y}
             \end{split}
-        \end{equation}
-
+        \end{equation*}
         \column{0.6\textwidth}
         \begin{figure}[H]
             \centering
-            \includegraphics[width=0.8\textwidth]{multilateration.png}
+            \includegraphics[width=0.85\textwidth]{multilateration.png}
             \caption{Multilateration in Euclidean space}
             \label{fig:multilateration}
         \end{figure}
     \end{columns}
-    \begin{equation}
-        \begin{split}
-            &B_0(0,0,0) \\
-            &B_1(U, 0, 0) = B_1(\Vert A_2 - A_1 \Vert, 0, 0) \\
-            &B_2(V_x, V_y, 0) = B_2(\boldsymbol{e_x} \cdot (A_3 - A_1), \boldsymbol{e_y} \cdot (A_3 - A_1), 0) 
-        \end{split}
-        \label{eqn:multilateration_to_simplified_problem}
-    \end{equation}
+    \begin{columns}
+        \column{0.6\textwidth}
+        \begin{equation*}
+            \begin{split}
+                &B_0(0,0,0) \\
+                &B_1(U, 0, 0) = B_1(\Vert A_2 - A_1 \Vert, 0, 0) \\
+                &B_2(V_x, V_y, 0) = B_2(\boldsymbol{e_x} \cdot (A_3 - A_1), \boldsymbol{e_y} \cdot (A_3 - A_1), 0) 
+            \end{split}
+            \label{eqn:multilateration_to_simplified_problem}
+        \end{equation*}
+        \column{0.4\textwidth}
+        \begin{equation*}
+            \begin{split}
+                T_1 = A_1 + x_t\boldsymbol{e_x} + y_t\boldsymbol{e_y} + z_t\boldsymbol{e_z} \\
+                T_2 = A_1 + x_t\boldsymbol{e_x} + y_t\boldsymbol{e_y} - z_t\boldsymbol{e_z} 
+            \end{split}
+            \label{eqn:multilateration_inverse_transfrom}
+        \end{equation*}
+    \end{columns}
 \end{frame}
 
 \begin{frame}
@@ -308,10 +320,10 @@ Federal Communication Commission (FCC) has defined UWB signal:
         \includegraphics[width=1\textwidth]{tof_to_distance.png}
         \caption{ToF to distance}
     \end{figure}
-    \begin{equation}
+    \begin{equation*}
         d = w*ToF + b
         \label{eqn:distance_model}
-    \end{equation}
+    \end{equation*}
     Using LinearRegression model of sklearn library:
     \begin{itemize}
         \item $w = 0.004632130984819555$: The slope of estimated model 
