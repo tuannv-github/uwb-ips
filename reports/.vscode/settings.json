@@ -9,4 +9,22 @@
         "rx",
         "tdma"
     ],
+    "grammarly.overrides": [
+        {
+            "files": [
+                "**/summary/summary.tex"
+            ],
+            "config": {
+                "audience": "expert",
+                "dialect": "american",
+                "domain": "technical",
+                "emotions": [
+                    "neutral"
+                ],
+                "goals": [
+                    "inform"
+                ]
+            }
+        }
+    ],
 }
