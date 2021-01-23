@@ -452,15 +452,14 @@ Federal Communication Commission (FCC) has defined UWB signal:
                 & ep_m = t^k_m - T_{SHR}\\
                 & ep_l = t^k_l - T_{SHR} \\
                 & ep_o = t_h - f_{d2h}(t_d - t^k_l) - T_{SHR}\\
-                & t_{wake up} = ep_o + \tau - T_{latency}
             \end{split}
         \end{equation*}
         \column{0.6\textwidth}
         \begin{equation*}
             \begin{split}
+                & t_{wake up} = ep_o + \tau - T_{latency} \\
                 &T_{hold-off} = n_{repeat}*T_{hold-off-conf} + i_{slot}*T_{ccp}\\
                 &t^{k-repeat} = t^k + T_{hold-off}\\
-                &\tau_{new} = \tau - T_{hold-off}
             \end{split}
         \end{equation*}
     \end{columns}
@@ -475,6 +474,10 @@ Federal Communication Commission (FCC) has defined UWB signal:
 
 \begin{frame}
     \myframetitle{RSA: TDMA state diagram}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{tdma_slot.png}
+    \end{figure}
     2 TDMA states:
     \begin{itemize}
         \item TDMA\_REQT
@@ -492,7 +495,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
         \column{0.25\textwidth}
         \begin{figure}[H]
             \begin{center}
-                \includegraphics[width=0.9\textwidth]{tdma_state_diagram.png}
+                \includegraphics[width=0.8\textwidth]{tdma_state_diagram.png}
             \end{center}
             \caption{TDMA state diagram}
             \label{fig:tdma_state_diagram}
