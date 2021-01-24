@@ -13,7 +13,7 @@ After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/home/debian/thesis/software/linux/autorun.sh
+ExecStart=/home/debian/indoor-positioning-system/software/linux/autorun.sh
 
 [Install]
 WantedBy=multi-user.target
