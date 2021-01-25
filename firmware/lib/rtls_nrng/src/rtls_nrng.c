@@ -664,15 +664,10 @@ nrng_twr_to_tof_frames(struct uwb_dev * inst, nrng_frame_t *first_frame, nrng_fr
             break;
         case UWB_DATA_CODE_SS_TWR_NRNG ... UWB_DATA_CODE_SS_TWR_NRNG_FINAL:{
             assert(first_frame != NULL);
-#if MYNEWT_VAL(UWB_WCS_ENABLED)
-            ToF = ((first_frame->response_timestamp - first_frame->request_timestamp)
-                    -  (first_frame->transmission_timestamp - first_frame->reception_timestamp))/2.0f;
-#else
             float skew = uwb_calc_clock_offset_ratio(inst, first_frame->carrier_integrator,
                                                      UWB_CR_CARRIER_INTEGRATOR);
             ToF = ((first_frame->response_timestamp - first_frame->request_timestamp)
                     -  (first_frame->transmission_timestamp - first_frame->reception_timestamp) * (1 - skew))/2.0f;
-#endif
             break;
             }
         default: break;
