@@ -77,7 +77,7 @@ void nearest_finder(sphere_t *sphere, location_t *a, location_t *b, location_t *
                 + (b->y - sphere->y)*(b->y - sphere->y)
                 + (b->z - sphere->z)*(b->z - sphere->z);
     float range = sphere->r*sphere->r;
-    if(fabs(distA - range) < fabs(distB - range)){
+    if(fabs(distA - range) < fabs(distB - range) || (a->z < 3)){
         memcpy(c, a, sizeof(location_t));
     }
     else{
