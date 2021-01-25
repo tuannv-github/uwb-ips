@@ -209,6 +209,29 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
+    \myframetitle{Position estimation: ToF to Distance}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{tof_to_distance.png}
+        \caption{ToF to distance}
+    \end{figure}
+    \begin{equation*}
+        d = w*ToF + b
+        \label{eqn:distance_model}
+    \end{equation*}
+    Using LinearRegression model of sklearn library:
+    \begin{itemize}
+        \item $w = 0.004632130984819555$: The slope of estimated model 
+        \item $b = 0.13043560944811894$: The bias of estimated model
+    \end{itemize}
+    Mean error:
+    \begin{equation*}
+        e = \frac{1}{n} \sum_{k = 1}^{n} | d^k_{est}-d^k \vert = \frac{1}{n} \sum_{k = 1}^{n} | w*ToF^k + b -d^k \vert  = 0.04095793575440317 (m)
+        \label{eqn:distance_model_loss}
+    \end{equation*}
+\end{frame}
+
+\begin{frame}
     \myframetitle{Position estimation: Multilateration}
     \begin{columns}
     \column{0.5\textwidth}
@@ -296,9 +319,9 @@ Federal Communication Commission (FCC) has defined UWB signal:
         \column{0.6\textwidth}
         \begin{equation*}
             \begin{split}
-                &B_0(0,0,0) \\
-                &B_1(U, 0, 0) = B_1(\Vert A_2 - A_1 \Vert, 0, 0) \\
-                &B_2(V_x, V_y, 0) = B_2(\boldsymbol{e_x} \cdot (A_3 - A_1), \boldsymbol{e_y} \cdot (A_3 - A_1), 0) 
+                &B_1(0,0,0) \\
+                &B_2(U, 0, 0) = B_1(\Vert A_2 - A_1 \Vert, 0, 0) \\
+                &B_3(V_x, V_y, 0) = B_2(\boldsymbol{e_x} \cdot (A_3 - A_1), \boldsymbol{e_y} \cdot (A_3 - A_1), 0) 
             \end{split}
             \label{eqn:multilateration_to_simplified_problem}
         \end{equation*}
@@ -313,33 +336,10 @@ Federal Communication Commission (FCC) has defined UWB signal:
     \end{columns}
 \end{frame}
 
-\begin{frame}
-    \myframetitle{Position estimation: ToF to Distance}
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=1\textwidth]{tof_to_distance.png}
-        \caption{ToF to distance}
-    \end{figure}
-    \begin{equation*}
-        d = w*ToF + b
-        \label{eqn:distance_model}
-    \end{equation*}
-    Using LinearRegression model of sklearn library:
-    \begin{itemize}
-        \item $w = 0.004632130984819555$: The slope of estimated model 
-        \item $b = 0.13043560944811894$: The bias of estimated model
-    \end{itemize}
-    Mean error:
-    \begin{equation*}
-        e = \frac{1}{n} \sum_{k = 1}^{n} | d^k_{est}-d^k \vert = \frac{1}{n} \sum_{k = 1}^{n} | w*ToF^k + b -d^k \vert  = 0.04095793575440317 (m)
-        \label{eqn:distance_model_loss}
-    \end{equation*}
-\end{frame}
-
 \section{Ranging System Architecture}
 
 \begin{frame}
-    \myframetitle{RAS: Layered Architecture}
+    \myframetitle{RSA: Layered Architecture}
 \begin{figure}[H]
     \begin{columns}
         \column{0.6\textwidth}
@@ -360,14 +360,14 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \myframetitle{RAS: CCP state diagram}
+    \myframetitle{RSA: CCP state diagram}
     % \begin{columns}
         % \column{0.4\textwidth}
         CCP state:
         \begin{itemize}
             \item Slave: CCP\_SLAVE
-            \item Master:  CCP\_MASTER
             \item Master Request: CCP\_MASTER\_REQT
+            \item Master:  CCP\_MASTER
         \end{itemize}
         % \column{0.6\textwidth}
         \begin{figure}[H]
@@ -380,7 +380,7 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \myframetitle{RAS: Slave Flowchart}
+    \myframetitle{RSA: Slave Flowchart}
     \begin{columns}
         \column{0.5\textwidth}
         \begin{figure}[H]
@@ -400,20 +400,20 @@ Federal Communication Commission (FCC) has defined UWB signal:
 \end{frame}
 
 \begin{frame}
-    \myframetitle{RAS: Master and Master Request Flowchart}
+    \myframetitle{RSA: Master and Master Request Flowchart}
     \begin{columns}
-        \column{0.5\textwidth}
-        \begin{figure}[H]
-            \centering
-            \includegraphics[width=0.45\textwidth]{ccp_master_flow_chart.png}
-            \caption{CCP master flowchart}
-        \end{figure}
         \column{0.5\textwidth}
         \begin{figure}[H]
             \centering
             \includegraphics[width=0.65\textwidth]{ccp_master_reqt_flow_chart.png}
             \caption{CCP master request flowchart}
             \label{fig:ccp_slave_flow_chart}
+        \end{figure}
+        \column{0.5\textwidth}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.45\textwidth]{ccp_master_flow_chart.png}
+            \caption{CCP master flowchart}
         \end{figure}
     \end{columns}
 \end{frame}
@@ -609,10 +609,10 @@ Federal Communication Commission (FCC) has defined UWB signal:
     \myframetitle{Bluetooth Mesh: Architecture}
     Terminology:
     \begin{itemize}
+        \item Element: primary element + additional secondary elements
         \item Network: network addresses, network keys
         \item Provisioning: devices and nodes
         \item Address: unicast address, virtual address, group address
-        \item Element: primary  element + additional secondary elements
         \item Model: basic functionality of a element
     \end{itemize}
     \begin{columns}
