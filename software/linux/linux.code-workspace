@@ -7,9 +7,6 @@
 			"path": "gateway"
 		},
 		{
-			"path": "../algorithm"
-		},
-		{
 			"path": "."
 		}
 	],

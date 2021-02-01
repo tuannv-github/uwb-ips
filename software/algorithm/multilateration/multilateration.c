@@ -119,7 +119,7 @@ int main(){
     trilateration_result_t tr;
     trilaterate(spheres, &tr);
     printf("PA: %.5f %.5f %.5f\n", tr.PA.x, tr.PA.y, tr.PA.z);
-    printf("PA: %.5f %.5f %.5f\n", tr.PB.x, tr.PB.y, tr.PB.z);
+    printf("PB: %.5f %.5f %.5f\n", tr.PB.x, tr.PB.y, tr.PB.z);
 
     sphere_t sphere = {
         0,5,5,7.180278010403454
@@ -127,5 +127,6 @@ int main(){
     location_t result;
     nearest_finder(&sphere, &tr.PA, &tr.PB, &result);
     printf("Result: %.5f %.5f %.5f\n", result.x, result.y, result.z);
+    
     return 0;
 }

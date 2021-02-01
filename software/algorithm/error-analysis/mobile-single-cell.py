@@ -7,8 +7,8 @@ ax = plt.gca()
 
 plt.plot([0.6, 12, 12, 0.6, 0.6], [0.6, 0.6, 3, 3, 0.6], 'r')
 
-DATA_DIR = "square"
-f = open(DATA_DIR + "/" + "06", 'r')
+DATA_DIR = "mobile-single-cell"
+f = open(DATA_DIR + "/" + "location", 'r')
 for line in f.readlines():
     est = np.array(line.split(" ")[:-1])
     print(est)

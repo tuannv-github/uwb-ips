@@ -88,13 +88,8 @@ function nearest_finder(sphere, locationA, locationB){
 }
 
 const fs = require('fs');
-let data = fs.readFileSync('dataset.txt');
+let data = fs.readFileSync('location_dataset.txt');
 let json = JSON.parse(data);
-
-// ranges = json[0].data
-// console.log(ranges)
-// location = trilaterate(ranges);
-// console.log(location);
 
 fs.writeFileSync("location_js.txt","",(err) => {
     if (err) throw err;

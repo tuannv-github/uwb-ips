@@ -1,12 +1,9 @@
+HTTP Server
 ```
-python manage.py startapp home
-```
-
-```
-python manage.py runserver 0.0.0.0:8000
-python manage.py runserver 0.0.0.0:9000
+sudo python3 manage.py runserver 0.0.0.0:80
 ```
 
+Beagle Bone Green Wi-fi config
 ```
 sudo connmanctl
 scan wifi

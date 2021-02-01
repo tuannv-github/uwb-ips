@@ -23,8 +23,7 @@ anchor_y = ANCHORS[:, 1]
 anchor_z = ANCHORS[:, 2]
 ax.scatter(anchor_x, anchor_y, anchor_z)
 
-f = open("dataset.txt", 'w')
-# f.write('anchor_x, anchor_y, anchor_z, d, tag_x, tag_y, tag_z\n')
+f = open("location_dataset.txt", 'w')
 
 TAGS = []
 DISTANCES = []
