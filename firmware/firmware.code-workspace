@@ -33,7 +33,8 @@
 			"system_error": "c",
 			"cstdio": "c",
 			"unordered_map": "c",
-			"cstddef": "c"
+			"cstddef": "c",
+			"random": "c"
 		},
 		"cSpell.words": [
 			"addresses",

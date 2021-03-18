@@ -1139,33 +1139,35 @@ class MAVLink_distance_message(MAVLink_message):
         '''
         id = MAVLINK_MSG_ID_DISTANCE
         name = 'DISTANCE'
-        fieldnames = ['uwb_address', 'anchor', 'distance']
-        ordered_fieldnames = ['distance', 'uwb_address', 'anchor']
-        fieldtypes = ['uint16_t', 'uint16_t', 'float']
+        fieldnames = ['uwb_address', 'rx', 'ry', 'rz', 'distance']
+        ordered_fieldnames = ['rx', 'ry', 'rz', 'distance', 'uwb_address']
+        fieldtypes = ['uint16_t', 'float', 'float', 'float', 'float']
         fielddisplays_by_name = {}
         fieldenums_by_name = {}
         fieldunits_by_name = {}
-        format = '<fHH'
-        native_format = bytearray('<fHH', 'ascii')
-        orders = [1, 2, 0]
-        lengths = [1, 1, 1]
-        array_lengths = [0, 0, 0]
-        crc_extra = 33
-        unpacker = struct.Struct('<fHH')
+        format = '<ffffH'
+        native_format = bytearray('<ffffH', 'ascii')
+        orders = [4, 0, 1, 2, 3]
+        lengths = [1, 1, 1, 1, 1]
+        array_lengths = [0, 0, 0, 0, 0]
+        crc_extra = 13
+        unpacker = struct.Struct('<ffffH')
         instance_field = None
         instance_offset = -1
 
-        def __init__(self, uwb_address, anchor, distance):
+        def __init__(self, uwb_address, rx, ry, rz, distance):
                 MAVLink_message.__init__(self, MAVLink_distance_message.id, MAVLink_distance_message.name)
                 self._fieldnames = MAVLink_distance_message.fieldnames
                 self._instance_field = MAVLink_distance_message.instance_field
                 self._instance_offset = MAVLink_distance_message.instance_offset
                 self.uwb_address = uwb_address
-                self.anchor = anchor
+                self.rx = rx
+                self.ry = ry
+                self.rz = rz
                 self.distance = distance
 
         def pack(self, mav, force_mavlink1=False):
-                return MAVLink_message.pack(self, mav, 33, struct.pack('<fHH', self.distance, self.uwb_address, self.anchor), force_mavlink1=force_mavlink1)
+                return MAVLink_message.pack(self, mav, 13, struct.pack('<ffffH', self.rx, self.ry, self.rz, self.distance, self.uwb_address), force_mavlink1=force_mavlink1)
 
 class MAVLink_tof_message(MAVLink_message):
         '''
@@ -2236,27 +2238,31 @@ class MAVLink(object):
                 '''
                 return self.send(self.location_reduced_encode(mesh_address, location_x, location_y), force_mavlink1=force_mavlink1)
 
-        def distance_encode(self, uwb_address, anchor, distance):
+        def distance_encode(self, uwb_address, rx, ry, rz, distance):
                 '''
                 Distance message
 
                 uwb_address               :  (type:uint16_t)
-                anchor                    :  (type:uint16_t)
+                rx                        :  (type:float)
+                ry                        :  (type:float)
+                rz                        :  (type:float)
                 distance                  :  (type:float)
 
                 '''
-                return MAVLink_distance_message(uwb_address, anchor, distance)
+                return MAVLink_distance_message(uwb_address, rx, ry, rz, distance)
 
-        def distance_send(self, uwb_address, anchor, distance, force_mavlink1=False):
+        def distance_send(self, uwb_address, rx, ry, rz, distance, force_mavlink1=False):
                 '''
                 Distance message
 
                 uwb_address               :  (type:uint16_t)
-                anchor                    :  (type:uint16_t)
+                rx                        :  (type:float)
+                ry                        :  (type:float)
+                rz                        :  (type:float)
                 distance                  :  (type:float)
 
                 '''
-                return self.send(self.distance_encode(uwb_address, anchor, distance), force_mavlink1=force_mavlink1)
+                return self.send(self.distance_encode(uwb_address, rx, ry, rz, distance), force_mavlink1=force_mavlink1)
 
         def tof_encode(self, uwb_address, anchor, tof):
                 '''

@@ -40,9 +40,6 @@ static rtls_tdma_instance_t g_rtls_tdma_instance = {
     .rtls_tdma_cb = rtls_tdma_cb
 };
 
-static struct os_task g_rtls_gateway_task;
-static os_stack_t g_task_rtls_gatway_stack[MYNEWT_VAL(TASK_GATEWAY_STACK_SIZE)];
-
 static char *
 rtls_get(int argc, char **argv, char *val, int val_len_max)
 {
@@ -126,7 +123,6 @@ static struct conf_handler rtls_handler = {
 struct uwb_dev *udev;
 static location_t location_result;
 static bool location_updated_ble;
-static bool location_updated;
 bool rtls_get_location(float *x, float *y, float *z){
     if(rtls_conf.node_type == ANCHOR){
         *x = rtls_conf.location_x;
@@ -230,15 +226,8 @@ void rtls_tdma_cb(rtls_tdma_instance_t *rti, tdma_slot_t *slot){
 }
 
 static distance_t g_distance;
-static distance_t g_distance4;
-
-distance_t *get_distances(){
-    return &g_distance4;
-}
-
-static sphere_t g_spheres[4];
-static uint16_t anchor_addrs[4];
-static trilateration_result_t g_tr;
+static mavlink_message_t mavlink_msg;
+static char mav_send_buf[128];
 
 static bool
 complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
@@ -252,106 +241,31 @@ complete_cb(struct uwb_dev * inst, struct uwb_mac_interface * cbs)
     struct nrng_instance *nrng = (struct nrng_instance *)cbs->inst_ptr;
     nrng_get_tofs_addresses( nrng, g_distance.tofs, g_distance.anchors, g_distance.updated, ANCHOR_NUM, nrng->idx);
 
-    printf("-------------\n");
-    uint16_t updated_counter = 0;
-    for(int j=0; j<ANCHOR_NUM; j++){
-        if(g_distance.anchors[j] != 0 && g_distance.updated[j]){
-            updated_counter++;
-            printf("0x%04X: %5ld\n", g_distance.anchors[j], g_distance.tofs[j]); 
-        }
-    }
-    printf("updated_counter: %d\n", updated_counter);
-    printf("-------\n");
-
-    uint32_t max_tof = 0;
-    for(int i=0; i<4; i++){
-        g_distance4.updated[i] = false;
-        g_distance4.anchors[i] = 0;
-        uint32_t min_tof = -1;
-        
-        for(int j=0; j<ANCHOR_NUM; j++){
-            if(g_distance.anchors[j] != 0 && g_distance.updated[j]){
-                if(g_distance.tofs[j] >= max_tof && g_distance.tofs[j] <= min_tof){
-                    bool cont = false;
-                    if(g_distance.tofs[j] == max_tof){
-                        for(int k=0; k<i; k++){
-                            if(g_distance.anchors[j] == g_distance4.anchors[k]){
-                                cont = true;
-                                break;
-                            }
-                        }
-                    }
-                    if(cont) continue;
-                    min_tof = g_distance.tofs[j];
-                    g_distance4.tofs[i] =  g_distance.tofs[j];
-                    g_distance4.anchors[i] = g_distance.anchors[j];
-                    g_distance4.updated[i] = true;
-                }
-            }
-        }
-        if(min_tof != -1){
-            max_tof = min_tof;
-        }
-    }
-    printf("max_tof: %ld\n", max_tof);
-
-
-    uint8_t sphere_idx = 0;
-    for(int i=0; i<4; i++){
-        if(g_distance4.anchors[i] != 0 && g_distance4.updated[i]){
-            printf("0x%04X: %5ld\n", g_distance4.anchors[i], g_distance4.tofs[i]); 
-            rtls_tdma_node_t *node = NULL;
-            rtls_tdma_find_node(&g_rtls_tdma_instance, g_distance4.anchors[i], &node);
-            if(node != NULL){
-                g_spheres[sphere_idx].x = node->location_x;
-                g_spheres[sphere_idx].y = node->location_y;
-                g_spheres[sphere_idx].z = node->location_z;
-                g_spheres[sphere_idx].r = 0.004632130984819555*g_distance4.tofs[i] +  0.13043560944811894;
-                anchor_addrs[sphere_idx] = g_distance4.anchors[i];
-                sphere_idx++;
-                if(sphere_idx == 4) break;
-            }
-        }
-    }
-
-    if(sphere_idx == 4){
-        trilaterate(g_spheres, &g_tr);
-        nearest_finder(&g_spheres[3], &g_tr.PA, &g_tr.PB, &location_result);
-        printf("Location: %d.%d %d.%d %d.%d\n", 
-                (int)location_result.x, (int)(1000*(location_result.x - (int)location_result.x)),
-                (int)location_result.y, (int)(1000*(location_result.y - (int)location_result.y)),
-                (int)location_result.z, (int)(1000*(location_result.z - (int)location_result.z)));
-        location_updated = true;
-        location_updated_ble = true;
-    }
-
-    for(int j=0; j<ANCHOR_NUM; j++){
-        g_distance.anchors[j] = 0;
-        g_distance.updated[j] = false;
-    }
-
     return true;
 }
 
-static mavlink_message_t mavlink_msg;
-static char mav_send_buf[128];
+static struct os_task g_rtls_gateway_task;
+static os_stack_t g_task_rtls_gatway_stack[MYNEWT_VAL(TASK_GATEWAY_STACK_SIZE)];
 
 static void
 task_rtls_gateway_func(void *arg){
-    uint16_t len;
     while(1){
         dpl_time_delay(dpl_time_ms_to_ticks32(MYNEWT_VAL(UWB_CCP_PERIOD)/1000));
 
-        if(location_updated){
-            location_updated = false;
-            mavlink_msg_tag_pack(0,0,&mavlink_msg,
-                anchor_addrs[0], g_spheres[0].x, g_spheres[0].y, g_spheres[0].z, g_spheres[0].r,
-                anchor_addrs[1], g_spheres[1].x, g_spheres[1].y, g_spheres[1].z, g_spheres[1].r,
-                anchor_addrs[2], g_spheres[2].x, g_spheres[2].y, g_spheres[2].z, g_spheres[2].r,
-                anchor_addrs[3], g_spheres[3].x, g_spheres[3].y, g_spheres[3].z, g_spheres[3].r,
-                g_rtls_tdma_instance.dev_inst->my_short_address, location_result.x, location_result.y, location_result.z);
-                len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
-                serial_write(mav_send_buf, len);
+        for(int j=0; j<ANCHOR_NUM; j++){
+            if(g_distance.anchors[j] != 0 && g_distance.updated[j]){
+                g_distance.updated[j] = false;
+                printf("0x%04X: %5ld\n", g_distance.anchors[j], g_distance.tofs[j]);
+
+                rtls_tdma_node_t *node = NULL;
+                rtls_tdma_find_node(&g_rtls_tdma_instance, g_distance.anchors[j], &node);
+                if(node != NULL){
+                    float r = 0.004632130984819555*g_distance.tofs[j] +  0.13043560944811894;
+                    mavlink_msg_distance_pack(0,0,&mavlink_msg, node->addr, node->location_x, node->location_y, node->location_z, r);
+                    uint16_t len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
+                    serial_write(mav_send_buf, len);
+                }
+            }
         }
     }
 }

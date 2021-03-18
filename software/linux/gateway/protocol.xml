@@ -209,7 +209,9 @@
 		<message id="22" name="DISTANCE">
 			<description>Distance message</description>
 			<field type="uint16_t" name="uwb_address"/>
-			<field type="uint16_t" name="anchor"/>
+			<field type="float" name="rx"/>
+			<field type="float" name="ry"/>
+			<field type="float" name="rz"/>
 			<field type="float" name="distance"/>
 		</message>
 
