@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import pylink
+from pylink.jlink import JLink
 import os
 import sys
 
@@ -13,7 +13,7 @@ def main(argv, snl):
     os.system(cmd)
     cmd = image_template % (argv[0])
     os.system(cmd)
-    jlink = pylink.JLink()
+    jlink = JLink()
     counter = 0
     for emulator in jlink.connected_emulators():
         if snl is None or emulator.SerialNumber in snl:
