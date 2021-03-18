@@ -136,7 +136,7 @@
           "request": "launch",
           "name": "Debug: gateway",
           "program": "/home/tuannv/thesis/firmware/bin/targets/gateway_pca10040/app/apps/gateway/gateway.elf",
-          "toolchain": "/usr/local/bin/",
+          "toolchain": "/usr/bin/",
           "client": "arm-none-eabi-gdb",
           "server": "JLinkGDBServer",
           "windows": {

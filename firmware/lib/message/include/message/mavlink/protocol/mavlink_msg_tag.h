@@ -1,7 +1,7 @@
 #pragma once
 // MESSAGE TAG PACKING
 
-#define MAVLINK_MSG_ID_TAG 8
+#define MAVLINK_MSG_ID_TAG 25
 
 
 typedef struct __mavlink_tag_t {
@@ -33,17 +33,17 @@ typedef struct __mavlink_tag_t {
 
 #define MAVLINK_MSG_ID_TAG_LEN 86
 #define MAVLINK_MSG_ID_TAG_MIN_LEN 86
-#define MAVLINK_MSG_ID_8_LEN 86
-#define MAVLINK_MSG_ID_8_MIN_LEN 86
+#define MAVLINK_MSG_ID_25_LEN 86
+#define MAVLINK_MSG_ID_25_MIN_LEN 86
 
 #define MAVLINK_MSG_ID_TAG_CRC 71
-#define MAVLINK_MSG_ID_8_CRC 71
+#define MAVLINK_MSG_ID_25_CRC 71
 
 
 
 #if MAVLINK_COMMAND_24BIT
 #define MAVLINK_MESSAGE_INFO_TAG { \
-    8, \
+    25, \
     "TAG", \
     24, \
     {  { "a0", NULL, MAVLINK_TYPE_UINT16_T, 0, 76, offsetof(mavlink_tag_t, a0) }, \

@@ -3,6 +3,51 @@
 	<version>3</version>
 
 	<enums>
+		<enum name="resond_t">
+			<entry name="RESPOND_OK"></entry>
+			<entry name="RESPOND_ERROR"></entry>
+		</enum>
+
+		<enum name="rmode_t">
+			<entry name="MODE_RUN"></entry>
+			<entry name="MODE_HW"></entry>
+			<entry name="MODE_IMU"></entry>
+			<entry name="MODE_PIDT_TW"></entry>
+			<entry name="MODE_PIDT_TA"></entry>
+		</enum>
+
+		<enum name="cmd_t">
+			<entry name="CMD_SAVE"></entry>
+			<entry name="CMD_LOAD"></entry>
+		</enum>
+
+		<enum name="sensor_t">
+			<entry name="SENSOR_IMU_OK"></entry>
+			<entry name="SENSOR_IMU_ERROR"></entry>
+		</enum>
+
+		<enum name="bool_t">
+			<entry name="MAV_FALSE"></entry>
+			<entry name="MAV_TRUE"></entry>
+		</enum>
+
+		<enum name="pidc_t">
+			<entry name="PID_TILT"></entry>
+			<entry name="PID_VEL"></entry>
+			<entry name="PID_POS"></entry>
+
+			<entry name="PID_WHE0"></entry>
+			<entry name="PID_WHE1"></entry>
+			<entry name="PID_WHE2"></entry>
+			<entry name="PID_WHE3"></entry>
+			<entry name="PID_SYNC"></entry>
+		</enum>
+
+		<enum name="tilt_type_t">
+			<entry name="ROLL"></entry>
+			<entry name="PITCH"></entry>
+		</enum>
+
 		<enum name="role_t">
 			<entry name="ANCHOR"></entry>
 			<entry name="TAG"></entry>
@@ -10,52 +55,178 @@
 	</enums>
 
 	<messages>
-		<message id="0" name="BLINK">
+		<message id="0" name="RESPOND">
+			<description>Respond for a reliable communication</description>
+			<field type="uint8_t" name="respond" enum="resond_t">Respond</field>
+		</message>
+
+		<message id="1" name="CMD_CHANGE_MODE">
+			<description>Command Change Mode. Need a respond message for confimation</description>
+			<field type="uint8_t" name="cmd_change_mode" enum="rmode_t">Mode</field>
+		</message>
+
+		<message id="2" name="CMD_PARAMS">
+			<description>Save Or Load Params</description>
+			<field type="int8_t" name="cmd_params" enum="cmd_params_t">save or load params</field>
+		</message>
+
+		<message id="3" name="CMD_VELOCITY">
+			<description>Velocity command. No need a respond message for confimation</description>
+			<field type="float" name="v">Velocity</field>
+			<field type="float" name="omega">Omega</field>
+		</message>
+
+		<message id="4" name="EVT_TILT">
+			<description>Tilt angle of robot in the calibrated vertical axis. No need a respond message for confimation</description>
+			<field type="float" name="tilt">Tilt</field>
+		</message>
+
+		<message id="5" name="EVT_RPY">
+			<description>Roll pitch and yaw angle of robot in the earth frame. No need a respond message for confimation</description>
+			<field type="float" name="roll">Roll</field>
+			<field type="float" name="pitch">Pitch</field>
+			<field type="float" name="yaw">Yaw</field>
+		</message>
+
+		<message id="6" name="EVT_SENSOR">
+			<description>Report sensor status. No need a respond message for confimation</description>
+			<field type="int8_t" name="imu_status" enum="sensor_t">IMU status</field>
+		</message>
+
+		<message id="7" name="MOTOR_SPEED">
+			<description>Set or info speed for motors. To test the hardware and motor rotaion direction. No need a respond message for confimation</description>
+			<field type="int16_t" name="motor_speed_0">Motor 0 speed</field>
+			<field type="int16_t" name="motor_speed_1">Motor 1 Speed</field>
+		</message>
+
+		<message id="8" name="HW_PARAMS">
+			<description>Switch to invert motor rotation direction. Need a respond message for confimation</description>
+			<field type="int8_t" name="motor0_invert" enum="bool_t">Motor 0 Invert</field>
+			<field type="int8_t" name="motor1_invert" enum="bool_t">Motor 1 Invert</field>
+			<field type="int8_t" name="encoder0_invert" enum="bool_t">Encoder 0 Invert</field>
+			<field type="int8_t" name="encoder1_invert" enum="bool_t">Encoder 1 Invert</field>
+			<field type="int8_t" name="encoder_exchange" enum="bool_t">Switch to invert encoder from motor 0 to motor 1 and vice versa</field>
+			<field type="int16_t" name="motor0_pos_deadband">Motor 0 positive deadband</field>
+			<field type="int16_t" name="motor0_neg_deadband">Motor 0 negative deadband</field>
+			<field type="int16_t" name="motor1_pos_deadband">Motor 1 positive deadband</field>
+			<field type="int16_t" name="motor1_neg_deadband">Motor 1 negative deadband</field>
+		</message>
+
+		<message id="9" name="GYRO_PARAMS">
+			<description>Gyro calibration parameters. No need a respond message for confimation</description>
+			<field type="float" name="gyro_offset_x">Gyro Offset X</field>
+			<field type="float" name="gyro_offset_y">Gyro Offset Y</field>
+			<field type="float" name="gyro_offset_z">Gyro Offset Z</field>
+		</message>
+
+		<message id="10" name="COMP_FILTER_PARAMS">
+			<description>Complimentary filter parameters. No need a respond message for confimation</description>
+			<field type="uint8_t" name="tilt_type" enum="tilt_type_t">Tilt type</field>
+			<field type="float" name="tilt_offset">Tilt angle offset</field>
+			<field type="float" name="g_believe">Belive in gyroscope</field>
+		</message>
+
+		<message id="11" name="EVT_ACCEL_RAW">
+			<description>IMU raw value. No need a respond message for confimation</description>
+			<field type="float" name="acc_x">Accel X</field>
+			<field type="float" name="acc_y">Accel Y</field>
+			<field type="float" name="acc_z">Accel Z</field>
+		</message>
+
+		<message id="12" name="EVT_GYRO_RAW">
+			<description>IMU raw value. No need a respond message for confimation</description>
+			<field type="float" name="gyro_x">Gyro X</field>
+			<field type="float" name="gyro_y">Gyro Y</field>
+			<field type="float" name="gyro_z">Gyro Z</field>
+		</message>
+
+		<message id="13" name="EVT_CALIBRATED_GYRO_RAW">
+			<description>IMU raw value. No need a respond message for confimation</description>
+			<field type="float" name="gyro_x">Gyro X</field>
+			<field type="float" name="gyro_y">Gyro Y</field>
+			<field type="float" name="gyro_z">Gyro Z</field>
+		</message>
+
+		<message id="14" name="EVT_MAG_RAW">
+			<description>IMU raw value. No need a respond message for confimation</description>
+			<field type="float" name="mag_x">Mag X</field>
+			<field type="float" name="mag_y">Mag Y</field>
+			<field type="float" name="mag_z">Mag Z</field>
+		</message>
+
+		<message id="15" name="PID_PARAMS">
+			<description>PID Coefficent. No need a respond message for confimation</description>
+			<field type="uint8_t" name="pid_control" enum="pidc_t">Object that PID control</field>
+			<field type="float" name="KP">KP</field>
+			<field type="float" name="KI">KI</field>
+			<field type="float" name="KD">KD</field>
+		</message>
+
+		<message id="16" name="PID_REPORT">
+			<description>Report pid internal parameter</description>
+			<field type="uint8_t" name="pid_control" enum="pidc_t">Object that PID control</field>
+			<field type="float" name="sp">Set point</field>
+			<field type="float" name="fb">Feed back</field>
+			<field type="float" name="P_Part">P part</field>
+			<field type="float" name="I_Part">I part</field>
+			<field type="float" name="D_Part">D part</field>
+			<field type="float" name="U">Output</field>
+		</message>
+
+		<message id="17" name="BLINK">
 			<description>Location message</description>
 			<field type="uint16_t" name="uwb_address"/>
 			<field type="uint8_t" enum="role_t" name="role"/>
 		</message>
-		<message id="1" name="BLE_MESH">
+
+		<message id="18" name="BLE_MESH">
 			<description>BLE mesh message</description>
 			<field type="uint16_t" name="uwb_address"/>
 			<field type="uint16_t" name="mesh_address"/>
 		</message>
-		<message id="2" name="ONOFF">
+
+		<message id="19" name="ONOFF">
 			<description>On off message</description>
 			<field type="uint16_t" name="uwb_address"/>
 			<field type="uint8_t" name="value"/>
 		</message>
-		<message id="3" name="LOCATION">
+
+		<message id="20" name="LOCATION">
 			<description>Location message</description>
 			<field type="uint16_t" name="uwb_address"/>
 			<field type="float" name="location_x"/>
 			<field type="float" name="location_y"/>
 			<field type="float" name="location_z"/>
 		</message>
-		<message id="4" name="LOCATION_REDUCED">
+
+		<message id="21" name="LOCATION_REDUCED">
 			<description>Location message</description>
 			<field type="uint16_t" name="mesh_address"/>
 			<field type="float" name="location_x"/>
 			<field type="float" name="location_y"/>
 		</message>
-		<message id="5" name="DISTANCE">
+
+		<message id="22" name="DISTANCE">
 			<description>Distance message</description>
 			<field type="uint16_t" name="uwb_address"/>
 			<field type="uint16_t" name="anchor"/>
 			<field type="float" name="distance"/>
 		</message>
-		<message id="6" name="TOF">
+
+		<message id="23" name="TOF">
 			<description>TOF message</description>
 			<field type="uint16_t" name="uwb_address"/>
 			<field type="uint16_t" name="anchor"/>
 			<field type="uint32_t" name="tof"/>
 		</message>
-		<message id="7" name="SLOT">
+
+		<message id="24" name="SLOT">
 			<description>Slot message</description>
 			<field type="uint16_t" name="uwb_address"/>
 			<field type="uint8_t" name="slot"/>
 		</message>
-		<message id="8" name="TAG">
+
+		<message id="25" name="TAG">
 			<description>Tag message</description>
 			<field type="uint16_t" name="a0"/>
 			<field type="float" name="a0x"/>
@@ -82,5 +253,6 @@
 			<field type="float" name="t0y"/>
 			<field type="float" name="t0z"/>
 		</message>
+
 	</messages>
 </mavlink>

@@ -262,6 +262,87 @@ class EnumEntry(object):
 
 enums = {}
 
+# resond_t
+enums['resond_t'] = {}
+RESPOND_OK = 1 # 
+enums['resond_t'][1] = EnumEntry('RESPOND_OK', '''''')
+RESPOND_ERROR = 2 # 
+enums['resond_t'][2] = EnumEntry('RESPOND_ERROR', '''''')
+resond_t_ENUM_END = 3 # 
+enums['resond_t'][3] = EnumEntry('resond_t_ENUM_END', '''''')
+
+# rmode_t
+enums['rmode_t'] = {}
+MODE_RUN = 1 # 
+enums['rmode_t'][1] = EnumEntry('MODE_RUN', '''''')
+MODE_HW = 2 # 
+enums['rmode_t'][2] = EnumEntry('MODE_HW', '''''')
+MODE_IMU = 3 # 
+enums['rmode_t'][3] = EnumEntry('MODE_IMU', '''''')
+MODE_PIDT_TW = 4 # 
+enums['rmode_t'][4] = EnumEntry('MODE_PIDT_TW', '''''')
+MODE_PIDT_TA = 5 # 
+enums['rmode_t'][5] = EnumEntry('MODE_PIDT_TA', '''''')
+rmode_t_ENUM_END = 6 # 
+enums['rmode_t'][6] = EnumEntry('rmode_t_ENUM_END', '''''')
+
+# cmd_t
+enums['cmd_t'] = {}
+CMD_SAVE = 1 # 
+enums['cmd_t'][1] = EnumEntry('CMD_SAVE', '''''')
+CMD_LOAD = 2 # 
+enums['cmd_t'][2] = EnumEntry('CMD_LOAD', '''''')
+cmd_t_ENUM_END = 3 # 
+enums['cmd_t'][3] = EnumEntry('cmd_t_ENUM_END', '''''')
+
+# sensor_t
+enums['sensor_t'] = {}
+SENSOR_IMU_OK = 1 # 
+enums['sensor_t'][1] = EnumEntry('SENSOR_IMU_OK', '''''')
+SENSOR_IMU_ERROR = 2 # 
+enums['sensor_t'][2] = EnumEntry('SENSOR_IMU_ERROR', '''''')
+sensor_t_ENUM_END = 3 # 
+enums['sensor_t'][3] = EnumEntry('sensor_t_ENUM_END', '''''')
+
+# bool_t
+enums['bool_t'] = {}
+MAV_FALSE = 1 # 
+enums['bool_t'][1] = EnumEntry('MAV_FALSE', '''''')
+MAV_TRUE = 2 # 
+enums['bool_t'][2] = EnumEntry('MAV_TRUE', '''''')
+bool_t_ENUM_END = 3 # 
+enums['bool_t'][3] = EnumEntry('bool_t_ENUM_END', '''''')
+
+# pidc_t
+enums['pidc_t'] = {}
+PID_TILT = 1 # 
+enums['pidc_t'][1] = EnumEntry('PID_TILT', '''''')
+PID_VEL = 2 # 
+enums['pidc_t'][2] = EnumEntry('PID_VEL', '''''')
+PID_POS = 3 # 
+enums['pidc_t'][3] = EnumEntry('PID_POS', '''''')
+PID_WHE0 = 4 # 
+enums['pidc_t'][4] = EnumEntry('PID_WHE0', '''''')
+PID_WHE1 = 5 # 
+enums['pidc_t'][5] = EnumEntry('PID_WHE1', '''''')
+PID_WHE2 = 6 # 
+enums['pidc_t'][6] = EnumEntry('PID_WHE2', '''''')
+PID_WHE3 = 7 # 
+enums['pidc_t'][7] = EnumEntry('PID_WHE3', '''''')
+PID_SYNC = 8 # 
+enums['pidc_t'][8] = EnumEntry('PID_SYNC', '''''')
+pidc_t_ENUM_END = 9 # 
+enums['pidc_t'][9] = EnumEntry('pidc_t_ENUM_END', '''''')
+
+# tilt_type_t
+enums['tilt_type_t'] = {}
+ROLL = 1 # 
+enums['tilt_type_t'][1] = EnumEntry('ROLL', '''''')
+PITCH = 2 # 
+enums['tilt_type_t'][2] = EnumEntry('PITCH', '''''')
+tilt_type_t_ENUM_END = 3 # 
+enums['tilt_type_t'][3] = EnumEntry('tilt_type_t_ENUM_END', '''''')
+
 # role_t
 enums['role_t'] = {}
 ANCHOR = 1 # 
@@ -273,15 +354,616 @@ enums['role_t'][3] = EnumEntry('role_t_ENUM_END', '''''')
 
 # message IDs
 MAVLINK_MSG_ID_BAD_DATA = -1
-MAVLINK_MSG_ID_BLINK = 0
-MAVLINK_MSG_ID_BLE_MESH = 1
-MAVLINK_MSG_ID_ONOFF = 2
-MAVLINK_MSG_ID_LOCATION = 3
-MAVLINK_MSG_ID_LOCATION_REDUCED = 4
-MAVLINK_MSG_ID_DISTANCE = 5
-MAVLINK_MSG_ID_TOF = 6
-MAVLINK_MSG_ID_SLOT = 7
-MAVLINK_MSG_ID_TAG = 8
+MAVLINK_MSG_ID_RESPOND = 0
+MAVLINK_MSG_ID_CMD_CHANGE_MODE = 1
+MAVLINK_MSG_ID_CMD_PARAMS = 2
+MAVLINK_MSG_ID_CMD_VELOCITY = 3
+MAVLINK_MSG_ID_EVT_TILT = 4
+MAVLINK_MSG_ID_EVT_RPY = 5
+MAVLINK_MSG_ID_EVT_SENSOR = 6
+MAVLINK_MSG_ID_MOTOR_SPEED = 7
+MAVLINK_MSG_ID_HW_PARAMS = 8
+MAVLINK_MSG_ID_GYRO_PARAMS = 9
+MAVLINK_MSG_ID_COMP_FILTER_PARAMS = 10
+MAVLINK_MSG_ID_EVT_ACCEL_RAW = 11
+MAVLINK_MSG_ID_EVT_GYRO_RAW = 12
+MAVLINK_MSG_ID_EVT_CALIBRATED_GYRO_RAW = 13
+MAVLINK_MSG_ID_EVT_MAG_RAW = 14
+MAVLINK_MSG_ID_PID_PARAMS = 15
+MAVLINK_MSG_ID_PID_REPORT = 16
+MAVLINK_MSG_ID_BLINK = 17
+MAVLINK_MSG_ID_BLE_MESH = 18
+MAVLINK_MSG_ID_ONOFF = 19
+MAVLINK_MSG_ID_LOCATION = 20
+MAVLINK_MSG_ID_LOCATION_REDUCED = 21
+MAVLINK_MSG_ID_DISTANCE = 22
+MAVLINK_MSG_ID_TOF = 23
+MAVLINK_MSG_ID_SLOT = 24
+MAVLINK_MSG_ID_TAG = 25
+
+class MAVLink_respond_message(MAVLink_message):
+        '''
+        Respond for a reliable communication
+        '''
+        id = MAVLINK_MSG_ID_RESPOND
+        name = 'RESPOND'
+        fieldnames = ['respond']
+        ordered_fieldnames = ['respond']
+        fieldtypes = ['uint8_t']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {"respond": "resond_t"}
+        fieldunits_by_name = {}
+        format = '<B'
+        native_format = bytearray('<B', 'ascii')
+        orders = [0]
+        lengths = [1]
+        array_lengths = [0]
+        crc_extra = 164
+        unpacker = struct.Struct('<B')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, respond):
+                MAVLink_message.__init__(self, MAVLink_respond_message.id, MAVLink_respond_message.name)
+                self._fieldnames = MAVLink_respond_message.fieldnames
+                self._instance_field = MAVLink_respond_message.instance_field
+                self._instance_offset = MAVLink_respond_message.instance_offset
+                self.respond = respond
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 164, struct.pack('<B', self.respond), force_mavlink1=force_mavlink1)
+
+class MAVLink_cmd_change_mode_message(MAVLink_message):
+        '''
+        Command Change Mode. Need a respond message for confimation
+        '''
+        id = MAVLINK_MSG_ID_CMD_CHANGE_MODE
+        name = 'CMD_CHANGE_MODE'
+        fieldnames = ['cmd_change_mode']
+        ordered_fieldnames = ['cmd_change_mode']
+        fieldtypes = ['uint8_t']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {"cmd_change_mode": "rmode_t"}
+        fieldunits_by_name = {}
+        format = '<B'
+        native_format = bytearray('<B', 'ascii')
+        orders = [0]
+        lengths = [1]
+        array_lengths = [0]
+        crc_extra = 44
+        unpacker = struct.Struct('<B')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, cmd_change_mode):
+                MAVLink_message.__init__(self, MAVLink_cmd_change_mode_message.id, MAVLink_cmd_change_mode_message.name)
+                self._fieldnames = MAVLink_cmd_change_mode_message.fieldnames
+                self._instance_field = MAVLink_cmd_change_mode_message.instance_field
+                self._instance_offset = MAVLink_cmd_change_mode_message.instance_offset
+                self.cmd_change_mode = cmd_change_mode
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 44, struct.pack('<B', self.cmd_change_mode), force_mavlink1=force_mavlink1)
+
+class MAVLink_cmd_params_message(MAVLink_message):
+        '''
+        Save Or Load Params
+        '''
+        id = MAVLINK_MSG_ID_CMD_PARAMS
+        name = 'CMD_PARAMS'
+        fieldnames = ['cmd_params']
+        ordered_fieldnames = ['cmd_params']
+        fieldtypes = ['int8_t']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {"cmd_params": "cmd_params_t"}
+        fieldunits_by_name = {}
+        format = '<b'
+        native_format = bytearray('<b', 'ascii')
+        orders = [0]
+        lengths = [1]
+        array_lengths = [0]
+        crc_extra = 245
+        unpacker = struct.Struct('<b')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, cmd_params):
+                MAVLink_message.__init__(self, MAVLink_cmd_params_message.id, MAVLink_cmd_params_message.name)
+                self._fieldnames = MAVLink_cmd_params_message.fieldnames
+                self._instance_field = MAVLink_cmd_params_message.instance_field
+                self._instance_offset = MAVLink_cmd_params_message.instance_offset
+                self.cmd_params = cmd_params
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 245, struct.pack('<b', self.cmd_params), force_mavlink1=force_mavlink1)
+
+class MAVLink_cmd_velocity_message(MAVLink_message):
+        '''
+        Velocity command. No need a respond message for confimation
+        '''
+        id = MAVLINK_MSG_ID_CMD_VELOCITY
+        name = 'CMD_VELOCITY'
+        fieldnames = ['v', 'omega']
+        ordered_fieldnames = ['v', 'omega']
+        fieldtypes = ['float', 'float']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {}
+        fieldunits_by_name = {}
+        format = '<ff'
+        native_format = bytearray('<ff', 'ascii')
+        orders = [0, 1]
+        lengths = [1, 1]
+        array_lengths = [0, 0]
+        crc_extra = 202
+        unpacker = struct.Struct('<ff')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, v, omega):
+                MAVLink_message.__init__(self, MAVLink_cmd_velocity_message.id, MAVLink_cmd_velocity_message.name)
+                self._fieldnames = MAVLink_cmd_velocity_message.fieldnames
+                self._instance_field = MAVLink_cmd_velocity_message.instance_field
+                self._instance_offset = MAVLink_cmd_velocity_message.instance_offset
+                self.v = v
+                self.omega = omega
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 202, struct.pack('<ff', self.v, self.omega), force_mavlink1=force_mavlink1)
+
+class MAVLink_evt_tilt_message(MAVLink_message):
+        '''
+        Tilt angle of robot in the calibrated vertical axis. No need a
+        respond message for confimation
+        '''
+        id = MAVLINK_MSG_ID_EVT_TILT
+        name = 'EVT_TILT'
+        fieldnames = ['tilt']
+        ordered_fieldnames = ['tilt']
+        fieldtypes = ['float']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {}
+        fieldunits_by_name = {}
+        format = '<f'
+        native_format = bytearray('<f', 'ascii')
+        orders = [0]
+        lengths = [1]
+        array_lengths = [0]
+        crc_extra = 83
+        unpacker = struct.Struct('<f')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, tilt):
+                MAVLink_message.__init__(self, MAVLink_evt_tilt_message.id, MAVLink_evt_tilt_message.name)
+                self._fieldnames = MAVLink_evt_tilt_message.fieldnames
+                self._instance_field = MAVLink_evt_tilt_message.instance_field
+                self._instance_offset = MAVLink_evt_tilt_message.instance_offset
+                self.tilt = tilt
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 83, struct.pack('<f', self.tilt), force_mavlink1=force_mavlink1)
+
+class MAVLink_evt_rpy_message(MAVLink_message):
+        '''
+        Roll pitch and yaw angle of robot in the earth frame. No need
+        a respond message for confimation
+        '''
+        id = MAVLINK_MSG_ID_EVT_RPY
+        name = 'EVT_RPY'
+        fieldnames = ['roll', 'pitch', 'yaw']
+        ordered_fieldnames = ['roll', 'pitch', 'yaw']
+        fieldtypes = ['float', 'float', 'float']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {}
+        fieldunits_by_name = {}
+        format = '<fff'
+        native_format = bytearray('<fff', 'ascii')
+        orders = [0, 1, 2]
+        lengths = [1, 1, 1]
+        array_lengths = [0, 0, 0]
+        crc_extra = 93
+        unpacker = struct.Struct('<fff')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, roll, pitch, yaw):
+                MAVLink_message.__init__(self, MAVLink_evt_rpy_message.id, MAVLink_evt_rpy_message.name)
+                self._fieldnames = MAVLink_evt_rpy_message.fieldnames
+                self._instance_field = MAVLink_evt_rpy_message.instance_field
+                self._instance_offset = MAVLink_evt_rpy_message.instance_offset
+                self.roll = roll
+                self.pitch = pitch
+                self.yaw = yaw
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 93, struct.pack('<fff', self.roll, self.pitch, self.yaw), force_mavlink1=force_mavlink1)
+
+class MAVLink_evt_sensor_message(MAVLink_message):
+        '''
+        Report sensor status. No need a respond message for
+        confimation
+        '''
+        id = MAVLINK_MSG_ID_EVT_SENSOR
+        name = 'EVT_SENSOR'
+        fieldnames = ['imu_status']
+        ordered_fieldnames = ['imu_status']
+        fieldtypes = ['int8_t']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {"imu_status": "sensor_t"}
+        fieldunits_by_name = {}
+        format = '<b'
+        native_format = bytearray('<b', 'ascii')
+        orders = [0]
+        lengths = [1]
+        array_lengths = [0]
+        crc_extra = 54
+        unpacker = struct.Struct('<b')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, imu_status):
+                MAVLink_message.__init__(self, MAVLink_evt_sensor_message.id, MAVLink_evt_sensor_message.name)
+                self._fieldnames = MAVLink_evt_sensor_message.fieldnames
+                self._instance_field = MAVLink_evt_sensor_message.instance_field
+                self._instance_offset = MAVLink_evt_sensor_message.instance_offset
+                self.imu_status = imu_status
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 54, struct.pack('<b', self.imu_status), force_mavlink1=force_mavlink1)
+
+class MAVLink_motor_speed_message(MAVLink_message):
+        '''
+        Set or info speed for motors. To test the hardware and motor
+        rotaion direction. No need a respond message for confimation
+        '''
+        id = MAVLINK_MSG_ID_MOTOR_SPEED
+        name = 'MOTOR_SPEED'
+        fieldnames = ['motor_speed_0', 'motor_speed_1']
+        ordered_fieldnames = ['motor_speed_0', 'motor_speed_1']
+        fieldtypes = ['int16_t', 'int16_t']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {}
+        fieldunits_by_name = {}
+        format = '<hh'
+        native_format = bytearray('<hh', 'ascii')
+        orders = [0, 1]
+        lengths = [1, 1]
+        array_lengths = [0, 0]
+        crc_extra = 183
+        unpacker = struct.Struct('<hh')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, motor_speed_0, motor_speed_1):
+                MAVLink_message.__init__(self, MAVLink_motor_speed_message.id, MAVLink_motor_speed_message.name)
+                self._fieldnames = MAVLink_motor_speed_message.fieldnames
+                self._instance_field = MAVLink_motor_speed_message.instance_field
+                self._instance_offset = MAVLink_motor_speed_message.instance_offset
+                self.motor_speed_0 = motor_speed_0
+                self.motor_speed_1 = motor_speed_1
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 183, struct.pack('<hh', self.motor_speed_0, self.motor_speed_1), force_mavlink1=force_mavlink1)
+
+class MAVLink_hw_params_message(MAVLink_message):
+        '''
+        Switch to invert motor rotation direction. Need a respond
+        message for confimation
+        '''
+        id = MAVLINK_MSG_ID_HW_PARAMS
+        name = 'HW_PARAMS'
+        fieldnames = ['motor0_invert', 'motor1_invert', 'encoder0_invert', 'encoder1_invert', 'encoder_exchange', 'motor0_pos_deadband', 'motor0_neg_deadband', 'motor1_pos_deadband', 'motor1_neg_deadband']
+        ordered_fieldnames = ['motor0_pos_deadband', 'motor0_neg_deadband', 'motor1_pos_deadband', 'motor1_neg_deadband', 'motor0_invert', 'motor1_invert', 'encoder0_invert', 'encoder1_invert', 'encoder_exchange']
+        fieldtypes = ['int8_t', 'int8_t', 'int8_t', 'int8_t', 'int8_t', 'int16_t', 'int16_t', 'int16_t', 'int16_t']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {"motor0_invert": "bool_t", "motor1_invert": "bool_t", "encoder0_invert": "bool_t", "encoder1_invert": "bool_t", "encoder_exchange": "bool_t"}
+        fieldunits_by_name = {}
+        format = '<hhhhbbbbb'
+        native_format = bytearray('<hhhhbbbbb', 'ascii')
+        orders = [4, 5, 6, 7, 8, 0, 1, 2, 3]
+        lengths = [1, 1, 1, 1, 1, 1, 1, 1, 1]
+        array_lengths = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        crc_extra = 55
+        unpacker = struct.Struct('<hhhhbbbbb')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, motor0_invert, motor1_invert, encoder0_invert, encoder1_invert, encoder_exchange, motor0_pos_deadband, motor0_neg_deadband, motor1_pos_deadband, motor1_neg_deadband):
+                MAVLink_message.__init__(self, MAVLink_hw_params_message.id, MAVLink_hw_params_message.name)
+                self._fieldnames = MAVLink_hw_params_message.fieldnames
+                self._instance_field = MAVLink_hw_params_message.instance_field
+                self._instance_offset = MAVLink_hw_params_message.instance_offset
+                self.motor0_invert = motor0_invert
+                self.motor1_invert = motor1_invert
+                self.encoder0_invert = encoder0_invert
+                self.encoder1_invert = encoder1_invert
+                self.encoder_exchange = encoder_exchange
+                self.motor0_pos_deadband = motor0_pos_deadband
+                self.motor0_neg_deadband = motor0_neg_deadband
+                self.motor1_pos_deadband = motor1_pos_deadband
+                self.motor1_neg_deadband = motor1_neg_deadband
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 55, struct.pack('<hhhhbbbbb', self.motor0_pos_deadband, self.motor0_neg_deadband, self.motor1_pos_deadband, self.motor1_neg_deadband, self.motor0_invert, self.motor1_invert, self.encoder0_invert, self.encoder1_invert, self.encoder_exchange), force_mavlink1=force_mavlink1)
+
+class MAVLink_gyro_params_message(MAVLink_message):
+        '''
+        Gyro calibration parameters. No need a respond message for
+        confimation
+        '''
+        id = MAVLINK_MSG_ID_GYRO_PARAMS
+        name = 'GYRO_PARAMS'
+        fieldnames = ['gyro_offset_x', 'gyro_offset_y', 'gyro_offset_z']
+        ordered_fieldnames = ['gyro_offset_x', 'gyro_offset_y', 'gyro_offset_z']
+        fieldtypes = ['float', 'float', 'float']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {}
+        fieldunits_by_name = {}
+        format = '<fff'
+        native_format = bytearray('<fff', 'ascii')
+        orders = [0, 1, 2]
+        lengths = [1, 1, 1]
+        array_lengths = [0, 0, 0]
+        crc_extra = 249
+        unpacker = struct.Struct('<fff')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, gyro_offset_x, gyro_offset_y, gyro_offset_z):
+                MAVLink_message.__init__(self, MAVLink_gyro_params_message.id, MAVLink_gyro_params_message.name)
+                self._fieldnames = MAVLink_gyro_params_message.fieldnames
+                self._instance_field = MAVLink_gyro_params_message.instance_field
+                self._instance_offset = MAVLink_gyro_params_message.instance_offset
+                self.gyro_offset_x = gyro_offset_x
+                self.gyro_offset_y = gyro_offset_y
+                self.gyro_offset_z = gyro_offset_z
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 249, struct.pack('<fff', self.gyro_offset_x, self.gyro_offset_y, self.gyro_offset_z), force_mavlink1=force_mavlink1)
+
+class MAVLink_comp_filter_params_message(MAVLink_message):
+        '''
+        Complimentary filter parameters. No need a respond message for
+        confimation
+        '''
+        id = MAVLINK_MSG_ID_COMP_FILTER_PARAMS
+        name = 'COMP_FILTER_PARAMS'
+        fieldnames = ['tilt_type', 'tilt_offset', 'g_believe']
+        ordered_fieldnames = ['tilt_offset', 'g_believe', 'tilt_type']
+        fieldtypes = ['uint8_t', 'float', 'float']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {"tilt_type": "tilt_type_t"}
+        fieldunits_by_name = {}
+        format = '<ffB'
+        native_format = bytearray('<ffB', 'ascii')
+        orders = [2, 0, 1]
+        lengths = [1, 1, 1]
+        array_lengths = [0, 0, 0]
+        crc_extra = 157
+        unpacker = struct.Struct('<ffB')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, tilt_type, tilt_offset, g_believe):
+                MAVLink_message.__init__(self, MAVLink_comp_filter_params_message.id, MAVLink_comp_filter_params_message.name)
+                self._fieldnames = MAVLink_comp_filter_params_message.fieldnames
+                self._instance_field = MAVLink_comp_filter_params_message.instance_field
+                self._instance_offset = MAVLink_comp_filter_params_message.instance_offset
+                self.tilt_type = tilt_type
+                self.tilt_offset = tilt_offset
+                self.g_believe = g_believe
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 157, struct.pack('<ffB', self.tilt_offset, self.g_believe, self.tilt_type), force_mavlink1=force_mavlink1)
+
+class MAVLink_evt_accel_raw_message(MAVLink_message):
+        '''
+        IMU raw value. No need a respond message for confimation
+        '''
+        id = MAVLINK_MSG_ID_EVT_ACCEL_RAW
+        name = 'EVT_ACCEL_RAW'
+        fieldnames = ['acc_x', 'acc_y', 'acc_z']
+        ordered_fieldnames = ['acc_x', 'acc_y', 'acc_z']
+        fieldtypes = ['float', 'float', 'float']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {}
+        fieldunits_by_name = {}
+        format = '<fff'
+        native_format = bytearray('<fff', 'ascii')
+        orders = [0, 1, 2]
+        lengths = [1, 1, 1]
+        array_lengths = [0, 0, 0]
+        crc_extra = 117
+        unpacker = struct.Struct('<fff')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, acc_x, acc_y, acc_z):
+                MAVLink_message.__init__(self, MAVLink_evt_accel_raw_message.id, MAVLink_evt_accel_raw_message.name)
+                self._fieldnames = MAVLink_evt_accel_raw_message.fieldnames
+                self._instance_field = MAVLink_evt_accel_raw_message.instance_field
+                self._instance_offset = MAVLink_evt_accel_raw_message.instance_offset
+                self.acc_x = acc_x
+                self.acc_y = acc_y
+                self.acc_z = acc_z
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 117, struct.pack('<fff', self.acc_x, self.acc_y, self.acc_z), force_mavlink1=force_mavlink1)
+
+class MAVLink_evt_gyro_raw_message(MAVLink_message):
+        '''
+        IMU raw value. No need a respond message for confimation
+        '''
+        id = MAVLINK_MSG_ID_EVT_GYRO_RAW
+        name = 'EVT_GYRO_RAW'
+        fieldnames = ['gyro_x', 'gyro_y', 'gyro_z']
+        ordered_fieldnames = ['gyro_x', 'gyro_y', 'gyro_z']
+        fieldtypes = ['float', 'float', 'float']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {}
+        fieldunits_by_name = {}
+        format = '<fff'
+        native_format = bytearray('<fff', 'ascii')
+        orders = [0, 1, 2]
+        lengths = [1, 1, 1]
+        array_lengths = [0, 0, 0]
+        crc_extra = 142
+        unpacker = struct.Struct('<fff')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, gyro_x, gyro_y, gyro_z):
+                MAVLink_message.__init__(self, MAVLink_evt_gyro_raw_message.id, MAVLink_evt_gyro_raw_message.name)
+                self._fieldnames = MAVLink_evt_gyro_raw_message.fieldnames
+                self._instance_field = MAVLink_evt_gyro_raw_message.instance_field
+                self._instance_offset = MAVLink_evt_gyro_raw_message.instance_offset
+                self.gyro_x = gyro_x
+                self.gyro_y = gyro_y
+                self.gyro_z = gyro_z
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 142, struct.pack('<fff', self.gyro_x, self.gyro_y, self.gyro_z), force_mavlink1=force_mavlink1)
+
+class MAVLink_evt_calibrated_gyro_raw_message(MAVLink_message):
+        '''
+        IMU raw value. No need a respond message for confimation
+        '''
+        id = MAVLINK_MSG_ID_EVT_CALIBRATED_GYRO_RAW
+        name = 'EVT_CALIBRATED_GYRO_RAW'
+        fieldnames = ['gyro_x', 'gyro_y', 'gyro_z']
+        ordered_fieldnames = ['gyro_x', 'gyro_y', 'gyro_z']
+        fieldtypes = ['float', 'float', 'float']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {}
+        fieldunits_by_name = {}
+        format = '<fff'
+        native_format = bytearray('<fff', 'ascii')
+        orders = [0, 1, 2]
+        lengths = [1, 1, 1]
+        array_lengths = [0, 0, 0]
+        crc_extra = 57
+        unpacker = struct.Struct('<fff')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, gyro_x, gyro_y, gyro_z):
+                MAVLink_message.__init__(self, MAVLink_evt_calibrated_gyro_raw_message.id, MAVLink_evt_calibrated_gyro_raw_message.name)
+                self._fieldnames = MAVLink_evt_calibrated_gyro_raw_message.fieldnames
+                self._instance_field = MAVLink_evt_calibrated_gyro_raw_message.instance_field
+                self._instance_offset = MAVLink_evt_calibrated_gyro_raw_message.instance_offset
+                self.gyro_x = gyro_x
+                self.gyro_y = gyro_y
+                self.gyro_z = gyro_z
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 57, struct.pack('<fff', self.gyro_x, self.gyro_y, self.gyro_z), force_mavlink1=force_mavlink1)
+
+class MAVLink_evt_mag_raw_message(MAVLink_message):
+        '''
+        IMU raw value. No need a respond message for confimation
+        '''
+        id = MAVLINK_MSG_ID_EVT_MAG_RAW
+        name = 'EVT_MAG_RAW'
+        fieldnames = ['mag_x', 'mag_y', 'mag_z']
+        ordered_fieldnames = ['mag_x', 'mag_y', 'mag_z']
+        fieldtypes = ['float', 'float', 'float']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {}
+        fieldunits_by_name = {}
+        format = '<fff'
+        native_format = bytearray('<fff', 'ascii')
+        orders = [0, 1, 2]
+        lengths = [1, 1, 1]
+        array_lengths = [0, 0, 0]
+        crc_extra = 76
+        unpacker = struct.Struct('<fff')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, mag_x, mag_y, mag_z):
+                MAVLink_message.__init__(self, MAVLink_evt_mag_raw_message.id, MAVLink_evt_mag_raw_message.name)
+                self._fieldnames = MAVLink_evt_mag_raw_message.fieldnames
+                self._instance_field = MAVLink_evt_mag_raw_message.instance_field
+                self._instance_offset = MAVLink_evt_mag_raw_message.instance_offset
+                self.mag_x = mag_x
+                self.mag_y = mag_y
+                self.mag_z = mag_z
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 76, struct.pack('<fff', self.mag_x, self.mag_y, self.mag_z), force_mavlink1=force_mavlink1)
+
+class MAVLink_pid_params_message(MAVLink_message):
+        '''
+        PID Coefficent. No need a respond message for confimation
+        '''
+        id = MAVLINK_MSG_ID_PID_PARAMS
+        name = 'PID_PARAMS'
+        fieldnames = ['pid_control', 'KP', 'KI', 'KD']
+        ordered_fieldnames = ['KP', 'KI', 'KD', 'pid_control']
+        fieldtypes = ['uint8_t', 'float', 'float', 'float']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {"pid_control": "pidc_t"}
+        fieldunits_by_name = {}
+        format = '<fffB'
+        native_format = bytearray('<fffB', 'ascii')
+        orders = [3, 0, 1, 2]
+        lengths = [1, 1, 1, 1]
+        array_lengths = [0, 0, 0, 0]
+        crc_extra = 2
+        unpacker = struct.Struct('<fffB')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, pid_control, KP, KI, KD):
+                MAVLink_message.__init__(self, MAVLink_pid_params_message.id, MAVLink_pid_params_message.name)
+                self._fieldnames = MAVLink_pid_params_message.fieldnames
+                self._instance_field = MAVLink_pid_params_message.instance_field
+                self._instance_offset = MAVLink_pid_params_message.instance_offset
+                self.pid_control = pid_control
+                self.KP = KP
+                self.KI = KI
+                self.KD = KD
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 2, struct.pack('<fffB', self.KP, self.KI, self.KD, self.pid_control), force_mavlink1=force_mavlink1)
+
+class MAVLink_pid_report_message(MAVLink_message):
+        '''
+        Report pid internal parameter
+        '''
+        id = MAVLINK_MSG_ID_PID_REPORT
+        name = 'PID_REPORT'
+        fieldnames = ['pid_control', 'sp', 'fb', 'P_Part', 'I_Part', 'D_Part', 'U']
+        ordered_fieldnames = ['sp', 'fb', 'P_Part', 'I_Part', 'D_Part', 'U', 'pid_control']
+        fieldtypes = ['uint8_t', 'float', 'float', 'float', 'float', 'float', 'float']
+        fielddisplays_by_name = {}
+        fieldenums_by_name = {"pid_control": "pidc_t"}
+        fieldunits_by_name = {}
+        format = '<ffffffB'
+        native_format = bytearray('<ffffffB', 'ascii')
+        orders = [6, 0, 1, 2, 3, 4, 5]
+        lengths = [1, 1, 1, 1, 1, 1, 1]
+        array_lengths = [0, 0, 0, 0, 0, 0, 0]
+        crc_extra = 198
+        unpacker = struct.Struct('<ffffffB')
+        instance_field = None
+        instance_offset = -1
+
+        def __init__(self, pid_control, sp, fb, P_Part, I_Part, D_Part, U):
+                MAVLink_message.__init__(self, MAVLink_pid_report_message.id, MAVLink_pid_report_message.name)
+                self._fieldnames = MAVLink_pid_report_message.fieldnames
+                self._instance_field = MAVLink_pid_report_message.instance_field
+                self._instance_offset = MAVLink_pid_report_message.instance_offset
+                self.pid_control = pid_control
+                self.sp = sp
+                self.fb = fb
+                self.P_Part = P_Part
+                self.I_Part = I_Part
+                self.D_Part = D_Part
+                self.U = U
+
+        def pack(self, mav, force_mavlink1=False):
+                return MAVLink_message.pack(self, mav, 198, struct.pack('<ffffffB', self.sp, self.fb, self.P_Part, self.I_Part, self.D_Part, self.U, self.pid_control), force_mavlink1=force_mavlink1)
 
 class MAVLink_blink_message(MAVLink_message):
         '''
@@ -609,6 +1291,23 @@ class MAVLink_tag_message(MAVLink_message):
 
 
 mavlink_map = {
+        MAVLINK_MSG_ID_RESPOND : MAVLink_respond_message,
+        MAVLINK_MSG_ID_CMD_CHANGE_MODE : MAVLink_cmd_change_mode_message,
+        MAVLINK_MSG_ID_CMD_PARAMS : MAVLink_cmd_params_message,
+        MAVLINK_MSG_ID_CMD_VELOCITY : MAVLink_cmd_velocity_message,
+        MAVLINK_MSG_ID_EVT_TILT : MAVLink_evt_tilt_message,
+        MAVLINK_MSG_ID_EVT_RPY : MAVLink_evt_rpy_message,
+        MAVLINK_MSG_ID_EVT_SENSOR : MAVLink_evt_sensor_message,
+        MAVLINK_MSG_ID_MOTOR_SPEED : MAVLink_motor_speed_message,
+        MAVLINK_MSG_ID_HW_PARAMS : MAVLink_hw_params_message,
+        MAVLINK_MSG_ID_GYRO_PARAMS : MAVLink_gyro_params_message,
+        MAVLINK_MSG_ID_COMP_FILTER_PARAMS : MAVLink_comp_filter_params_message,
+        MAVLINK_MSG_ID_EVT_ACCEL_RAW : MAVLink_evt_accel_raw_message,
+        MAVLINK_MSG_ID_EVT_GYRO_RAW : MAVLink_evt_gyro_raw_message,
+        MAVLINK_MSG_ID_EVT_CALIBRATED_GYRO_RAW : MAVLink_evt_calibrated_gyro_raw_message,
+        MAVLINK_MSG_ID_EVT_MAG_RAW : MAVLink_evt_mag_raw_message,
+        MAVLINK_MSG_ID_PID_PARAMS : MAVLink_pid_params_message,
+        MAVLINK_MSG_ID_PID_REPORT : MAVLink_pid_report_message,
         MAVLINK_MSG_ID_BLINK : MAVLink_blink_message,
         MAVLINK_MSG_ID_BLE_MESH : MAVLink_ble_mesh_message,
         MAVLINK_MSG_ID_ONOFF : MAVLink_onoff_message,
@@ -1049,6 +1748,388 @@ class MAVLink(object):
                 m._crc = crc
                 m._header = MAVLink_header(msgId, incompat_flags, compat_flags, mlen, seq, srcSystem, srcComponent)
                 return m
+        def respond_encode(self, respond):
+                '''
+                Respond for a reliable communication
+
+                respond                   : Respond (type:uint8_t, values:resond_t)
+
+                '''
+                return MAVLink_respond_message(respond)
+
+        def respond_send(self, respond, force_mavlink1=False):
+                '''
+                Respond for a reliable communication
+
+                respond                   : Respond (type:uint8_t, values:resond_t)
+
+                '''
+                return self.send(self.respond_encode(respond), force_mavlink1=force_mavlink1)
+
+        def cmd_change_mode_encode(self, cmd_change_mode):
+                '''
+                Command Change Mode. Need a respond message for confimation
+
+                cmd_change_mode           : Mode (type:uint8_t, values:rmode_t)
+
+                '''
+                return MAVLink_cmd_change_mode_message(cmd_change_mode)
+
+        def cmd_change_mode_send(self, cmd_change_mode, force_mavlink1=False):
+                '''
+                Command Change Mode. Need a respond message for confimation
+
+                cmd_change_mode           : Mode (type:uint8_t, values:rmode_t)
+
+                '''
+                return self.send(self.cmd_change_mode_encode(cmd_change_mode), force_mavlink1=force_mavlink1)
+
+        def cmd_params_encode(self, cmd_params):
+                '''
+                Save Or Load Params
+
+                cmd_params                : save or load params (type:int8_t, values:cmd_params_t)
+
+                '''
+                return MAVLink_cmd_params_message(cmd_params)
+
+        def cmd_params_send(self, cmd_params, force_mavlink1=False):
+                '''
+                Save Or Load Params
+
+                cmd_params                : save or load params (type:int8_t, values:cmd_params_t)
+
+                '''
+                return self.send(self.cmd_params_encode(cmd_params), force_mavlink1=force_mavlink1)
+
+        def cmd_velocity_encode(self, v, omega):
+                '''
+                Velocity command. No need a respond message for confimation
+
+                v                         : Velocity (type:float)
+                omega                     : Omega (type:float)
+
+                '''
+                return MAVLink_cmd_velocity_message(v, omega)
+
+        def cmd_velocity_send(self, v, omega, force_mavlink1=False):
+                '''
+                Velocity command. No need a respond message for confimation
+
+                v                         : Velocity (type:float)
+                omega                     : Omega (type:float)
+
+                '''
+                return self.send(self.cmd_velocity_encode(v, omega), force_mavlink1=force_mavlink1)
+
+        def evt_tilt_encode(self, tilt):
+                '''
+                Tilt angle of robot in the calibrated vertical axis. No need a respond
+                message for confimation
+
+                tilt                      : Tilt (type:float)
+
+                '''
+                return MAVLink_evt_tilt_message(tilt)
+
+        def evt_tilt_send(self, tilt, force_mavlink1=False):
+                '''
+                Tilt angle of robot in the calibrated vertical axis. No need a respond
+                message for confimation
+
+                tilt                      : Tilt (type:float)
+
+                '''
+                return self.send(self.evt_tilt_encode(tilt), force_mavlink1=force_mavlink1)
+
+        def evt_rpy_encode(self, roll, pitch, yaw):
+                '''
+                Roll pitch and yaw angle of robot in the earth frame. No need a
+                respond message for confimation
+
+                roll                      : Roll (type:float)
+                pitch                     : Pitch (type:float)
+                yaw                       : Yaw (type:float)
+
+                '''
+                return MAVLink_evt_rpy_message(roll, pitch, yaw)
+
+        def evt_rpy_send(self, roll, pitch, yaw, force_mavlink1=False):
+                '''
+                Roll pitch and yaw angle of robot in the earth frame. No need a
+                respond message for confimation
+
+                roll                      : Roll (type:float)
+                pitch                     : Pitch (type:float)
+                yaw                       : Yaw (type:float)
+
+                '''
+                return self.send(self.evt_rpy_encode(roll, pitch, yaw), force_mavlink1=force_mavlink1)
+
+        def evt_sensor_encode(self, imu_status):
+                '''
+                Report sensor status. No need a respond message for confimation
+
+                imu_status                : IMU status (type:int8_t, values:sensor_t)
+
+                '''
+                return MAVLink_evt_sensor_message(imu_status)
+
+        def evt_sensor_send(self, imu_status, force_mavlink1=False):
+                '''
+                Report sensor status. No need a respond message for confimation
+
+                imu_status                : IMU status (type:int8_t, values:sensor_t)
+
+                '''
+                return self.send(self.evt_sensor_encode(imu_status), force_mavlink1=force_mavlink1)
+
+        def motor_speed_encode(self, motor_speed_0, motor_speed_1):
+                '''
+                Set or info speed for motors. To test the hardware and motor rotaion
+                direction. No need a respond message for confimation
+
+                motor_speed_0             : Motor 0 speed (type:int16_t)
+                motor_speed_1             : Motor 1 Speed (type:int16_t)
+
+                '''
+                return MAVLink_motor_speed_message(motor_speed_0, motor_speed_1)
+
+        def motor_speed_send(self, motor_speed_0, motor_speed_1, force_mavlink1=False):
+                '''
+                Set or info speed for motors. To test the hardware and motor rotaion
+                direction. No need a respond message for confimation
+
+                motor_speed_0             : Motor 0 speed (type:int16_t)
+                motor_speed_1             : Motor 1 Speed (type:int16_t)
+
+                '''
+                return self.send(self.motor_speed_encode(motor_speed_0, motor_speed_1), force_mavlink1=force_mavlink1)
+
+        def hw_params_encode(self, motor0_invert, motor1_invert, encoder0_invert, encoder1_invert, encoder_exchange, motor0_pos_deadband, motor0_neg_deadband, motor1_pos_deadband, motor1_neg_deadband):
+                '''
+                Switch to invert motor rotation direction. Need a respond message for
+                confimation
+
+                motor0_invert             : Motor 0 Invert (type:int8_t, values:bool_t)
+                motor1_invert             : Motor 1 Invert (type:int8_t, values:bool_t)
+                encoder0_invert           : Encoder 0 Invert (type:int8_t, values:bool_t)
+                encoder1_invert           : Encoder 1 Invert (type:int8_t, values:bool_t)
+                encoder_exchange          : Switch to invert encoder from motor 0 to motor 1 and vice versa (type:int8_t, values:bool_t)
+                motor0_pos_deadband        : Motor 0 positive deadband (type:int16_t)
+                motor0_neg_deadband        : Motor 0 negative deadband (type:int16_t)
+                motor1_pos_deadband        : Motor 1 positive deadband (type:int16_t)
+                motor1_neg_deadband        : Motor 1 negative deadband (type:int16_t)
+
+                '''
+                return MAVLink_hw_params_message(motor0_invert, motor1_invert, encoder0_invert, encoder1_invert, encoder_exchange, motor0_pos_deadband, motor0_neg_deadband, motor1_pos_deadband, motor1_neg_deadband)
+
+        def hw_params_send(self, motor0_invert, motor1_invert, encoder0_invert, encoder1_invert, encoder_exchange, motor0_pos_deadband, motor0_neg_deadband, motor1_pos_deadband, motor1_neg_deadband, force_mavlink1=False):
+                '''
+                Switch to invert motor rotation direction. Need a respond message for
+                confimation
+
+                motor0_invert             : Motor 0 Invert (type:int8_t, values:bool_t)
+                motor1_invert             : Motor 1 Invert (type:int8_t, values:bool_t)
+                encoder0_invert           : Encoder 0 Invert (type:int8_t, values:bool_t)
+                encoder1_invert           : Encoder 1 Invert (type:int8_t, values:bool_t)
+                encoder_exchange          : Switch to invert encoder from motor 0 to motor 1 and vice versa (type:int8_t, values:bool_t)
+                motor0_pos_deadband        : Motor 0 positive deadband (type:int16_t)
+                motor0_neg_deadband        : Motor 0 negative deadband (type:int16_t)
+                motor1_pos_deadband        : Motor 1 positive deadband (type:int16_t)
+                motor1_neg_deadband        : Motor 1 negative deadband (type:int16_t)
+
+                '''
+                return self.send(self.hw_params_encode(motor0_invert, motor1_invert, encoder0_invert, encoder1_invert, encoder_exchange, motor0_pos_deadband, motor0_neg_deadband, motor1_pos_deadband, motor1_neg_deadband), force_mavlink1=force_mavlink1)
+
+        def gyro_params_encode(self, gyro_offset_x, gyro_offset_y, gyro_offset_z):
+                '''
+                Gyro calibration parameters. No need a respond message for confimation
+
+                gyro_offset_x             : Gyro Offset X (type:float)
+                gyro_offset_y             : Gyro Offset Y (type:float)
+                gyro_offset_z             : Gyro Offset Z (type:float)
+
+                '''
+                return MAVLink_gyro_params_message(gyro_offset_x, gyro_offset_y, gyro_offset_z)
+
+        def gyro_params_send(self, gyro_offset_x, gyro_offset_y, gyro_offset_z, force_mavlink1=False):
+                '''
+                Gyro calibration parameters. No need a respond message for confimation
+
+                gyro_offset_x             : Gyro Offset X (type:float)
+                gyro_offset_y             : Gyro Offset Y (type:float)
+                gyro_offset_z             : Gyro Offset Z (type:float)
+
+                '''
+                return self.send(self.gyro_params_encode(gyro_offset_x, gyro_offset_y, gyro_offset_z), force_mavlink1=force_mavlink1)
+
+        def comp_filter_params_encode(self, tilt_type, tilt_offset, g_believe):
+                '''
+                Complimentary filter parameters. No need a respond message for
+                confimation
+
+                tilt_type                 : Tilt type (type:uint8_t, values:tilt_type_t)
+                tilt_offset               : Tilt angle offset (type:float)
+                g_believe                 : Belive in gyroscope (type:float)
+
+                '''
+                return MAVLink_comp_filter_params_message(tilt_type, tilt_offset, g_believe)
+
+        def comp_filter_params_send(self, tilt_type, tilt_offset, g_believe, force_mavlink1=False):
+                '''
+                Complimentary filter parameters. No need a respond message for
+                confimation
+
+                tilt_type                 : Tilt type (type:uint8_t, values:tilt_type_t)
+                tilt_offset               : Tilt angle offset (type:float)
+                g_believe                 : Belive in gyroscope (type:float)
+
+                '''
+                return self.send(self.comp_filter_params_encode(tilt_type, tilt_offset, g_believe), force_mavlink1=force_mavlink1)
+
+        def evt_accel_raw_encode(self, acc_x, acc_y, acc_z):
+                '''
+                IMU raw value. No need a respond message for confimation
+
+                acc_x                     : Accel X (type:float)
+                acc_y                     : Accel Y (type:float)
+                acc_z                     : Accel Z (type:float)
+
+                '''
+                return MAVLink_evt_accel_raw_message(acc_x, acc_y, acc_z)
+
+        def evt_accel_raw_send(self, acc_x, acc_y, acc_z, force_mavlink1=False):
+                '''
+                IMU raw value. No need a respond message for confimation
+
+                acc_x                     : Accel X (type:float)
+                acc_y                     : Accel Y (type:float)
+                acc_z                     : Accel Z (type:float)
+
+                '''
+                return self.send(self.evt_accel_raw_encode(acc_x, acc_y, acc_z), force_mavlink1=force_mavlink1)
+
+        def evt_gyro_raw_encode(self, gyro_x, gyro_y, gyro_z):
+                '''
+                IMU raw value. No need a respond message for confimation
+
+                gyro_x                    : Gyro X (type:float)
+                gyro_y                    : Gyro Y (type:float)
+                gyro_z                    : Gyro Z (type:float)
+
+                '''
+                return MAVLink_evt_gyro_raw_message(gyro_x, gyro_y, gyro_z)
+
+        def evt_gyro_raw_send(self, gyro_x, gyro_y, gyro_z, force_mavlink1=False):
+                '''
+                IMU raw value. No need a respond message for confimation
+
+                gyro_x                    : Gyro X (type:float)
+                gyro_y                    : Gyro Y (type:float)
+                gyro_z                    : Gyro Z (type:float)
+
+                '''
+                return self.send(self.evt_gyro_raw_encode(gyro_x, gyro_y, gyro_z), force_mavlink1=force_mavlink1)
+
+        def evt_calibrated_gyro_raw_encode(self, gyro_x, gyro_y, gyro_z):
+                '''
+                IMU raw value. No need a respond message for confimation
+
+                gyro_x                    : Gyro X (type:float)
+                gyro_y                    : Gyro Y (type:float)
+                gyro_z                    : Gyro Z (type:float)
+
+                '''
+                return MAVLink_evt_calibrated_gyro_raw_message(gyro_x, gyro_y, gyro_z)
+
+        def evt_calibrated_gyro_raw_send(self, gyro_x, gyro_y, gyro_z, force_mavlink1=False):
+                '''
+                IMU raw value. No need a respond message for confimation
+
+                gyro_x                    : Gyro X (type:float)
+                gyro_y                    : Gyro Y (type:float)
+                gyro_z                    : Gyro Z (type:float)
+
+                '''
+                return self.send(self.evt_calibrated_gyro_raw_encode(gyro_x, gyro_y, gyro_z), force_mavlink1=force_mavlink1)
+
+        def evt_mag_raw_encode(self, mag_x, mag_y, mag_z):
+                '''
+                IMU raw value. No need a respond message for confimation
+
+                mag_x                     : Mag X (type:float)
+                mag_y                     : Mag Y (type:float)
+                mag_z                     : Mag Z (type:float)
+
+                '''
+                return MAVLink_evt_mag_raw_message(mag_x, mag_y, mag_z)
+
+        def evt_mag_raw_send(self, mag_x, mag_y, mag_z, force_mavlink1=False):
+                '''
+                IMU raw value. No need a respond message for confimation
+
+                mag_x                     : Mag X (type:float)
+                mag_y                     : Mag Y (type:float)
+                mag_z                     : Mag Z (type:float)
+
+                '''
+                return self.send(self.evt_mag_raw_encode(mag_x, mag_y, mag_z), force_mavlink1=force_mavlink1)
+
+        def pid_params_encode(self, pid_control, KP, KI, KD):
+                '''
+                PID Coefficent. No need a respond message for confimation
+
+                pid_control               : Object that PID control (type:uint8_t, values:pidc_t)
+                KP                        : KP (type:float)
+                KI                        : KI (type:float)
+                KD                        : KD (type:float)
+
+                '''
+                return MAVLink_pid_params_message(pid_control, KP, KI, KD)
+
+        def pid_params_send(self, pid_control, KP, KI, KD, force_mavlink1=False):
+                '''
+                PID Coefficent. No need a respond message for confimation
+
+                pid_control               : Object that PID control (type:uint8_t, values:pidc_t)
+                KP                        : KP (type:float)
+                KI                        : KI (type:float)
+                KD                        : KD (type:float)
+
+                '''
+                return self.send(self.pid_params_encode(pid_control, KP, KI, KD), force_mavlink1=force_mavlink1)
+
+        def pid_report_encode(self, pid_control, sp, fb, P_Part, I_Part, D_Part, U):
+                '''
+                Report pid internal parameter
+
+                pid_control               : Object that PID control (type:uint8_t, values:pidc_t)
+                sp                        : Set point (type:float)
+                fb                        : Feed back (type:float)
+                P_Part                    : P part (type:float)
+                I_Part                    : I part (type:float)
+                D_Part                    : D part (type:float)
+                U                         : Output (type:float)
+
+                '''
+                return MAVLink_pid_report_message(pid_control, sp, fb, P_Part, I_Part, D_Part, U)
+
+        def pid_report_send(self, pid_control, sp, fb, P_Part, I_Part, D_Part, U, force_mavlink1=False):
+                '''
+                Report pid internal parameter
+
+                pid_control               : Object that PID control (type:uint8_t, values:pidc_t)
+                sp                        : Set point (type:float)
+                fb                        : Feed back (type:float)
+                P_Part                    : P part (type:float)
+                I_Part                    : I part (type:float)
+                D_Part                    : D part (type:float)
+                U                         : Output (type:float)
+
+                '''
+                return self.send(self.pid_report_encode(pid_control, sp, fb, P_Part, I_Part, D_Part, U), force_mavlink1=force_mavlink1)
+
         def blink_encode(self, uwb_address, role):
                 '''
                 Location message

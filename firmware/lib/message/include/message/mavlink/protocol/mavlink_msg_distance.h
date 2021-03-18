@@ -1,7 +1,7 @@
 #pragma once
 // MESSAGE DISTANCE PACKING
 
-#define MAVLINK_MSG_ID_DISTANCE 5
+#define MAVLINK_MSG_ID_DISTANCE 22
 
 
 typedef struct __mavlink_distance_t {
@@ -12,17 +12,17 @@ typedef struct __mavlink_distance_t {
 
 #define MAVLINK_MSG_ID_DISTANCE_LEN 8
 #define MAVLINK_MSG_ID_DISTANCE_MIN_LEN 8
-#define MAVLINK_MSG_ID_5_LEN 8
-#define MAVLINK_MSG_ID_5_MIN_LEN 8
+#define MAVLINK_MSG_ID_22_LEN 8
+#define MAVLINK_MSG_ID_22_MIN_LEN 8
 
 #define MAVLINK_MSG_ID_DISTANCE_CRC 33
-#define MAVLINK_MSG_ID_5_CRC 33
+#define MAVLINK_MSG_ID_22_CRC 33
 
 
 
 #if MAVLINK_COMMAND_24BIT
 #define MAVLINK_MESSAGE_INFO_DISTANCE { \
-    5, \
+    22, \
     "DISTANCE", \
     3, \
     {  { "uwb_address", NULL, MAVLINK_TYPE_UINT16_T, 0, 4, offsetof(mavlink_distance_t, uwb_address) }, \

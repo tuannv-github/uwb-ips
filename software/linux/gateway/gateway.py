@@ -11,7 +11,8 @@ from mavlink import *
 
 # SERVER_IP = "127.0.0.1"
 # SERVER_IP = "192.168.10.12"
-HOSTNAME = "rtls.local"
+# HOSTNAME = "rtls.local"
+HOSTNAME = "localhost"
 
 class StoppableThread(threading.Thread):
     """Thread class with a stop() method. The thread itself has to check
