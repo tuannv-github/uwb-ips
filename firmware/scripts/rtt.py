@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 
-import pylink
+from pylink.jlink import JLink
 import threading
 from subprocess import PIPE, run
 
 BASE_PORT = 20000
-jlink = pylink.JLink()
+jlink = JLink()
 
 def os_cmd(command):
     result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
