@@ -465,9 +465,11 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                 case RT_LOCA_MSG:
                 {
                     rt_loca_t *rt_loca = (rt_loca_t *)(&rti->dev_inst->rxbuf[frame_idx]);
-                    rti->nodes[tdma_slot->idx].location_x = rt_loca->location_x;
-                    rti->nodes[tdma_slot->idx].location_y = rt_loca->location_y;
-                    rti->nodes[tdma_slot->idx].location_z = rt_loca->location_z;
+                    if(rti->nodes[tdma_slot->idx].location_z == 0.0f){
+                        rti->nodes[tdma_slot->idx].location_x = rt_loca->location_x;
+                        rti->nodes[tdma_slot->idx].location_y = rt_loca->location_y;
+                        rti->nodes[tdma_slot->idx].location_z = rt_loca->location_z;
+                    }
                 }
                 break;
                 case RT_SLOT_MSG:
