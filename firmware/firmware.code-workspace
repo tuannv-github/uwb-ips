@@ -34,7 +34,9 @@
 			"cstdio": "c",
 			"unordered_map": "c",
 			"cstddef": "c",
-			"random": "c"
+			"random": "c",
+			"rtls_tdma.h": "c",
+			"rtls.h": "c"
 		},
 		"cSpell.words": [
 			"addresses",
@@ -78,6 +80,12 @@
 			"txconfig",
 			"txrx",
 			"wakeupvbat"
+		],
+		"python.autoComplete.extraPaths": [
+			"/opt/ros/noetic/lib/python3/dist-packages"
+		],
+		"python.analysis.extraPaths": [
+			"/opt/ros/noetic/lib/python3/dist-packages"
 		]
 	}
 }

@@ -437,7 +437,7 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
         rti->nodes[tdma_slot->idx].timeout = 0;
         rti->nodes[rti->slot_idx].slot_map |= (slot_map_t)1 << tdma_slot->idx;
 
-        if(rti->dev_inst->rxbuf_size - sizeof(ieee_std_frame_hdr_t) < sizeof(msg_hdr_t)) return;
+        if(rti->dev_inst->rxbuf_size - sizeof(ieee_std_frame_hdr_t) < sizeof(struct _msg_hdr_t)) return;
         uint16_t frame_idx = sizeof(ieee_std_frame_hdr_t);
         while(frame_idx < rti->dev_inst->rxbuf_size){
             switch(rti->dev_inst->rxbuf[frame_idx]){
@@ -492,7 +492,7 @@ bcn_slot_cb_othr(tdma_slot_t *tdma_slot){
                 break;
             }
             uint8_t msg_len = rti->dev_inst->rxbuf[frame_idx+1];
-            frame_idx += sizeof(msg_hdr_t) + msg_len;
+            frame_idx += sizeof(struct _msg_hdr_t) + msg_len;
         }
     }
 }

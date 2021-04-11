@@ -260,7 +260,7 @@ task_rtls_gateway_func(void *arg){
                 rtls_tdma_find_node(&g_rtls_tdma_instance, g_distance.anchors[j], &node);
                 if(node != NULL){
                     float r = 0.004632130984819555*g_distance.tofs[j] +  0.13043560944811894;
-                    mavlink_msg_distance_pack(0,0,&mavlink_msg, node->location_x, node->location_y, node->location_z, r);
+                    mavlink_msg_distance_pack(0,0,&mavlink_msg, node->addr, node->location_x, node->location_y, node->location_z, r);
                     uint16_t len = mavlink_msg_to_send_buffer((uint8_t*)mav_send_buf, &mavlink_msg);
                     serial_write(mav_send_buf, len);
                     printf("0x%04X: %04d %04d %04d %04d\n", g_distance.anchors[j], (int)(node->location_x*1000), (int)(node->location_y*1000), (int)(node->location_z*1000), (int)(r*1000));

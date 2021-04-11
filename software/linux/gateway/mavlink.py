@@ -395,7 +395,6 @@ MAVLINK_MSG_ID_SLOT = 26
 MAVLINK_MSG_ID_TAG = 27
 MAVLINK_MSG_ID_CONTROL = 28
 MAVLINK_MSG_ID_MEASUREMENT = 29
-MAVLINK_MSG_ID_CONTROL_MEASUREMENT = 30
 
 class MAVLink_respond_message(MAVLink_message):
         '''
@@ -1235,34 +1234,35 @@ class MAVLink_distance_message(MAVLink_message):
         '''
         id = MAVLINK_MSG_ID_DISTANCE
         name = 'DISTANCE'
-        fieldnames = ['x', 'y', 'z', 'r']
-        ordered_fieldnames = ['x', 'y', 'z', 'r']
-        fieldtypes = ['float', 'float', 'float', 'float']
+        fieldnames = ['id', 'x', 'y', 'z', 'r']
+        ordered_fieldnames = ['id', 'x', 'y', 'z', 'r']
+        fieldtypes = ['int32_t', 'float', 'float', 'float', 'float']
         fielddisplays_by_name = {}
         fieldenums_by_name = {}
         fieldunits_by_name = {}
-        format = '<ffff'
-        native_format = bytearray('<ffff', 'ascii')
-        orders = [0, 1, 2, 3]
-        lengths = [1, 1, 1, 1]
-        array_lengths = [0, 0, 0, 0]
-        crc_extra = 59
-        unpacker = struct.Struct('<ffff')
+        format = '<iffff'
+        native_format = bytearray('<iffff', 'ascii')
+        orders = [0, 1, 2, 3, 4]
+        lengths = [1, 1, 1, 1, 1]
+        array_lengths = [0, 0, 0, 0, 0]
+        crc_extra = 212
+        unpacker = struct.Struct('<iffff')
         instance_field = None
         instance_offset = -1
 
-        def __init__(self, x, y, z, r):
+        def __init__(self, id, x, y, z, r):
                 MAVLink_message.__init__(self, MAVLink_distance_message.id, MAVLink_distance_message.name)
                 self._fieldnames = MAVLink_distance_message.fieldnames
                 self._instance_field = MAVLink_distance_message.instance_field
                 self._instance_offset = MAVLink_distance_message.instance_offset
+                self.id = id
                 self.x = x
                 self.y = y
                 self.z = z
                 self.r = r
 
         def pack(self, mav, force_mavlink1=False):
-                return MAVLink_message.pack(self, mav, 59, struct.pack('<ffff', self.x, self.y, self.z, self.r), force_mavlink1=force_mavlink1)
+                return MAVLink_message.pack(self, mav, 212, struct.pack('<iffff', self.id, self.x, self.y, self.z, self.r), force_mavlink1=force_mavlink1)
 
 class MAVLink_tof_message(MAVLink_message):
         '''
@@ -1388,23 +1388,23 @@ class MAVLink_tag_message(MAVLink_message):
 
 class MAVLink_control_message(MAVLink_message):
         '''
-        Control message
+        Control messeage
         '''
         id = MAVLINK_MSG_ID_CONTROL
         name = 'CONTROL'
         fieldnames = ['left', 'right']
         ordered_fieldnames = ['left', 'right']
-        fieldtypes = ['float', 'float']
+        fieldtypes = ['int32_t', 'int32_t']
         fielddisplays_by_name = {}
         fieldenums_by_name = {}
         fieldunits_by_name = {}
-        format = '<ff'
-        native_format = bytearray('<ff', 'ascii')
+        format = '<ii'
+        native_format = bytearray('<ii', 'ascii')
         orders = [0, 1]
         lengths = [1, 1]
         array_lengths = [0, 0]
-        crc_extra = 103
-        unpacker = struct.Struct('<ff')
+        crc_extra = 164
+        unpacker = struct.Struct('<ii')
         instance_field = None
         instance_offset = -1
 
@@ -1417,79 +1417,44 @@ class MAVLink_control_message(MAVLink_message):
                 self.right = right
 
         def pack(self, mav, force_mavlink1=False):
-                return MAVLink_message.pack(self, mav, 103, struct.pack('<ff', self.left, self.right), force_mavlink1=force_mavlink1)
+                return MAVLink_message.pack(self, mav, 164, struct.pack('<ii', self.left, self.right), force_mavlink1=force_mavlink1)
 
 class MAVLink_measurement_message(MAVLink_message):
         '''
-        Measurement message
+        Measument messeage
         '''
         id = MAVLINK_MSG_ID_MEASUREMENT
         name = 'MEASUREMENT'
-        fieldnames = ['rx', 'ry', 'range', 'yaw']
-        ordered_fieldnames = ['rx', 'ry', 'range', 'yaw']
-        fieldtypes = ['float', 'float', 'float', 'float']
+        fieldnames = ['id', 'x', 'y', 'z', 'r', 'yaw']
+        ordered_fieldnames = ['id', 'x', 'y', 'z', 'r', 'yaw']
+        fieldtypes = ['int32_t', 'float', 'float', 'float', 'float', 'float']
         fielddisplays_by_name = {}
         fieldenums_by_name = {}
         fieldunits_by_name = {}
-        format = '<ffff'
-        native_format = bytearray('<ffff', 'ascii')
-        orders = [0, 1, 2, 3]
-        lengths = [1, 1, 1, 1]
-        array_lengths = [0, 0, 0, 0]
-        crc_extra = 183
-        unpacker = struct.Struct('<ffff')
+        format = '<ifffff'
+        native_format = bytearray('<ifffff', 'ascii')
+        orders = [0, 1, 2, 3, 4, 5]
+        lengths = [1, 1, 1, 1, 1, 1]
+        array_lengths = [0, 0, 0, 0, 0, 0]
+        crc_extra = 175
+        unpacker = struct.Struct('<ifffff')
         instance_field = None
         instance_offset = -1
 
-        def __init__(self, rx, ry, range, yaw):
+        def __init__(self, id, x, y, z, r, yaw):
                 MAVLink_message.__init__(self, MAVLink_measurement_message.id, MAVLink_measurement_message.name)
                 self._fieldnames = MAVLink_measurement_message.fieldnames
                 self._instance_field = MAVLink_measurement_message.instance_field
                 self._instance_offset = MAVLink_measurement_message.instance_offset
-                self.rx = rx
-                self.ry = ry
-                self.range = range
+                self.id = id
+                self.x = x
+                self.y = y
+                self.z = z
+                self.r = r
                 self.yaw = yaw
 
         def pack(self, mav, force_mavlink1=False):
-                return MAVLink_message.pack(self, mav, 183, struct.pack('<ffff', self.rx, self.ry, self.range, self.yaw), force_mavlink1=force_mavlink1)
-
-class MAVLink_control_measurement_message(MAVLink_message):
-        '''
-        Control and measurement message
-        '''
-        id = MAVLINK_MSG_ID_CONTROL_MEASUREMENT
-        name = 'CONTROL_MEASUREMENT'
-        fieldnames = ['left', 'right', 'rx', 'ry', 'range', 'yaw']
-        ordered_fieldnames = ['left', 'right', 'rx', 'ry', 'range', 'yaw']
-        fieldtypes = ['float', 'float', 'float', 'float', 'float', 'float']
-        fielddisplays_by_name = {}
-        fieldenums_by_name = {}
-        fieldunits_by_name = {}
-        format = '<ffffff'
-        native_format = bytearray('<ffffff', 'ascii')
-        orders = [0, 1, 2, 3, 4, 5]
-        lengths = [1, 1, 1, 1, 1, 1]
-        array_lengths = [0, 0, 0, 0, 0, 0]
-        crc_extra = 72
-        unpacker = struct.Struct('<ffffff')
-        instance_field = None
-        instance_offset = -1
-
-        def __init__(self, left, right, rx, ry, range, yaw):
-                MAVLink_message.__init__(self, MAVLink_control_measurement_message.id, MAVLink_control_measurement_message.name)
-                self._fieldnames = MAVLink_control_measurement_message.fieldnames
-                self._instance_field = MAVLink_control_measurement_message.instance_field
-                self._instance_offset = MAVLink_control_measurement_message.instance_offset
-                self.left = left
-                self.right = right
-                self.rx = rx
-                self.ry = ry
-                self.range = range
-                self.yaw = yaw
-
-        def pack(self, mav, force_mavlink1=False):
-                return MAVLink_message.pack(self, mav, 72, struct.pack('<ffffff', self.left, self.right, self.rx, self.ry, self.range, self.yaw), force_mavlink1=force_mavlink1)
+                return MAVLink_message.pack(self, mav, 175, struct.pack('<ifffff', self.id, self.x, self.y, self.z, self.r, self.yaw), force_mavlink1=force_mavlink1)
 
 
 mavlink_map = {
@@ -1523,7 +1488,6 @@ mavlink_map = {
         MAVLINK_MSG_ID_TAG : MAVLink_tag_message,
         MAVLINK_MSG_ID_CONTROL : MAVLink_control_message,
         MAVLINK_MSG_ID_MEASUREMENT : MAVLink_measurement_message,
-        MAVLINK_MSG_ID_CONTROL_MEASUREMENT : MAVLink_control_measurement_message,
 }
 
 class MAVError(Exception):
@@ -2513,29 +2477,31 @@ class MAVLink(object):
                 '''
                 return self.send(self.location_reduced_encode(mesh_address, location_x, location_y), force_mavlink1=force_mavlink1)
 
-        def distance_encode(self, x, y, z, r):
+        def distance_encode(self, id, x, y, z, r):
                 '''
                 Distance message
 
+                id                        :  (type:int32_t)
                 x                         :  (type:float)
                 y                         :  (type:float)
                 z                         :  (type:float)
                 r                         :  (type:float)
 
                 '''
-                return MAVLink_distance_message(x, y, z, r)
+                return MAVLink_distance_message(id, x, y, z, r)
 
-        def distance_send(self, x, y, z, r, force_mavlink1=False):
+        def distance_send(self, id, x, y, z, r, force_mavlink1=False):
                 '''
                 Distance message
 
+                id                        :  (type:int32_t)
                 x                         :  (type:float)
                 y                         :  (type:float)
                 z                         :  (type:float)
                 r                         :  (type:float)
 
                 '''
-                return self.send(self.distance_encode(x, y, z, r), force_mavlink1=force_mavlink1)
+                return self.send(self.distance_encode(id, x, y, z, r), force_mavlink1=force_mavlink1)
 
         def tof_encode(self, uwb_address, anchor, tof):
                 '''
@@ -2645,73 +2611,49 @@ class MAVLink(object):
 
         def control_encode(self, left, right):
                 '''
-                Control message
+                Control messeage
 
-                left                      :  (type:float)
-                right                     :  (type:float)
+                left                      :  (type:int32_t)
+                right                     :  (type:int32_t)
 
                 '''
                 return MAVLink_control_message(left, right)
 
         def control_send(self, left, right, force_mavlink1=False):
                 '''
-                Control message
+                Control messeage
 
-                left                      :  (type:float)
-                right                     :  (type:float)
+                left                      :  (type:int32_t)
+                right                     :  (type:int32_t)
 
                 '''
                 return self.send(self.control_encode(left, right), force_mavlink1=force_mavlink1)
 
-        def measurement_encode(self, rx, ry, range, yaw):
+        def measurement_encode(self, id, x, y, z, r, yaw):
                 '''
-                Measurement message
+                Measument messeage
 
-                rx                        :  (type:float)
-                ry                        :  (type:float)
-                range                     :  (type:float)
+                id                        :  (type:int32_t)
+                x                         :  (type:float)
+                y                         :  (type:float)
+                z                         :  (type:float)
+                r                         :  (type:float)
                 yaw                       :  (type:float)
 
                 '''
-                return MAVLink_measurement_message(rx, ry, range, yaw)
+                return MAVLink_measurement_message(id, x, y, z, r, yaw)
 
-        def measurement_send(self, rx, ry, range, yaw, force_mavlink1=False):
+        def measurement_send(self, id, x, y, z, r, yaw, force_mavlink1=False):
                 '''
-                Measurement message
+                Measument messeage
 
-                rx                        :  (type:float)
-                ry                        :  (type:float)
-                range                     :  (type:float)
+                id                        :  (type:int32_t)
+                x                         :  (type:float)
+                y                         :  (type:float)
+                z                         :  (type:float)
+                r                         :  (type:float)
                 yaw                       :  (type:float)
 
                 '''
-                return self.send(self.measurement_encode(rx, ry, range, yaw), force_mavlink1=force_mavlink1)
-
-        def control_measurement_encode(self, left, right, rx, ry, range, yaw):
-                '''
-                Control and measurement message
-
-                left                      :  (type:float)
-                right                     :  (type:float)
-                rx                        :  (type:float)
-                ry                        :  (type:float)
-                range                     :  (type:float)
-                yaw                       :  (type:float)
-
-                '''
-                return MAVLink_control_measurement_message(left, right, rx, ry, range, yaw)
-
-        def control_measurement_send(self, left, right, rx, ry, range, yaw, force_mavlink1=False):
-                '''
-                Control and measurement message
-
-                left                      :  (type:float)
-                right                     :  (type:float)
-                rx                        :  (type:float)
-                ry                        :  (type:float)
-                range                     :  (type:float)
-                yaw                       :  (type:float)
-
-                '''
-                return self.send(self.control_measurement_encode(left, right, rx, ry, range, yaw), force_mavlink1=force_mavlink1)
+                return self.send(self.measurement_encode(id, x, y, z, r, yaw), force_mavlink1=force_mavlink1)
 

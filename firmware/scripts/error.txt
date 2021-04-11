@@ -1,0 +1,6 @@
+Error: 
+/home/tuannv/gcc-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/10.2.1/../../../../arm-none-eabi/bin/ld: /home/tuannv/thesis/firmware/bin/targets/rtls/app/apps/rtls/apps_rtls.a(model_root.o):/home/tuannv/thesis/firmware/lib/rtls_tdma/include/rtls_tdma/rtls_tdma.h:87: multiple definition of `msg_hdr_t'; /home/tuannv/thesis/firmware/bin/targets/rtls/app/apps/rtls/apps_rtls.a(rtls.o):/home/tuannv/thesis/firmware/lib/rtls_tdma/include/rtls_tdma/rtls_tdma.h:87: first defined here
+
+/home/tuannv/gcc-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/10.2.1/../../../../arm-none-eabi/bin/ld: /home/tuannv/thesis/firmware/bin/targets/rtls/app/lib/rtls_tdma/lib_rtls_tdma.a(rtls_tdma.o):/home/tuannv/thesis/firmware/lib/rtls_tdma/include/rtls_tdma/rtls_tdma.h:87: multiple definition of `msg_hdr_t'; /home/tuannv/thesis/firmware/bin/targets/rtls/app/apps/rtls/apps_rtls.a(rtls.o):/home/tuannv/thesis/firmware/lib/rtls_tdma/include/rtls_tdma/rtls_tdma.h:87: first defined here
+collect2: error: ld returned 1 exit status
+

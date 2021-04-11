@@ -84,7 +84,7 @@ typedef enum{
 struct _msg_hdr_t{
     uint8_t msg_type;
     uint8_t len;
-}__attribute__((__packed__,aligned(1))) msg_hdr_t;
+}__attribute__((__packed__,aligned(1)));
 
 typedef struct _rt_bcn_loca_t{
     struct _msg_hdr_t;
