@@ -1451,13 +1451,15 @@ static void mavlink_test_tof(uint8_t system_id, uint8_t component_id, mavlink_me
         uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
         uint16_t i;
     mavlink_tof_t packet_in = {
-        963497464,17443,17547
+        963497464,45.0,73.0,101.0,963498296
     };
     mavlink_tof_t packet1, packet2;
         memset(&packet1, 0, sizeof(packet1));
+        packet1.node_id = packet_in.node_id;
+        packet1.x = packet_in.x;
+        packet1.y = packet_in.y;
+        packet1.z = packet_in.z;
         packet1.tof = packet_in.tof;
-        packet1.uwb_address = packet_in.uwb_address;
-        packet1.anchor = packet_in.anchor;
         
         
 #ifdef MAVLINK_STATUS_FLAG_OUT_MAVLINK1
@@ -1472,12 +1474,12 @@ static void mavlink_test_tof(uint8_t system_id, uint8_t component_id, mavlink_me
         MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
 
         memset(&packet2, 0, sizeof(packet2));
-    mavlink_msg_tof_pack(system_id, component_id, &msg , packet1.uwb_address , packet1.anchor , packet1.tof );
+    mavlink_msg_tof_pack(system_id, component_id, &msg , packet1.node_id , packet1.x , packet1.y , packet1.z , packet1.tof );
     mavlink_msg_tof_decode(&msg, &packet2);
         MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
 
         memset(&packet2, 0, sizeof(packet2));
-    mavlink_msg_tof_pack_chan(system_id, component_id, MAVLINK_COMM_0, &msg , packet1.uwb_address , packet1.anchor , packet1.tof );
+    mavlink_msg_tof_pack_chan(system_id, component_id, MAVLINK_COMM_0, &msg , packet1.node_id , packet1.x , packet1.y , packet1.z , packet1.tof );
     mavlink_msg_tof_decode(&msg, &packet2);
         MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
 
@@ -1490,7 +1492,7 @@ static void mavlink_test_tof(uint8_t system_id, uint8_t component_id, mavlink_me
         MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
         
         memset(&packet2, 0, sizeof(packet2));
-    mavlink_msg_tof_send(MAVLINK_COMM_1 , packet1.uwb_address , packet1.anchor , packet1.tof );
+    mavlink_msg_tof_send(MAVLINK_COMM_1 , packet1.node_id , packet1.x , packet1.y , packet1.z , packet1.tof );
     mavlink_msg_tof_decode(last_msg, &packet2);
         MAVLINK_ASSERT(memcmp(&packet1, &packet2, sizeof(packet1)) == 0);
 }

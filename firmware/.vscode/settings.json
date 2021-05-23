@@ -16,7 +16,6 @@
         "target": true
     },
     "cmake.configureOnOpen": false,
-    "python.pythonPath": "/usr/bin/python3",
     "cSpell.words": [
         "addresses",
         "aroot",

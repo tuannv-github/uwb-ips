@@ -73,9 +73,9 @@ typedef struct _tdma_slot_t{
 //! Structure of tdma instance
 typedef struct _tdma_instance_t{
     struct uwb_dev * dev_inst;                //!< Pointer to associated uwb_dev
-#if MYNEWT_VAL(UWB_CCP_ENABLED)
+
     struct uwb_ccp_instance * ccp;            //!< Pointer to ccp instance
-#endif
+
 #if MYNEWT_VAL(TDMA_STATS)
     STATS_SECT_DECL(tdma_stat_section) stat;  //!< Stats instance
 #endif

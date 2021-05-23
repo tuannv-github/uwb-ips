@@ -1,0 +1,1 @@
+Run mynewt os from its queue

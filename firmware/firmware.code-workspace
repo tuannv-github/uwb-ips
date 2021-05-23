@@ -36,7 +36,8 @@
 			"cstddef": "c",
 			"random": "c",
 			"rtls_tdma.h": "c",
-			"rtls.h": "c"
+			"rtls.h": "c",
+			"hal_bsp.h": "c"
 		},
 		"cSpell.words": [
 			"addresses",

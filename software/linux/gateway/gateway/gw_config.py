@@ -1,0 +1,5 @@
+
+
+
+GATEWAY_DEFAULT_PORT = "/dev/ttyGateway"
+GATEWAY_DEFAULT_BAUD = 115200

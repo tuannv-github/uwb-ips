@@ -60,6 +60,10 @@ else:
     # mavnative isn't supported for MAVLink2 yet
     native_supported = False
 
+# allow MAV_IGNORE_CRC=1 to ignore CRC, allowing some
+# corrupted msgs to be seen
+MAVLINK_IGNORE_CRC = os.environ.get("MAV_IGNORE_CRC",0)
+
 # some base types from mavlink_types.h
 MAVLINK_TYPE_CHAR     = 0
 MAVLINK_TYPE_UINT8_T  = 1
@@ -72,6 +76,32 @@ MAVLINK_TYPE_UINT64_T = 7
 MAVLINK_TYPE_INT64_T  = 8
 MAVLINK_TYPE_FLOAT    = 9
 MAVLINK_TYPE_DOUBLE   = 10
+
+
+# swiped from DFReader.py
+def to_string(s):
+    '''desperate attempt to convert a string regardless of what garbage we get'''
+    try:
+        return s.decode("utf-8")
+    except Exception as e:
+        pass
+    try:
+        s2 = s.encode('utf-8', 'ignore')
+        x = u"%s" % s2
+        return s2
+    except Exception:
+        pass
+    # so its a nasty one. Let's grab as many characters as we can
+    r = ''
+    try:
+        for c in s:
+            r2 = r + c
+            r2 = r2.encode('ascii', 'ignore')
+            x = u"%s" % r2
+            r = r2
+    except Exception:
+        pass
+    return r + '_XXX'
 
 
 class MAVLink_header(object):
@@ -108,37 +138,11 @@ class MAVLink_message(object):
         self._instances  = None
         self._instance_field = None
 
-    # swiped from DFReader.py
-    def to_string(self, s):
-        '''desperate attempt to convert a string regardless of what garbage we get'''
-        try:
-            return s.decode("utf-8")
-        except Exception as e:
-            pass
-        try:
-            s2 = s.encode('utf-8', 'ignore')
-            x = u"%s" % s2
-            return s2
-        except Exception:
-            pass
-        # so its a nasty one. Let's grab as many characters as we can
-        r = ''
-        while s != '':
-            try:
-                r2 = r + s[0]
-                s = s[1:]
-                r2 = r2.encode('ascii', 'ignore')
-                x = u"%s" % r2
-                r = r2
-            except Exception:
-                break
-        return r + '_XXX'
-
     def format_attr(self, field):
         '''override field getter'''
         raw_attr = getattr(self,field)
         if isinstance(raw_attr, bytes):
-            raw_attr = self.to_string(raw_attr).rstrip("\\00")
+            raw_attr = to_string(raw_attr).rstrip("\\00")
         return raw_attr
 
     def get_msgbuf(self):
@@ -746,32 +750,6 @@ class MAVLink(object):
             self.signing.timestamp = max(self.signing.timestamp, timestamp)
             return True
 
-        # swiped from DFReader.py
-        def to_string(self, s):
-            '''desperate attempt to convert a string regardless of what garbage we get'''
-            try:
-                return s.decode("utf-8")
-            except Exception as e:
-                pass
-            try:
-                s2 = s.encode('utf-8', 'ignore')
-                x = u"%s" % s2
-                return s2
-            except Exception:
-                pass
-            # so its a nasty one. Let's grab as many characters as we can
-            r = ''
-            while s != '':
-                try:
-                    r2 = r + s[0]
-                    s = s[1:]
-                    r2 = r2.encode('ascii', 'ignore')
-                    x = u"%s" % r2
-                    r = r2
-                except Exception:
-                    break
-            return r + '_XXX'
-
         def decode(self, msgbuf):
                 '''decode a buffer as a MAVLink message'''
                 # decode the header
@@ -821,7 +799,7 @@ class MAVLink(object):
                 if ${crc_extra}: # using CRC extra
                     crcbuf.append(crc_extra)
                 crc2 = x25crc(crcbuf)
-                if crc != crc2.crc:
+                if crc != crc2.crc and not MAVLINK_IGNORE_CRC:
                     raise MAVError('invalid MAVLink CRC in msgID %u 0x%04x should be 0x%04x' % (msgId, crc, crc2.crc))
 
                 sig_ok = False
@@ -891,7 +869,7 @@ class MAVLink(object):
                 for i in range(0, len(tlist)):
                     if type.fieldtypes[i] == 'char':
                         if sys.version_info.major >= 3:
-                            tlist[i] = self.to_string(tlist[i])
+                            tlist[i] = to_string(tlist[i])
                         tlist[i] = str(MAVString(tlist[i]))
                 t = tuple(tlist)
                 # construct the message object

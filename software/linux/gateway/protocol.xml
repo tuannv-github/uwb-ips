@@ -252,9 +252,11 @@
 
 		<message id="25" name="TOF">
 			<description>TOF message</description>
-			<field type="uint16_t" name="uwb_address"/>
-			<field type="uint16_t" name="anchor"/>
-			<field type="uint32_t" name="tof"/>
+			<field type="int32_t" name="node_id"/>
+			<field type="float" name="x"/>
+			<field type="float" name="y"/>
+			<field type="float" name="z"/>
+			<field type="int32_t" name="tof"/>
 		</message>
 
 		<message id="26" name="SLOT">

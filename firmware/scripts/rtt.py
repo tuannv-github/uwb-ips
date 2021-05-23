@@ -2,7 +2,8 @@
 
 from pylink.jlink import JLink
 import threading
-from subprocess import PIPE, run
+from subprocess import PIPE
+from subprocess import run
 
 BASE_PORT = 20000
 jlink = JLink()

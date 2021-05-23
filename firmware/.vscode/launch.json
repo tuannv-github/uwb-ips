@@ -82,6 +82,32 @@
         {
           "type": "gnu-debugger",
           "request": "launch",
+          "name": "Debug: pifer",
+          "program": "/home/tuannv/uwb-ips/firmware/bin/targets/pifer/app/apps/pifer/pifer.elf",
+          "toolchain": "/usr/bin/",
+          "client": "/home/tuannv/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi/bin/arm-none-eabi-gdb",
+          "server": "JLinkGDBServer",
+          "windows": {
+            "server": "JLinkGDBServerCL",
+          },
+          "serverArgs": [
+            "-device", "nrf52",
+            "-if", "SWD",
+            "-speed", "4000"
+          ],
+          "serverPort": 2331,
+          "serverHost": "localhost",
+          "customVariables": [
+            "port0",
+            "port1",
+            "port2",
+          ],
+          "autoRun": false,
+          "debugOutput": false,
+        },
+        {
+          "type": "gnu-debugger",
+          "request": "launch",
           "name": "Debug: demo_ccp",
           "program": "/home/tuannv/thesis/firmware/bin/targets/demo_ccp/app/apps/demo_ccp/demo_ccp.elf",
           "toolchain": "/usr/local/bin/",
